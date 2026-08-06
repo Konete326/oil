@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { loginUserApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LogoIcon } from "@/components/logo";
-import { MailIcon, LockIcon, CheckCircle2Icon, AlertCircleIcon, ArrowRightIcon, Loader2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { MailIcon, LockIcon, CheckCircle2Icon, ArrowRightIcon, Loader2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_REGEX = /^.{6,}$/;
@@ -16,7 +17,6 @@ export function LoginPage({ onLoginSuccess }) {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
 
   const isEmailValid = EMAIL_REGEX.test(email);
@@ -31,14 +31,14 @@ export function LoginPage({ onLoginSuccess }) {
     if (!isFormValid) return;
 
     setLoading(true);
-    setApiError("");
 
     try {
       const user = await loginUserApi(email, password);
+      toast.success("Welcome back! Redirecting to dashboard...");
       if (onLoginSuccess) onLoginSuccess(user);
       navigate("/");
     } catch (err) {
-      setApiError(err.message || "Invalid email or password");
+      toast.error(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -55,13 +55,6 @@ export function LoginPage({ onLoginSuccess }) {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome to EliteDev</h1>
           <p className="text-xs text-muted-foreground">Enter your credentials to access the Oil Management Portal.</p>
         </div>
-
-        {apiError && (
-          <div className="rounded-lg bg-destructive/15 border border-destructive/30 p-3 text-xs text-destructive flex items-center gap-2">
-            <AlertCircleIcon className="size-4 shrink-0" />
-            <span>{apiError}</span>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="space-y-1">
