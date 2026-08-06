@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/table";
 import { CategoryModal } from "@/components/category-modal";
 import { SubcategoryModal } from "@/components/subcategory-modal";
+import { ConfirmModal } from "@/components/confirm-modal";
+
 import { PlusIcon, Edit3Icon, Trash2Icon, FolderTreeIcon, SearchIcon, TagIcon, LayersIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -221,28 +223,14 @@ export function CategoryManager() {
         onDeleteSubcategory={handleDeleteSub}
       />
 
-      {confirmDeleteCat && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-2xl space-y-4">
-            <h3 className="font-semibold text-lg text-foreground">Delete Category</h3>
-            <p className="text-xs text-muted-foreground">
-              Are you sure you want to delete <span className="font-semibold text-foreground">"{confirmDeleteCat.name}"</span>? This will also remove its subcategories.
-            </p>
-            <div className="flex items-center justify-end gap-2 border-t pt-3">
-              <Button variant="outline" size="sm" onClick={() => setConfirmDeleteCat(null)}>
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDelete(confirmDeleteCat._id)}
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!confirmDeleteCat}
+        onClose={() => setConfirmDeleteCat(null)}
+        onConfirm={() => handleDelete(confirmDeleteCat._id)}
+        title="Delete Category"
+        message={`Are you sure you want to delete category "${confirmDeleteCat?.name}"? This action will also delete all attached subcategories.`}
+      />
     </div>
   );
 }
+

@@ -2,6 +2,7 @@ import { Invoice } from "../models/invoiceModel.js";
 import { Activity } from "../models/activityModel.js";
 import { Revenue } from "../models/revenueModel.js";
 import { Category } from "../models/categoryModel.js";
+import { Product } from "../models/productModel.js";
 
 export const seedDatabase = async () => {
   try {
@@ -47,6 +48,49 @@ export const seedDatabase = async () => {
           ],
         },
       ]);
+    }
+
+    const productCount = await Product.countDocuments();
+    if (productCount === 0) {
+      const texCat = await Category.findOne({ code: "TEX-OIL" });
+      const indCat = await Category.findOne({ code: "IND-LUB" });
+
+      if (texCat && indCat) {
+        await Product.insertMany([
+          {
+            name: "Super Spindle Lube 10",
+            sku: "SKU-TEX-001",
+            category: texCat._id,
+            subcategoryName: "Spindle Oil 10",
+            brand: "Shell",
+            grade: "ISO VG 10",
+            viscosity: "10 cSt",
+            packagingType: "Master Drum 208L",
+            costPrice: 420,
+            sellingPrice: 550,
+            stockQuantity: 25,
+            unit: "Drums",
+            minStockAlert: 5,
+            description: "Premium high-speed spindle lubricant for textile spinning frames",
+          },
+          {
+            name: "Hydro-Max ISO 68 Fluid",
+            sku: "SKU-IND-002",
+            category: indCat._id,
+            subcategoryName: "Hydraulic Oil ISO 68",
+            brand: "Mobil",
+            grade: "ISO VG 68",
+            viscosity: "68 cSt",
+            packagingType: "Master Drum 208L",
+            costPrice: 480,
+            sellingPrice: 620,
+            stockQuantity: 4,
+            unit: "Drums",
+            minStockAlert: 10,
+            description: "Anti-wear hydraulic oil for heavy industrial machinery",
+          },
+        ]);
+      }
     }
 
     const invoiceCount = await Invoice.countDocuments();

@@ -68,6 +68,45 @@ export async function deleteSubcategory(categoryId, subId) {
   return await res.json();
 }
 
+export async function fetchProducts() {
+  try {
+    const res = await fetch(`${API_URL}/products`);
+    if (!res.ok) throw new Error("Failed to fetch products");
+    return await res.json();
+  } catch (err) {
+    console.warn("Product API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createProduct(data) {
+  const res = await fetch(`${API_URL}/products`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create product");
+  return await res.json();
+}
+
+export async function updateProduct(id, data) {
+  const res = await fetch(`${API_URL}/products/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update product");
+  return await res.json();
+}
+
+export async function deleteProduct(id) {
+  const res = await fetch(`${API_URL}/products/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete product");
+  return await res.json();
+}
+
 export async function uploadImageToCloudinary(file, title = "") {
   const formData = new FormData();
   formData.append("image", file);
