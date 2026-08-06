@@ -9,6 +9,7 @@ import {
   ListFilterIcon,
   RefreshCwIcon,
   CalendarIcon,
+  FileSpreadsheetIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,12 +17,17 @@ import { Input } from "@/components/ui/input";
 import { CashStatsSummary } from "@/components/cash-stats-summary";
 import { CashTransactionModal } from "@/components/cash-transaction-modal";
 import { CashPartyReport } from "@/components/cash-party-report";
+import { CashPrintStatementModal } from "@/components/cash-print-statement-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import {
   fetchCashTransactionsApi,
   fetchPartyCashSummaryApi,
   deleteCashTransactionApi,
 } from "@/lib/api";
+import {
+  exportTransactionsToExcel,
+  exportPartySummaryToExcel,
+} from "@/lib/cash-export-utils";
 
 export function CashManager() {
   const [activeTab, setActiveTab] = useState("all");
@@ -35,6 +41,7 @@ export function CashManager() {
   const [modalInitialType, setModalInitialType] = useState("Paid");
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const loadData = async () => {
     try {
@@ -154,15 +161,34 @@ export function CashManager() {
           ))}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.print()}
-          className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer mb-1"
-        >
-          <PrinterIcon className="size-3.5" />
-          <span>Print Report</span>
-        </Button>
+        <div className="flex items-center gap-2 mb-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (activeTab === "party") {
+                exportPartySummaryToExcel(partySummaries);
+              } else {
+                exportTransactionsToExcel(transactions);
+              }
+              toast.success("Excel report exported successfully!");
+            }}
+            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+          >
+            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
+            <span>Export Excel</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPrintModalOpen(true)}
+            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+          >
+            <PrinterIcon className="size-3.5 text-primary" />
+            <span>PDF Statement</span>
+          </Button>
+        </div>
       </div>
 
       {activeTab === "party" ? (
@@ -299,6 +325,14 @@ export function CashManager() {
         loading={deleteLoading}
         title="Delete Cash Record"
         message="Are you sure you want to delete this cash transaction record? This action cannot be undone."
+      />
+
+      <CashPrintStatementModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        transactions={transactions}
+        startDate={startDate}
+        endDate={endDate}
       />
     </div>
   );
