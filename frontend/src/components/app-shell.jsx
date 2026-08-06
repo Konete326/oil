@@ -4,13 +4,15 @@ import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 
 export function AppShell({
+    user,
+    onLogout,
     children
 }) {
 	return (
         <SidebarProvider className={cn("[--app-wrapper-max-width:80rem]")}>
             <AppSidebar />
             <SidebarInset>
-				<AppHeader />
+				<AppHeader user={user} onLogout={onLogout} />
 				<div
                     className={cn(
                         "flex flex-1 flex-col p-4 md:p-6",

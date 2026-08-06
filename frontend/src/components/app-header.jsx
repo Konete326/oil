@@ -10,7 +10,7 @@ import { SendIcon, BellIcon } from "lucide-react";
 
 const activeItem = navLinks.find((item) => item.isActive);
 
-export function AppHeader() {
+export function AppHeader({ user, onLogout }) {
 	return (
         <header
             className={cn(
@@ -26,16 +26,16 @@ export function AppHeader() {
 				<AppBreadcrumbs page={activeItem} />
 			</div>
             <div className="flex items-center gap-3">
-				<Button size="icon-sm" variant="outline">
+				<Button size="icon-sm" variant="outline" className="cursor-pointer">
 					<SendIcon />
 				</Button>
-				<Button aria-label="Notifications" size="icon-sm" variant="outline">
+				<Button aria-label="Notifications" size="icon-sm" variant="outline" className="cursor-pointer">
 					<BellIcon />
 				</Button>
 				<Separator
                     className="h-4 data-[orientation=vertical]:self-center"
                     orientation="vertical" />
-				<NavUser />
+				<NavUser user={user} onLogout={onLogout} />
 			</div>
         </header>
     );

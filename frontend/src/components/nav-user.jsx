@@ -46,10 +46,11 @@ export function NavUser({ user: currentUser, onLogout }) {
     setIsDark((prev) => !prev);
   };
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    if (e) e.preventDefault();
     logoutUserApi();
     if (onLogout) onLogout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   return (
