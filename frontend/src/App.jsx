@@ -15,6 +15,7 @@ import { CashManager } from "@/components/cash-manager";
 import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
 import { ProfitLossWidget } from "@/components/profit-loss-widget";
 import { SupplierLedgerManager } from "@/components/supplier-ledger-manager";
+import { FinancialReportsManager } from "@/components/financial-reports-manager";
 import { LoginPage } from "@/components/login";
 import { NotFoundPage } from "@/components/not-found";
 
@@ -90,6 +91,7 @@ export default function App() {
                   <Route path="/sales-purchases" element={<SalesPurchaseManager />} />
                   <Route path="/profit-loss" element={<ProfitLossWidget />} />
                   <Route path="/supplier-ledger" element={<SupplierLedgerManager />} />
+                  <Route path="/financial-reports" element={<FinancialReportsManager />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </AppShell>

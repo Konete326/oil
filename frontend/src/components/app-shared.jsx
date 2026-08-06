@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, CalculatorIcon, TruckIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, CalculatorIcon, TruckIcon, ScaleIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -87,6 +87,13 @@ export const navGroups = [
 				path: "/supplier-ledger",
 				icon: (
 					<TruckIcon />
+				),
+			},
+			{
+				title: "Financial Reports",
+				path: "/financial-reports",
+				icon: (
+					<ScaleIcon />
 				),
 			},
 			{

@@ -548,5 +548,33 @@ export async function fetchSupplierLedgerApi(supplierId = "") {
   }
 }
 
+export async function fetchTrialBalanceApi() {
+  try {
+    const res = await fetch(`${API_URL}/financial-reports/trial-balance`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch Trial Balance");
+    return await res.json();
+  } catch (err) {
+    console.warn("Trial Balance API error", err);
+    return { success: false, summary: { totalDebit: 0, totalCredit: 0, isBalanced: true }, data: [] };
+  }
+}
+
+export async function fetchDetailedPartyLedgerApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/financial-reports/party-ledger?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch party ledger details");
+    return await res.json();
+  } catch (err) {
+    console.warn("Detailed party ledger API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+
 
 
