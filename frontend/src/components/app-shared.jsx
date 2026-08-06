@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -31,6 +31,13 @@ export const navGroups = [
 				path: "/decanting",
 				icon: (
 					<RefreshCwIcon />
+				),
+			},
+			{
+				title: "Textile Mills & DC",
+				path: "/textile",
+				icon: (
+					<FactoryIcon />
 				),
 			},
 			{

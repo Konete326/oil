@@ -8,6 +8,8 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import decantingRoutes from "./routes/decantingRoutes.js";
+import millRoutes from "./routes/millRoutes.js";
+import challanRoutes from "./routes/challanRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -33,6 +35,8 @@ app.use("/api/media", mediaRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/decanting", decantingRoutes);
+app.use("/api/mills", millRoutes);
+app.use("/api/challans", challanRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

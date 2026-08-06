@@ -183,6 +183,93 @@ export async function createDecantingLog(data) {
   return json;
 }
 
+export async function fetchMills() {
+  try {
+    const res = await fetch(`${API_URL}/mills`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch Textile Mills");
+    return await res.json();
+  } catch (err) {
+    console.warn("Mills API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createMill(data) {
+  const res = await fetch(`${API_URL}/mills`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to create Textile Mill profile");
+  }
+  return json;
+}
+
+export async function updateMill(id, data) {
+  const res = await fetch(`${API_URL}/mills/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to update Textile Mill profile");
+  }
+  return json;
+}
+
+export async function deleteMill(id) {
+  const res = await fetch(`${API_URL}/mills/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  if (!res.ok) throw new Error("Failed to delete Textile Mill profile");
+  return await res.json();
+}
+
+export async function fetchChallans() {
+  try {
+    const res = await fetch(`${API_URL}/challans`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch Delivery Challans");
+    return await res.json();
+  } catch (err) {
+    console.warn("Challans API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createChallan(data) {
+  const res = await fetch(`${API_URL}/challans`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to issue Delivery Challan");
+  }
+  return json;
+}
+
+export async function updateChallanStatus(id, data) {
+  const res = await fetch(`${API_URL}/challans/${id}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to update Challan status");
+  }
+  return json;
+}
+
 export async function uploadImageToCloudinary(file, title = "") {
   const formData = new FormData();
   formData.append("image", file);

@@ -4,6 +4,7 @@ import { Revenue } from "../models/revenueModel.js";
 import { Category } from "../models/categoryModel.js";
 import { Product } from "../models/productModel.js";
 import { User } from "../models/userModel.js";
+import { Mill } from "../models/millModel.js";
 
 export const seedDatabase = async () => {
   try {
@@ -15,7 +16,48 @@ export const seedDatabase = async () => {
         password: "admin123",
         role: "admin",
       });
-      console.log("Admin user seeded: admin@gmail.com / admin123");
+    }
+
+    const millCount = await Mill.countDocuments();
+    if (millCount === 0) {
+      await Mill.insertMany([
+        {
+          name: "Al-Karam Textile Mills Ltd",
+          code: "AKTM-01",
+          zone: "Landhi Industrial Area, Karachi",
+          contactPerson: "Tariq Mahmood",
+          phone: "0300-8219401",
+          ntnNumber: "0712394-8",
+          contractRatePerLiter: 530,
+          creditLimit: 2500000,
+          currentBalance: 1250000,
+          address: "HT/11, Landhi Industrial Zone, Karachi",
+        },
+        {
+          name: "Gul Ahmed Textile Mills Ltd",
+          code: "GATM-02",
+          zone: "Korangi Industrial Area, Karachi",
+          contactPerson: "Kamran Siddiqui",
+          phone: "0321-9201844",
+          ntnNumber: "0891230-1",
+          contractRatePerLiter: 545,
+          creditLimit: 3000000,
+          currentBalance: 890000,
+          address: "Plot No. 82, Main Korangi Industrial Road, Karachi",
+        },
+        {
+          name: "Yunus Textile Mills Ltd",
+          code: "YTML-03",
+          zone: "SITE Industrial Area, Karachi",
+          contactPerson: "Faisal Naeem",
+          phone: "0333-2194811",
+          ntnNumber: "1429812-4",
+          contractRatePerLiter: 525,
+          creditLimit: 2000000,
+          currentBalance: 450000,
+          address: "B-40, Estate Avenue, SITE, Karachi",
+        },
+      ]);
     }
 
     const categoryCount = await Category.countDocuments();
@@ -39,24 +81,6 @@ export const seedDatabase = async () => {
             { name: "Hydraulic Oil ISO 68", code: "HYD-68", description: "Anti-wear hydraulic fluid" },
             { name: "Gear Oil 220", code: "GER-220", description: "Heavy duty industrial gear oil" },
             { name: "Transformer Oil", code: "TRF-OIL", description: "Electrical insulating oil" },
-          ],
-        },
-        {
-          name: "Automotive Oils",
-          code: "AUTO-OIL",
-          description: "Commercial vehicle and engine lubricants",
-          subcategories: [
-            { name: "Diesel Engine Oil 15W-40", code: "DEO-15W40", description: "Heavy duty diesel engine oil" },
-            { name: "Motorcycle Oil 20W-50", code: "MCO-20W50", description: "4T Motorcycle engine oil" },
-          ],
-        },
-        {
-          name: "Base Oils",
-          code: "BASE-OIL",
-          description: "Raw unblended base stock oils",
-          subcategories: [
-            { name: "Virgin Base Oil SN 150", code: "SN-150", description: "High grade solvent neutral base oil" },
-            { name: "Recycled Base Oil Grade A", code: "RBO-A", description: "Refined recycled base stock" },
           ],
         },
       ]);
