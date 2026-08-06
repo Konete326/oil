@@ -75,11 +75,12 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 217 92% 62%;
+    --chart-2: 158 82% 48%;
+    --chart-3: 38 92% 58%;
+    --chart-4: 275 80% 68%;
+    --chart-5: 342 88% 62%;
+
 
     --scrollbar-track: hsl(240 3.7% 12%);
     --scrollbar-thumb: hsl(240 3.7% 25%);

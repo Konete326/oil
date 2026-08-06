@@ -30,9 +30,10 @@ const growthPct = (((lastDay - firstDay) / firstDay) * 100).toFixed(1);
 const chartConfig = {
     sales: {
 		label: "Sales",
-		color: "var(--chart-2)",
+		color: "hsl(var(--chart-2))",
 	}
 };
+
 
 function CustomGradientBar(
 	props

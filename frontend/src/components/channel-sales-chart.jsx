@@ -79,14 +79,15 @@ const growthPctNum = growthPctForWindow(chartRows);
 const chartConfig = {
     retail: {
 		label: "Retail",
-		color: "var(--chart-2)",
+		color: "hsl(var(--chart-2))",
 	},
 
     online: {
 		label: "Online",
-		color: "var(--chart-1)",
+		color: "hsl(var(--chart-1))",
 	}
 };
+
 
 export function ChannelSalesChart() {
 	const chartUid = useId().replace(/:/g, "");
