@@ -7,6 +7,7 @@ import { toast } from "sonner";
 export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, submitting }) {
   const [customerName, setCustomerName] = useState("Walk-in Customer");
   const [saleType, setSaleType] = useState("Retail");
+  const [discountMode, setDiscountMode] = useState("fixed");
   const [discount, setDiscount] = useState("0");
   const [taxPercent, setTaxPercent] = useState("0");
   const [paymentMode, setPaymentMode] = useState("Cash");
@@ -14,7 +15,10 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
 
   if (!isOpen) return null;
 
-  const discountNum = Number(discount) || 0;
+  const discountRaw = Number(discount) || 0;
+  const discountNum = discountMode === "percent"
+    ? Number(((cartSubtotal * discountRaw) / 100).toFixed(2))
+    : discountRaw;
   const taxPctNum = Number(taxPercent) || 0;
   const taxAmount = Number(((cartSubtotal - discountNum) * (taxPctNum / 100)).toFixed(2));
   const grandTotal = Math.max(0, Number((cartSubtotal - discountNum + (taxAmount > 0 ? taxAmount : 0)).toFixed(2)));
@@ -50,7 +54,7 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
             </div>
             {discountNum > 0 && (
               <div className="flex justify-between text-amber-500">
-                <span>Discount</span>
+                <span>Discount{discountMode === "percent" ? ` (${discountRaw}%)` : ""}</span>
                 <span className="font-mono font-semibold">- Rs {discountNum.toLocaleString()}</span>
               </div>
             )}
@@ -91,9 +95,28 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground flex items-center gap-1">
-                <BadgePercentIcon className="size-3" /> Discount (Rs)
+                <BadgePercentIcon className="size-3" /> Discount
               </label>
-              <Input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} className="h-8 text-xs font-mono" />
+              <div className="flex rounded-md border border-input overflow-hidden bg-background">
+                <Input
+                  type="number"
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  className="h-8 text-xs font-mono border-0 rounded-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="0"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setDiscountMode(discountMode === "fixed" ? "percent" : "fixed"); setDiscount("0"); }}
+                  className={`px-2 text-[10px] font-bold border-l border-input transition-colors cursor-pointer shrink-0 ${discountMode === "fixed" ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"}`}
+                  title="Toggle Fixed / Percentage"
+                >
+                  {discountMode === "fixed" ? "Rs" : "%"}
+                </button>
+              </div>
+              <p className="text-[9px] text-muted-foreground">
+                {discountMode === "fixed" ? "Fixed amount in Rs" : "Percentage of subtotal"}
+              </p>
             </div>
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground flex items-center gap-1">

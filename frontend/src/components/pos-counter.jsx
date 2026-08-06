@@ -259,7 +259,7 @@ export function PosCounter() {
                 Cart ({cart.length})
               </h3>
               {cart.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={() => setCart([])} className="text-xs text-destructive hover:text-destructive cursor-pointer">
+                <Button variant="outline" size="sm" onClick={() => setCart([])} className="text-xs text-destructive hover:text-destructive border-destructive/40 hover:border-destructive cursor-pointer h-7 px-2">
                   Clear Cart
                 </Button>
               )}
