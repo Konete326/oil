@@ -6,6 +6,20 @@ export function getAuthHeader() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+export async function uploadMediaApi(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+  const res = await fetch(`${API_URL}/media/upload`, {
+    method: "POST",
+    headers: { ...getAuthHeader() },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Upload failed");
+  return data.data.url;
+}
+
+
 export async function loginUserApi(email, password) {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",

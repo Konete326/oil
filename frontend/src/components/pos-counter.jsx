@@ -198,9 +198,9 @@ export function PosCounter() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <Skeleton key={n} className="h-32 rounded-xl" />
+                <Skeleton key={n} className="h-36 rounded-xl" />
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -210,38 +210,52 @@ export function PosCounter() {
               <p className="text-xs text-muted-foreground">Try clearing search or filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[560px] overflow-y-auto pe-1">
+            <div className="grid grid-cols-3 gap-3 max-h-[560px] overflow-y-auto pe-1">
               {filteredProducts.map((prod) => {
                 const isLowStock = prod.stockQuantity <= prod.minStockAlert;
                 return (
                   <div
                     key={prod._id}
-                    className="group rounded-xl border border-border bg-card p-3 shadow-xs hover:border-primary/50 transition-all flex flex-col gap-2"
+                    className="group rounded-xl border border-border bg-card shadow-xs hover:border-primary/50 transition-all flex flex-col overflow-hidden"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-                          {prod.name}
-                        </h4>
-                        <p className="text-[10px] text-muted-foreground">{prod.brand}{prod.grade ? ` · ${prod.grade}` : ""}</p>
-                        <p className="font-mono font-bold text-sm text-primary mt-0.5">
-                          Rs {prod.sellingPrice?.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">/{prod.unit}</span>
-                        </p>
-                      </div>
-                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${isLowStock ? "bg-amber-500/10 border-amber-500/30 text-amber-500" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"}`}>
-                        {prod.stockQuantity}
-                      </span>
+                    <div className="h-24 bg-muted/30 flex items-center justify-center overflow-hidden">
+                      {prod.imageUrl ? (
+                        <img
+                          src={prod.imageUrl}
+                          alt={prod.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <PackageIcon className="size-8 text-muted-foreground/30" />
+                      )}
                     </div>
 
-                    <Button
-                      size="sm"
-                      className="w-full h-7 gap-1 text-xs cursor-pointer shadow-xs"
-                      onClick={() => addToCart(prod)}
-                      disabled={prod.stockQuantity <= 0}
-                    >
-                      <PlusIcon className="size-3" />
-                      <span>{prod.stockQuantity <= 0 ? "Out of Stock" : "Add to Cart"}</span>
-                    </Button>
+                    <div className="p-2.5 flex flex-col gap-1.5 flex-1">
+                      <div className="flex items-start justify-between gap-1">
+                        <h4 className="font-bold text-[11px] text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-tight flex-1">
+                          {prod.name}
+                        </h4>
+                        <span className={`text-[9px] font-semibold px-1 py-0.5 rounded-full border shrink-0 mt-0.5 ${isLowStock ? "bg-amber-500/10 border-amber-500/30 text-amber-500" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"}`}>
+                          {prod.stockQuantity}
+                        </span>
+                      </div>
+
+                      <p className="text-[10px] text-muted-foreground line-clamp-1">{prod.brand}{prod.grade ? ` · ${prod.grade}` : ""}</p>
+
+                      <p className="font-mono font-bold text-xs text-primary">
+                        Rs {prod.sellingPrice?.toLocaleString()} <span className="text-[9px] font-normal text-muted-foreground">/{prod.unit}</span>
+                      </p>
+
+                      <Button
+                        size="sm"
+                        className="w-full h-7 gap-1 text-[11px] cursor-pointer shadow-xs mt-auto"
+                        onClick={() => addToCart(prod)}
+                        disabled={prod.stockQuantity <= 0}
+                      >
+                        <PlusIcon className="size-3" />
+                        <span>{prod.stockQuantity <= 0 ? "Out of Stock" : "Add"}</span>
+                      </Button>
+                    </div>
                   </div>
                 );
               })}

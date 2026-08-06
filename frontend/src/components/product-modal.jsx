@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { XIcon } from "lucide-react";
+import { uploadMediaApi } from "@/lib/api";
+import { XIcon, UploadCloudIcon, ImageIcon, Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 
 const PACKAGING_TYPES = [
   "Master Drum 208L",
@@ -28,8 +30,11 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
   const [unit, setUnit] = useState("Drums");
   const [minStockAlert, setMinStockAlert] = useState("10");
   const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
 
   const selectedCategoryObj = categories.find((c) => c._id === category);
 
@@ -49,6 +54,8 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
       setUnit(initialData.unit || "Drums");
       setMinStockAlert(initialData.minStockAlert !== undefined ? String(initialData.minStockAlert) : "10");
       setDescription(initialData.description || "");
+      setImageUrl(initialData.imageUrl || "");
+      setImagePreview(initialData.imageUrl || "");
     } else {
       setName("");
       setSku(`SKU-${Math.floor(1000 + Math.random() * 9000)}`);
@@ -64,20 +71,55 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
       setUnit("Drums");
       setMinStockAlert("10");
       setDescription("");
+      setImageUrl("");
+      setImagePreview("");
     }
-    setError("");
   }, [initialData, isOpen, categories]);
 
   if (!isOpen) return null;
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (JPG, PNG, WEBP).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB.");
+      return;
+    }
+    const localPreview = URL.createObjectURL(file);
+    setImagePreview(localPreview);
+    setUploading(true);
+    try {
+      const url = await uploadMediaApi(file);
+      setImageUrl(url);
+      toast.success("Image uploaded successfully.");
+    } catch (err) {
+      toast.error(err.message || "Image upload failed.");
+      setImagePreview(imageUrl);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      const syntheticEvent = { target: { files: [file] } };
+      handleFileChange(syntheticEvent);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !sku.trim() || !category || !brand.trim() || costPrice === "" || sellingPrice === "") {
-      setError("Product Name, SKU, Category, Brand, Cost Price, and Selling Price are required.");
+      toast.error("Product Name, SKU, Category, Brand, Cost Price, and Selling Price are required.");
       return;
     }
     setLoading(true);
-    setError("");
     try {
       await onSave({
         name,
@@ -94,10 +136,11 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
         unit,
         minStockAlert: Number(minStockAlert) || 10,
         description,
+        imageUrl,
       });
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to save product");
+      toast.error(err.message || "Failed to save product");
     } finally {
       setLoading(false);
     }
@@ -115,13 +158,58 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
           </Button>
         </div>
 
-        {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-xs text-destructive">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <div
+            className="relative rounded-xl border-2 border-dashed border-border bg-muted/30 hover:border-primary/50 transition-colors cursor-pointer group"
+            onClick={() => !uploading && fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+          >
+            {imagePreview ? (
+              <div className="relative h-36 w-full overflow-hidden rounded-xl">
+                <img
+                  src={imagePreview}
+                  alt="Product preview"
+                  className="w-full h-full object-contain bg-muted/20"
+                />
+                {uploading && (
+                  <div className="absolute inset-0 bg-background/70 flex items-center justify-center gap-2 text-xs text-foreground">
+                    <Loader2Icon className="size-4 animate-spin text-primary" />
+                    <span>Uploading to Cloudinary...</span>
+                  </div>
+                )}
+                {!uploading && (
+                  <div className="absolute inset-0 bg-background/0 group-hover:bg-background/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-xs font-medium text-foreground gap-1">
+                    <UploadCloudIcon className="size-4" />
+                    <span>Change Image</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-36 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                {uploading ? (
+                  <>
+                    <Loader2Icon className="size-6 animate-spin text-primary" />
+                    <span className="text-[11px]">Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="size-8 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                    <p className="text-[11px] font-medium">Click or drag &amp; drop to upload product image</p>
+                    <p className="text-[10px]">JPG, PNG, WEBP — max 5MB</p>
+                  </>
+                )}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground">Product Name *</label>
@@ -148,18 +236,13 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
               <label className="font-medium text-muted-foreground">Category *</label>
               <select
                 value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setSubcategoryName("");
-                }}
+                onChange={(e) => { setCategory(e.target.value); setSubcategoryName(""); }}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                 required
               >
                 <option value="" disabled>Select Category</option>
                 {categories.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name} ({c.code})
-                  </option>
+                  <option key={c._id} value={c._id}>{c.name} ({c.code})</option>
                 ))}
               </select>
             </div>
@@ -172,9 +255,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
               >
                 <option value="">None / General</option>
                 {selectedCategoryObj?.subcategories?.map((sub) => (
-                  <option key={sub._id || sub.name} value={sub.name}>
-                    {sub.name}
-                  </option>
+                  <option key={sub._id || sub.name} value={sub.name}>{sub.name}</option>
                 ))}
               </select>
             </div>
@@ -217,9 +298,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
               >
                 {PACKAGING_TYPES.map((pt) => (
-                  <option key={pt} value={pt}>
-                    {pt}
-                  </option>
+                  <option key={pt} value={pt}>{pt}</option>
                 ))}
               </select>
             </div>
@@ -231,9 +310,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
               >
                 {UNITS.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
-                  </option>
+                  <option key={u} value={u}>{u}</option>
                 ))}
               </select>
             </div>
@@ -242,41 +319,19 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground">Cost Price (Rs) *</label>
-              <Input
-                type="number"
-                placeholder="450"
-                value={costPrice}
-                onChange={(e) => setCostPrice(e.target.value)}
-                required
-              />
+              <Input type="number" placeholder="450" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} required />
             </div>
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground">Selling Price (Rs) *</label>
-              <Input
-                type="number"
-                placeholder="600"
-                value={sellingPrice}
-                onChange={(e) => setSellingPrice(e.target.value)}
-                required
-              />
+              <Input type="number" placeholder="600" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} required />
             </div>
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground">Current Stock</label>
-              <Input
-                type="number"
-                placeholder="50"
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
-              />
+              <Input type="number" placeholder="50" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} />
             </div>
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground">Min Stock Alert</label>
-              <Input
-                type="number"
-                placeholder="10"
-                value={minStockAlert}
-                onChange={(e) => setMinStockAlert(e.target.value)}
-              />
+              <Input type="number" placeholder="10" value={minStockAlert} onChange={(e) => setMinStockAlert(e.target.value)} />
             </div>
           </div>
 
@@ -293,8 +348,12 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="cursor-pointer">
-              {loading ? "Saving..." : initialData ? "Update Product" : "Save Product"}
+            <Button type="submit" disabled={loading || uploading} className="cursor-pointer gap-2">
+              {loading ? (
+                <><Loader2Icon className="size-3.5 animate-spin" /><span>Saving...</span></>
+              ) : (
+                initialData ? "Update Product" : "Save Product"
+              )}
             </Button>
           </div>
         </form>

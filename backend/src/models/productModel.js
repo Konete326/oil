@@ -20,6 +20,7 @@ const productSchema = new mongoose.Schema(
     unit: { type: String, default: "Liters" },
     minStockAlert: { type: Number, default: 10 },
     description: { type: String },
+    imageUrl: { type: String, default: "" },
   },
   { timestamps: true }
 );
