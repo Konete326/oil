@@ -1,7 +1,7 @@
 {
-  "name": "EliteDev Dashboard",
-  "short_name": "EliteDev",
-  "description": "EliteDev Production Web Application",
+  "name": "Al Khaleej Lubricants Dashboard",
+  "short_name": "Al Khaleej Lubricants",
+  "description": "Al Khaleej Lubricants Production Web Application",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

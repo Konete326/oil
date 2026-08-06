@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "EliteDev Oil Management System API is Running",
+    message: "Al Khaleej Lubricants Management System API is Running",
     status: "Active",
     timestamp: new Date(),
     endpoints: {

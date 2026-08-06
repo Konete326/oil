@@ -5,7 +5,7 @@ import { loginUserApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LogoIcon } from "@/components/logo";
-import { MailIcon, LockIcon, CheckCircle2Icon, ArrowRightIcon, Loader2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { MailIcon, LockIcon, CheckCircle2Icon, AlertCircleIcon, ArrowRightIcon, Loader2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_REGEX = /^.{6,}$/;
@@ -52,7 +52,7 @@ export function LoginPage({ onLoginSuccess }) {
           <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/10">
             <LogoIcon className="size-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome to EliteDev</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome to Al Khaleej Lubricants</h1>
           <p className="text-xs text-muted-foreground">Enter your credentials to access the Oil Management Portal.</p>
         </div>
 

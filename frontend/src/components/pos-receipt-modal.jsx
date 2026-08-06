@@ -30,8 +30,8 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
 
         <div className="border border-border p-5 rounded-lg space-y-4 bg-card text-foreground font-mono text-xs print:bg-white print:text-black print:border-black print:p-2">
           <div className="text-center space-y-1 border-b pb-3">
-            <img src={logoImg} alt="EliteDev" className="size-8 mx-auto object-contain" />
-            <h2 className="font-bold text-sm tracking-tight text-foreground print:text-black">ELITEDEV OIL TRADERS</h2>
+            <img src={logoImg} alt="Al Khaleej Lubricants" className="size-8 mx-auto object-contain" />
+            <h2 className="font-bold text-sm tracking-tight text-foreground print:text-black">AL KHALEEJ LUBRICANTS</h2>
             <p className="text-[10px] text-muted-foreground print:text-gray-600">POS Counter Retail & Wholesale</p>
             <p className="text-[10px] text-muted-foreground print:text-gray-600">Phone: 021-35091244 | Karachi</p>
           </div>

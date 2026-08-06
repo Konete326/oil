@@ -31,9 +31,9 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
         <div className="border border-border p-6 rounded-lg space-y-6 bg-card text-foreground print:bg-white print:text-black print:border-black">
           <div className="flex items-start justify-between border-b pb-4">
             <div className="flex items-center gap-3">
-              <img src={logoImg} alt="EliteDev" className="size-10 object-contain" />
+              <img src={logoImg} alt="Al Khaleej Lubricants" className="size-10 object-contain" />
               <div>
-                <h1 className="text-xl font-bold tracking-tight">ELITEDEV OIL TRADERS</h1>
+                <h1 className="text-xl font-bold tracking-tight">AL KHALEEJ LUBRICANTS</h1>
                 <p className="text-xs text-muted-foreground print:text-gray-600">Industrial & Textile Lubricant Suppliers, Karachi</p>
                 <p className="text-[11px] text-muted-foreground print:text-gray-600">NTN: 8941203-7 | Phone: 021-35091244</p>
               </div>

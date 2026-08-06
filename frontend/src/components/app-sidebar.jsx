@@ -30,7 +30,7 @@ export function AppSidebar() {
 				<SidebarMenuButton asChild>
 					<Link to="/" className="cursor-pointer">
 						<LogoIcon />
-						<span className="font-medium text-foreground!">EliteDev</span>
+						<span className="font-medium text-foreground!">Al Khaleej Lubricants</span>
 					</Link>
 				</SidebarMenuButton>
 			</SidebarHeader>
@@ -60,7 +60,7 @@ export function AppSidebar() {
 				<div
                     className="px-4 pt-4 pb-2 transition-opacity group-data-[collapsible=icon]:hidden">
 					<p className="text-nowrap text-[9px] text-muted-foreground">
-						© {new Date().getFullYear()} EliteDev LLC
+						© {new Date().getFullYear()} Al Khaleej Lubricants LLC
 					</p>
 				</div>
 			</SidebarFooter>

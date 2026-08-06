@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/userModel.js";
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "elitedev_oil_jwt_secret_key_2026", {
+  return jwt.sign({ id }, process.env.JWT_SECRET || "al_khaleej_lubricants_jwt_secret_key_2026", {
     expiresIn: "30d",
   });
 };
