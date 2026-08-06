@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { Dashboard } from "@/components/dashboard";
 import { CategoryManager } from "@/components/category-manager";
 import { ProductManager } from "@/components/product-manager";
+import { DecantingManager } from "@/components/decanting-manager";
 import { LoginPage } from "@/components/login";
 
 export default function App() {
@@ -71,6 +72,7 @@ export default function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/categories" element={<CategoryManager />} />
                   <Route path="/products" element={<ProductManager />} />
+                  <Route path="/decanting" element={<DecantingManager />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AppShell>

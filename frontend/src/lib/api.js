@@ -157,6 +157,32 @@ export async function deleteProduct(id) {
   return await res.json();
 }
 
+export async function fetchDecantingLogs() {
+  try {
+    const res = await fetch(`${API_URL}/decanting`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch decanting logs");
+    return await res.json();
+  } catch (err) {
+    console.warn("Decanting API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createDecantingLog(data) {
+  const res = await fetch(`${API_URL}/decanting`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to record decanting process");
+  }
+  return json;
+}
+
 export async function uploadImageToCloudinary(file, title = "") {
   const formData = new FormData();
   formData.append("image", file);

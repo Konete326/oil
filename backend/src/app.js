@@ -7,6 +7,7 @@ import mediaRoutes from "./routes/mediaRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import decantingRoutes from "./routes/decantingRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/decanting", decantingRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

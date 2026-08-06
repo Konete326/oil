@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -24,6 +24,13 @@ export const navGroups = [
 				path: "/products",
 				icon: (
 					<PackageIcon />
+				),
+			},
+			{
+				title: "Drum Decanting",
+				path: "/decanting",
+				icon: (
+					<RefreshCwIcon />
 				),
 			},
 			{
