@@ -1,4 +1,5 @@
-"use client";;
+"use client";
+
 import { Bar, BarChart, XAxis } from "recharts";
 import {
 	CardContent,
@@ -9,9 +10,9 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Delta, DeltaIcon, DeltaValue } from "@/components/delta";
 import { DashboardCard } from "@/components/dashboard-card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-/** Demo: last 7 days. */
-const salesDaily7 = [
+const defaultSalesDaily7 = [
     { day: "Mon", sales: 3200 },
     { day: "Tue", sales: 3001 },
     { day: "Wed", sales: 3780 },
@@ -21,12 +22,6 @@ const salesDaily7 = [
     { day: "Sun", sales: 5340 }
 ];
 
-const chartRows = salesDaily7.map((row) => ({ ...row }));
-
-const firstDay = salesDaily7[0].sales;
-const lastDay = salesDaily7.at(-1)?.sales ?? firstDay;
-const growthPct = (((lastDay - firstDay) / firstDay) * 100).toFixed(1);
-
 const chartConfig = {
     sales: {
 		label: "Sales",
@@ -34,10 +29,7 @@ const chartConfig = {
 	}
 };
 
-
-function CustomGradientBar(
-	props
-) {
+function CustomGradientBar(props) {
 	const {
 		fill,
 		x = 0,
@@ -69,7 +61,12 @@ function CustomGradientBar(
     );
 }
 
-export function NetRevenueChart() {
+export function NetRevenueChart({ revenue, loading }) {
+	const chartRows = (revenue && revenue.length > 0) ? revenue : defaultSalesDaily7;
+	const firstDay = chartRows[0]?.sales || 3200;
+	const lastDay = chartRows.at(-1)?.sales ?? firstDay;
+	const growthPct = (((lastDay - firstDay) / firstDay) * 100).toFixed(1);
+
 	return (
         <DashboardCard className="gap-0 md:col-span-2">
             <CardHeader className="gap-2">
@@ -80,22 +77,26 @@ export function NetRevenueChart() {
 						<DeltaValue />
 					</Delta>
 				</div>
-				<CardDescription>Daily net sales, last 7 days.</CardDescription>
+				<CardDescription>Daily net sales from MongoDB Atlas.</CardDescription>
 			</CardHeader>
             <CardContent>
-				<ChartContainer className="aspect-auto h-60 w-full md:h-80" config={chartConfig}>
-					<BarChart accessibilityLayer data={chartRows}>
-						<XAxis
-                            axisLine={false}
-                            dataKey="day"
-                            interval={0}
-                            tickFormatter={(value) => String(value)}
-                            tickLine={false}
-                            tickMargin={10} />
-						<ChartTooltip content={<ChartTooltipContent hideLabel />} cursor={false} />
-						<Bar dataKey="sales" fill="var(--color-sales)" shape={<CustomGradientBar />} />
-					</BarChart>
-				</ChartContainer>
+				{loading ? (
+					<Skeleton className="h-60 w-full md:h-80" />
+				) : (
+					<ChartContainer className="aspect-auto h-60 w-full md:h-80" config={chartConfig}>
+						<BarChart accessibilityLayer data={chartRows}>
+							<XAxis
+								axisLine={false}
+								dataKey="day"
+								interval={0}
+								tickFormatter={(value) => String(value)}
+								tickLine={false}
+								tickMargin={10} />
+							<ChartTooltip content={<ChartTooltipContent hideLabel />} cursor={false} />
+							<Bar dataKey="sales" fill="var(--color-sales)" shape={<CustomGradientBar />} />
+						</BarChart>
+					</ChartContainer>
+				)}
 			</CardContent>
         </DashboardCard>
     );

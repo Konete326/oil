@@ -6,30 +6,34 @@ import {
 } from "@/components/ui/card";
 import { Delta, DeltaIcon, DeltaValue } from "@/components/delta";
 import { DashboardCard } from "@/components/dashboard-card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const stats = [{
-    label: "Active users",
-    value: "847",
-    delta: 3.1,
-}, {
-    label: "Revenue",
-    value: "$18,290",
-    delta: 12.4,
-}, {
-    label: "Conversion Rate",
-    value: "3.28%",
-    delta: -0.4,
-}, {
-    label: "New signups",
-    value: "142",
-    delta: 8.7,
-}];
+export function DashboardStats({ stats, loading }) {
+	const items = stats || [
+		{ label: "Active users", value: "847", delta: 3.1 },
+		{ label: "Revenue", value: "$18,290", delta: 12.4 },
+		{ label: "Conversion Rate", value: "3.28%", delta: -0.4 },
+		{ label: "New signups", value: "142", delta: 8.7 },
+	];
 
-export function DashboardStats() {
+	if (loading) {
+		return (
+			<>
+				{[1, 2, 3, 4].map((n) => (
+					<DashboardCard key={`stat-skeleton-${n}`}>
+						<CardHeader className="p-4"><Skeleton className="h-4 w-24" /></CardHeader>
+						<CardContent className="px-4 pb-2"><Skeleton className="h-8 w-20" /></CardContent>
+						<CardFooter className="p-4"><Skeleton className="h-4 w-16" /></CardFooter>
+					</DashboardCard>
+				))}
+			</>
+		);
+	}
+
 	return (
         <>
-            {stats.map((s) => (
-				<DashboardCard className="" key={s.label}>
+            {items.map((s) => (
+				<DashboardCard key={s.label}>
 					<CardHeader className="flex flex-row items-center justify-between">
 						<CardTitle className="font-normal text-xs tracking-wide">
 							{s.label}
@@ -43,7 +47,7 @@ export function DashboardStats() {
 							<DeltaIcon />
 							<DeltaValue />
 						</Delta>
-						<span className="text-muted-foreground">vs last week</span>{" "}
+						<span className="text-muted-foreground">vs last week</span>
 					</CardFooter>
 				</DashboardCard>
 			))}
