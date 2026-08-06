@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import { connectDB } from "./config/db.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import mediaRoutes from "./routes/mediaRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -15,6 +16,8 @@ import ledgerRoutes from "./routes/ledgerRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
+
+connectDB();
 
 app.use(
   helmet({
