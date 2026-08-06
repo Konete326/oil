@@ -40,7 +40,7 @@ export function NavGroup({
 											{item.icon}
 											<span>{item.title}</span>
 											<ChevronRightIcon
-                                                className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                                className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
 										</SidebarMenuButton>
 									</CollapsibleTrigger>
 									<CollapsibleContent>
