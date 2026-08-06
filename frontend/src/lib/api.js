@@ -297,6 +297,46 @@ export async function createPosSale(data) {
   return json;
 }
 
+export async function fetchLedgerEntries(millId = "") {
+  try {
+    const url = millId ? `${API_URL}/ledger?millId=${millId}` : `${API_URL}/ledger`;
+    const res = await fetch(url, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch Ledger entries");
+    return await res.json();
+  } catch (err) {
+    console.warn("Ledger API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createPaymentEntry(data) {
+  const res = await fetch(`${API_URL}/ledger/payment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to record payment entry");
+  }
+  return json;
+}
+
+export async function fetchAgingReport() {
+  try {
+    const res = await fetch(`${API_URL}/ledger/aging`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch Aging report");
+    return await res.json();
+  } catch (err) {
+    console.warn("Aging API error", err);
+    return { success: false, data: [] };
+  }
+}
+
 export async function uploadImageToCloudinary(file, title = "") {
   const formData = new FormData();
   formData.append("image", file);

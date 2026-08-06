@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -34,6 +34,13 @@ export const navGroups = [
 				),
 			},
 			{
+				title: "POS Sales History",
+				path: "/pos/history",
+				icon: (
+					<HistoryIcon />
+				),
+			},
+			{
 				title: "Drum Decanting",
 				path: "/decanting",
 				icon: (
@@ -48,17 +55,17 @@ export const navGroups = [
 				),
 			},
 			{
+				title: "Ledger & Khata",
+				path: "/ledger",
+				icon: (
+					<BookOpenIcon />
+				),
+			},
+			{
 				title: "Analytics",
 				path: "/analytics",
 				icon: (
 					<BarChart3Icon />
-				),
-			},
-			{
-				title: "Projects",
-				path: "/projects",
-				icon: (
-					<BriefcaseIcon />
 				),
 			},
 		],
@@ -122,7 +129,7 @@ export const footerNavLinks = [
 		title: "Documentation",
 		path: "/documentation",
 		icon: (
-			<BookOpenIcon />
+			<FileTextIcon />
 		),
 	},
 ];

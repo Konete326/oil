@@ -11,6 +11,7 @@ import decantingRoutes from "./routes/decantingRoutes.js";
 import millRoutes from "./routes/millRoutes.js";
 import challanRoutes from "./routes/challanRoutes.js";
 import posRoutes from "./routes/posRoutes.js";
+import ledgerRoutes from "./routes/ledgerRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -51,6 +52,7 @@ app.get("/", (req, res) => {
       mills: "/api/mills",
       challans: "/api/challans",
       pos: "/api/pos/sales",
+      ledger: "/api/ledger",
     },
   });
 });
@@ -68,6 +70,7 @@ app.use("/api/decanting", decantingRoutes);
 app.use("/api/mills", millRoutes);
 app.use("/api/challans", challanRoutes);
 app.use("/api/pos", posRoutes);
+app.use("/api/ledger", ledgerRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
