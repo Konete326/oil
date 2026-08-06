@@ -640,6 +640,46 @@ export async function fetchAuditLogsApi(params = {}) {
   }
 }
 
+export async function fetchExpensesApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/expenses?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch expenses");
+    return await res.json();
+  } catch (err) {
+    console.warn("Expenses API error", err);
+    return { success: false, count: 0, totalAmount: 0, data: [] };
+  }
+}
+
+export async function createExpenseApi(payload) {
+  const res = await fetch(`${API_URL}/expenses`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to record expense voucher");
+  }
+  return data;
+}
+
+export async function deleteExpenseApi(id) {
+  const res = await fetch(`${API_URL}/expenses/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to delete expense record");
+  }
+  return data;
+}
+
+
 
 
 
