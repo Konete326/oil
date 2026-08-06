@@ -3,9 +3,21 @@ import { Activity } from "../models/activityModel.js";
 import { Revenue } from "../models/revenueModel.js";
 import { Category } from "../models/categoryModel.js";
 import { Product } from "../models/productModel.js";
+import { User } from "../models/userModel.js";
 
 export const seedDatabase = async () => {
   try {
+    const adminUser = await User.findOne({ email: "admin@gmail.com" });
+    if (!adminUser) {
+      await User.create({
+        name: "Admin User",
+        email: "admin@gmail.com",
+        password: "admin123",
+        role: "admin",
+      });
+      console.log("Admin user seeded: admin@gmail.com / admin123");
+    }
+
     const categoryCount = await Category.countDocuments();
     if (categoryCount === 0) {
       await Category.insertMany([

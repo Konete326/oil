@@ -1,8 +1,51 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+export function getAuthHeader() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function loginUserApi(email, password) {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Invalid credentials");
+  }
+  localStorage.setItem("token", data.data.token);
+  localStorage.setItem("user", JSON.stringify(data.data));
+  return data.data;
+}
+
+export function logoutUserApi() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+}
+
+export async function getCurrentUserApi() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_URL}/auth/me`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Unauthorized");
+    const data = await res.json();
+    return data.data;
+  } catch (err) {
+    logoutUserApi();
+    return null;
+  }
+}
+
 export async function fetchDashboardData() {
   try {
-    const res = await fetch(`${API_URL}/dashboard`);
+    const res = await fetch(`${API_URL}/dashboard`, {
+      headers: { ...getAuthHeader() },
+    });
     if (!res.ok) throw new Error("Failed to fetch dashboard data");
     return await res.json();
   } catch (err) {
@@ -13,7 +56,9 @@ export async function fetchDashboardData() {
 
 export async function fetchCategories() {
   try {
-    const res = await fetch(`${API_URL}/categories`);
+    const res = await fetch(`${API_URL}/categories`, {
+      headers: { ...getAuthHeader() },
+    });
     if (!res.ok) throw new Error("Failed to fetch categories");
     return await res.json();
   } catch (err) {
@@ -25,7 +70,7 @@ export async function fetchCategories() {
 export async function createCategory(data) {
   const res = await fetch(`${API_URL}/categories`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to create category");
@@ -35,7 +80,7 @@ export async function createCategory(data) {
 export async function updateCategory(id, data) {
   const res = await fetch(`${API_URL}/categories/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update category");
@@ -45,6 +90,7 @@ export async function updateCategory(id, data) {
 export async function deleteCategory(id) {
   const res = await fetch(`${API_URL}/categories/${id}`, {
     method: "DELETE",
+    headers: { ...getAuthHeader() },
   });
   if (!res.ok) throw new Error("Failed to delete category");
   return await res.json();
@@ -53,7 +99,7 @@ export async function deleteCategory(id) {
 export async function addSubcategory(categoryId, data) {
   const res = await fetch(`${API_URL}/categories/${categoryId}/subcategories`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to add subcategory");
@@ -63,6 +109,7 @@ export async function addSubcategory(categoryId, data) {
 export async function deleteSubcategory(categoryId, subId) {
   const res = await fetch(`${API_URL}/categories/${categoryId}/subcategories/${subId}`, {
     method: "DELETE",
+    headers: { ...getAuthHeader() },
   });
   if (!res.ok) throw new Error("Failed to delete subcategory");
   return await res.json();
@@ -70,7 +117,9 @@ export async function deleteSubcategory(categoryId, subId) {
 
 export async function fetchProducts() {
   try {
-    const res = await fetch(`${API_URL}/products`);
+    const res = await fetch(`${API_URL}/products`, {
+      headers: { ...getAuthHeader() },
+    });
     if (!res.ok) throw new Error("Failed to fetch products");
     return await res.json();
   } catch (err) {
@@ -82,7 +131,7 @@ export async function fetchProducts() {
 export async function createProduct(data) {
   const res = await fetch(`${API_URL}/products`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to create product");
@@ -92,7 +141,7 @@ export async function createProduct(data) {
 export async function updateProduct(id, data) {
   const res = await fetch(`${API_URL}/products/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Failed to update product");
@@ -102,6 +151,7 @@ export async function updateProduct(id, data) {
 export async function deleteProduct(id) {
   const res = await fetch(`${API_URL}/products/${id}`, {
     method: "DELETE",
+    headers: { ...getAuthHeader() },
   });
   if (!res.ok) throw new Error("Failed to delete product");
   return await res.json();
@@ -114,6 +164,7 @@ export async function uploadImageToCloudinary(file, title = "") {
 
   const res = await fetch(`${API_URL}/media/upload`, {
     method: "POST",
+    headers: { ...getAuthHeader() },
     body: formData,
   });
 
@@ -122,7 +173,9 @@ export async function uploadImageToCloudinary(file, title = "") {
 }
 
 export async function fetchMediaList() {
-  const res = await fetch(`${API_URL}/media`);
+  const res = await fetch(`${API_URL}/media`, {
+    headers: { ...getAuthHeader() },
+  });
   if (!res.ok) throw new Error("Failed to fetch media list");
   return await res.json();
 }

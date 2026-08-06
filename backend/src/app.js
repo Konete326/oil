@@ -6,6 +6,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import mediaRoutes from "./routes/mediaRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -25,6 +26,7 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date() });
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/categories", categoryRoutes);

@@ -7,7 +7,7 @@ export function DashboardCard({
 }) {
 	return (
         <Card
-            className={cn("rounded-none bg-background shadow-none ring-0", className)}
+            className={cn("rounded-xl border border-border bg-card shadow-xs outline-none", className)}
             {...props} />
     );
 }

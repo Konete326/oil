@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { logoutUserApi } from "@/lib/api";
 import {
 	Avatar,
 	AvatarFallback,
@@ -17,74 +19,77 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserIcon, SettingsIcon, CreditCardIcon, LogOutIcon, SunIcon, MoonIcon } from "lucide-react";
 
-const user = {
-	name: "Shaban Haider",
-	email: "shaban@efferd.com",
-	avatar: "https://github.com/shabanhr.png",
-};
+export function NavUser({ user: currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const savedUser = currentUser || JSON.parse(localStorage.getItem("user") || '{"name":"Admin User","email":"admin@gmail.com"}');
 
-export function NavUser() {
-	const [isDark, setIsDark] = useState(() => {
-		if (typeof window !== "undefined") {
-			return document.documentElement.classList.contains("dark") ||
-				localStorage.getItem("theme") === "dark";
-		}
-		return false;
-	});
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark") ||
+        localStorage.getItem("theme") === "dark";
+    }
+    return false;
+  });
 
-	useEffect(() => {
-		if (isDark) {
-			document.documentElement.classList.add("dark");
-			localStorage.setItem("theme", "dark");
-		} else {
-			document.documentElement.classList.remove("dark");
-			localStorage.setItem("theme", "light");
-		}
-	}, [isDark]);
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDark]);
 
-	const toggleTheme = (e) => {
-		e.preventDefault();
-		setIsDark((prev) => !prev);
-	};
+  const toggleTheme = (e) => {
+    e.preventDefault();
+    setIsDark((prev) => !prev);
+  };
 
-	return (
+  const handleLogout = () => {
+    logoutUserApi();
+    if (onLogout) onLogout();
+    navigate("/login");
+  };
+
+  return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
 				<Avatar className="size-8 cursor-pointer">
-					<AvatarImage src={user.avatar} />
-					<AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+					<AvatarImage src="https://github.com/shabanhr.png" />
+					<AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuItem className="flex items-center justify-start gap-2">
 					<DropdownMenuLabel className="flex items-center gap-3">
 						<Avatar className="size-10">
-							<AvatarImage src={user.avatar} />
-							<AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+							<AvatarImage src="https://github.com/shabanhr.png" />
+							<AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
 						</Avatar>
 						<div>
-							<span className="font-medium text-foreground">{user.name}</span>{" "}
+							<span className="font-medium text-foreground">{savedUser.name}</span>{" "}
 							<br />
 							<div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
-								{user.email}
+								{savedUser.email}
 							</div>
 						</div>
 					</DropdownMenuLabel>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem>
+					<DropdownMenuItem className="cursor-pointer">
 						<UserIcon />
 						Account
 					</DropdownMenuItem>
-					<DropdownMenuItem>
+					<DropdownMenuItem className="cursor-pointer">
 						<SettingsIcon />
 						Settings
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem>
+					<DropdownMenuItem className="cursor-pointer">
 						<CreditCardIcon />
 						Plan & Billing
 					</DropdownMenuItem>
@@ -103,9 +108,9 @@ export function NavUser() {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem className="w-full cursor-pointer" variant="destructive">
-						<LogOutIcon />
-						Log out
+					<DropdownMenuItem className="w-full cursor-pointer flex items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={handleLogout}>
+						<LogOutIcon className="size-4" />
+						<span>Log out</span>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>
