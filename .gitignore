@@ -8,9 +8,7 @@ frontend/dist/
 frontend/build/
 
 # environment & logs
-.env
-.env.local
-*.log
+
 
 # IDE & system
 .DS_Store
