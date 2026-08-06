@@ -17,6 +17,7 @@ import { ProfitLossWidget } from "@/components/profit-loss-widget";
 import { SupplierLedgerManager } from "@/components/supplier-ledger-manager";
 import { FinancialReportsManager } from "@/components/financial-reports-manager";
 import { ExpensesManager } from "@/components/expenses-manager";
+import { EmployeePayrollManager } from "@/components/employee-payroll-manager";
 import { UserManagementManager } from "@/components/user-management-manager";
 import { AuditTrailManager } from "@/components/audit-trail-manager";
 import { LoginPage } from "@/components/login";
@@ -96,6 +97,7 @@ export default function App() {
                   <Route path="/supplier-ledger" element={<SupplierLedgerManager />} />
                   <Route path="/financial-reports" element={<FinancialReportsManager />} />
                   <Route path="/expenses" element={<ExpensesManager />} />
+                  <Route path="/payroll" element={<EmployeePayrollManager />} />
                   <Route path="/users" element={<UserManagementManager />} />
                   <Route path="/audit-trail" element={<AuditTrailManager />} />
                   <Route path="*" element={<NotFoundPage />} />

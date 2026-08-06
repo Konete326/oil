@@ -104,6 +104,13 @@ export const navGroups = [
 				),
 			},
 			{
+				title: "Employee Payroll",
+				path: "/payroll",
+				icon: (
+					<BriefcaseIcon />
+				),
+			},
+			{
 				title: "User Management",
 				path: "/users",
 				icon: (

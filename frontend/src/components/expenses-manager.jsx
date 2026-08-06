@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExpenseModal } from "@/components/expense-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { PaginationControl } from "@/components/pagination-control";
 import { fetchExpensesApi, deleteExpenseApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
@@ -29,6 +30,7 @@ export function ExpensesManager() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [todayTotal, setTodayTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -283,6 +285,13 @@ export function ExpensesManager() {
             </tbody>
           </table>
         </div>
+
+        <PaginationControl
+          page={page}
+          pages={Math.ceil(expenses.length / 10) || 1}
+          total={expenses.length}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
 
       <ExpenseModal

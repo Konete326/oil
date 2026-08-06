@@ -679,6 +679,99 @@ export async function deleteExpenseApi(id) {
   return data;
 }
 
+export async function fetchEmployeesApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/employees?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch employees");
+    return await res.json();
+  } catch (err) {
+    console.warn("Employees API error", err);
+    return { success: false, count: 0, total: 0, page: 1, pages: 1, data: [] };
+  }
+}
+
+export async function createEmployeeApi(payload) {
+  const res = await fetch(`${API_URL}/employees`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to create employee profile");
+  }
+  return data;
+}
+
+export async function updateEmployeeApi(id, payload) {
+  const res = await fetch(`${API_URL}/employees/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to update employee profile");
+  }
+  return data;
+}
+
+export async function deleteEmployeeApi(id) {
+  const res = await fetch(`${API_URL}/employees/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to delete employee profile");
+  }
+  return data;
+}
+
+export async function recordEmployeeAdvanceApi(payload) {
+  const res = await fetch(`${API_URL}/employees/advance`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to record advance cash");
+  }
+  return data;
+}
+
+export async function fetchSalaryVouchersApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/salaries?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch salary vouchers");
+    return await res.json();
+  } catch (err) {
+    console.warn("Salary vouchers API error", err);
+    return { success: false, count: 0, total: 0, page: 1, pages: 1, data: [] };
+  }
+}
+
+export async function generateSalaryVoucherApi(payload) {
+  const res = await fetch(`${API_URL}/salaries`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to generate salary voucher");
+  }
+  return data;
+}
+
+
 
 
 
