@@ -6,9 +6,66 @@ export async function fetchDashboardData() {
     if (!res.ok) throw new Error("Failed to fetch dashboard data");
     return await res.json();
   } catch (err) {
-    console.warn("Backend offline or unreachable, fallback active", err);
+    console.warn("Backend offline or unreachable", err);
     return null;
   }
+}
+
+export async function fetchCategories() {
+  try {
+    const res = await fetch(`${API_URL}/categories`);
+    if (!res.ok) throw new Error("Failed to fetch categories");
+    return await res.json();
+  } catch (err) {
+    console.warn("Category API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createCategory(data) {
+  const res = await fetch(`${API_URL}/categories`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create category");
+  return await res.json();
+}
+
+export async function updateCategory(id, data) {
+  const res = await fetch(`${API_URL}/categories/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update category");
+  return await res.json();
+}
+
+export async function deleteCategory(id) {
+  const res = await fetch(`${API_URL}/categories/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete category");
+  return await res.json();
+}
+
+export async function addSubcategory(categoryId, data) {
+  const res = await fetch(`${API_URL}/categories/${categoryId}/subcategories`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to add subcategory");
+  return await res.json();
+}
+
+export async function deleteSubcategory(categoryId, subId) {
+  const res = await fetch(`${API_URL}/categories/${categoryId}/subcategories/${subId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete subcategory");
+  return await res.json();
 }
 
 export async function uploadImageToCloudinary(file, title = "") {

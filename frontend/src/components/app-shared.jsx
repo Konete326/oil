@@ -1,4 +1,4 @@
-import { LayoutGridIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon, BookOpenIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -11,6 +11,13 @@ export const navGroups = [
 					<LayoutGridIcon />
 				),
 				isActive: true,
+			},
+			{
+				title: "Categories",
+				path: "#/categories",
+				icon: (
+					<FolderTreeIcon />
+				),
 			},
 			{
 				title: "Analytics",

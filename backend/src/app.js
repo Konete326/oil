@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import mediaRoutes from "./routes/mediaRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -25,6 +26,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/media", mediaRoutes);
+app.use("/api/categories", categoryRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
