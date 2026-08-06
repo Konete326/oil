@@ -3,6 +3,7 @@ import { fetchProducts, fetchCategories, createPosSale } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PosReceiptModal } from "@/components/pos-receipt-modal";
+import { PosCheckoutModal } from "@/components/pos-checkout-modal";
 import { ShoppingCartIcon, SearchIcon, PlusIcon, MinusIcon, Trash2Icon, AlertCircleIcon, PackageIcon, ReceiptIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,14 +15,7 @@ export function PosCounter() {
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const [cart, setCart] = useState([]);
-  const [customerName, setCustomerName] = useState("Walk-in Customer");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [saleType, setSaleType] = useState("Retail");
-  const [discount, setDiscount] = useState("0");
-  const [taxPercent, setTaxPercent] = useState("0");
-  const [paymentMode, setPaymentMode] = useState("Cash");
-  const [cashReceived, setCashReceived] = useState("");
-
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [completedSale, setCompletedSale] = useState(null);
@@ -98,44 +92,29 @@ export function PosCounter() {
   };
 
   const cartSubtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const discountNum = Number(discount) || 0;
-  const taxPctNum = Number(taxPercent) || 0;
-  const taxAmount = Number(((cartSubtotal - discountNum) * (taxPctNum / 100)).toFixed(2));
-  const grandTotal = Math.max(0, Number((cartSubtotal - discountNum + (taxAmount > 0 ? taxAmount : 0)).toFixed(2)));
 
-  const cashReceivedNum = Number(cashReceived) || 0;
-  const changeDue = Math.max(0, Number((cashReceivedNum - grandTotal).toFixed(2)));
-
-  const handleCheckout = async () => {
-    if (cart.length === 0) {
-      setError("Please add at least 1 product to the cart.");
-      return;
-    }
-
+  const handleCheckout = async (checkoutData) => {
+    if (cart.length === 0) return;
     setSubmitting(true);
     setError("");
-
+    const { customerName, saleType, discount, taxAmount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
     try {
       const res = await createPosSale({
         customerName,
-        customerPhone,
+        customerPhone: "",
         saleType,
         items: cart,
         subtotal: cartSubtotal,
-        discount: discountNum,
+        discount,
         taxAmount,
         grandTotal,
         paymentMode,
-        cashReceived: cashReceivedNum,
+        cashReceived,
         changeDue,
       });
-
       setCompletedSale(res.data);
       setCart([]);
-      setCustomerName("Walk-in Customer");
-      setCustomerPhone("");
-      setDiscount("0");
-      setCashReceived("");
+      setIsCheckoutOpen(false);
       await loadData();
     } catch (err) {
       setError(err.message || "Failed to process POS checkout");
@@ -336,118 +315,34 @@ export function PosCounter() {
             )}
           </div>
 
-          <div className="space-y-4 pt-3 border-t border-border">
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="space-y-1">
-                <label className="font-medium text-muted-foreground">Customer Name</label>
-                <Input
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="font-medium text-muted-foreground">Sale Type</label>
-                <select
-                  value={saleType}
-                  onChange={(e) => setSaleType(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs cursor-pointer h-8"
-                >
-                  <option value="Retail">Retail Sale</option>
-                  <option value="Wholesale">Wholesale Sale</option>
-                </select>
-              </div>
+          <div className="pt-3 border-t border-border space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-mono text-foreground">Rs {cartSubtotal.toLocaleString()}</span>
             </div>
-
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="space-y-1">
-                <label className="font-medium text-muted-foreground">Discount (Rs)</label>
-                <Input
-                  type="number"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="font-medium text-muted-foreground">Tax GST (%)</label>
-                <Input
-                  type="number"
-                  value={taxPercent}
-                  onChange={(e) => setTaxPercent(e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="font-medium text-muted-foreground">Payment Mode</label>
-                <select
-                  value={paymentMode}
-                  onChange={(e) => setPaymentMode(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs cursor-pointer h-8"
-                >
-                  <option value="Cash">Cash</option>
-                  <option value="Card">Card POS</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Credit / Khata">Credit / Khata</option>
-                </select>
-              </div>
-            </div>
-
-            {paymentMode === "Cash" && (
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="space-y-1">
-                  <label className="font-medium text-muted-foreground">Cash Received (Rs)</label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 5000"
-                    value={cashReceived}
-                    onChange={(e) => setCashReceived(e.target.value)}
-                    className="text-xs h-8 font-mono"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-medium text-muted-foreground">Change Due</label>
-                  <div className="h-8 rounded-md border bg-muted/40 px-3 flex items-center font-mono font-bold text-emerald-500">
-                    Rs {changeDue}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="rounded-lg bg-primary/10 border border-primary/20 p-3 space-y-1 text-xs">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Subtotal:</span>
-                <span className="font-mono font-semibold">Rs {cartSubtotal.toLocaleString()}</span>
-              </div>
-              {discountNum > 0 && (
-                <div className="flex justify-between text-amber-500">
-                  <span>Discount:</span>
-                  <span className="font-mono font-semibold">-Rs {discountNum}</span>
-                </div>
-              )}
-              {taxAmount > 0 && (
-                <div className="flex justify-between text-muted-foreground">
-                  <span>GST Tax ({taxPctNum}%):</span>
-                  <span className="font-mono font-semibold">+Rs {taxAmount}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-base font-bold text-primary pt-1 border-primary/20 border-t">
-                <span>GRAND TOTAL:</span>
-                <span className="font-mono">Rs {grandTotal.toLocaleString()}</span>
-              </div>
-            </div>
-
             <Button
-              onClick={handleCheckout}
-              disabled={submitting || cart.length === 0}
+              onClick={() => {
+                if (cart.length === 0) { setError("Add at least 1 product."); return; }
+                setError("");
+                setIsCheckoutOpen(true);
+              }}
+              disabled={cart.length === 0}
               className="w-full h-10 gap-2 font-semibold text-xs cursor-pointer shadow-xs"
             >
               <ReceiptIcon className="size-4" />
-              {submitting ? "Processing Sale..." : "Complete Sale & Print Receipt"}
+              Checkout ({cart.length} item{cart.length !== 1 ? "s" : ""})
             </Button>
           </div>
         </div>
       </div>
+
+      <PosCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cartSubtotal={cartSubtotal}
+        onConfirm={handleCheckout}
+        submitting={submitting}
+      />
 
       <PosReceiptModal
         isOpen={!!completedSale}
