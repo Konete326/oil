@@ -25,6 +25,24 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "EliteDev Oil Management System API is Running",
+    status: "Active",
+    timestamp: new Date(),
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      dashboard: "/api/dashboard",
+      categories: "/api/categories",
+      products: "/api/products",
+      decanting: "/api/decanting",
+      mills: "/api/mills",
+      challans: "/api/challans",
+    },
+  });
+});
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date() });
 });
