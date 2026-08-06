@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
 	Avatar,
 	AvatarFallback,
@@ -14,7 +15,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserIcon, SettingsIcon, CreditCardIcon, LogOutIcon } from "lucide-react";
+import { UserIcon, SettingsIcon, CreditCardIcon, LogOutIcon, SunIcon, MoonIcon } from "lucide-react";
 
 const user = {
 	name: "Shaban Haider",
@@ -23,10 +24,33 @@ const user = {
 };
 
 export function NavUser() {
+	const [isDark, setIsDark] = useState(() => {
+		if (typeof window !== "undefined") {
+			return document.documentElement.classList.contains("dark") ||
+				localStorage.getItem("theme") === "dark";
+		}
+		return false;
+	});
+
+	useEffect(() => {
+		if (isDark) {
+			document.documentElement.classList.add("dark");
+			localStorage.setItem("theme", "dark");
+		} else {
+			document.documentElement.classList.remove("dark");
+			localStorage.setItem("theme", "light");
+		}
+	}, [isDark]);
+
+	const toggleTheme = (e) => {
+		e.preventDefault();
+		setIsDark((prev) => !prev);
+	};
+
 	return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-				<Avatar className="size-8">
+				<Avatar className="size-8 cursor-pointer">
 					<AvatarImage src={user.avatar} />
 					<AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
 				</Avatar>
@@ -41,8 +65,7 @@ export function NavUser() {
 						<div>
 							<span className="font-medium text-foreground">{user.name}</span>{" "}
 							<br />
-							<div
-                                className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
+							<div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
 								{user.email}
 							</div>
 						</div>
@@ -64,6 +87,18 @@ export function NavUser() {
 					<DropdownMenuItem>
 						<CreditCardIcon />
 						Plan & Billing
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem className="w-full cursor-pointer flex items-center justify-between" onClick={toggleTheme}>
+						<div className="flex items-center gap-2">
+							{isDark ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
+							<span>Theme</span>
+						</div>
+						<span className="text-xs text-muted-foreground font-mono">
+							{isDark ? "Dark" : "Light"}
+						</span>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
