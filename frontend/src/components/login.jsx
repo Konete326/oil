@@ -4,7 +4,7 @@ import { loginUserApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LogoIcon } from "@/components/logo";
-import { MailIcon, LockIcon, CheckCircle2Icon, AlertCircleIcon, ArrowRightIcon } from "lucide-react";
+import { MailIcon, LockIcon, CheckCircle2Icon, AlertCircleIcon, ArrowRightIcon, Loader2Icon } from "lucide-react";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_REGEX = /^.{6,}$/;
@@ -43,12 +43,6 @@ export function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  const fillDefaultCredentials = () => {
-    setEmail("admin@gmail.com");
-    setPassword("admin123");
-    setEmailTouched(true);
-    setPasswordTouched(true);
-  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 relative overflow-hidden">
@@ -148,23 +142,21 @@ export function LoginPage({ onLoginSuccess }) {
             className="w-full h-10 gap-2 text-xs font-semibold cursor-pointer shadow-xs"
             disabled={loading || (emailTouched && passwordTouched && !isFormValid)}
           >
-            {loading ? "Signing in..." : "Sign In to Dashboard"}
-            <ArrowRightIcon className="size-4" />
+            {loading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                <span>Signing In...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In to Dashboard</span>
+                <ArrowRightIcon className="size-4" />
+              </>
+            )}
           </Button>
         </form>
 
-        <div className="pt-4 border-t border-border text-center space-y-2">
-          <p className="text-[11px] text-muted-foreground">Demo Credentials:</p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={fillDefaultCredentials}
-            className="text-xs gap-1.5 cursor-pointer"
-          >
-            Use Demo Credentials (admin@gmail.com / admin123)
-          </Button>
-        </div>
+
       </div>
     </div>
   );

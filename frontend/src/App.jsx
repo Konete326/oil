@@ -12,6 +12,7 @@ import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
 import { LedgerManager } from "@/components/ledger-manager";
 import { LoginPage } from "@/components/login";
+import { NotFoundPage } from "@/components/not-found";
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -81,7 +82,7 @@ export default function App() {
                   <Route path="/decanting" element={<DecantingManager />} />
                   <Route path="/textile" element={<TextileManager />} />
                   <Route path="/ledger" element={<LedgerManager />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </AppShell>
             ) : (
