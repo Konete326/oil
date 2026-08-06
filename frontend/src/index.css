@@ -2,6 +2,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -37,9 +38,14 @@
     --chart-3: 47.9 95.8% 53.1%;
     --chart-4: 262.1 83.3% 57.8%;
     --chart-5: 346.8 77.2% 49.8%;
+
+    --scrollbar-track: hsl(240 4.8% 95.9%);
+    --scrollbar-thumb: hsl(240 5.9% 80%);
+    --scrollbar-thumb-hover: hsl(240 5.9% 65%);
   }
 
   .dark {
+    color-scheme: dark;
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
@@ -74,6 +80,10 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --scrollbar-track: hsl(240 3.7% 12%);
+    --scrollbar-thumb: hsl(240 3.7% 25%);
+    --scrollbar-thumb-hover: hsl(240 3.7% 40%);
   }
 }
 
@@ -114,6 +124,26 @@
 
 * {
   border-color: hsl(var(--border));
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 
 body {
