@@ -4,7 +4,7 @@ import { loginUserApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LogoIcon } from "@/components/logo";
-import { MailIcon, LockIcon, CheckCircle2Icon, AlertCircleIcon, ArrowRightIcon, Loader2Icon } from "lucide-react";
+import { MailIcon, LockIcon, CheckCircle2Icon, AlertCircleIcon, ArrowRightIcon, Loader2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_REGEX = /^.{6,}$/;
@@ -15,6 +15,7 @@ export function LoginPage({ onLoginSuccess }) {
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
 
@@ -112,7 +113,7 @@ export function LoginPage({ onLoginSuccess }) {
             <div className="relative">
               <LockIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => {
@@ -125,15 +126,14 @@ export function LoginPage({ onLoginSuccess }) {
                 }`}
                 required
               />
-              {passwordTouched && (
-                <div className="absolute right-3 top-2.5">
-                  {isPasswordValid ? (
-                    <CheckCircle2Icon className="size-4 text-emerald-500" />
-                  ) : (
-                    <AlertCircleIcon className="size-4 text-destructive" />
-                  )}
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+              </button>
             </div>
           </div>
 
