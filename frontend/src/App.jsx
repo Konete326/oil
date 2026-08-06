@@ -13,6 +13,8 @@ import { PosHistory } from "@/components/pos-history";
 import { LedgerManager } from "@/components/ledger-manager";
 import { CashManager } from "@/components/cash-manager";
 import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
+import { ProfitLossWidget } from "@/components/profit-loss-widget";
+import { SupplierLedgerManager } from "@/components/supplier-ledger-manager";
 import { LoginPage } from "@/components/login";
 import { NotFoundPage } from "@/components/not-found";
 
@@ -86,6 +88,8 @@ export default function App() {
                   <Route path="/ledger" element={<LedgerManager />} />
                   <Route path="/cash" element={<CashManager />} />
                   <Route path="/sales-purchases" element={<SalesPurchaseManager />} />
+                  <Route path="/profit-loss" element={<ProfitLossWidget />} />
+                  <Route path="/supplier-ledger" element={<SupplierLedgerManager />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </AppShell>

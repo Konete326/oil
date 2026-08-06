@@ -480,4 +480,73 @@ export async function fetchPartySalesRecordApi() {
   }
 }
 
+export async function fetchProfitLossApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/profit-loss?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch profit and loss summary");
+    return await res.json();
+  } catch (err) {
+    console.warn("Profit and Loss API error", err);
+    return { success: false, data: { totalSalesRevenue: 0, grossProfit: 0, operatingExpenses: 0, netProfit: 0, marginPercentage: 0 } };
+  }
+}
+
+export async function fetchSuppliersApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/suppliers?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch suppliers");
+    return await res.json();
+  } catch (err) {
+    console.warn("Suppliers API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createSupplierApi(payload) {
+  const res = await fetch(`${API_URL}/suppliers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to create supplier profile");
+  }
+  return data;
+}
+
+export async function createSupplierPaymentApi(payload) {
+  const res = await fetch(`${API_URL}/suppliers/payment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to record supplier payment");
+  }
+  return data;
+}
+
+export async function fetchSupplierLedgerApi(supplierId = "") {
+  try {
+    const endpoint = supplierId ? `${API_URL}/suppliers/ledger/${supplierId}` : `${API_URL}/suppliers/ledger`;
+    const res = await fetch(endpoint, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch supplier ledger");
+    return await res.json();
+  } catch (err) {
+    console.warn("Supplier ledger API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+
 

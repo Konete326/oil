@@ -16,6 +16,8 @@ import posRoutes from "./routes/posRoutes.js";
 import ledgerRoutes from "./routes/ledgerRoutes.js";
 import cashRoutes from "./routes/cashRoutes.js";
 import salesReportRoutes from "./routes/salesReportRoutes.js";
+import supplierRoutes from "./routes/supplierRoutes.js";
+import profitLossRoutes from "./routes/profitLossRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -86,6 +88,8 @@ app.use("/api/pos", posRoutes);
 app.use("/api/ledger", ledgerRoutes);
 app.use("/api/cash", cashRoutes);
 app.use("/api/sales-reports", salesReportRoutes);
+app.use("/api/suppliers", supplierRoutes);
+app.use("/api/profit-loss", profitLossRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

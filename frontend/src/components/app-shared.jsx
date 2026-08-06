@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, CalculatorIcon, TruckIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -73,6 +73,20 @@ export const navGroups = [
 				path: "/sales-purchases",
 				icon: (
 					<TrendingUpIcon />
+				),
+			},
+			{
+				title: "Profit & Loss Margin",
+				path: "/profit-loss",
+				icon: (
+					<CalculatorIcon />
+				),
+			},
+			{
+				title: "Supplier Ledger",
+				path: "/supplier-ledger",
+				icon: (
+					<TruckIcon />
 				),
 			},
 			{
