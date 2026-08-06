@@ -148,9 +148,9 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-xl border border-border bg-background p-6 shadow-2xl space-y-4 my-8">
+      <div className="w-full max-w-2xl rounded-xl border border-border bg-background p-4 shadow-2xl space-y-3 my-4">
         <div className="flex items-center justify-between border-b pb-3">
-          <h3 className="font-semibold text-lg text-foreground">
+          <h3 className="font-semibold text-sm text-foreground">
             {initialData ? "Edit Oil Product" : "Add New Oil Product"}
           </h3>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
@@ -158,15 +158,15 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
           <div
-            className="relative rounded-xl border-2 border-dashed border-border bg-muted/30 hover:border-primary/50 transition-colors cursor-pointer group"
+            className="relative rounded-lg border-2 border-dashed border-border bg-muted/30 hover:border-primary/50 transition-colors cursor-pointer group"
             onClick={() => !uploading && fileInputRef.current?.click()}
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
           >
             {imagePreview ? (
-              <div className="relative h-36 w-full overflow-hidden rounded-xl">
+              <div className="relative h-24 w-full overflow-hidden rounded-lg">
                 <img
                   src={imagePreview}
                   alt="Product preview"
@@ -186,7 +186,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
                 )}
               </div>
             ) : (
-              <div className="h-36 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+              <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
                 {uploading ? (
                   <>
                     <Loader2Icon className="size-6 animate-spin text-primary" />

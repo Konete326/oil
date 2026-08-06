@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PosReceiptModal } from "@/components/pos-receipt-modal";
 import { PosCheckoutModal } from "@/components/pos-checkout-modal";
-import { ShoppingCartIcon, SearchIcon, PlusIcon, MinusIcon, Trash2Icon, AlertCircleIcon, PackageIcon, ReceiptIcon } from "lucide-react";
+import { ShoppingCartIcon, SearchIcon, PlusIcon, MinusIcon, Trash2Icon, AlertCircleIcon, ReceiptIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function PosCounter() {
@@ -195,7 +195,8 @@ export function PosCounter() {
                 return (
                   <div
                     key={prod._id}
-                    className="group rounded-xl border border-border bg-card shadow-xs hover:border-primary/50 transition-all flex flex-col overflow-hidden"
+                    onClick={() => prod.stockQuantity > 0 && addToCart(prod)}
+                    className={`group rounded-xl border border-border bg-card shadow-xs hover:border-primary/50 transition-all flex flex-col overflow-hidden ${prod.stockQuantity > 0 ? "cursor-pointer" : "opacity-60"}`}
                   >
                     <div className="h-24 bg-muted/30 flex items-center justify-center overflow-hidden">
                       {prod.imageUrl ? (
@@ -205,7 +206,10 @@ export function PosCounter() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <PackageIcon className="size-8 text-muted-foreground/30" />
+                        <svg viewBox="0 0 64 64" className="size-10 text-primary/20 fill-current" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M32 4C32 4 14 24 14 38a18 18 0 0 0 36 0C50 24 32 4 32 4z" />
+                          <ellipse cx="24" cy="36" rx="4" ry="6" className="fill-background/40" />
+                        </svg>
                       )}
                     </div>
 
@@ -225,15 +229,20 @@ export function PosCounter() {
                         Rs {prod.sellingPrice?.toLocaleString()} <span className="text-[9px] font-normal text-muted-foreground">/{prod.unit}</span>
                       </p>
 
-                      <Button
-                        size="sm"
-                        className="w-full h-7 gap-1 text-[11px] cursor-pointer shadow-xs mt-auto"
-                        onClick={() => addToCart(prod)}
-                        disabled={prod.stockQuantity <= 0}
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-auto"
                       >
-                        <PlusIcon className="size-3" />
-                        <span>{prod.stockQuantity <= 0 ? "Out of Stock" : "Add"}</span>
-                      </Button>
+                        <Button
+                          size="sm"
+                          className="w-full h-7 gap-1 text-[11px] cursor-pointer shadow-xs"
+                          onClick={() => addToCart(prod)}
+                          disabled={prod.stockQuantity <= 0}
+                        >
+                          <PlusIcon className="size-3" />
+                          <span>{prod.stockQuantity <= 0 ? "Out of Stock" : "Add"}</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -245,9 +254,9 @@ export function PosCounter() {
         <div className="rounded-xl border border-border bg-card p-5 space-y-4 shadow-xs flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
-                <ShoppingCartIcon className="size-5 text-primary" />
-                Current Checkout Cart ({cart.length})
+              <h3 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+                <ShoppingCartIcon className="size-3.5 text-primary" />
+                Cart ({cart.length})
               </h3>
               {cart.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={() => setCart([])} className="text-xs text-destructive hover:text-destructive cursor-pointer">
