@@ -373,3 +373,56 @@ export async function fetchMediaList() {
   if (!res.ok) throw new Error("Failed to fetch media list");
   return await res.json();
 }
+
+export async function fetchCashTransactionsApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/cash?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch cash transactions");
+    return await res.json();
+  } catch (err) {
+    console.warn("Cash transactions API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createCashTransactionApi(payload) {
+  const res = await fetch(`${API_URL}/cash`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to record cash transaction");
+  }
+  return data;
+}
+
+export async function fetchPartyCashSummaryApi() {
+  try {
+    const res = await fetch(`${API_URL}/cash/party-summary`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch party cash summary");
+    return await res.json();
+  } catch (err) {
+    console.warn("Party cash summary API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function deleteCashTransactionApi(id) {
+  const res = await fetch(`${API_URL}/cash/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to delete cash transaction");
+  }
+  return data;
+}
+
