@@ -270,6 +270,32 @@ export async function updateChallanStatus(id, data) {
   return json;
 }
 
+export async function fetchPosSales() {
+  try {
+    const res = await fetch(`${API_URL}/pos/sales`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch POS Sales");
+    return await res.json();
+  } catch (err) {
+    console.warn("POS API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createPosSale(data) {
+  const res = await fetch(`${API_URL}/pos/sales`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || "Failed to complete POS sale transaction");
+  }
+  return json;
+}
+
 export async function uploadImageToCloudinary(file, title = "") {
   const formData = new FormData();
   formData.append("image", file);

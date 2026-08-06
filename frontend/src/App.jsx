@@ -8,6 +8,7 @@ import { CategoryManager } from "@/components/category-manager";
 import { ProductManager } from "@/components/product-manager";
 import { DecantingManager } from "@/components/decanting-manager";
 import { TextileManager } from "@/components/textile-manager";
+import { PosCounter } from "@/components/pos-counter";
 import { LoginPage } from "@/components/login";
 
 export default function App() {
@@ -73,6 +74,7 @@ export default function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/categories" element={<CategoryManager />} />
                   <Route path="/products" element={<ProductManager />} />
+                  <Route path="/pos" element={<PosCounter />} />
                   <Route path="/decanting" element={<DecantingManager />} />
                   <Route path="/textile" element={<TextileManager />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
