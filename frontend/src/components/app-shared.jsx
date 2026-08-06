@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -66,6 +66,13 @@ export const navGroups = [
 				path: "/cash",
 				icon: (
 					<BanknoteIcon />
+				),
+			},
+			{
+				title: "Sales & Purchases",
+				path: "/sales-purchases",
+				icon: (
+					<TrendingUpIcon />
 				),
 			},
 			{

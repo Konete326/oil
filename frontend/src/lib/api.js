@@ -426,3 +426,58 @@ export async function deleteCashTransactionApi(id) {
   return data;
 }
 
+export async function fetchSalesReportApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/sales-reports/sales?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch sales report");
+    return await res.json();
+  } catch (err) {
+    console.warn("Sales report API error", err);
+    return { success: false, summary: { totalSalesRevenue: 0, posSalesTotal: 0, challanSalesTotal: 0, totalSalesCount: 0 }, data: { posSales: [], challans: [] } };
+  }
+}
+
+export async function fetchPurchasesApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/sales-reports/purchases?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch stock purchases");
+    return await res.json();
+  } catch (err) {
+    console.warn("Purchases API error", err);
+    return { success: false, data: [], totalCost: 0 };
+  }
+}
+
+export async function createPurchaseApi(payload) {
+  const res = await fetch(`${API_URL}/sales-reports/purchases`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to record purchase entry");
+  }
+  return data;
+}
+
+export async function fetchPartySalesRecordApi() {
+  try {
+    const res = await fetch(`${API_URL}/sales-reports/party-sales`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch party sales records");
+    return await res.json();
+  } catch (err) {
+    console.warn("Party sales API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+

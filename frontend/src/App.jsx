@@ -12,6 +12,7 @@ import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
 import { LedgerManager } from "@/components/ledger-manager";
 import { CashManager } from "@/components/cash-manager";
+import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
 import { LoginPage } from "@/components/login";
 import { NotFoundPage } from "@/components/not-found";
 
@@ -84,6 +85,7 @@ export default function App() {
                   <Route path="/textile" element={<TextileManager />} />
                   <Route path="/ledger" element={<LedgerManager />} />
                   <Route path="/cash" element={<CashManager />} />
+                  <Route path="/sales-purchases" element={<SalesPurchaseManager />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </AppShell>
