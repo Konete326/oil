@@ -19,6 +19,8 @@ import salesReportRoutes from "./routes/salesReportRoutes.js";
 import supplierRoutes from "./routes/supplierRoutes.js";
 import profitLossRoutes from "./routes/profitLossRoutes.js";
 import financialReportRoutes from "./routes/financialReportRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import auditRoutes from "./routes/auditRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -92,6 +94,8 @@ app.use("/api/sales-reports", salesReportRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/profit-loss", profitLossRoutes);
 app.use("/api/financial-reports", financialReportRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/audit", auditRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

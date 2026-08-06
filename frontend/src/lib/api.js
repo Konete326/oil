@@ -575,6 +575,72 @@ export async function fetchDetailedPartyLedgerApi(params = {}) {
   }
 }
 
+export async function fetchUsersApi() {
+  try {
+    const res = await fetch(`${API_URL}/users`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch users");
+    return await res.json();
+  } catch (err) {
+    console.warn("Users API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function createUserApi(payload) {
+  const res = await fetch(`${API_URL}/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to create user account");
+  }
+  return data;
+}
+
+export async function updateUserPermissionsApi(id, payload) {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to update user permissions");
+  }
+  return data;
+}
+
+export async function deleteUserApi(id) {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to delete user account");
+  }
+  return data;
+}
+
+export async function fetchAuditLogsApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/audit?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch audit logs");
+    return await res.json();
+  } catch (err) {
+    console.warn("Audit log API error", err);
+    return { success: false, data: [] };
+  }
+}
+
+
 
 
 

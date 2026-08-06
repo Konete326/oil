@@ -1,4 +1,4 @@
-import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, CalculatorIcon, TruckIcon, ScaleIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
+import { LayoutGridIcon, FolderTreeIcon, PackageIcon, RefreshCwIcon, FactoryIcon, ShoppingCartIcon, HistoryIcon, BookOpenIcon, BanknoteIcon, TrendingUpIcon, CalculatorIcon, TruckIcon, ScaleIcon, UserCogIcon, ShieldAlertIcon, FileTextIcon, BarChart3Icon, BriefcaseIcon, UsersIcon, PlugIcon, KeyRoundIcon, SettingsIcon, CreditCardIcon, HelpCircleIcon } from "lucide-react";
 
 export const navGroups = [
 	{
@@ -94,6 +94,20 @@ export const navGroups = [
 				path: "/financial-reports",
 				icon: (
 					<ScaleIcon />
+				),
+			},
+			{
+				title: "User Management",
+				path: "/users",
+				icon: (
+					<UserCogIcon />
+				),
+			},
+			{
+				title: "Audit Trail Logs",
+				path: "/audit-trail",
+				icon: (
+					<ShieldAlertIcon />
 				),
 			},
 			{
