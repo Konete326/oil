@@ -18,8 +18,11 @@ import {
 } from "@/components/ui/table";
 import { ProductModal } from "@/components/product-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { PlusIcon, Edit3Icon, Trash2Icon, PackageIcon, SearchIcon, AlertTriangleIcon, FilterIcon, ShieldAlertIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const PAGE_SIZE = 7;
 
 export function ProductManager() {
   const [products, setProducts] = useState([]);
@@ -27,6 +30,7 @@ export function ProductManager() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [confirmDeleteProd, setConfirmDeleteProd] = useState(null);
@@ -69,6 +73,12 @@ export function ProductManager() {
 
     return matchesSearch && matchesCat;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const lowStockCount = products.filter((p) => p.stockQuantity <= p.minStockAlert).length;
 
@@ -135,13 +145,19 @@ export function ProductManager() {
             <Input
               placeholder="Search product, SKU, brand, grade..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               className="ps-8 text-xs"
             />
           </div>
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCurrentPage(1);
+            }}
             className="rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
           >
             <option value="">All Categories</option>
@@ -168,97 +184,107 @@ export function ProductManager() {
             <p className="text-xs text-muted-foreground">Click "Add Product" to add your first oil item to inventory.</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/40">
-                <TableHead className="w-[110px]">SKU</TableHead>
-                <TableHead>Product Name & Brand</TableHead>
-                <TableHead>Category / Subcategory</TableHead>
-                <TableHead>Packaging & Grade</TableHead>
-                <TableHead className="text-right">Cost Price</TableHead>
-                <TableHead className="text-right">Selling Price</TableHead>
-                <TableHead className="text-center">Stock Level</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((prod) => {
-                const isLowStock = prod.stockQuantity <= prod.minStockAlert;
-                return (
-                  <TableRow key={prod._id} className="hover:bg-muted/20">
-                    <TableCell className="font-mono text-xs font-semibold text-primary">
-                      {prod.sku}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-0.5">
-                        <p className="font-semibold text-sm text-foreground">{prod.name}</p>
-                        <p className="text-[11px] text-muted-foreground">Brand: {prod.brand}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-0.5">
-                        <span className="inline-block rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                          {prod.category?.name || "Uncategorized"}
-                        </span>
-                        {prod.subcategoryName && (
-                          <p className="text-[11px] text-muted-foreground">{prod.subcategoryName}</p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-0.5 text-xs">
-                        <p className="font-medium text-foreground">{prod.packagingType}</p>
-                        <p className="text-[11px] text-muted-foreground">
-                          {prod.grade ? `Grade: ${prod.grade}` : ""} {prod.viscosity ? `(${prod.viscosity})` : ""}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums text-xs">
-                      Rs {prod.costPrice?.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums font-semibold text-xs text-foreground">
-                      Rs {prod.sellingPrice?.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
-                        style={{
-                          backgroundColor: isLowStock ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)",
-                          borderColor: isLowStock ? "rgba(245, 158, 11, 0.3)" : "rgba(16, 185, 129, 0.3)",
-                          color: isLowStock ? "#f59e0b" : "#10b981",
-                        }}
-                      >
-                        {isLowStock && <ShieldAlertIcon className="size-3.5" />}
-                        <span>{prod.stockQuantity} {prod.unit}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground hover:text-foreground cursor-pointer"
-                          onClick={() => {
-                            setEditingProduct(prod);
-                            setIsModalOpen(true);
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40">
+                  <TableHead className="w-[110px]">SKU</TableHead>
+                  <TableHead>Product Name & Brand</TableHead>
+                  <TableHead>Category / Subcategory</TableHead>
+                  <TableHead>Packaging & Grade</TableHead>
+                  <TableHead className="text-right">Cost Price</TableHead>
+                  <TableHead className="text-right">Selling Price</TableHead>
+                  <TableHead className="text-center">Stock Level</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedProducts.map((prod) => {
+                  const isLowStock = prod.stockQuantity <= prod.minStockAlert;
+                  return (
+                    <TableRow key={prod._id} className="hover:bg-muted/20">
+                      <TableCell className="font-mono text-xs font-semibold text-primary">
+                        {prod.sku}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-0.5">
+                          <p className="font-semibold text-sm text-foreground">{prod.name}</p>
+                          <p className="text-[11px] text-muted-foreground">Brand: {prod.brand}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-0.5">
+                          <span className="inline-block rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                            {prod.category?.name || "Uncategorized"}
+                          </span>
+                          {prod.subcategoryName && (
+                            <p className="text-[11px] text-muted-foreground">{prod.subcategoryName}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-0.5 text-xs">
+                          <p className="font-medium text-foreground">{prod.packagingType}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {prod.grade ? `Grade: ${prod.grade}` : ""} {prod.viscosity ? `(${prod.viscosity})` : ""}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-xs">
+                        Rs {prod.costPrice?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums font-semibold text-xs text-foreground">
+                        Rs {prod.sellingPrice?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
+                          style={{
+                            backgroundColor: isLowStock ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                            borderColor: isLowStock ? "rgba(245, 158, 11, 0.3)" : "rgba(16, 185, 129, 0.3)",
+                            color: isLowStock ? "#f59e0b" : "#10b981",
                           }}
                         >
-                          <Edit3Icon className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground hover:text-destructive cursor-pointer"
-                          onClick={() => setConfirmDeleteProd(prod)}
-                        >
-                          <Trash2Icon className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                          {isLowStock && <ShieldAlertIcon className="size-3.5" />}
+                          <span>{prod.stockQuantity} {prod.unit}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={() => {
+                              setEditingProduct(prod);
+                              setIsModalOpen(true);
+                            }}
+                          >
+                            <Edit3Icon className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-muted-foreground hover:text-destructive cursor-pointer"
+                            onClick={() => setConfirmDeleteProd(prod)}
+                          >
+                            <Trash2Icon className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredProducts.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </>
         )}
       </div>
 

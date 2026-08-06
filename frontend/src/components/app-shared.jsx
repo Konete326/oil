@@ -6,7 +6,7 @@ export const navGroups = [
 		items: [
 			{
 				title: "Dashboard",
-				path: "#/dashboard",
+				path: "/",
 				icon: (
 					<LayoutGridIcon />
 				),
@@ -14,28 +14,28 @@ export const navGroups = [
 			},
 			{
 				title: "Categories",
-				path: "#/categories",
+				path: "/categories",
 				icon: (
 					<FolderTreeIcon />
 				),
 			},
 			{
 				title: "Products & Stock",
-				path: "#/products",
+				path: "/products",
 				icon: (
 					<PackageIcon />
 				),
 			},
 			{
 				title: "Analytics",
-				path: "#/analytics",
+				path: "/analytics",
 				icon: (
 					<BarChart3Icon />
 				),
 			},
 			{
 				title: "Projects",
-				path: "#/projects",
+				path: "/projects",
 				icon: (
 					<BriefcaseIcon />
 				),
@@ -47,21 +47,21 @@ export const navGroups = [
 		items: [
 			{
 				title: "Team",
-				path: "#/team",
+				path: "/team",
 				icon: (
 					<UsersIcon />
 				),
 			},
 			{
 				title: "Integrations",
-				path: "#/integrations",
+				path: "/integrations",
 				icon: (
 					<PlugIcon />
 				),
 			},
 			{
 				title: "API Keys",
-				path: "#/api-keys",
+				path: "/api-keys",
 				icon: (
 					<KeyRoundIcon />
 				),
@@ -73,14 +73,14 @@ export const navGroups = [
 		items: [
 			{
 				title: "Settings",
-				path: "#/settings",
+				path: "/settings",
 				icon: (
 					<SettingsIcon />
 				),
 			},
 			{
 				title: "Billing",
-				path: "#/billing",
+				path: "/billing",
 				icon: (
 					<CreditCardIcon />
 				),
@@ -92,14 +92,14 @@ export const navGroups = [
 export const footerNavLinks = [
 	{
 		title: "Help Center",
-		path: "#/help",
+		path: "/help",
 		icon: (
 			<HelpCircleIcon />
 		),
 	},
 	{
 		title: "Documentation",
-		path: "#/documentation",
+		path: "/documentation",
 		icon: (
 			<BookOpenIcon />
 		),

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import { Agentation } from "agentation";
 import { AppShell } from "@/components/app-shell";
 import { Dashboard } from "@/components/dashboard";
@@ -6,31 +6,15 @@ import { CategoryManager } from "@/components/category-manager";
 import { ProductManager } from "@/components/product-manager";
 
 export default function App() {
-  const [currentHash, setCurrentHash] = useState(window.location.hash || "#/dashboard");
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentHash(window.location.hash || "#/dashboard");
-    };
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
-
-  const renderContent = () => {
-    switch (currentHash) {
-      case "#/categories":
-        return <CategoryManager />;
-      case "#/products":
-        return <ProductManager />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
   return (
     <>
       <AppShell>
-        {renderContent()}
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/categories" element={<CategoryManager />} />
+          <Route path="/products" element={<ProductManager />} />
+          <Route path="*" element={<Dashboard />} />
+        </Routes>
       </AppShell>
       {import.meta.env.DEV && (
         <Agentation

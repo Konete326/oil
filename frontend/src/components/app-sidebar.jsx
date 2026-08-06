@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/logo";
 import {
@@ -27,10 +28,10 @@ export function AppSidebar() {
             variant="sidebar">
             <SidebarHeader className="h-14 justify-center border-b px-2">
 				<SidebarMenuButton asChild>
-					<a href="#link">
+					<Link to="/" className="cursor-pointer">
 						<LogoIcon />
 						<span className="font-medium text-foreground!">EliteDev</span>
-					</a>
+					</Link>
 				</SidebarMenuButton>
 			</SidebarHeader>
             <SidebarContent>
@@ -45,13 +46,13 @@ export function AppSidebar() {
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton
                                 asChild
-                                className="text-muted-foreground"
+                                className="text-muted-foreground cursor-pointer"
                                 isActive={item.isActive}
                                 size="sm">
-								<a href={item.path}>
+								<Link to={item.path} className="cursor-pointer">
 									{item.icon}
 									<span>{item.title}</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}
@@ -61,7 +62,6 @@ export function AppSidebar() {
 					<p className="text-nowrap text-[9px] text-muted-foreground">
 						© {new Date().getFullYear()} EliteDev LLC
 					</p>
-
 				</div>
 			</SidebarFooter>
         </Sidebar>
