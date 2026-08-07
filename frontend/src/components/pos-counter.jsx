@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PosReceiptModal } from "@/components/pos-receipt-modal";
 import { PosCheckoutModal } from "@/components/pos-checkout-modal";
-import { ShoppingCartIcon, SearchIcon, PlusIcon, MinusIcon, Trash2Icon, AlertCircleIcon, ReceiptIcon } from "lucide-react";
+import { ShoppingCartIcon, SearchIcon, PlusIcon, MinusIcon, Trash2Icon, AlertCircleIcon, ReceiptIcon, PackageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function PosCounter() {

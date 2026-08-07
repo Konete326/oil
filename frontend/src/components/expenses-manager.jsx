@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   ReceiptIcon,
   PlusIcon,
@@ -20,10 +21,12 @@ import { fetchExpensesApi, deleteExpenseApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function ExpensesManager() {
+  const location = useLocation();
   const [period, setPeriod] = useState("monthly");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [search, setSearch] = useState("");
+  const [paymentMode, setPaymentMode] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const [expenses, setExpenses] = useState([]);
@@ -36,6 +39,12 @@ export function ExpensesManager() {
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setIsModalOpen(true);
+    }
+  }, [location.state]);
+
   const loadExpensesData = async () => {
     try {
       setLoading(true);
@@ -44,6 +53,7 @@ export function ExpensesManager() {
       if (endDate) params.endDate = endDate;
       if (search) params.search = search;
       if (selectedCategory) params.category = selectedCategory;
+      if (paymentMode) params.paymentMode = paymentMode;
 
       const [res, dailyRes] = await Promise.all([
         fetchExpensesApi(params),
@@ -66,7 +76,7 @@ export function ExpensesManager() {
 
   useEffect(() => {
     loadExpensesData();
-  }, [period, startDate, endDate, search, selectedCategory]);
+  }, [period, startDate, endDate, search, selectedCategory, paymentMode]);
 
   const handleDelete = async () => {
     if (!deletingId) return;
@@ -111,7 +121,7 @@ export function ExpensesManager() {
           <Button
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground gap-1.5 cursor-pointer text-xs"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 cursor-pointer text-xs"
           >
             <PlusIcon className="size-3.5" />
             <span>Record Expense Voucher</span>
@@ -155,74 +165,77 @@ export function ExpensesManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
-        <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-xs">
-          {[
-            { id: "daily", label: "Daily Expenses (Today)" },
-            { id: "monthly", label: "Monthly Expenses (This Month)" },
-            { id: "custom", label: "Date-Wise Report" },
-          ].map((btn) => (
-            <button
-              key={btn.id}
-              onClick={() => setPeriod(btn.id)}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
-                period === btn.id
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {btn.label}
-            </button>
-          ))}
-        </div>
+      <div className="bg-card p-3 rounded-xl border border-border space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+          <div className="col-span-12 md:col-span-4 flex items-center gap-1 p-1 bg-muted/50 rounded-lg border border-border/40 text-xs w-full">
+            {[
+              { id: "daily", label: "Daily" },
+              { id: "monthly", label: "Monthly" },
+              { id: "custom", label: "Date-Wise" },
+            ].map((btn) => (
+              <button
+                key={btn.id}
+                onClick={() => setPeriod(btn.id)}
+                className={`flex-1 py-1.5 rounded-md font-semibold text-center transition-all cursor-pointer ${
+                  period === btn.id
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex items-center gap-2 text-xs w-full sm:w-auto">
-          {period === "custom" && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground bg-background px-2.5 py-1 rounded-md border border-border">
-              <CalendarIcon className="size-3.5" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent text-foreground outline-none text-xs"
-              />
-              <span>to</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent text-foreground outline-none text-xs"
-              />
-            </div>
-          )}
-
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="">All Categories</option>
-            <option value="Salaries & Wages">Salaries & Wages</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Transport & Freight">Transport & Freight</option>
-            <option value="Rent">Rent</option>
-            <option value="Maintenance & Repairs">Maintenance & Repairs</option>
-            <option value="Office Petty Cash">Office Petty Cash</option>
-            <option value="Tax & Licenses">Tax & Licenses</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <div className="relative w-full sm:w-48">
-            <SearchIcon className="absolute left-3 top-2.5 size-3.5 text-muted-foreground" />
+          <div className="relative col-span-12 md:col-span-5">
+            <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search title..."
+              placeholder="Search expense voucher or title..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="ps-8 text-xs"
+              className="ps-9 text-xs h-9 w-full"
             />
           </div>
+
+          <div className="col-span-12 md:col-span-3">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">All Categories</option>
+              <option value="Salaries & Wages">Salaries & Wages</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Transport & Freight">Transport & Freight</option>
+              <option value="Rent">Rent</option>
+              <option value="Maintenance & Repairs">Maintenance & Repairs</option>
+              <option value="Office Petty Cash">Office Petty Cash</option>
+              <option value="Tax & Licenses">Tax & Licenses</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </div>
+
+        {period === "custom" && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background p-2 rounded-md border border-border w-full justify-between">
+            <CalendarIcon className="size-4 shrink-0 text-primary" />
+            <span className="font-medium text-foreground">Custom Date Range:</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent text-foreground outline-none text-xs border border-input rounded px-2 py-1"
+            />
+            <span>to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent text-foreground outline-none text-xs border border-input rounded px-2 py-1"
+            />
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">

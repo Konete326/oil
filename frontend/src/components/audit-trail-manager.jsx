@@ -45,35 +45,33 @@ export function AuditTrailManager() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
-        <div className="relative w-full sm:w-72">
-          <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search action, user, details..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs"
-          />
-        </div>
+      <div className="bg-card p-3 rounded-xl border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+          <div className="relative col-span-12 md:col-span-10">
+            <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search action, user, details..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="ps-9 text-xs h-9 w-full"
+            />
+          </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          <select
-            value={selectedModule}
-            onChange={(e) => setSelectedModule(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="">All Modules</option>
-            <option value="User Management">User Management</option>
-            <option value="Cash">Cash Transactions</option>
-            <option value="Sales">Sales & Purchases</option>
-            <option value="Ledger">Customer/Supplier Ledger</option>
-            <option value="System">System</option>
-          </select>
-
-          <span className="text-muted-foreground">
-            Logs Count: <strong className="font-mono text-foreground">{logs.length}</strong>
-          </span>
+          <div className="col-span-12 md:col-span-2">
+            <select
+              value={selectedModule}
+              onChange={(e) => setSelectedModule(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">All Modules</option>
+              <option value="User Management">Users</option>
+              <option value="Cash">Cash</option>
+              <option value="Sales">Sales</option>
+              <option value="Ledger">Ledger</option>
+              <option value="System">System</option>
+            </select>
+          </div>
         </div>
       </div>
 

@@ -9,7 +9,7 @@ export function CashStatsSummary({ totalPaid = 0, totalReceived = 0, partyCount 
       value: `Rs. ${totalPaid.toLocaleString()}`,
       subtitle: "Total Outflow",
       icon: ArrowUpRightIcon,
-      accent: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+      accent: "text-rose-500 bg-rose-500/10 border-rose-500/20",
     },
     {
       title: "Total Received Cash",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   TruckIcon,
   PlusIcon,
@@ -21,10 +22,12 @@ import {
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function SupplierLedgerManager() {
+  const location = useLocation();
   const [suppliers, setSuppliers] = useState([]);
   const [ledgerEntries, setLedgerEntries] = useState([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [search, setSearch] = useState("");
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
@@ -32,6 +35,12 @@ export function SupplierLedgerManager() {
   const [newSupplierPhone, setNewSupplierPhone] = useState("");
   const [newSupplierAddress, setNewSupplierAddress] = useState("");
   const [showAddSupplierForm, setShowAddSupplierForm] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setIsPaymentModalOpen(true);
+    }
+  }, [location.state]);
 
   const loadSupplierData = async () => {
     try {
@@ -53,6 +62,12 @@ export function SupplierLedgerManager() {
   useEffect(() => {
     loadSupplierData();
   }, [search, selectedSupplierId]);
+
+  const filteredLedgerEntries = ledgerEntries.filter((item) => {
+    if (transactionTypeFilter === "Purchase") return item.transactionType.includes("Purchase");
+    if (transactionTypeFilter === "Payment") return item.transactionType.includes("Payment");
+    return true;
+  });
 
   const handleAddSupplier = async (e) => {
     e.preventDefault();
@@ -108,7 +123,7 @@ export function SupplierLedgerManager() {
           <Button
             size="sm"
             onClick={() => setIsPaymentModalOpen(true)}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 cursor-pointer text-xs"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 cursor-pointer text-xs"
           >
             <PlusIcon className="size-3.5" />
             <span>Record Supplier Payment</span>
@@ -162,9 +177,9 @@ export function SupplierLedgerManager() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-1">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 space-y-1">
           <span className="text-xs text-muted-foreground font-medium">Total Owed to Suppliers</span>
-          <div className="text-xl font-bold font-mono text-amber-500">
+          <div className="text-xl font-bold font-mono text-rose-500">
             Rs. {totalOwedBalance.toLocaleString()}
           </div>
           <p className="text-[11px] text-muted-foreground">Total Pending Payable Balance</p>
@@ -187,47 +202,39 @@ export function SupplierLedgerManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
-        <div className="relative w-full sm:w-72">
-          <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search supplier by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs"
-          />
-        </div>
+      <div className="bg-card p-3 rounded-xl border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+          <div className="relative col-span-12 md:col-span-10">
+            <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search supplier name, ref no, or notes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="ps-9 text-xs h-9 w-full"
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedSupplierId}
-            onChange={(e) => setSelectedSupplierId(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="">All Suppliers Ledger</option>
-            {suppliers.map((s) => (
-              <option key={s._id} value={s._id}>
-                {s.name} (Balance: Rs. {s.currentBalance.toLocaleString()})
-              </option>
-            ))}
-          </select>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportExcel}
-            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
-          >
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span>Export Excel</span>
-          </Button>
+          <div className="col-span-12 md:col-span-2">
+            <select
+              value={selectedSupplierId}
+              onChange={(e) => setSelectedSupplierId(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">All Suppliers</option>
+              {suppliers.map((s) => (
+                <option key={s._id} value={s._id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div className="p-4 border-b border-border bg-muted/30 font-semibold text-xs text-foreground">
-          Supplier Ledger Transaction History
+          Supplier Ledger Transaction History ({filteredLedgerEntries.length} Entries)
         </div>
 
         <div className="overflow-x-auto">
@@ -250,14 +257,14 @@ export function SupplierLedgerManager() {
                     Loading supplier ledger transactions...
                   </td>
                 </tr>
-              ) : ledgerEntries.length === 0 ? (
+              ) : filteredLedgerEntries.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-muted-foreground">
                     No supplier ledger entries found.
                   </td>
                 </tr>
               ) : (
-                ledgerEntries.map((item) => (
+                filteredLedgerEntries.map((item) => (
                   <tr key={item._id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                       {new Date(item.createdAt).toLocaleDateString()}

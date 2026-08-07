@@ -81,11 +81,19 @@ export function CategoryManager() {
     }
   };
 
-  const filteredCategories = categories.filter(
-    (c) =>
+  const [subStatus, setSubStatus] = useState("all");
+
+  const filteredCategories = categories.filter((c) => {
+    const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.code.toLowerCase().includes(search.toLowerCase())
-  );
+      c.code.toLowerCase().includes(search.toLowerCase());
+
+    let matchesSub = true;
+    if (subStatus === "withSubs") matchesSub = (c.subcategories?.length || 0) > 0;
+    else if (subStatus === "noSubs") matchesSub = (c.subcategories?.length || 0) === 0;
+
+    return matchesSearch && matchesSub;
+  });
 
   const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
   const paginatedCategories = filteredCategories.slice(
@@ -117,18 +125,35 @@ export function CategoryManager() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 max-w-sm">
-        <div className="relative w-full">
-          <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Search category name or code..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="ps-8 text-xs"
-          />
+      <div className="bg-card p-3 rounded-xl border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+          <div className="relative col-span-12 md:col-span-10">
+            <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Search category name or code..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="ps-8 text-xs h-9 w-full"
+            />
+          </div>
+
+          <div className="col-span-12 md:col-span-2">
+            <select
+              value={subStatus}
+              onChange={(e) => {
+                setSubStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="all">All Types</option>
+              <option value="withSubs">With Subs</option>
+              <option value="noSubs">No Subs</option>
+            </select>
+          </div>
         </div>
       </div>
 

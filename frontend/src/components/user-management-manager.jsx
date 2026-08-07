@@ -64,6 +64,13 @@ export function UserManagementManager() {
   const handleDeleteConfirm = async () => {
     if (!deletingId) return;
 
+    const targetUser = users.find((u) => u._id === deletingId);
+    if (targetUser && targetUser.role === "admin") {
+      toast.error("Security Restriction: Admin user accounts are protected system accounts and cannot be deleted by anyone.");
+      setDeletingId(null);
+      return;
+    }
+
     if (currentUser && currentUser._id === deletingId) {
       toast.error("Self-deletion is prohibited. You cannot delete your own active account.");
       setDeletingId(null);
@@ -72,23 +79,30 @@ export function UserManagementManager() {
 
     try {
       setDeleteLoading(true);
-      await deleteUserApi(deletingId);
-      toast.success("User account deleted successfully!");
-      setDeletingId(null);
-      loadUsers();
+      const res = await deleteUserApi(deletingId);
+      if (res?.success) {
+        toast.success("User account deleted successfully");
+        setUsers((prev) => prev.filter((u) => u._id !== deletingId));
+      } else {
+        toast.error(res?.message || "Failed to delete user account");
+      }
     } catch (err) {
       toast.error(err.message || "Failed to delete user account");
     } finally {
       setDeleteLoading(false);
+      setDeletingId(null);
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      u.role.toLowerCase().includes(search.toLowerCase())
-  );
+  const isCurrentUserAdmin = currentUser?.role === "admin";
+  const filteredUsers = users
+    .filter((u) => isCurrentUserAdmin || u.role !== "admin")
+    .filter(
+      (u) =>
+        u.name.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase()) ||
+        u.role.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
     <div className="w-full space-y-6">
@@ -107,7 +121,7 @@ export function UserManagementManager() {
       <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-500 flex items-center gap-3">
         <LockIcon className="size-5 shrink-0" />
         <div>
-          <strong className="font-semibold text-foreground">Self-Deletion Protection Enabled:</strong> No user (Admin or Manager) can delete their own active account. Admins can manage and delete other user accounts.
+          <strong className="font-semibold text-foreground">Admin Account Protection Active:</strong> Admin user accounts are visible only to logged-in Admins and cannot be deleted by anyone (including Admins).
         </div>
       </div>
 
@@ -124,7 +138,7 @@ export function UserManagementManager() {
         </div>
 
         <div className="text-xs text-muted-foreground font-medium">
-          Total Users: <strong className="text-foreground font-mono">{users.length}</strong>
+          Total Users: <strong className="text-foreground font-mono">{filteredUsers.length}</strong>
         </div>
       </div>
 
@@ -157,6 +171,9 @@ export function UserManagementManager() {
               ) : (
                 filteredUsers.map((user) => {
                   const isSelf = currentUser && currentUser._id === user._id;
+                  const isAdminUser = user.role === "admin";
+                  const isDeleteDisabled = isSelf || isAdminUser;
+
                   return (
                     <tr key={user._id} className="hover:bg-muted/30 transition-colors">
                       <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
@@ -176,7 +193,7 @@ export function UserManagementManager() {
                       <td className="p-3">
                         <span
                           className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                            user.role === "admin"
+                            isAdminUser
                               ? "bg-primary/15 text-primary border border-primary/30"
                               : "bg-muted text-muted-foreground border border-border"
                           }`}
@@ -217,16 +234,24 @@ export function UserManagementManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            disabled={isSelf}
-                            onClick={() => setDeletingId(user._id)}
-                            title={isSelf ? "Self-deletion prohibited" : "Delete User"}
+                            disabled={isDeleteDisabled}
+                            onClick={() => {
+                              if (!isDeleteDisabled) setDeletingId(user._id);
+                            }}
+                            title={
+                              isAdminUser
+                                ? "Admin accounts are protected and cannot be deleted"
+                                : isSelf
+                                ? "Self-deletion prohibited"
+                                : "Delete User"
+                            }
                             className={`size-7 cursor-pointer ${
-                              isSelf
+                              isDeleteDisabled
                                 ? "text-muted-foreground/30 cursor-not-allowed opacity-50"
                                 : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             }`}
                           >
-                            <Trash2Icon className="size-3.5" />
+                            {isAdminUser ? <LockIcon className="size-3.5 text-amber-500" /> : <Trash2Icon className="size-3.5" />}
                           </Button>
                         </div>
                       </td>

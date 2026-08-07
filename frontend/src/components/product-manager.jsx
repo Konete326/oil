@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   fetchProducts,
   fetchCategories,
@@ -25,15 +26,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 const PAGE_SIZE = 7;
 
 export function ProductManager() {
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [stockStatus, setStockStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [confirmDeleteProd, setConfirmDeleteProd] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setEditingProduct(null);
+      setIsModalOpen(true);
+    }
+  }, [location.state]);
 
   const loadData = async () => {
     setLoading(true);
@@ -62,17 +73,31 @@ export function ProductManager() {
     await loadData();
   };
 
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase()) ||
-      (p.grade && p.grade.toLowerCase().includes(search.toLowerCase()));
+  const filteredProducts = products
+    .filter((p) => {
+      const matchesSearch =
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.sku.toLowerCase().includes(search.toLowerCase()) ||
+        p.brand.toLowerCase().includes(search.toLowerCase()) ||
+        (p.grade && p.grade.toLowerCase().includes(search.toLowerCase()));
 
-    const matchesCat = !selectedCategory || (p.category?._id || p.category) === selectedCategory;
+      const matchesCat = !selectedCategory || (p.category?._id || p.category) === selectedCategory;
 
-    return matchesSearch && matchesCat;
-  });
+      let matchesStock = true;
+      if (stockStatus === "inStock") matchesStock = p.stockQuantity > p.minStockAlert;
+      else if (stockStatus === "lowStock") matchesStock = p.stockQuantity <= p.minStockAlert && p.stockQuantity > 0;
+      else if (stockStatus === "outOfStock") matchesStock = p.stockQuantity === 0;
+
+      return matchesSearch && matchesCat && matchesStock;
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "priceLow") return (a.sellingPrice || 0) - (b.sellingPrice || 0);
+      if (sortBy === "priceHigh") return (b.sellingPrice || 0) - (a.sellingPrice || 0);
+      if (sortBy === "stockLow") return (a.stockQuantity || 0) - (b.stockQuantity || 0);
+      if (sortBy === "stockHigh") return (b.stockQuantity || 0) - (a.stockQuantity || 0);
+      return 0;
+    });
 
   const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
   const paginatedProducts = filteredProducts.slice(
@@ -118,7 +143,7 @@ export function ProductManager() {
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className={`size-10 rounded-lg flex items-center justify-center ${lowStockCount > 0 ? "bg-amber-500/15 text-amber-500" : "bg-emerald-500/15 text-emerald-500"}`}>
+          <div className={`size-10 rounded-lg flex items-center justify-center ${lowStockCount > 0 ? "bg-rose-500/15 text-rose-500" : "bg-emerald-500/15 text-emerald-500"}`}>
             <AlertTriangleIcon className="size-5" />
           </div>
           <div>
@@ -138,9 +163,9 @@ export function ProductManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2 w-full sm:max-w-md">
-          <div className="relative flex-1">
+      <div className="bg-card p-3 rounded-xl border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+          <div className="relative col-span-12 md:col-span-10">
             <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
               placeholder="Search product, SKU, brand, grade..."
@@ -149,24 +174,27 @@ export function ProductManager() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8 text-xs"
+              className="ps-8 text-xs h-9 w-full"
             />
           </div>
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+
+          <div className="col-span-12 md:col-span-2">
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">All Categories</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -239,9 +267,9 @@ export function ProductManager() {
                       <TableCell className="text-center">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
                           style={{
-                            backgroundColor: isLowStock ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)",
-                            borderColor: isLowStock ? "rgba(245, 158, 11, 0.3)" : "rgba(16, 185, 129, 0.3)",
-                            color: isLowStock ? "#f59e0b" : "#10b981",
+                            backgroundColor: isLowStock ? "rgba(244, 63, 94, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                            borderColor: isLowStock ? "rgba(244, 63, 94, 0.3)" : "rgba(16, 185, 129, 0.3)",
+                            color: isLowStock ? "#f43f5e" : "#10b981",
                           }}
                         >
                           {isLowStock && <ShieldAlertIcon className="size-3.5" />}

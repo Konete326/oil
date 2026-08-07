@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { fetchMills, fetchLedgerEntries, createPaymentEntry, fetchAgingReport } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ const AGING_COLORS = {
 };
 
 export function LedgerManager() {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("ledger");
   const [mills, setMills] = useState([]);
   const [entries, setEntries] = useState([]);
@@ -32,8 +34,15 @@ export function LedgerManager() {
   const [loading, setLoading] = useState(true);
   const [selectedMill, setSelectedMill] = useState("");
   const [search, setSearch] = useState("");
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setIsPaymentModalOpen(true);
+    }
+  }, [location.state]);
 
   const loadData = async () => {
     setLoading(true);
@@ -60,11 +69,18 @@ export function LedgerManager() {
   const totalOutstanding = mills.reduce((sum, m) => sum + (m.currentBalance || 0), 0);
   const totalOverdue = agingData.filter((a) => a.category === "90+ Days (Overdue)").reduce((sum, a) => sum + a.balance, 0);
 
-  const filteredEntries = entries.filter((e) =>
-    e.clientName.toLowerCase().includes(search.toLowerCase()) ||
-    (e.referenceNumber && e.referenceNumber.toLowerCase().includes(search.toLowerCase())) ||
-    e.transactionType.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredEntries = entries.filter((e) => {
+    const matchesSearch =
+      e.clientName.toLowerCase().includes(search.toLowerCase()) ||
+      (e.referenceNumber && e.referenceNumber.toLowerCase().includes(search.toLowerCase())) ||
+      e.transactionType.toLowerCase().includes(search.toLowerCase());
+
+    let matchesType = true;
+    if (transactionTypeFilter === "Debit") matchesType = e.transactionType.includes("Debit");
+    else if (transactionTypeFilter === "Credit") matchesType = e.transactionType.includes("Credit");
+
+    return matchesSearch && matchesType;
+  });
 
   const totalPages = Math.ceil(filteredEntries.length / PAGE_SIZE);
   const paginatedEntries = filteredEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
@@ -84,7 +100,7 @@ export function LedgerManager() {
 
         <Button
           onClick={() => setIsPaymentModalOpen(true)}
-          className="gap-2 shadow-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+          className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <PlusIcon className="size-4" />
           Record Payment Receipt
@@ -123,8 +139,8 @@ export function LedgerManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-border pb-3">
-        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg">
+      <div className="space-y-3">
+        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg w-fit">
           <button
             onClick={() => { setActiveTab("ledger"); setCurrentPage(1); }}
             className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer ${activeTab === "ledger" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
@@ -140,28 +156,32 @@ export function LedgerManager() {
         </div>
 
         {activeTab === "ledger" && (
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <select
-              value={selectedMill}
-              onChange={(e) => { setSelectedMill(e.target.value); setCurrentPage(1); }}
-              className="rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
-            >
-              <option value="">All Clients</option>
-              {mills.map((m) => (
-                <option key={m._id} value={m._id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+          <div className="bg-card p-3 rounded-xl border border-border">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+              <div className="relative col-span-12 md:col-span-10">
+                <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search client name, reference no, or transaction type..."
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                  className="ps-8 text-xs h-9 w-full"
+                />
+              </div>
 
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-              <Input
-                placeholder="Search client, ref, type..."
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                className="ps-8 text-xs"
-              />
+              <div className="col-span-12 md:col-span-2">
+                <select
+                  value={selectedMill}
+                  onChange={(e) => { setSelectedMill(e.target.value); setCurrentPage(1); }}
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">All Clients</option>
+                  {mills.map((m) => (
+                    <option key={m._id} value={m._id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -211,9 +231,9 @@ export function LedgerManager() {
                             {isCredit ? (
                               <CheckCircle2Icon className="size-3.5 text-emerald-500" />
                             ) : (
-                              <AlertTriangleIcon className="size-3.5 text-amber-500" />
+                              <AlertTriangleIcon className="size-3.5 text-rose-500" />
                             )}
-                            <span className={isCredit ? "text-emerald-500 font-semibold" : "text-amber-500 font-semibold"}>
+                            <span className={isCredit ? "text-emerald-500 font-semibold" : "text-rose-500 font-semibold"}>
                               {entry.transactionType}
                             </span>
                           </div>

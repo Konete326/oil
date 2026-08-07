@@ -21,6 +21,8 @@ export function PosHistory() {
   const [salesHistory, setSalesHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [saleTypeFilter, setSaleTypeFilter] = useState("all");
+  const [paymentModeFilter, setPaymentModeFilter] = useState("all");
   const [completedSale, setCompletedSale] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -35,14 +37,22 @@ export function PosHistory() {
     loadData();
   }, []);
 
-  const filteredSales = salesHistory.filter(
-    (s) =>
+  const filteredSales = salesHistory.filter((s) => {
+    const matchesSearch =
       s.saleNumber.toLowerCase().includes(search.toLowerCase()) ||
       s.customerName.toLowerCase().includes(search.toLowerCase()) ||
       (s.customerPhone && s.customerPhone.includes(search)) ||
       s.saleType.toLowerCase().includes(search.toLowerCase()) ||
-      s.paymentMode.toLowerCase().includes(search.toLowerCase())
-  );
+      s.paymentMode.toLowerCase().includes(search.toLowerCase());
+
+    let matchesType = true;
+    if (saleTypeFilter !== "all") matchesType = s.saleType === saleTypeFilter;
+
+    let matchesMode = true;
+    if (paymentModeFilter !== "all") matchesMode = s.paymentMode.toLowerCase().includes(paymentModeFilter.toLowerCase());
+
+    return matchesSearch && matchesType && matchesMode;
+  });
 
   const totalRevenue = salesHistory.reduce((sum, s) => sum + (s.grandTotal || 0), 0);
   const retailCount = salesHistory.filter((s) => s.saleType === "Retail").length;
@@ -62,19 +72,6 @@ export function PosHistory() {
           <p className="text-xs text-muted-foreground">
             Complete transaction records for all retail and wholesale counter sales.
           </p>
-        </div>
-
-        <div className="relative w-full sm:max-w-xs">
-          <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Search receipt no, customer, phone, mode..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="ps-8 text-xs"
-          />
         </div>
       </div>
 
@@ -106,6 +103,54 @@ export function PosHistory() {
           <div>
             <p className="text-xs text-muted-foreground font-medium">Wholesale Transactions</p>
             <p className="text-xl font-bold text-foreground">{wholesaleCount} Sales</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-card p-3 rounded-xl border border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center w-full">
+          <div className="relative col-span-12 md:col-span-5">
+            <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Search receipt no, customer name, phone..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="ps-8 text-xs h-9"
+            />
+          </div>
+
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <select
+              value={saleTypeFilter}
+              onChange={(e) => {
+                setSaleTypeFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="all">All Sale Types</option>
+              <option value="Retail">Retail Sales</option>
+              <option value="Wholesale">Wholesale Sales</option>
+            </select>
+          </div>
+
+          <div className="col-span-12 sm:col-span-6 md:col-span-4">
+            <select
+              value={paymentModeFilter}
+              onChange={(e) => {
+                setPaymentModeFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="all">All Payment Modes</option>
+              <option value="cash">Cash Payment</option>
+              <option value="bank">Bank Transfer / Card</option>
+              <option value="credit">Credit / Account</option>
+            </select>
           </div>
         </div>
       </div>

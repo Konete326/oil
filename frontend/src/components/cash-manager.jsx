@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   PlusIcon,
   SearchIcon,
@@ -30,11 +31,14 @@ import {
 } from "@/lib/cash-export-utils";
 
 export function CashManager() {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("all");
   const [transactions, setTransactions] = useState([]);
   const [partySummaries, setPartySummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [paymentMode, setPaymentMode] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +47,13 @@ export function CashManager() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setModalInitialType(location.state.initialType || "Received");
+      setIsModalOpen(true);
+    }
+  }, [location.state]);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -50,6 +61,8 @@ export function CashManager() {
       if (activeTab === "paid") params.type = "Paid";
       if (activeTab === "received") params.type = "Received";
       if (search) params.search = search;
+      if (selectedCategory) params.category = selectedCategory;
+      if (paymentMode) params.paymentMode = paymentMode;
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
@@ -69,7 +82,7 @@ export function CashManager() {
 
   useEffect(() => {
     loadData();
-  }, [activeTab, startDate, endDate]);
+  }, [activeTab, startDate, endDate, selectedCategory, paymentMode]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -116,7 +129,7 @@ export function CashManager() {
           <Button
             size="sm"
             onClick={() => handleOpenModal("Paid")}
-            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-xs"
+            className="bg-rose-500 hover:bg-rose-600 text-white gap-1.5 cursor-pointer text-xs"
           >
             <ArrowUpRightIcon className="size-3.5" />
             <span>Record Paid Cash</span>
@@ -195,40 +208,65 @@ export function CashManager() {
         <CashPartyReport partySummaries={partySummaries} loading={loading} />
       ) : (
         <div className="space-y-4">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border">
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search party name, category, or reference no..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="ps-9 text-xs"
-              />
-            </div>
+          <form onSubmit={handleSearchSubmit} className="bg-card p-3 rounded-xl border border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center w-full">
+              <div className="relative col-span-12 md:col-span-4">
+                <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search party, ref no, notes..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="ps-9 text-xs h-9"
+                />
+              </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground bg-background px-2.5 py-1 rounded-md border border-border">
-                <CalendarIcon className="size-3.5" />
+              <div className="col-span-12 sm:col-span-6 md:col-span-3">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">All Categories</option>
+                  <option value="Customer Payment">Customer Payment</option>
+                  <option value="Supplier Payment">Supplier Payment</option>
+                  <option value="Expenses">Expenses</option>
+                  <option value="Staff Salary">Staff Salary</option>
+                  <option value="Petty Cash">Petty Cash</option>
+                  <option value="Miscellaneous">Miscellaneous</option>
+                </select>
+              </div>
+
+              <div className="col-span-12 sm:col-span-6 md:col-span-2">
+                <select
+                  value={paymentMode}
+                  onChange={(e) => setPaymentMode(e.target.value)}
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">All Payment Modes</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Online">Online / POS</option>
+                </select>
+              </div>
+
+              <div className="col-span-12 md:col-span-3 flex items-center gap-1 text-xs text-muted-foreground bg-background px-2.5 h-9 rounded-md border border-border w-full justify-between">
+                <CalendarIcon className="size-3.5 shrink-0" />
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent text-foreground outline-none text-xs"
+                  className="bg-transparent text-foreground outline-none text-xs w-full text-center"
                 />
-                <span>to</span>
+                <span className="shrink-0 text-[11px]">to</span>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent text-foreground outline-none text-xs"
+                  className="bg-transparent text-foreground outline-none text-xs w-full text-center"
                 />
               </div>
-
-              <Button type="submit" variant="secondary" size="sm" className="text-xs cursor-pointer">
-                <ListFilterIcon className="size-3.5 me-1" />
-                Filter
-              </Button>
             </div>
           </form>
 
@@ -271,7 +309,7 @@ export function CashManager() {
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                               tx.type === "Paid"
-                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
                                 : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                             }`}
                           >
@@ -283,7 +321,7 @@ export function CashManager() {
                         <td className="p-3 text-muted-foreground">{tx.category}</td>
                         <td
                           className={`p-3 text-right font-mono font-bold ${
-                            tx.type === "Paid" ? "text-amber-500" : "text-emerald-500"
+                            tx.type === "Paid" ? "text-rose-500" : "text-emerald-500"
                           }`}
                         >
                           {tx.type === "Paid" ? "-" : "+"}Rs. {tx.amount.toLocaleString()}
