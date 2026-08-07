@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { XIcon, PlusIcon, Loader2Icon, HandCoinsIcon } from "lucide-react";
+import { XIcon, Loader2Icon, HandCoinsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { recordEmployeeAdvanceApi } from "@/lib/api";
 
 const PAYMENT_MODES = ["Cash", "Bank Transfer", "Cheque"];
@@ -14,18 +14,15 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [amountValid, setAmountValid] = useState(false);
+
+  const isFormValid = !!employeeId && amountValid;
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!employeeId) {
-      toast.error("Please select an employee");
-      return;
-    }
-    if (!amount || Number(amount) <= 0) {
-      toast.error("Please enter a valid advance amount");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -101,19 +98,17 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Advance Cash Given (PKR) *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="text-xs font-mono font-bold text-amber-500"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Advance Cash Given (PKR)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              onValidationChange={setAmountValid}
+              className="font-mono font-bold text-amber-500"
+            />
 
             <div className="space-y-1">
               <label className="font-medium text-foreground">Payment Mode</label>
@@ -131,22 +126,20 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Notes & Particulars</label>
-            <textarea
-              rows={2}
-              placeholder="e.g. Emergency medical advance..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
+          <ValidatedInput
+            label="Notes & Particulars"
+            rule="text"
+            required={false}
+            placeholder="e.g. Emergency medical advance..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <HandCoinsIcon className="size-3.5" />}
               <span>Record Advance Payment</span>
             </Button>

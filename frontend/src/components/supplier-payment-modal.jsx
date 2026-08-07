@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { XIcon, PlusIcon, Loader2Icon, TruckIcon } from "lucide-react";
+import { XIcon, PlusIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { createSupplierPaymentApi } from "@/lib/api";
 
 const PAYMENT_MODES = ["Cash", "Cheque", "Bank Transfer", "Online POS"];
@@ -15,18 +15,15 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [amountValid, setAmountValid] = useState(false);
+
+  const isFormValid = !!supplierId && amountValid;
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!supplierId) {
-      toast.error("Please select a supplier / refinery");
-      return;
-    }
-    if (!amount || Number(amount) <= 0) {
-      toast.error("Please enter a valid payment amount");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -99,19 +96,17 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Payment Amount Paid (Rs.) *</label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="text-xs font-mono"
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Payment Amount Paid (Rs.)"
+            rule="amount"
+            required
+            type="number"
+            placeholder="0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            onValidationChange={setAmountValid}
+            className="font-mono"
+          />
 
           <div className="space-y-1">
             <label className="font-medium text-foreground">Payment Mode</label>
@@ -128,33 +123,30 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
             </select>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Reference / Cheque / Bank Slip No.</label>
-            <Input
-              type="text"
-              placeholder="e.g. CHQ-90412 or Bank Ref #"
-              value={referenceNumber}
-              onChange={(e) => setReferenceNumber(e.target.value)}
-              className="text-xs font-mono"
-            />
-          </div>
+          <ValidatedInput
+            label="Reference / Cheque / Bank Slip No."
+            rule="text"
+            required={false}
+            placeholder="e.g. CHQ-90412 or Bank Ref #"
+            value={referenceNumber}
+            onChange={(e) => setReferenceNumber(e.target.value)}
+            className="font-mono"
+          />
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Notes & Particulars</label>
-            <textarea
-              rows={2}
-              placeholder="Additional remarks..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
+          <ValidatedInput
+            label="Notes & Particulars"
+            rule="text"
+            required={false}
+            placeholder="Additional remarks..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
               <span>Save Supplier Payment</span>
             </Button>

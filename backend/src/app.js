@@ -24,6 +24,9 @@ import auditRoutes from "./routes/auditRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import salaryRoutes from "./routes/salaryRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import systemLogRoutes from "./routes/systemLogRoutes.js";
+import dataResetRoutes from "./routes/dataResetRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -102,6 +105,9 @@ app.use("/api/audit", auditRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/salaries", salaryRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/system-logs", systemLogRoutes);
+app.use("/api/data-reset", dataResetRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

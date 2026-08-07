@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, BadgePercentIcon, CreditCardIcon, BanknoteIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,6 +12,11 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
   const [taxPercent, setTaxPercent] = useState("0");
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [cashReceived, setCashReceived] = useState("");
+
+  const [customerValid, setCustomerValid] = useState(true);
+  const [discountValid, setDiscountValid] = useState(true);
+  const [taxValid, setTaxValid] = useState(true);
+  const [cashReceivedValid, setCashReceivedValid] = useState(true);
 
   if (!isOpen) return null;
 
@@ -25,7 +30,10 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
   const cashReceivedNum = Number(cashReceived) || 0;
   const changeDue = Math.max(0, Number((cashReceivedNum - grandTotal).toFixed(2)));
 
+  const isFormValid = customerValid && discountValid && taxValid && cashReceivedValid;
+
   const handleConfirm = () => {
+    if (!isFormValid) return;
     if (paymentMode === "Cash" && cashReceivedNum > 0 && cashReceivedNum < grandTotal) {
       toast.error("Cash received is less than the Grand Total.");
       return;
@@ -71,20 +79,22 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
+            <ValidatedInput
+              label="Customer Name"
+              rule="name"
+              required
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              onValidationChange={setCustomerValid}
+            />
             <div className="space-y-1">
-              <label className="font-medium text-muted-foreground flex items-center gap-1">
-                <UserIcon className="size-3" /> Customer
-              </label>
-              <Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="h-8 text-xs" />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground flex items-center gap-1">
-                <TagIcon className="size-3" /> Sale Type
+              <label className="font-medium text-foreground flex items-center gap-1">
+                <TagIcon className="size-3 text-muted-foreground" /> Sale Type
               </label>
               <select
                 value={saleType}
                 onChange={(e) => setSaleType(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
+                className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
               >
                 <option value="Retail">Retail</option>
                 <option value="Wholesale">Wholesale</option>
@@ -94,46 +104,42 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <label className="font-medium text-muted-foreground flex items-center gap-1">
-                <BadgePercentIcon className="size-3" /> Discount
-              </label>
-              <div className="flex rounded-md border border-input overflow-hidden bg-background">
-                <Input
-                  type="number"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  className="h-8 text-xs font-mono border-0 rounded-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  placeholder="0"
-                />
-                <button
-                  type="button"
-                  onClick={() => { setDiscountMode(discountMode === "fixed" ? "percent" : "fixed"); setDiscount("0"); }}
-                  className={`px-2 text-[10px] font-bold border-l border-input transition-colors cursor-pointer shrink-0 ${discountMode === "fixed" ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"}`}
-                  title="Toggle Fixed / Percentage"
-                >
-                  {discountMode === "fixed" ? "Rs" : "%"}
-                </button>
-              </div>
-              <p className="text-[9px] text-muted-foreground">
-                {discountMode === "fixed" ? "Fixed amount in Rs" : "Percentage of subtotal"}
-              </p>
+              <ValidatedInput
+                label={`Discount (${discountMode === "fixed" ? "Rs" : "%"})`}
+                rule="positiveNumber"
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                onValidationChange={setDiscountValid}
+                placeholder="0"
+              />
+              <button
+                type="button"
+                onClick={() => { setDiscountMode(discountMode === "fixed" ? "percent" : "fixed"); setDiscount("0"); }}
+                className="text-[10px] text-primary hover:underline cursor-pointer"
+              >
+                Switch to {discountMode === "fixed" ? "Percentage (%)" : "Fixed (Rs)"}
+              </button>
             </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground flex items-center gap-1">
-                <BadgePercentIcon className="size-3" /> Tax GST (%)
-              </label>
-              <Input type="number" value={taxPercent} onChange={(e) => setTaxPercent(e.target.value)} className="h-8 text-xs font-mono" />
-            </div>
+            <ValidatedInput
+              label="Tax GST (%)"
+              rule="positiveNumber"
+              type="number"
+              value={taxPercent}
+              onChange={(e) => setTaxPercent(e.target.value)}
+              onValidationChange={setTaxValid}
+              placeholder="0"
+            />
           </div>
 
           <div className="space-y-1">
-            <label className="font-medium text-muted-foreground flex items-center gap-1">
-              <CreditCardIcon className="size-3" /> Payment Mode
+            <label className="font-medium text-foreground flex items-center gap-1">
+              <CreditCardIcon className="size-3 text-muted-foreground" /> Payment Mode
             </label>
             <select
               value={paymentMode}
               onChange={(e) => setPaymentMode(e.target.value)}
-              className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
+              className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
             >
               <option value="Cash">Cash</option>
               <option value="Card">Card POS</option>
@@ -144,21 +150,18 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
 
           {paymentMode === "Cash" && (
             <div className="grid grid-cols-2 gap-2.5">
-              <div className="space-y-1">
-                <label className="font-medium text-muted-foreground flex items-center gap-1">
-                  <BanknoteIcon className="size-3" /> Cash Received
-                </label>
-                <Input
-                  type="number"
-                  placeholder="e.g. 5000"
-                  value={cashReceived}
-                  onChange={(e) => setCashReceived(e.target.value)}
-                  className="h-8 text-xs font-mono"
-                />
-              </div>
+              <ValidatedInput
+                label="Cash Received"
+                rule="positiveNumber"
+                type="number"
+                placeholder="e.g. 5000"
+                value={cashReceived}
+                onChange={(e) => setCashReceived(e.target.value)}
+                onValidationChange={setCashReceivedValid}
+              />
               <div className="space-y-1">
                 <label className="font-medium text-muted-foreground">Change Due</label>
-                <div className="h-8 rounded-md border bg-muted/40 px-3 flex items-center font-mono font-bold text-emerald-500 text-xs">
+                <div className="h-9 rounded-md border bg-muted/40 px-3 flex items-center font-mono font-bold text-emerald-500 text-xs">
                   Rs {changeDue.toLocaleString()}
                 </div>
               </div>
@@ -173,12 +176,12 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
           <Button
             className="flex-1 gap-1.5 text-xs cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
             onClick={handleConfirm}
-            disabled={submitting}
+            disabled={submitting || !isFormValid}
           >
             {submitting ? (
               <><Loader2Icon className="size-3.5 animate-spin" /><span>Processing...</span></>
             ) : (
-              <><ReceiptIcon className="size-3.5" /><span>Confirm & Print</span></>
+              <span>Complete Sale</span>
             )}
           </Button>
         </div>

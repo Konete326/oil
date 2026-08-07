@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { XIcon, PlusIcon, Loader2Icon, DollarSignIcon } from "lucide-react";
+import { XIcon, PlusIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { createExpenseApi } from "@/lib/api";
 
 const EXPENSE_CATEGORIES = [
@@ -28,18 +28,16 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [titleValid, setTitleValid] = useState(false);
+  const [amountValid, setAmountValid] = useState(false);
+
+  const isFormValid = titleValid && amountValid;
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) {
-      toast.error("Expense title is required");
-      return;
-    }
-    if (!amount || Number(amount) <= 0) {
-      toast.error("Please enter a valid expense amount");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -88,17 +86,15 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Expense Title / Particulars *</label>
-            <Input
-              type="text"
-              placeholder="e.g. Shop Electricity Bill or Office Tea/Lunch"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="text-xs"
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Expense Title / Particulars"
+            rule="name"
+            required
+            placeholder="e.g. Shop Electricity Bill or Office Tea/Lunch"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onValidationChange={setTitleValid}
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -116,19 +112,17 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Amount (PKR) *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="text-xs font-mono font-bold"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Amount (PKR)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              onValidationChange={setAmountValid}
+              className="font-mono font-bold"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -149,44 +143,41 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
 
             <div className="space-y-1">
               <label className="font-medium text-foreground">Date</label>
-              <Input
+              <input
                 type="date"
                 value={expenseDate}
                 onChange={(e) => setExpenseDate(e.target.value)}
-                className="text-xs"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Voucher / Slip Reference No.</label>
-            <Input
-              type="text"
-              placeholder="Auto-generated if left blank"
-              value={voucherNumber}
-              onChange={(e) => setVoucherNumber(e.target.value)}
-              className="text-xs font-mono"
-            />
-          </div>
+          <ValidatedInput
+            label="Voucher / Slip Reference No."
+            rule="text"
+            required={false}
+            placeholder="Auto-generated if left blank"
+            value={voucherNumber}
+            onChange={(e) => setVoucherNumber(e.target.value)}
+            className="font-mono"
+          />
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Notes & Remarks</label>
-            <textarea
-              rows={2}
-              placeholder="Additional details..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
+          <ValidatedInput
+            label="Notes & Remarks"
+            rule="text"
+            required={false}
+            placeholder="Additional details..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
-              <span>Save Expense Voucher</span>
+              <span>Record Expense</span>
             </Button>
           </div>
         </form>

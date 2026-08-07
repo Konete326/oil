@@ -1,24 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { HomeIcon, ArrowLeftIcon } from "lucide-react";
+import { HomeIcon, ArrowLeftIcon, AlertCircleIcon } from "lucide-react";
 
 export function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-6">
-      <div className="max-w-sm w-full text-center space-y-6">
-        <div className="space-y-1 select-none">
-          <p className="text-[120px] font-black leading-none tracking-tighter bg-gradient-to-br from-primary via-primary/60 to-primary/20 bg-clip-text text-transparent">
+    <div className="py-16 w-full flex flex-col items-center justify-center bg-card rounded-2xl border border-border p-6 shadow-sm my-auto text-center animate-in fade-in duration-200">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="space-y-2 select-none flex flex-col items-center">
+          <div className="size-16 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-2">
+            <AlertCircleIcon className="size-8" />
+          </div>
+          <p className="text-6xl font-black leading-none tracking-tight text-foreground font-mono">
             404
           </p>
-          <div className="h-1 w-16 mx-auto rounded-full bg-primary/30" />
+          <div className="h-1 w-12 rounded-full bg-primary/40" />
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-xl font-bold text-foreground">Page Not Found</h1>
+          <h1 className="text-lg font-bold text-foreground">Page Not Found</h1>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            The page you are looking for does not exist or has been moved. Check the URL and try again.
+            The URL path you entered does not match any valid route in the portal. Please check the address or return to the main dashboard.
           </p>
         </div>
 
@@ -30,7 +33,7 @@ export function NotFoundPage() {
             className="gap-1.5 text-xs cursor-pointer"
           >
             <ArrowLeftIcon className="size-3.5" />
-            Go Back
+            <span>Go Back</span>
           </Button>
           <Button
             size="sm"
@@ -38,7 +41,7 @@ export function NotFoundPage() {
             className="gap-1.5 text-xs cursor-pointer"
           >
             <HomeIcon className="size-3.5" />
-            Dashboard
+            <span>Return to Dashboard</span>
           </Button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon } from "lucide-react";
 
 const INDUSTRIAL_ZONES = [
@@ -24,6 +24,14 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [nameValid, setNameValid] = useState(false);
+  const [codeValid, setCodeValid] = useState(false);
+  const [contactValid, setContactValid] = useState(false);
+  const [phoneValid, setPhoneValid] = useState(false);
+  const [rateValid, setRateValid] = useState(false);
+
+  const isFormValid = nameValid && codeValid && contactValid && phoneValid && rateValid;
 
   useEffect(() => {
     if (initialData) {
@@ -54,10 +62,7 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !code.trim() || !contactPerson.trim() || !phone.trim() || contractRatePerLiter === "") {
-      setError("Mill Name, Code, Contact Person, Phone, and Contract Rate are required.");
-      return;
-    }
+    if (!isFormValid) return;
     setLoading(true);
     setError("");
     try {
@@ -100,24 +105,24 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Mill Name *</label>
-              <Input
-                placeholder="e.g. Al-Karam Textile Mills"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Mill Code *</label>
-              <Input
-                placeholder="e.g. AKTM-01"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Mill Name"
+              rule="name"
+              required
+              placeholder="e.g. Al-Karam Textile Mills"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onValidationChange={setNameValid}
+            />
+            <ValidatedInput
+              label="Mill Code"
+              rule="code"
+              required
+              placeholder="e.g. AKTM-01"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              onValidationChange={setCodeValid}
+            />
           </div>
 
           <div className="space-y-1">
@@ -136,70 +141,69 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Contact Person *</label>
-              <Input
-                placeholder="e.g. Tariq Mahmood"
-                value={contactPerson}
-                onChange={(e) => setContactPerson(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Phone Number *</label>
-              <Input
-                placeholder="e.g. 0300-8219401"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Contact Person"
+              rule="name"
+              required
+              placeholder="e.g. Tariq Mahmood"
+              value={contactPerson}
+              onChange={(e) => setContactPerson(e.target.value)}
+              onValidationChange={setContactValid}
+            />
+            <ValidatedInput
+              label="Phone Number"
+              rule="phone"
+              required
+              placeholder="e.g. 0300-8219401"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              onValidationChange={setPhoneValid}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Contract Rate (Rs/L) *</label>
-              <Input
-                type="number"
-                placeholder="530"
-                value={contractRatePerLiter}
-                onChange={(e) => setContractRatePerLiter(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Credit Limit (Rs)</label>
-              <Input
-                type="number"
-                placeholder="500000"
-                value={creditLimit}
-                onChange={(e) => setCreditLimit(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">NTN / STRN</label>
-              <Input
-                placeholder="0712394-8"
-                value={ntnNumber}
-                onChange={(e) => setNtnNumber(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Full Factory Address</label>
-            <Input
-              placeholder="e.g. Plot HT/11, Landhi Industrial Area, Karachi"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+            <ValidatedInput
+              label="Contract Rate (Rs/L)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="530"
+              value={contractRatePerLiter}
+              onChange={(e) => setContractRatePerLiter(e.target.value)}
+              onValidationChange={setRateValid}
+            />
+            <ValidatedInput
+              label="Credit Limit (Rs)"
+              rule="positiveNumber"
+              type="number"
+              placeholder="500000"
+              value={creditLimit}
+              onChange={(e) => setCreditLimit(e.target.value)}
+            />
+            <ValidatedInput
+              label="NTN / STRN"
+              rule="text"
+              required={false}
+              placeholder="0712394-8"
+              value={ntnNumber}
+              onChange={(e) => setNtnNumber(e.target.value)}
             />
           </div>
+
+          <ValidatedInput
+            label="Full Factory Address"
+            rule="text"
+            required={false}
+            placeholder="e.g. Plot HT/11, Landhi Industrial Area, Karachi"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="cursor-pointer">
+            <Button type="submit" disabled={loading || !isFormValid} className="cursor-pointer">
               {loading ? "Saving..." : initialData ? "Update Profile" : "Register Mill"}
             </Button>
           </div>

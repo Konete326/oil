@@ -79,20 +79,13 @@ export function NavUser({ user: currentUser, onLogout }) {
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem className="cursor-pointer">
-						<UserIcon />
+					<DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/users")}>
+						<UserIcon className="size-4 mr-2" />
 						Account
 					</DropdownMenuItem>
-					<DropdownMenuItem className="cursor-pointer">
-						<SettingsIcon />
+					<DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
+						<SettingsIcon className="size-4 mr-2" />
 						Settings
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem className="cursor-pointer">
-						<CreditCardIcon />
-						Plan & Billing
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon } from "lucide-react";
 
 export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
@@ -9,6 +9,11 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [nameValid, setNameValid] = useState(false);
+  const [codeValid, setCodeValid] = useState(false);
+
+  const isFormValid = nameValid && codeValid;
 
   useEffect(() => {
     if (initialData) {
@@ -27,10 +32,7 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !code.trim()) {
-      setError("Category Name and Code are required.");
-      return;
-    }
+    if (!isFormValid) return;
     setLoading(true);
     setError("");
     try {
@@ -62,40 +64,40 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Category Name</label>
-            <Input
-              placeholder="e.g. Textile Processing Oils"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Category Name"
+            rule="name"
+            required
+            placeholder="e.g. Textile Processing Oils"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onValidationChange={setNameValid}
+          />
 
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Category Code</label>
-            <Input
-              placeholder="e.g. TEX-OIL"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Category Code"
+            rule="code"
+            required
+            placeholder="e.g. TEX-OIL"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onValidationChange={setCodeValid}
+          />
 
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Description</label>
-            <Input
-              placeholder="e.g. Specialized oils for Karachi spinning & weaving mills"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+          <ValidatedInput
+            label="Description"
+            rule="text"
+            required={false}
+            placeholder="e.g. Specialized oils for Karachi spinning & weaving mills"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !isFormValid}>
               {loading ? "Saving..." : initialData ? "Update Category" : "Create Category"}
             </Button>
           </div>

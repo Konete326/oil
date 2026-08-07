@@ -2,7 +2,7 @@ import { useState } from "react";
 import { XIcon, PlusIcon, ArrowUpRightIcon, ArrowDownLeftIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { createCashTransactionApi } from "@/lib/api";
 
 const CATEGORY_OPTIONS = [
@@ -29,18 +29,16 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [partyValid, setPartyValid] = useState(false);
+  const [amountValid, setAmountValid] = useState(false);
+
+  const isFormValid = partyValid && amountValid;
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!partyName.trim()) {
-      toast.error("Please enter a party or customer name");
-      return;
-    }
-    if (!amount || Number(amount) <= 0) {
-      toast.error("Please enter a valid cash amount");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -118,40 +116,36 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
             </button>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Party / Customer Name *</label>
-            <Input
-              type="text"
-              placeholder="e.g. Malik Traders, Hassan Mills"
-              value={partyName}
-              onChange={(e) => setPartyName(e.target.value)}
-              className="text-xs"
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Party / Customer Name"
+            rule="name"
+            required
+            placeholder="e.g. Malik Traders, Hassan Mills"
+            value={partyName}
+            onChange={(e) => setPartyName(e.target.value)}
+            onValidationChange={setPartyValid}
+          />
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Cash Amount (Rs.) *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="text-xs font-mono"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Cash Amount (Rs.)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              onValidationChange={setAmountValid}
+              className="font-mono"
+            />
 
             <div className="space-y-1">
               <label className="font-medium text-foreground">Transaction Date</label>
-              <Input
+              <input
                 type="date"
                 value={transactionDate}
                 onChange={(e) => setTransactionDate(e.target.value)}
-                className="text-xs"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
           </div>
@@ -188,33 +182,30 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Reference / Receipt No. (Optional)</label>
-            <Input
-              type="text"
-              placeholder="e.g. REC-10492 or Bank Slip #"
-              value={referenceNo}
-              onChange={(e) => setReferenceNo(e.target.value)}
-              className="text-xs font-mono"
-            />
-          </div>
+          <ValidatedInput
+            label="Reference / Receipt No. (Optional)"
+            rule="text"
+            required={false}
+            placeholder="e.g. REC-10492 or Bank Slip #"
+            value={referenceNo}
+            onChange={(e) => setReferenceNo(e.target.value)}
+            className="font-mono"
+          />
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Notes & Details (Optional)</label>
-            <textarea
-              rows={2}
-              placeholder="Add additional remarks..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
+          <ValidatedInput
+            label="Notes & Details (Optional)"
+            rule="text"
+            required={false}
+            placeholder="Add additional remarks..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
               <span>Save {type} Cash Record</span>
             </Button>

@@ -1,5 +1,6 @@
 import { PosSale } from "../models/posSaleModel.js";
 import { Product } from "../models/productModel.js";
+import { createNotificationHelper } from "./notificationController.js";
 
 export const getPosSales = async (req, res, next) => {
   try {
@@ -43,6 +44,17 @@ export const createPosSale = async (req, res, next) => {
       }
       product.stockQuantity -= item.quantity;
       await product.save();
+
+      if (product.stockQuantity <= product.minStockAlert) {
+        await createNotificationHelper({
+          title: "Low Stock Alert",
+          message: `${product.name} (SKU: ${product.sku}) stock dropped to ${product.stockQuantity} ${product.unit} (Alert Limit: ${product.minStockAlert}).`,
+          type: "stock",
+          userName: req.user?.name || "System",
+          targetRoles: ["admin", "manager", "cashier"],
+          metadata: { productId: product._id, currentStock: product.stockQuantity },
+        });
+      }
     }
 
     const lastSale = await PosSale.findOne().sort({ createdAt: -1 });

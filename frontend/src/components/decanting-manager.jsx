@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchProducts, fetchDecantingLogs, createDecantingLog } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import {
   Table,
   TableBody,
@@ -38,6 +38,11 @@ export function DecantingManager() {
   const [wastagePercentage, setWastagePercentage] = useState("0.5");
   const [notes, setNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [drumsValid, setDrumsValid] = useState(true);
+  const [wastageValid, setWastageValid] = useState(true);
+
+  const isFormValid = !!sourceProductId && drumsValid && wastageValid;
 
   const loadData = async () => {
     setLoading(true);
@@ -154,7 +159,7 @@ export function DecantingManager() {
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="font-medium text-foreground">Select Source Master Drum *</label>
+                <label className="font-medium text-foreground">Source Master Drum *</label>
                 <select
                   value={sourceProductId}
                   onChange={(e) => setSourceProductId(e.target.value)}
@@ -170,17 +175,16 @@ export function DecantingManager() {
                 </select>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-medium text-foreground">Drums Quantity to Decant *</label>
-                <Input
-                  type="number"
-                  min="1"
-                  placeholder="1"
-                  value={sourceDrumsCount}
-                  onChange={(e) => setSourceDrumsCount(e.target.value)}
-                  required
-                />
-              </div>
+              <ValidatedInput
+                label="Drums Quantity to Decant"
+                rule="amount"
+                required
+                type="number"
+                placeholder="1"
+                value={sourceDrumsCount}
+                onChange={(e) => setSourceDrumsCount(e.target.value)}
+                onValidationChange={setDrumsValid}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -217,28 +221,27 @@ export function DecantingManager() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="font-medium text-foreground">Handling & Evaporation Loss (%)</label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="0.5"
-                  value={wastagePercentage}
-                  onChange={(e) => setWastagePercentage(e.target.value)}
-                />
-              </div>
+              <ValidatedInput
+                label="Handling & Evaporation Loss (%)"
+                rule="positiveNumber"
+                type="number"
+                placeholder="0.5"
+                value={wastagePercentage}
+                onChange={(e) => setWastagePercentage(e.target.value)}
+                onValidationChange={setWastageValid}
+              />
 
-              <div className="space-y-1">
-                <label className="font-medium text-foreground">Batch Notes / Operator Ref</label>
-                <Input
-                  placeholder="e.g. Decanted Lot #402 for SITE Mill order"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </div>
+              <ValidatedInput
+                label="Batch Notes / Operator Ref"
+                rule="text"
+                required={false}
+                placeholder="e.g. Decanted Lot #402 for SITE Mill order"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </div>
 
-            <Button type="submit" disabled={submitting} className="w-full h-10 gap-2 cursor-pointer font-semibold shadow-xs">
+            <Button type="submit" disabled={submitting || !isFormValid} className="w-full h-10 gap-2 cursor-pointer font-semibold shadow-xs">
               <RefreshCwIcon className="size-4" />
               {submitting ? "Processing Conversion..." : "Execute Decanting & Update Stock"}
             </Button>

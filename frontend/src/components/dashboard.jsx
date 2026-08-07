@@ -24,7 +24,7 @@ export function Dashboard() {
     <div className="grid grid-cols-1 gap-4 p-4 md:p-6 md:grid-cols-2 lg:grid-cols-4">
       <DashboardStats stats={data?.stats} loading={loading} />
       <NetRevenueChart revenue={data?.revenue} loading={loading} />
-      <ChannelSalesChart loading={loading} />
+      <ChannelSalesChart data={data?.channelSales} loading={loading} />
       <DashboardInvoices invoices={data?.invoices} loading={loading} />
       <BillingHealth />
       <DashboardActivity activities={data?.activities} loading={loading} />

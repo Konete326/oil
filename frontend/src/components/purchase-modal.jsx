@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { XIcon, PlusIcon, Loader2Icon, PackageIcon } from "lucide-react";
+import { XIcon, PlusIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { createPurchaseApi, fetchProducts } from "@/lib/api";
 
 export function PurchaseModal({ isOpen, onClose, onSuccess }) {
@@ -17,6 +17,13 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
   const [notes, setNotes] = useState("");
   const [productsList, setProductsList] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [supplierValid, setSupplierValid] = useState(false);
+  const [productValid, setProductValid] = useState(false);
+  const [quantityValid, setQuantityValid] = useState(false);
+  const [unitPriceValid, setUnitPriceValid] = useState(false);
+
+  const isFormValid = supplierValid && productValid && quantityValid && unitPriceValid;
 
   useEffect(() => {
     if (isOpen) {
@@ -40,22 +47,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!supplierName.trim()) {
-      toast.error("Please enter a supplier or vendor name");
-      return;
-    }
-    if (!productName.trim()) {
-      toast.error("Please enter or select a product name");
-      return;
-    }
-    if (!quantity || Number(quantity) <= 0) {
-      toast.error("Please enter a valid stock quantity");
-      return;
-    }
-    if (!unitPrice || Number(unitPrice) <= 0) {
-      toast.error("Please enter a valid rate per liter/unit");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -108,17 +100,15 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Supplier / Vendor Name *</label>
-            <Input
-              type="text"
-              placeholder="e.g. Parco Refinery, National Oil Corp"
-              value={supplierName}
-              onChange={(e) => setSupplierName(e.target.value)}
-              className="text-xs"
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Supplier / Vendor Name"
+            rule="name"
+            required
+            placeholder="e.g. Parco Refinery, National Oil Corp"
+            value={supplierName}
+            onChange={(e) => setSupplierName(e.target.value)}
+            onValidationChange={setSupplierValid}
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -137,62 +127,54 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Product Name *</label>
-              <Input
-                type="text"
-                placeholder="Product title"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                className="text-xs"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Product Name"
+              rule="name"
+              required
+              placeholder="Product title"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              onValidationChange={setProductValid}
+            />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Quantity *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                className="text-xs font-mono"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Quantity"
+              rule="amount"
+              required
+              type="number"
+              placeholder="0.00"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              onValidationChange={setQuantityValid}
+              className="font-mono"
+            />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Unit Type</label>
-              <Input
-                type="text"
-                value={unitType}
-                onChange={(e) => setUnitType(e.target.value)}
-                className="text-xs"
-              />
-            </div>
+            <ValidatedInput
+              label="Unit Type"
+              rule="text"
+              required={false}
+              value={unitType}
+              onChange={(e) => setUnitType(e.target.value)}
+            />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Rate / Unit (Rs.) *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={unitPrice}
-                onChange={(e) => setUnitPrice(e.target.value)}
-                className="text-xs font-mono"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Rate / Unit (Rs.)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="0.00"
+              value={unitPrice}
+              onChange={(e) => setUnitPrice(e.target.value)}
+              onValidationChange={setUnitPriceValid}
+              className="font-mono"
+            />
           </div>
 
-          <div className="p-3 bg-muted/40 rounded-lg border border-border flex items-center justify-between font-mono text-xs">
-            <span className="text-muted-foreground font-sans">Total Bill Amount:</span>
-            <span className="font-bold text-sm text-foreground">Rs. {calculatedTotal.toLocaleString()}</span>
+          <div className="p-3 rounded-lg bg-muted/40 border border-border flex justify-between items-center text-xs">
+            <span className="font-medium text-muted-foreground">Calculated Net Total:</span>
+            <span className="font-mono font-bold text-sm text-primary">Rs. {calculatedTotal.toLocaleString()}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -203,40 +185,37 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
                 onChange={(e) => setPaymentStatus(e.target.value)}
                 className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
-                <option value="Partial">Partial</option>
+                <option value="Paid">Paid (Cash / Bank)</option>
+                <option value="Credit">Credit (Khata)</option>
+                <option value="Partial">Partial Payment</option>
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Invoice / Bill Ref No</label>
-              <Input
-                type="text"
-                placeholder="e.g. INV-9042"
-                value={invoiceNumber}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
-                className="text-xs font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Notes & Remarks</label>
-            <textarea
-              rows={2}
-              placeholder="Additional details..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            <ValidatedInput
+              label="Supplier Invoice / Bill No."
+              rule="text"
+              required={false}
+              placeholder="e.g. INV-90412"
+              value={invoiceNumber}
+              onChange={(e) => setInvoiceNumber(e.target.value)}
+              className="font-mono"
             />
           </div>
+
+          <ValidatedInput
+            label="Notes & Remarks"
+            rule="text"
+            required={false}
+            placeholder="Batch number, tank lorry details, etc."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
               <span>Save Purchase Entry</span>
             </Button>

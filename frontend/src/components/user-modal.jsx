@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { XIcon, PlusIcon, ShieldCheckIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { createUserApi, updateUserPermissionsApi } from "@/lib/api";
 
 const ALL_AVAILABLE_PERMISSIONS = [
@@ -30,6 +30,12 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
   const [status, setStatus] = useState("Active");
   const [selectedPermissions, setSelectedPermissions] = useState(["pos", "cash", "ledger"]);
   const [loading, setLoading] = useState(false);
+
+  const [nameValid, setNameValid] = useState(false);
+  const [emailValid, setEmailValid] = useState(false);
+  const [passwordValid, setPasswordValid] = useState(false);
+
+  const isFormValid = nameValid && (editingUser || emailValid) && (editingUser || passwordValid);
 
   useEffect(() => {
     if (editingUser) {
@@ -72,18 +78,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Please enter a user name");
-      return;
-    }
-    if (!email.trim()) {
-      toast.error("Please enter an email address");
-      return;
-    }
-    if (!editingUser && !password) {
-      toast.error("Please provide a password for new user");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -133,44 +128,39 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Full Name *</label>
-              <Input
-                type="text"
-                placeholder="e.g. Asif Khan"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="text-xs"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Full Name"
+              rule="name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onValidationChange={setNameValid}
+              placeholder="e.g. Asif Khan"
+            />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Email Address *</label>
-              <Input
-                type="email"
-                placeholder="user@alkhaleej.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="text-xs"
-                disabled={!!editingUser}
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Email Address"
+              rule="email"
+              required
+              value={email}
+              disabled={!!editingUser}
+              onChange={(e) => setEmail(e.target.value)}
+              onValidationChange={setEmailValid}
+              placeholder="user@alkhaleej.com"
+            />
           </div>
 
           {!editingUser && (
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Password *</label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="text-xs"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Password"
+              rule="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onValidationChange={setPasswordValid}
+              placeholder="••••••••"
+            />
           )}
 
           <div className="grid grid-cols-2 gap-3">
@@ -232,7 +222,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
               <span>{editingUser ? "Save Permissions" : "Create User Account"}</span>
             </Button>

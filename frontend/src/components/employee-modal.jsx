@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { XIcon, PlusIcon, Loader2Icon, BriefcaseIcon } from "lucide-react";
+import { XIcon, PlusIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { createEmployeeApi, updateEmployeeApi } from "@/lib/api";
 
 const DEPARTMENTS = ["Plant Operations", "Warehouse & Store", "Sales & Marketing", "Finance & Accounts", "General"];
@@ -16,13 +16,19 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
   const [status, setStatus] = useState("Active");
   const [loading, setLoading] = useState(false);
 
+  const [nameValid, setNameValid] = useState(false);
+  const [designationValid, setDesignationValid] = useState(false);
+  const [salaryValid, setSalaryValid] = useState(false);
+
+  const isFormValid = nameValid && designationValid && salaryValid;
+
   useEffect(() => {
     if (editingEmployee) {
       setName(editingEmployee.name || "");
       setDesignation(editingEmployee.designation || "");
       setDepartment(editingEmployee.department || "Plant Operations");
       setPhone(editingEmployee.phone || "");
-      setBaseSalary(editingEmployee.baseSalary || "");
+      setBaseSalary(String(editingEmployee.baseSalary || ""));
       setStatus(editingEmployee.status || "Active");
     } else {
       setName("");
@@ -38,18 +44,7 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Employee name is required");
-      return;
-    }
-    if (!designation.trim()) {
-      toast.error("Designation is required");
-      return;
-    }
-    if (!baseSalary || Number(baseSalary) <= 0) {
-      toast.error("Please enter a valid monthly base salary");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -100,30 +95,26 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Full Name *</label>
-            <Input
-              type="text"
-              placeholder="e.g. Kashif Mahmood"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="text-xs"
-              required
-            />
-          </div>
+          <ValidatedInput
+            label="Full Name"
+            rule="name"
+            required
+            placeholder="e.g. Kashif Mahmood"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onValidationChange={setNameValid}
+          />
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Designation *</label>
-              <Input
-                type="text"
-                placeholder="e.g. Plant Operator"
-                value={designation}
-                onChange={(e) => setDesignation(e.target.value)}
-                className="text-xs"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Designation"
+              rule="text"
+              required
+              placeholder="e.g. Plant Operator"
+              value={designation}
+              onChange={(e) => setDesignation(e.target.value)}
+              onValidationChange={setDesignationValid}
+            />
 
             <div className="space-y-1">
               <label className="font-medium text-foreground">Department</label>
@@ -142,30 +133,27 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Phone Number</label>
-              <Input
-                type="text"
-                placeholder="0300-1234567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="text-xs font-mono"
-              />
-            </div>
+            <ValidatedInput
+              label="Phone Number"
+              rule="phone"
+              required={false}
+              placeholder="0300-1234567"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="font-mono"
+            />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Monthly Base Salary (PKR) *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="65000"
-                value={baseSalary}
-                onChange={(e) => setBaseSalary(e.target.value)}
-                className="text-xs font-mono font-bold text-emerald-500"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Monthly Base Salary (PKR)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="65000"
+              value={baseSalary}
+              onChange={(e) => setBaseSalary(e.target.value)}
+              onValidationChange={setSalaryValid}
+              className="font-mono font-bold text-emerald-500"
+            />
           </div>
 
           <div className="space-y-1">
@@ -184,9 +172,9 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
-              <span>Save Employee</span>
+              <span>{editingEmployee ? "Update Employee" : "Create Employee"}</span>
             </Button>
           </div>
         </form>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { uploadMediaApi } from "@/lib/api";
 import { XIcon, UploadCloudIcon, ImageIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -35,6 +35,15 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
+
+  const [nameValid, setNameValid] = useState(false);
+  const [skuValid, setSkuValid] = useState(false);
+  const [brandValid, setBrandValid] = useState(false);
+  const [costValid, setCostValid] = useState(false);
+  const [sellingValid, setSellingValid] = useState(false);
+  const [stockValid, setStockValid] = useState(true);
+
+  const isFormValid = nameValid && skuValid && brandValid && costValid && sellingValid && stockValid && !!category;
 
   const selectedCategoryObj = categories.find((c) => c._id === category);
 
@@ -115,10 +124,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !sku.trim() || !category || !brand.trim() || costPrice === "" || sellingPrice === "") {
-      toast.error("Product Name, SKU, Category, Brand, Cost Price, and Selling Price are required.");
-      return;
-    }
+    if (!isFormValid) return;
     setLoading(true);
     try {
       await onSave({
@@ -211,29 +217,29 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Product Name *</label>
-              <Input
-                placeholder="e.g. Super Spindle Lube 10"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">SKU Code *</label>
-              <Input
-                placeholder="e.g. SKU-TEX-001"
-                value={sku}
-                onChange={(e) => setSku(e.target.value)}
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Product Name"
+              rule="name"
+              required
+              placeholder="e.g. Super Spindle Lube 10"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onValidationChange={setNameValid}
+            />
+            <ValidatedInput
+              label="SKU Code"
+              rule="code"
+              required
+              placeholder="e.g. SKU-TEX-001"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              onValidationChange={setSkuValid}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Category *</label>
+              <label className="font-medium text-foreground">Category *</label>
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value); setSubcategoryName(""); }}
@@ -247,7 +253,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
               </select>
             </div>
             <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Subcategory</label>
+              <label className="font-medium text-foreground">Subcategory</label>
               <select
                 value={subcategoryName}
                 onChange={(e) => setSubcategoryName(e.target.value)}
@@ -262,36 +268,36 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Brand / Manufacturer *</label>
-              <Input
-                placeholder="e.g. Shell, Mobil, Total"
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Oil Grade</label>
-              <Input
-                placeholder="e.g. ISO VG 68, 20W-50"
-                value={grade}
-                onChange={(e) => setGrade(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Viscosity</label>
-              <Input
-                placeholder="e.g. 68 cSt, 10 cSt"
-                value={viscosity}
-                onChange={(e) => setViscosity(e.target.value)}
-              />
-            </div>
+            <ValidatedInput
+              label="Brand / Manufacturer"
+              rule="name"
+              required
+              placeholder="e.g. Shell, Mobil, Total"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              onValidationChange={setBrandValid}
+            />
+            <ValidatedInput
+              label="Oil Grade"
+              rule="text"
+              required={false}
+              placeholder="e.g. ISO VG 68, 20W-50"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+            />
+            <ValidatedInput
+              label="Viscosity"
+              rule="text"
+              required={false}
+              placeholder="e.g. 68 cSt, 10 cSt"
+              value={viscosity}
+              onChange={(e) => setViscosity(e.target.value)}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Packaging Type</label>
+              <label className="font-medium text-foreground">Packaging Type</label>
               <select
                 value={packagingType}
                 onChange={(e) => setPackagingType(e.target.value)}
@@ -303,7 +309,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
               </select>
             </div>
             <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Stock Unit</label>
+              <label className="font-medium text-foreground">Stock Unit</label>
               <select
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
@@ -317,38 +323,59 @@ export function ProductModal({ isOpen, onClose, onSave, categories, initialData 
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Cost Price (Rs) *</label>
-              <Input type="number" placeholder="450" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Selling Price (Rs) *</label>
-              <Input type="number" placeholder="600" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Current Stock</label>
-              <Input type="number" placeholder="50" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-muted-foreground">Min Stock Alert</label>
-              <Input type="number" placeholder="10" value={minStockAlert} onChange={(e) => setMinStockAlert(e.target.value)} />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="font-medium text-muted-foreground">Description / Notes</label>
-            <Input
-              placeholder="e.g. High pressure hydraulic oil suitable for textile looms"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+            <ValidatedInput
+              label="Cost Price (Rs)"
+              rule="positiveNumber"
+              required
+              type="number"
+              placeholder="450"
+              value={costPrice}
+              onChange={(e) => setCostPrice(e.target.value)}
+              onValidationChange={setCostValid}
+            />
+            <ValidatedInput
+              label="Selling Price (Rs)"
+              rule="positiveNumber"
+              required
+              type="number"
+              placeholder="600"
+              value={sellingPrice}
+              onChange={(e) => setSellingPrice(e.target.value)}
+              onValidationChange={setSellingValid}
+            />
+            <ValidatedInput
+              label="Current Stock"
+              rule="positiveNumber"
+              type="number"
+              placeholder="50"
+              value={stockQuantity}
+              onChange={(e) => setStockQuantity(e.target.value)}
+              onValidationChange={setStockValid}
+            />
+            <ValidatedInput
+              label="Min Stock Alert"
+              rule="positiveNumber"
+              type="number"
+              placeholder="10"
+              value={minStockAlert}
+              onChange={(e) => setMinStockAlert(e.target.value)}
             />
           </div>
+
+          <ValidatedInput
+            label="Description / Notes"
+            rule="text"
+            required={false}
+            placeholder="e.g. High pressure hydraulic oil suitable for textile looms"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || uploading} className="cursor-pointer gap-2">
+            <Button type="submit" disabled={loading || uploading || !isFormValid} className="cursor-pointer gap-2">
               {loading ? (
                 <><Loader2Icon className="size-3.5 animate-spin" /><span>Saving...</span></>
               ) : (

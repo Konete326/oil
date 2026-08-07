@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { XIcon, PlusIcon, Loader2Icon, CalculatorIcon, ReceiptIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { generateSalaryVoucherApi } from "@/lib/api";
 
 const MONTH_NAMES = [
@@ -24,6 +24,14 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [monthYearValid, setMonthYearValid] = useState(true);
+  const [salaryValid, setSalaryValid] = useState(false);
+  const [bonusValid, setBonusValid] = useState(true);
+  const [advDedValid, setAdvDedValid] = useState(true);
+  const [othDedValid, setOthDedValid] = useState(true);
+
+  const isFormValid = !!employeeId && monthYearValid && salaryValid && bonusValid && advDedValid && othDedValid;
+
   useEffect(() => {
     if (employeeId) {
       const emp = employees.find((e) => e._id === employeeId);
@@ -44,14 +52,7 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!employeeId) {
-      toast.error("Please select an employee");
-      return;
-    }
-    if (!monthYear.trim()) {
-      toast.error("Please enter the salary month/year");
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setLoading(true);
@@ -122,17 +123,15 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Salary Month / Year *</label>
-              <Input
-                type="text"
-                placeholder="e.g. August 2026"
-                value={monthYear}
-                onChange={(e) => setMonthYear(e.target.value)}
-                className="text-xs font-semibold"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Salary Month / Year"
+              rule="text"
+              required
+              placeholder="e.g. August 2026"
+              value={monthYear}
+              onChange={(e) => setMonthYear(e.target.value)}
+              onValidationChange={setMonthYearValid}
+            />
           </div>
 
           {selectedEmployeeObj && (
@@ -147,96 +146,86 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Base Salary (PKR) *</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={baseSalary}
-                onChange={(e) => setBaseSalary(e.target.value)}
-                className="text-xs font-mono font-bold"
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Base Salary (PKR)"
+              rule="amount"
+              required
+              type="number"
+              value={baseSalary}
+              onChange={(e) => setBaseSalary(e.target.value)}
+              onValidationChange={setSalaryValid}
+              className="font-mono font-bold"
+            />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Bonus / Overtime (PKR)</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={bonus}
-                onChange={(e) => setBonus(e.target.value)}
-                className="text-xs font-mono text-emerald-500"
-              />
-            </div>
+            <ValidatedInput
+              label="Bonus / Overtime (PKR)"
+              rule="positiveNumber"
+              type="number"
+              value={bonus}
+              onChange={(e) => setBonus(e.target.value)}
+              onValidationChange={setBonusValid}
+              className="font-mono text-emerald-500"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Advance Deducted (PKR)</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={advanceDeducted}
-                onChange={(e) => setAdvanceDeducted(e.target.value)}
-                className="text-xs font-mono text-amber-500"
-              />
-            </div>
+            <ValidatedInput
+              label="Advance Deducted (PKR)"
+              rule="positiveNumber"
+              type="number"
+              value={advanceDeducted}
+              onChange={(e) => setAdvanceDeducted(e.target.value)}
+              onValidationChange={setAdvDedValid}
+              className="font-mono text-amber-500"
+            />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Other Deductions (Absents / Fine)</label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={otherDeductions}
-                onChange={(e) => setOtherDeductions(e.target.value)}
-                className="text-xs font-mono text-red-500"
-              />
-            </div>
+            <ValidatedInput
+              label="Other Deductions (PKR)"
+              rule="positiveNumber"
+              type="number"
+              value={otherDeductions}
+              onChange={(e) => setOtherDeductions(e.target.value)}
+              onValidationChange={setOthDedValid}
+              className="font-mono text-destructive"
+            />
           </div>
 
-          <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-between">
-            <span className="font-semibold text-xs text-foreground">Calculated Net Salary Paid:</span>
-            <span className="font-mono text-lg font-bold text-primary">Rs. {netPaid.toLocaleString()}</span>
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex justify-between items-center text-xs">
+            <span className="font-semibold text-emerald-500">Calculated Net Payable:</span>
+            <span className="font-mono text-base font-bold text-emerald-500">
+              Rs. {netPaid.toLocaleString()}
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Payment Mode</label>
-              <select
-                value={paymentMode}
-                onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="Cash">Cash</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Cheque">Cheque</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Notes / Remarks</label>
-              <Input
-                type="text"
-                placeholder="Optional remarks"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="text-xs"
-              />
-            </div>
+          <div className="space-y-1">
+            <label className="font-medium text-foreground">Payment Mode</label>
+            <select
+              value={paymentMode}
+              onChange={(e) => setPaymentMode(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cheque">Cheque</option>
+            </select>
           </div>
+
+          <ValidatedInput
+            label="Notes & Remarks"
+            rule="text"
+            required={false}
+            placeholder="Additional details..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5 cursor-pointer">
-              {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <ReceiptIcon className="size-3.5" />}
-              <span>Process Salary Payout</span>
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
+              {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
+              <span>Generate Payslip</span>
             </Button>
           </div>
         </form>

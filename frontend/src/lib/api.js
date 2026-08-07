@@ -771,6 +771,118 @@ export async function generateSalaryVoucherApi(payload) {
   return data;
 }
 
+export async function fetchNotificationsApi() {
+  try {
+    const res = await fetch(`${API_URL}/notifications`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch notifications");
+    return await res.json();
+  } catch (err) {
+    console.warn("Notifications API error", err);
+    return { success: false, data: [], unreadCount: 0 };
+  }
+}
+
+export async function markNotificationReadApi(id) {
+  const res = await fetch(`${API_URL}/notifications/read/${id}`, {
+    method: "PUT",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to update notification");
+  return data;
+}
+
+export async function deleteNotificationApi(id) {
+  const res = await fetch(`${API_URL}/notifications/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete notification");
+  return data;
+}
+
+export async function clearAllNotificationsApi() {
+  const res = await fetch(`${API_URL}/notifications/clear-all`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to clear notifications");
+  return data;
+}
+
+export async function fetchSystemLogsApi() {
+  try {
+    const res = await fetch(`${API_URL}/system-logs`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch system logs");
+    return await res.json();
+  } catch (err) {
+    console.warn("System logs API error", err);
+    return { success: false, count: 0, data: [] };
+  }
+}
+
+export async function createSystemLogApi(payload) {
+  try {
+    const res = await fetch(`${API_URL}/system-logs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("Failed to create system log", err);
+    return { success: false };
+  }
+}
+
+export async function clearSystemLogsApi() {
+  const res = await fetch(`${API_URL}/system-logs/clear-all`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to clear system logs");
+  return data;
+}
+
+export async function deleteSingleSystemLogApi(id) {
+  const res = await fetch(`${API_URL}/system-logs/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete system log");
+  return data;
+}
+
+export async function eraseAllDataApi(password) {
+  const res = await fetch(`${API_URL}/data-reset/erase-all`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify({ password }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to reset application data");
+  return data;
+}
+
+export async function eraseModuleDataApi(password, moduleKey) {
+  const res = await fetch(`${API_URL}/data-reset/erase-module`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify({ password, moduleKey }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to erase module data");
+  return data;
+}
+
 
 
 

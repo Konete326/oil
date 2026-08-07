@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon, TruckIcon } from "lucide-react";
 
 export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
@@ -15,6 +15,14 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [vehicleValid, setVehicleValid] = useState(false);
+  const [driverValid, setDriverValid] = useState(false);
+  const [dipValid, setDipValid] = useState(true);
+  const [quantityValid, setQuantityValid] = useState(true);
+  const [rateValid, setRateValid] = useState(true);
+
+  const isFormValid = !!millId && !!productId && vehicleValid && driverValid && dipValid && quantityValid && rateValid;
 
   const selectedMillObj = mills.find((m) => m._id === millId);
 
@@ -47,10 +55,8 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!millId || !productId || !vehicleNumber.trim() || !driverName.trim() || !dipMeasurementInches || !quantityLiters) {
-      setError("Please fill all required dispatch fields.");
-      return;
-    }
+    if (!isFormValid) return;
+
     setLoading(true);
     setError("");
     try {
@@ -133,89 +139,87 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Tanker / Vehicle No *</label>
-              <Input
-                placeholder="e.g. TKA-4921"
-                value={vehicleNumber}
-                onChange={(e) => setVehicleNumber(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Driver Name *</label>
-              <Input
-                placeholder="e.g. Muhammad Aslam"
-                value={driverName}
-                onChange={(e) => setDriverName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Driver Phone</label>
-              <Input
-                placeholder="0301-8291044"
-                value={driverPhone}
-                onChange={(e) => setDriverPhone(e.target.value)}
-              />
-            </div>
+            <ValidatedInput
+              label="Tanker / Vehicle No"
+              rule="code"
+              required
+              placeholder="e.g. TKA-4921"
+              value={vehicleNumber}
+              onChange={(e) => setVehicleNumber(e.target.value)}
+              onValidationChange={setVehicleValid}
+            />
+            <ValidatedInput
+              label="Driver Name"
+              rule="name"
+              required
+              placeholder="e.g. Muhammad Aslam"
+              value={driverName}
+              onChange={(e) => setDriverName(e.target.value)}
+              onValidationChange={setDriverValid}
+            />
+            <ValidatedInput
+              label="Driver Phone"
+              rule="phone"
+              required={false}
+              placeholder="0301-8291044"
+              value={driverPhone}
+              onChange={(e) => setDriverPhone(e.target.value)}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Dip Measurement (Inches) *</label>
-              <Input
-                type="number"
-                placeholder="48"
-                value={dipMeasurementInches}
-                onChange={(e) => setDipMeasurementInches(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Net Quantity (Liters) *</label>
-              <Input
-                type="number"
-                placeholder="10000"
-                value={quantityLiters}
-                onChange={(e) => setQuantityLiters(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Rate Per Liter (Rs) *</label>
-              <Input
-                type="number"
-                placeholder="530"
-                value={overrideRate}
-                onChange={(e) => setOverrideRate(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
-            <span className="font-medium text-primary">Calculated Total Shipment Bill:</span>
-            <span className="font-mono text-lg font-bold text-primary">
-              Rs {Number(calculatedTotal).toLocaleString()}
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Gate Pass Notes / Bilty Ref</label>
-            <Input
-              placeholder="e.g. Bilty No. 49120, Shipped to Spinning Division"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+            <ValidatedInput
+              label="Dip Measurement (Inches)"
+              rule="positiveNumber"
+              required
+              type="number"
+              placeholder="48"
+              value={dipMeasurementInches}
+              onChange={(e) => setDipMeasurementInches(e.target.value)}
+              onValidationChange={setDipValid}
+            />
+            <ValidatedInput
+              label="Net Quantity (Liters)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="10000"
+              value={quantityLiters}
+              onChange={(e) => setQuantityLiters(e.target.value)}
+              onValidationChange={setQuantityValid}
+            />
+            <ValidatedInput
+              label="Rate per Liter (Rs)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="530"
+              value={overrideRate}
+              onChange={(e) => setOverrideRate(e.target.value)}
+              onValidationChange={setRateValid}
             />
           </div>
+
+          <div className="p-3 bg-muted/40 rounded-lg border flex justify-between items-center text-xs">
+            <span className="text-muted-foreground font-medium">Calculated Bill Amount:</span>
+            <span className="font-mono font-bold text-sm text-primary">Rs {Number(calculatedTotal).toLocaleString()}</span>
+          </div>
+
+          <ValidatedInput
+            label="Special Delivery Instructions / Gate Pass Notes"
+            rule="text"
+            required={false}
+            placeholder="e.g. Deliver to Tank #4 near Spinning Unit B"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="cursor-pointer font-semibold">
-              {loading ? "Issuing Gate Pass..." : "Issue Delivery Challan"}
+            <Button type="submit" disabled={loading || !isFormValid} className="cursor-pointer">
+              {loading ? "Generating DC..." : "Issue Delivery Challan"}
             </Button>
           </div>
         </form>

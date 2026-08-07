@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon, WalletIcon } from "lucide-react";
 
 export function PaymentModal({ isOpen, onClose, onSave, mills }) {
@@ -12,6 +12,11 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [clientNameValid, setClientNameValid] = useState(true);
+  const [amountValid, setAmountValid] = useState(false);
+
+  const isFormValid = (millId || clientNameValid) && amountValid;
 
   const selectedMill = mills.find((m) => m._id === millId);
 
@@ -37,10 +42,7 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount || Number(amount) <= 0) {
-      setError("Please enter a valid payment amount.");
-      return;
-    }
+    if (!isFormValid) return;
 
     setLoading(true);
     setError("");
@@ -99,29 +101,29 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
           </div>
 
           {!millId && (
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Client Name *</label>
-              <Input
-                placeholder="e.g. SITE Weaving Division"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                required
-              />
-            </div>
+            <ValidatedInput
+              label="Client Name"
+              rule="name"
+              required
+              placeholder="e.g. SITE Weaving Division"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              onValidationChange={setClientNameValid}
+            />
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Amount Received (Rs) *</label>
-              <Input
-                type="number"
-                placeholder="e.g. 250000"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                className="font-mono"
-              />
-            </div>
+            <ValidatedInput
+              label="Amount Received (Rs)"
+              rule="amount"
+              required
+              type="number"
+              placeholder="e.g. 250000"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              onValidationChange={setAmountValid}
+              className="font-mono"
+            />
 
             <div className="space-y-1">
               <label className="font-medium text-foreground">Payment Mode *</label>
@@ -138,29 +140,29 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Cheque / Bank Reference No.</label>
-            <Input
-              placeholder="e.g. HBL Cheque #492104 or Online Deposit Ref"
-              value={referenceNumber}
-              onChange={(e) => setReferenceNumber(e.target.value)}
-            />
-          </div>
+          <ValidatedInput
+            label="Cheque / Bank Reference No."
+            rule="text"
+            required={false}
+            placeholder="e.g. HBL Cheque #492104 or Online Deposit Ref"
+            value={referenceNumber}
+            onChange={(e) => setReferenceNumber(e.target.value)}
+          />
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Transaction Notes / Voucher Ref</label>
-            <Input
-              placeholder="e.g. Received partial payment against Invoice DC-1002"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </div>
+          <ValidatedInput
+            label="Transaction Notes / Voucher Ref"
+            rule="text"
+            required={false}
+            placeholder="e.g. Received partial payment against Invoice DC-1002"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button type="submit" disabled={loading || !isFormValid} className="cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white">
               {loading ? "Recording..." : "Record Credit Payment"}
             </Button>
           </div>

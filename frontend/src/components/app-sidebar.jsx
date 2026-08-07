@@ -4,66 +4,71 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/logo";
 import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarHeader,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { footerNavLinks, navGroups } from "@/components/app-shared";
-import { LatestChange } from "@/components/latest-change";
 import { NavGroup } from "@/components/nav-group";
 
 export function AppSidebar() {
-	return (
-        <Sidebar
-            className={cn(
-                "*:data-[slot=sidebar-inner]:bg-background",
-                "*:data-[slot=sidebar-inner]:dark:bg-[radial-gradient(60%_18%_at_10%_0%,--theme(--color-foreground/.08),transparent)]",
-                "**:data-[slot=sidebar-menu-button]:[&>span]:text-foreground/75"
-            )}
-            collapsible="icon"
-            variant="sidebar">
-            <SidebarHeader className="h-14 justify-center border-b px-2">
-				<SidebarMenuButton asChild>
-					<Link to="/" className="cursor-pointer">
-						<LogoIcon />
-						<span className="font-medium text-foreground!">Al Khaleej Lubricants</span>
-					</Link>
-				</SidebarMenuButton>
-			</SidebarHeader>
-            <SidebarContent>
-				{navGroups.map((group, index) => (
-					<NavGroup key={`sidebar-group-${index}`} {...group} />
-				))}
-			</SidebarContent>
-            <SidebarFooter className="gap-0 p-0">
-				<LatestChange />
-				<SidebarMenu className="border-t p-2">
-					{footerNavLinks.map((item) => (
-						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton
-                                asChild
-                                className="text-muted-foreground cursor-pointer"
-                                isActive={item.isActive}
-                                size="sm">
-								<Link to={item.path} className="cursor-pointer">
-									{item.icon}
-									<span>{item.title}</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					))}
-				</SidebarMenu>
-				<div
-                    className="px-4 pt-4 pb-2 transition-opacity group-data-[collapsible=icon]:hidden">
-					<p className="text-nowrap text-[9px] text-muted-foreground">
-						© {new Date().getFullYear()} Al Khaleej Lubricants LLC
-					</p>
-				</div>
-			</SidebarFooter>
-        </Sidebar>
-    );
+  return (
+    <Sidebar
+      className={cn(
+        "*:data-[slot=sidebar-inner]:bg-background",
+        "*:data-[slot=sidebar-inner]:dark:bg-[radial-gradient(60%_18%_at_10%_0%,--theme(--color-foreground/.08),transparent)]",
+        "**:data-[slot=sidebar-menu-button]:[&>span]:text-foreground/75"
+      )}
+      collapsible="icon"
+      variant="sidebar"
+    >
+      <SidebarHeader className="h-14 justify-center border-b px-2">
+        <SidebarMenuButton asChild>
+          <Link to="/" className="cursor-pointer">
+            <LogoIcon />
+            <span className="font-medium text-foreground!">Al Khaleej Lubricants</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {navGroups.map((group, index) => (
+          <NavGroup key={`sidebar-group-${index}`} {...group} />
+        ))}
+      </SidebarContent>
+
+      <SidebarFooter className="gap-0 p-0">
+        <SidebarMenu className="border-t p-2">
+          {footerNavLinks.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                className="text-muted-foreground cursor-pointer"
+                isActive={item.isActive}
+                size="sm"
+              >
+                <Link to={item.path} className="cursor-pointer">
+                  {item.icon}
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+
+        <div className="px-4 py-3 border-t border-border/40 transition-opacity group-data-[collapsible=icon]:hidden space-y-1">
+          <p className="text-[10px] font-bold text-foreground tracking-tight">
+            Al Khaleej Lubricants LLC
+          </p>
+          <p className="text-[9px] text-muted-foreground leading-tight">
+            © 2026 • Developed by <span className="font-semibold text-primary">Elite Dev</span>
+          </p>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
 }

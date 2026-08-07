@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/userModel.js";
 import { connectDB } from "../config/db.js";
+import { createNotificationHelper } from "./notificationController.js";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "al_khaleej_lubricants_jwt_secret_key_2026", {
@@ -19,6 +20,14 @@ export const loginUser = async (req, res, next) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (user && (await user.matchPassword(password))) {
+      await createNotificationHelper({
+        title: "User Session Authenticated",
+        message: `${user.name} (${user.role.toUpperCase()}) logged into portal`,
+        type: "login",
+        userName: user.name,
+        targetRoles: ["admin", "manager"],
+      });
+
       res.status(200).json({
         success: true,
         data: {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon, PlusIcon, Trash2Icon, TagIcon } from "lucide-react";
 
 export function SubcategoryModal({ isOpen, onClose, category, onAddSubcategory, onDeleteSubcategory }) {
@@ -10,14 +10,13 @@ export function SubcategoryModal({ isOpen, onClose, category, onAddSubcategory, 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [subNameValid, setSubNameValid] = useState(false);
+
   if (!isOpen || !category) return null;
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!subName.trim()) {
-      setError("Subcategory name is required.");
-      return;
-    }
+    if (!subNameValid) return;
     setLoading(true);
     setError("");
     try {
@@ -69,27 +68,33 @@ export function SubcategoryModal({ isOpen, onClose, category, onAddSubcategory, 
         <form onSubmit={handleAdd} className="space-y-3 rounded-lg border bg-muted/30 p-3">
           <p className="text-xs font-semibold text-foreground">Add New Subcategory</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Input
-              placeholder="Subcategory Name (e.g. Spindle Oil 10)"
+            <ValidatedInput
+              label="Subcategory Name"
+              rule="name"
+              required
+              placeholder="e.g. Spindle Oil 10"
               value={subName}
               onChange={(e) => setSubName(e.target.value)}
-              className="text-xs"
-              required
+              onValidationChange={setSubNameValid}
             />
-            <Input
-              placeholder="Code (e.g. SPD-10)"
+            <ValidatedInput
+              label="Subcategory Code"
+              rule="code"
+              required={false}
+              placeholder="e.g. SPD-10"
               value={subCode}
               onChange={(e) => setSubCode(e.target.value)}
-              className="text-xs"
             />
           </div>
-          <Input
+          <ValidatedInput
+            label="Description / Grade Specification"
+            rule="text"
+            required={false}
             placeholder="Description / Grade Specification"
             value={subDesc}
             onChange={(e) => setSubDesc(e.target.value)}
-            className="text-xs"
           />
-          <Button type="submit" size="sm" className="w-full gap-1 text-xs" disabled={loading}>
+          <Button type="submit" size="sm" className="w-full gap-1 text-xs" disabled={loading || !subNameValid}>
             <PlusIcon className="size-3.5" />
             {loading ? "Adding..." : "Add Subcategory"}
           </Button>
