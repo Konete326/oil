@@ -14,7 +14,6 @@ import {
   Check,
   RefreshCw,
   Search,
-  AlertTriangle,
   Clock,
   ShieldAlert,
   Boxes,
@@ -26,8 +25,8 @@ import {
   Factory,
   CheckCircle2,
   CopyCheck,
-  Filter,
   Download,
+  ShieldCheck,
 } from "lucide-react";
 
 export function SettingsManager({ user }) {
@@ -194,23 +193,66 @@ export function SettingsManager({ user }) {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
-            <Settings className="size-5 text-primary" /> System Settings & Maintenance
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            Manage system error diagnostics logs and database maintenance operations.
+          <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Settings className="size-6 text-primary" />
+            System Settings & Diagnostics
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Monitor real-time error logs, system diagnostics, and administrative data maintenance.
           </p>
         </div>
 
         {successMsg && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs animate-in fade-in">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-medium animate-in fade-in">
             <CheckCircle2 className="size-4" />
             <span>{successMsg}</span>
           </div>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <Terminal className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Logged Diagnostics</p>
+            <p className="text-xl font-bold text-foreground">{logs.length}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-500">
+            <ShieldCheck className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">System Health</p>
+            <p className="text-base font-bold text-foreground">Active & Monitored</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-sky-500/15 flex items-center justify-center text-sky-500">
+            <Clock className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Log Retention</p>
+            <p className="text-base font-bold text-foreground">7 Days Retention</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
+            <Database className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Data Security</p>
+            <p className="text-base font-bold text-foreground">Admin Controlled</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 border-b border-border/60 pb-2">
@@ -218,7 +260,7 @@ export function SettingsManager({ user }) {
           variant={activeTab === "logs" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("logs")}
-          className="text-xs cursor-pointer gap-2"
+          className="text-xs cursor-pointer h-8 gap-2 font-medium"
         >
           <Terminal className="size-3.5" /> System Console Logs
         </Button>
@@ -226,15 +268,15 @@ export function SettingsManager({ user }) {
           variant={activeTab === "maintenance" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("maintenance")}
-          className="text-xs cursor-pointer gap-2"
+          className="text-xs cursor-pointer h-8 gap-2 font-medium"
         >
           <Database className="size-3.5" /> Data Maintenance & Erase
         </Button>
       </div>
 
       {activeTab === "logs" && (
-        <Card className="border-border/60 bg-card shadow-xs">
-          <CardHeader className="pb-3 border-b border-border/40 space-y-3">
+        <Card className="border-border shadow-xs bg-card">
+          <CardHeader className="p-4 border-b border-border/40 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -302,7 +344,7 @@ export function SettingsManager({ user }) {
                   variant={logLevelFilter === "all" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setLogLevelFilter("all")}
-                  className="text-xs h-7 px-2.5 rounded cursor-pointer"
+                  className="text-xs h-7 px-2.5 rounded cursor-pointer font-medium"
                 >
                   All ({logs.length})
                 </Button>
@@ -310,7 +352,7 @@ export function SettingsManager({ user }) {
                   variant={logLevelFilter === "error" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setLogLevelFilter("error")}
-                  className="text-xs h-7 px-2.5 rounded cursor-pointer text-rose-500"
+                  className="text-xs h-7 px-2.5 rounded cursor-pointer text-rose-500 font-medium"
                 >
                   Errors ({logs.filter((l) => l.level === "error").length})
                 </Button>
@@ -318,7 +360,7 @@ export function SettingsManager({ user }) {
                   variant={logLevelFilter === "warning" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setLogLevelFilter("warning")}
-                  className="text-xs h-7 px-2.5 rounded cursor-pointer text-amber-500"
+                  className="text-xs h-7 px-2.5 rounded cursor-pointer text-amber-500 font-medium"
                 >
                   Warnings ({logs.filter((l) => l.level === "warning").length})
                 </Button>
@@ -423,21 +465,21 @@ export function SettingsManager({ user }) {
       {activeTab === "maintenance" && (
         <div className="space-y-6">
           <Card className="border-rose-500/30 bg-rose-950/10 backdrop-blur-sm">
-            <CardHeader className="pb-3 border-b border-rose-500/20">
+            <CardHeader className="p-4 border-b border-rose-500/20">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400">
+                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500">
                   <ShieldAlert className="size-6" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-bold text-rose-400">Full System Data Erasure</CardTitle>
+                  <CardTitle className="text-sm font-bold text-rose-500">Full System Data Erasure</CardTitle>
                   <CardDescription className="text-xs text-muted-foreground mt-0.5">
                     Permanently wipes all product inventory, sales, ledgers, transactions, and employee vouchers.
-                    <span className="font-semibold text-foreground"> Admin login email & password remain preserved.</span>
+                    <span className="font-semibold text-foreground"> Admin login credentials remain preserved.</span>
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="text-xs text-muted-foreground space-y-1">
                 <p>• Requires valid Administrator Password confirmation.</p>
                 <p>• Cannot be undone once executed.</p>
@@ -457,8 +499,8 @@ export function SettingsManager({ user }) {
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-3 border-b border-border/40">
+          <Card className="border-border shadow-xs bg-card">
+            <CardHeader className="p-4 border-b border-border/40">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Database className="size-4 text-primary" /> Selective Module Data Erasure
               </CardTitle>
@@ -466,10 +508,10 @@ export function SettingsManager({ user }) {
                 Selectively hard-delete specific operational module data from database with password verification.
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-border/60 bg-background/40 flex flex-col justify-between gap-3">
+            <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Boxes className="size-5 text-amber-400" />
+                  <Boxes className="size-5 text-amber-500" />
                   <div>
                     <h4 className="text-xs font-semibold">Inventory & Stock</h4>
                     <p className="text-[11px] text-muted-foreground">All products & categories</p>
@@ -487,9 +529,9 @@ export function SettingsManager({ user }) {
                 )}
               </div>
 
-              <div className="p-4 rounded-xl border border-border/60 bg-background/40 flex flex-col justify-between gap-3">
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <ShoppingCart className="size-5 text-emerald-400" />
+                  <ShoppingCart className="size-5 text-emerald-500" />
                   <div>
                     <h4 className="text-xs font-semibold">POS Sales & Delivery</h4>
                     <p className="text-[11px] text-muted-foreground">POS counter transactions & DC</p>
@@ -507,12 +549,12 @@ export function SettingsManager({ user }) {
                 )}
               </div>
 
-              <div className="p-4 rounded-xl border border-border/60 bg-background/40 flex flex-col justify-between gap-3">
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <BookOpen className="size-5 text-blue-400" />
+                  <BookOpen className="size-5 text-blue-500" />
                   <div>
                     <h4 className="text-xs font-semibold">Khatas & Ledgers</h4>
-                    <p className="text-[11px] text-muted-foreground">Customer & Supplier khatas</p>
+                    <p className="text-[11px] text-muted-foreground">Customer & supplier accounts</p>
                   </div>
                 </div>
                 {isAdmin && (
@@ -527,12 +569,12 @@ export function SettingsManager({ user }) {
                 )}
               </div>
 
-              <div className="p-4 rounded-xl border border-border/60 bg-background/40 flex flex-col justify-between gap-3">
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Banknote className="size-5 text-teal-400" />
+                  <Banknote className="size-5 text-cyan-500" />
                   <div>
                     <h4 className="text-xs font-semibold">Cash Register</h4>
-                    <p className="text-[11px] text-muted-foreground">Cash in / out entries</p>
+                    <p className="text-[11px] text-muted-foreground">Cashbook in/out logs</p>
                   </div>
                 </div>
                 {isAdmin && (
@@ -542,17 +584,17 @@ export function SettingsManager({ user }) {
                     onClick={() => triggerEraseModuleModal("cash", "Cash Register")}
                     className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
                   >
-                    Erase Cash Data
+                    Erase Cash Log
                   </Button>
                 )}
               </div>
 
-              <div className="p-4 rounded-xl border border-border/60 bg-background/40 flex flex-col justify-between gap-3">
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Receipt className="size-5 text-rose-400" />
+                  <Receipt className="size-5 text-purple-500" />
                   <div>
-                    <h4 className="text-xs font-semibold">Expense Records</h4>
-                    <p className="text-[11px] text-muted-foreground">Vouchers & petty expenses</p>
+                    <h4 className="text-xs font-semibold">Expense Vouchers</h4>
+                    <p className="text-[11px] text-muted-foreground">Operating expense records</p>
                   </div>
                 </div>
                 {isAdmin && (
@@ -562,27 +604,47 @@ export function SettingsManager({ user }) {
                     onClick={() => triggerEraseModuleModal("expenses", "Expenses")}
                     className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
                   >
-                    Erase Expenses Data
+                    Erase Expenses
                   </Button>
                 )}
               </div>
 
-              <div className="p-4 rounded-xl border border-border/60 bg-background/40 flex flex-col justify-between gap-3">
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <UserCheck className="size-5 text-purple-400" />
+                  <UserCheck className="size-5 text-indigo-500" />
                   <div>
-                    <h4 className="text-xs font-semibold">HR & Payroll</h4>
-                    <p className="text-[11px] text-muted-foreground">Employee profiles & vouchers</p>
+                    <h4 className="text-xs font-semibold">Employee Payroll</h4>
+                    <p className="text-[11px] text-muted-foreground">Staff profiles & salary advances</p>
                   </div>
                 </div>
                 {isAdmin && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => triggerEraseModuleModal("payroll", "HR & Payroll")}
+                    onClick={() => triggerEraseModuleModal("payroll", "Employee Payroll")}
                     className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
                   >
-                    Erase Payroll Data
+                    Erase Payroll
+                  </Button>
+                )}
+              </div>
+
+              <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Factory className="size-5 text-teal-500" />
+                  <div>
+                    <h4 className="text-xs font-semibold">Textile Mills</h4>
+                    <p className="text-[11px] text-muted-foreground">Textile profiles & contracts</p>
+                  </div>
+                </div>
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => triggerEraseModuleModal("textile", "Textile Mills")}
+                    className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
+                  >
+                    Erase Textile Data
                   </Button>
                 )}
               </div>
@@ -593,11 +655,11 @@ export function SettingsManager({ user }) {
 
       <AdminPasswordModal
         isOpen={securityModal.isOpen}
-        onClose={() => setSecurityModal((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() => setSecurityModal({ isOpen: false, type: null, moduleKey: null, title: "", message: "" })}
         onConfirm={handleConfirmPasswordReset}
         title={securityModal.title}
         message={securityModal.message}
-        actionLabel="Confirm & Erase"
+        actionLabel="Confirm Erasure"
       />
     </div>
   );
