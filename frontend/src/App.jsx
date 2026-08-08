@@ -11,6 +11,7 @@ import { DecantingManager } from "@/components/decanting-manager";
 import { TextileManager } from "@/components/textile-manager";
 import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
+import { CustomerManager } from "@/components/customer-manager";
 import { LedgerManager } from "@/components/ledger-manager";
 import { CashManager } from "@/components/cash-manager";
 import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
@@ -26,6 +27,8 @@ import { DocumentationView } from "@/components/documentation-view";
 import { SettingsManager } from "@/components/settings-manager";
 import { LoginPage } from "@/components/login";
 import { NotFoundPage } from "@/components/not-found";
+
+import { CloudLoader } from "@/components/ui/cloud-loader";
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -62,14 +65,7 @@ export default function App() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground text-xs">
-        <div className="flex items-center gap-2">
-          <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span>Authenticating session...</span>
-        </div>
-      </div>
-    );
+    return <CloudLoader fullScreen label="Authenticating session..." />;
   }
 
   return (
@@ -95,6 +91,7 @@ export default function App() {
                     <Route path="/pos/history" element={<PosHistory />} />
                     <Route path="/decanting" element={<DecantingManager />} />
                     <Route path="/textile" element={<TextileManager />} />
+                    <Route path="/customers" element={<CustomerManager />} />
                     <Route path="/ledger" element={<LedgerManager />} />
                     <Route path="/cash" element={<CashManager />} />
                     <Route path="/sales-purchases" element={<SalesPurchaseManager />} />

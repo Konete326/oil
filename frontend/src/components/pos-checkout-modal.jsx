@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
-import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, BadgePercentIcon, CreditCardIcon, BanknoteIcon } from "lucide-react";
+import { CustomerVendorSelect } from "@/components/ui/customer-vendor-select";
+import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, BadgePercentIcon, CreditCardIcon, BanknoteIcon, AlertTriangleIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, submitting }) {
   const [customerName, setCustomerName] = useState("Walk-in Customer");
+  const [selectedCustomerObj, setSelectedCustomerObj] = useState(null);
   const [saleType, setSaleType] = useState("Retail");
   const [discountMode, setDiscountMode] = useState("fixed");
   const [discount, setDiscount] = useState("0");
@@ -29,6 +31,10 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
   const grandTotal = Math.max(0, Number((cartSubtotal - discountNum + (taxAmount > 0 ? taxAmount : 0)).toFixed(2)));
   const cashReceivedNum = Number(cashReceived) || 0;
   const changeDue = Math.max(0, Number((cashReceivedNum - grandTotal).toFixed(2)));
+
+  const currentBal = selectedCustomerObj?.currentBalance || 0;
+  const credLimit = selectedCustomerObj?.creditLimit || 0;
+  const isCreditBreached = credLimit > 0 && (currentBal + (paymentMode === "Credit / Khata" ? grandTotal : 0) > credLimit);
 
   const isFormValid = customerValid && discountValid && taxValid && cashReceivedValid;
 
@@ -79,14 +85,25 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            <ValidatedInput
-              label="Customer Name"
-              rule="name"
-              required
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              onValidationChange={setCustomerValid}
-            />
+            <div className="space-y-1">
+              <label className="font-medium text-foreground flex items-center gap-1">
+                <UserIcon className="size-3 text-muted-foreground" /> Select Customer
+              </label>
+              <CustomerVendorSelect
+                value={customerName}
+                onChange={(val) => {
+                  setCustomerName(val);
+                  if (selectedCustomerObj && val !== selectedCustomerObj.name) {
+                    setSelectedCustomerObj(null);
+                  }
+                }}
+                onSelectCustomer={(cust) => {
+                  setCustomerName(cust.name);
+                  setSelectedCustomerObj(cust);
+                  if (cust.customerType === "Wholesale") setSaleType("Wholesale");
+                }}
+              />
+            </div>
             <div className="space-y-1">
               <label className="font-medium text-foreground flex items-center gap-1">
                 <TagIcon className="size-3 text-muted-foreground" /> Sale Type
@@ -101,6 +118,23 @@ export function PosCheckoutModal({ isOpen, onClose, cartSubtotal, onConfirm, sub
               </select>
             </div>
           </div>
+
+          {isCreditBreached && (
+            <div className="rounded-lg bg-amber-500/15 border border-amber-500/40 p-2.5 text-amber-500 text-xs flex items-start gap-2 animate-pulse">
+              <AlertTriangleIcon className="size-4 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <div className="font-bold flex items-center gap-1">
+                  <span>⚠️ Credit Limit Breach Alert</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500 text-black font-bold font-mono">
+                    EXCEEDED
+                  </span>
+                </div>
+                <div className="text-[11px] leading-tight opacity-90">
+                  Customer Khata Balance (Rs {currentBal.toLocaleString()}) + sale will breach sanctioned limit of Rs {credLimit.toLocaleString()}!
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">

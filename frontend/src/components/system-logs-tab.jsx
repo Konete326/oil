@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PaginationControl } from "@/components/pagination-control";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CloudLoader } from "@/components/ui/cloud-loader";
 import {
   Terminal,
   Trash2,
@@ -254,8 +255,8 @@ export function SystemLogsTab({ logs, loadingLogs, loadLogs, isAdmin, setSuccess
 
         <CardContent className="p-4 space-y-3 min-h-[300px]">
           {loadingLogs ? (
-            <div className="flex items-center justify-center h-48 text-muted-foreground text-xs gap-2">
-              <RefreshCw className="size-4 animate-spin text-primary" /> Loading diagnostic logs...
+            <div className="flex items-center justify-center h-48">
+              <CloudLoader label="Loading diagnostic logs..." />
             </div>
           ) : paginatedLogs.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-xs gap-2 border border-dashed rounded-xl p-6">

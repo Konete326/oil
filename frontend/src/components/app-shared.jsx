@@ -19,6 +19,7 @@ import {
   BriefcaseIcon,
   BoxesIcon,
   UserCheckIcon,
+  UsersIcon,
   BellIcon,
   SettingsIcon,
 } from "lucide-react";
@@ -81,6 +82,11 @@ export const navGroups = [
         path: "/ledger",
         icon: <BookOpenIcon />,
         subItems: [
+          {
+            title: "Customers & Accounts",
+            path: "/customers",
+            icon: <UsersIcon />,
+          },
           {
             title: "Customer Ledger & Khata",
             path: "/ledger",

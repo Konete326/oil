@@ -883,6 +883,103 @@ export async function eraseModuleDataApi(password, moduleKey) {
   return data;
 }
 
+export async function fetchCustomers(params = {}) {
+  try {
+    const query = new URLSearchParams();
+    if (params.search) query.append("search", params.search);
+    if (params.customerType) query.append("customerType", params.customerType);
+    if (params.status) query.append("status", params.status);
+    if (params.page) query.append("page", params.page);
+    if (params.limit) query.append("limit", params.limit);
+
+    const res = await fetch(`${API_URL}/customers?${query.toString()}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch customers");
+    return await res.json();
+  } catch (err) {
+    console.warn("Customer API error", err);
+    return { success: false, count: 0, total: 0, data: [] };
+  }
+}
+
+export async function fetchCustomerDetail(id) {
+  const res = await fetch(`${API_URL}/customers/${id}`, {
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to fetch customer detail");
+  return data.data;
+}
+
+export async function createCustomerApi(payload) {
+  const res = await fetch(`${API_URL}/customers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to create customer");
+  return data.data;
+}
+
+export async function updateCustomerApi(id, payload) {
+  const res = await fetch(`${API_URL}/customers/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to update customer");
+  return data.data;
+}
+
+export async function deleteCustomerApi(id) {
+  const res = await fetch(`${API_URL}/customers/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete customer");
+  return data;
+}
+
+export async function fetchSuppliers(search = "") {
+  try {
+    const query = search ? `?search=${encodeURIComponent(search)}` : "";
+    const res = await fetch(`${API_URL}/suppliers${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error("Failed to fetch suppliers");
+    return await res.json();
+  } catch (err) {
+    console.warn("Supplier API error", err);
+    return { success: false, count: 0, data: [] };
+  }
+}
+
+export async function updateSupplierApi(id, payload) {
+  const res = await fetch(`${API_URL}/suppliers/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to update supplier");
+  return data.data;
+}
+
+export async function deleteSupplierApi(id) {
+  const res = await fetch(`${API_URL}/suppliers/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeader() },
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete supplier");
+  return data;
+}
+
+
 
 
 
