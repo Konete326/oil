@@ -374,7 +374,6 @@ export function AppHeader({ user, onLogout }) {
               onClick={() => setIsQuickActionOpen(!isQuickActionOpen)}
               className="gap-1 h-9 px-3 text-xs shadow-xs cursor-pointer bg-primary text-primary-foreground"
             >
-              <PlusIcon className="size-3.5" />
               <span>Quick Action</span>
               <ChevronDownIcon className="size-3 ml-0.5" />
             </Button>

@@ -5,24 +5,17 @@ import { XIcon } from "lucide-react";
 
 export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [nameValid, setNameValid] = useState(false);
-  const [codeValid, setCodeValid] = useState(false);
-
-  const isFormValid = nameValid && codeValid;
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
-      setCode(initialData.code || "");
       setDescription(initialData.description || "");
     } else {
       setName("");
-      setCode("");
       setDescription("");
     }
     setError("");
@@ -30,13 +23,27 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
 
   if (!isOpen) return null;
 
+  const autoGenerateCode = (categoryName) => {
+    if (initialData?.code) return initialData.code;
+    if (!categoryName || categoryName.trim().length === 0) return `CAT-${Math.floor(1000 + Math.random() * 9000)}`;
+    const words = categoryName.trim().split(/\s+/).filter(Boolean);
+    let codeStr = "";
+    if (words.length >= 2) {
+      codeStr = words.map((w) => w[0]).join("").toUpperCase().substring(0, 4);
+    } else {
+      codeStr = categoryName.substring(0, 4).toUpperCase();
+    }
+    return `CAT-${codeStr}-${Math.floor(100 + Math.random() * 900)}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isFormValid) return;
+    if (!nameValid) return;
     setLoading(true);
     setError("");
     try {
-      await onSave({ name, code: code.toUpperCase(), description });
+      const generatedCode = autoGenerateCode(name);
+      await onSave({ name, code: generatedCode, description });
       onClose();
     } catch (err) {
       setError(err.message || "Failed to save category");
@@ -75,20 +82,10 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
           />
 
           <ValidatedInput
-            label="Category Code"
-            rule="code"
-            required
-            placeholder="e.g. TEX-OIL"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            onValidationChange={setCodeValid}
-          />
-
-          <ValidatedInput
-            label="Description"
+            label="Description (Optional)"
             rule="text"
             required={false}
-            placeholder="e.g. Specialized oils for Karachi spinning & weaving mills"
+            placeholder="e.g. Specialized oils for spinning & weaving mills"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -97,7 +94,7 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !isFormValid}>
+            <Button type="submit" disabled={loading || !nameValid}>
               {loading ? "Saving..." : initialData ? "Update Category" : "Create Category"}
             </Button>
           </div>
@@ -106,3 +103,4 @@ export function CategoryModal({ isOpen, onClose, onSave, initialData }) {
     </div>
   );
 }
+

@@ -9,6 +9,11 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
     window.print();
   };
 
+  const handleShareWhatsApp = () => {
+    const text = `*AL KHALEEJ LUBRICANTS - DELIVERY GATE PASS*\n*Challan No:* ${challan.challanNumber}\n*Consignee Mill:* ${challan.millName}\n*Product:* ${challan.productName}\n*Quantity:* ${challan.quantityLiters?.toLocaleString()} Liters\n*Vehicle No:* ${challan.vehicleNumber}\n*Driver:* ${challan.driverName} (${challan.driverPhone || "N/A"})\n*Total Amount:* Rs ${challan.totalAmount?.toLocaleString()}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:bg-white print:static">
       <div className="w-full max-w-3xl rounded-xl border border-border bg-background p-8 shadow-2xl space-y-6 my-8 print:border-none print:shadow-none print:w-full print:max-w-none print:p-0">
@@ -18,6 +23,13 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
             <span>Delivery Challan & Official Gate Pass Preview</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={handleShareWhatsApp}
+              className="gap-1.5 cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              Share on WhatsApp
+            </Button>
             <Button size="sm" onClick={handlePrint} className="gap-1.5 cursor-pointer">
               <PrinterIcon className="size-4" />
               Print Gate Pass (A4)

@@ -19,6 +19,11 @@ export function CashPrintStatementModal({ isOpen, onClose, transactions = [], pa
     window.print();
   };
 
+  const handleShareWhatsApp = () => {
+    const text = `*AL KHALEEJ LUBRICANTS - CASH LEDGER STATEMENT*\n*Party Name:* ${partyName}\n*Total Received:* Rs ${totalReceived.toLocaleString()}\n*Total Paid:* Rs ${totalPaid.toLocaleString()}\n*Net Balance:* Rs ${netBalance.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:bg-white print:static">
       <div className="w-full max-w-4xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-6 animate-in fade-in duration-150 print:border-none print:shadow-none print:bg-white print:text-black print:p-0">
@@ -28,6 +33,13 @@ export function CashPrintStatementModal({ isOpen, onClose, transactions = [], pa
             <p className="text-xs text-muted-foreground">Print or Save as PDF with official Al Khaleej Lubricants letterhead.</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={handleShareWhatsApp}
+              className="gap-1.5 cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              Share on WhatsApp
+            </Button>
             <Button size="sm" onClick={handlePrint} className="gap-1.5 cursor-pointer">
               <PrinterIcon className="size-3.5" />
               <span>Print / Save PDF</span>

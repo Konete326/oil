@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DashboardStats({ stats, loading }) {
 	const items = stats || [
 		{ label: "Active users", value: "847", delta: 3.1 },
-		{ label: "Revenue", value: "$18,290", delta: 12.4 },
+		{ label: "Revenue", value: "Rs. 18,290", delta: 12.4 },
 		{ label: "Conversion Rate", value: "3.28%", delta: -0.4 },
 		{ label: "New signups", value: "142", delta: 8.7 },
 	];

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutUserApi } from "@/lib/api";
+import { ConfirmModal } from "@/components/confirm-modal";
 import {
 	Avatar,
 	AvatarFallback,
@@ -22,6 +23,7 @@ import { UserIcon, SettingsIcon, CreditCardIcon, LogOutIcon, SunIcon, MoonIcon }
 export function NavUser({ user: currentUser, onLogout }) {
   const navigate = useNavigate();
   const savedUser = currentUser || JSON.parse(localStorage.getItem("user") || '{"name":"Admin User","email":"admin@gmail.com"}');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -46,68 +48,85 @@ export function NavUser({ user: currentUser, onLogout }) {
     setIsDark((prev) => !prev);
   };
 
-  const handleLogout = (e) => {
-    if (e) e.preventDefault();
+  const handleLogoutConfirm = () => {
+    setShowLogoutConfirm(false);
     logoutUserApi();
     if (onLogout) onLogout();
     navigate("/login", { replace: true });
   };
 
   return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-				<Avatar className="size-8 cursor-pointer">
-					<AvatarImage src="https://github.com/shabanhr.png" />
-					<AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
-				</Avatar>
-			</DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60">
-				<DropdownMenuItem className="flex items-center justify-start gap-2">
-					<DropdownMenuLabel className="flex items-center gap-3">
-						<Avatar className="size-10">
-							<AvatarImage src="https://github.com/shabanhr.png" />
-							<AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
-						</Avatar>
-						<div>
-							<span className="font-medium text-foreground">{savedUser.name}</span>{" "}
-							<br />
-							<div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
-								{savedUser.email}
-							</div>
-						</div>
-					</DropdownMenuLabel>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/users")}>
-						<UserIcon className="size-4 mr-2" />
-						Account
-					</DropdownMenuItem>
-					<DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
-						<SettingsIcon className="size-4 mr-2" />
-						Settings
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem className="w-full cursor-pointer flex items-center justify-between" onClick={toggleTheme}>
-						<div className="flex items-center gap-2">
-							{isDark ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
-							<span>Theme</span>
-						</div>
-						<span className="text-xs text-muted-foreground font-mono">
-							{isDark ? "Dark" : "Light"}
-						</span>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem className="w-full cursor-pointer flex items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={handleLogout}>
-						<LogOutIcon className="size-4" />
-						<span>Log out</span>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-			</DropdownMenuContent>
-        </DropdownMenu>
-    );
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Avatar className="size-8 cursor-pointer">
+            <AvatarImage src="https://github.com/shabanhr.png" />
+            <AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuItem className="flex items-center justify-start gap-2">
+            <DropdownMenuLabel className="flex items-center gap-3">
+              <Avatar className="size-10">
+                <AvatarImage src="https://github.com/shabanhr.png" />
+                <AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
+              </Avatar>
+              <div>
+                <span className="font-medium text-foreground">{savedUser.name}</span>{" "}
+                <br />
+                <div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
+                  {savedUser.email}
+                </div>
+              </div>
+            </DropdownMenuLabel>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/users")}>
+              <UserIcon className="size-4 mr-2" />
+              Account
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
+              <SettingsIcon className="size-4 mr-2" />
+              Settings
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem className="w-full cursor-pointer flex items-center justify-between" onClick={toggleTheme}>
+              <div className="flex items-center gap-2">
+                {isDark ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
+                <span>Theme</span>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">
+                {isDark ? "Dark" : "Light"}
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              className="w-full cursor-pointer flex items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onClick={() => setShowLogoutConfirm(true)}
+            >
+              <LogOutIcon className="size-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogoutConfirm}
+        title="Confirm Logout"
+        message="Are you sure you want to log out of your session?"
+        confirmText="Log Out"
+        variant="logout"
+        icon={LogOutIcon}
+      />
+    </>
+  );
 }
+

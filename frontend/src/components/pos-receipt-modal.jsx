@@ -9,6 +9,11 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
     window.print();
   };
 
+  const handleShareWhatsApp = () => {
+    const text = `*AL KHALEEJ LUBRICANTS - POS RECEIPT*\n*Receipt No:* ${sale.saleNumber}\n*Customer:* ${sale.customerName}\n*Date:* ${new Date(sale.createdAt).toLocaleDateString()}\n*Grand Total:* Rs ${sale.grandTotal?.toLocaleString()}\n*Payment Mode:* ${sale.paymentMode}\nThank you for doing business with us!`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:bg-white print:static">
       <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-2xl space-y-4 my-8 print:border-none print:shadow-none print:w-full print:max-w-none print:p-0">
@@ -18,9 +23,16 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
             <span>POS Sale Completed</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={handleShareWhatsApp}
+              className="gap-1 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              Share on WhatsApp
+            </Button>
             <Button size="sm" onClick={handlePrint} className="gap-1 text-xs cursor-pointer">
               <PrinterIcon className="size-3.5" />
-              Print Thermal Receipt
+              Print
             </Button>
             <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
               <XIcon className="size-4" />

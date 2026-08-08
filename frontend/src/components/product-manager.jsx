@@ -20,7 +20,7 @@ import {
 import { ProductModal } from "@/components/product-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
-import { PlusIcon, Edit3Icon, Trash2Icon, PackageIcon, SearchIcon, AlertTriangleIcon, FilterIcon, ShieldAlertIcon } from "lucide-react";
+import { Plus as PlusIcon, Edit3 as Edit3Icon, Trash2 as Trash2Icon, Package as PackageIcon, Search as SearchIcon, AlertTriangle as AlertTriangleIcon, Filter as FilterIcon, ShieldAlert as ShieldAlertIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const PAGE_SIZE = 7;
