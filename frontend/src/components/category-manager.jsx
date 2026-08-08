@@ -9,6 +9,7 @@ import {
 } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -84,9 +85,22 @@ export function CategoryManager() {
   const [subStatus, setSubStatus] = useState("all");
 
   const filteredCategories = categories.filter((c) => {
-    const matchesSearch =
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.code.toLowerCase().includes(search.toLowerCase());
+    const q = search.toLowerCase().trim();
+    const matchesCategoryNameOrCode =
+      c.name.toLowerCase().includes(q) ||
+      c.code.toLowerCase().includes(q) ||
+      (c.description && c.description.toLowerCase().includes(q));
+
+    const matchesSubcategory =
+      c.subcategories &&
+      c.subcategories.some(
+        (sub) =>
+          sub.name.toLowerCase().includes(q) ||
+          (sub.code && sub.code.toLowerCase().includes(q)) ||
+          (sub.description && sub.description.toLowerCase().includes(q))
+      );
+
+    const matchesSearch = matchesCategoryNameOrCode || matchesSubcategory;
 
     let matchesSub = true;
     if (subStatus === "withSubs") matchesSub = (c.subcategories?.length || 0) > 0;
@@ -130,13 +144,13 @@ export function CategoryManager() {
           <div className="relative col-span-12 md:col-span-10">
             <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search category name or code..."
+              placeholder="Quick search by category name, code, or subcategory name..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8 text-xs h-9 w-full"
+              className="ps-8 text-xs h-9 w-full bg-muted/30 focus:bg-background"
             />
           </div>
 
@@ -167,8 +181,8 @@ export function CategoryManager() {
         ) : filteredCategories.length === 0 ? (
           <div className="p-8 text-center space-y-2">
             <LayersIcon className="size-8 mx-auto text-muted-foreground/60" />
-            <p className="text-sm font-medium text-foreground">No Categories Found</p>
-            <p className="text-xs text-muted-foreground">Click "Add Category" to create your first oil category.</p>
+            <p className="text-sm font-medium text-foreground">No Matching Categories or Subcategories</p>
+            <p className="text-xs text-muted-foreground">Try clearing your search query or click "Add Category".</p>
           </div>
         ) : (
           <>
@@ -177,36 +191,66 @@ export function CategoryManager() {
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-[120px]">Code</TableHead>
                   <TableHead>Category Name</TableHead>
-                  <TableHead>Subcategories</TableHead>
+                  <TableHead>Subcategories & Quick Preview</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedCategories.map((cat) => (
-                  <TableRow key={cat._id} className="hover:bg-muted/20">
-                    <TableCell className="font-mono text-xs font-semibold text-primary">
-                      {cat.code}
-                    </TableCell>
-                    <TableCell className="font-medium text-foreground text-sm">
-                      {cat.name}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 gap-1 px-2 text-xs border-dashed cursor-pointer"
-                          onClick={() => {
-                            setSelectedSubCategory(cat);
-                            setIsSubModalOpen(true);
-                          }}
-                        >
-                          <TagIcon className="size-3 text-primary" />
-                          <span>{cat.subcategories?.length || 0} Subcategories</span>
-                        </Button>
-                      </div>
-                    </TableCell>
+                {paginatedCategories.map((cat) => {
+                  const q = search.toLowerCase().trim();
+                  return (
+                    <TableRow key={cat._id} className="hover:bg-muted/20">
+                      <TableCell className="font-mono text-xs font-semibold text-primary">
+                        {cat.code}
+                      </TableCell>
+                      <TableCell className="font-medium text-foreground text-sm">
+                        {cat.name}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 gap-1 px-2 text-xs border-dashed cursor-pointer shrink-0"
+                            onClick={() => {
+                              setSelectedSubCategory(cat);
+                              setIsSubModalOpen(true);
+                            }}
+                          >
+                            <TagIcon className="size-3 text-primary" />
+                            <span>{cat.subcategories?.length || 0} Subcategories</span>
+                          </Button>
+                          {cat.subcategories?.slice(0, 3).map((sub) => {
+                            const isMatch = q.length > 0 && (
+                              sub.name.toLowerCase().includes(q) ||
+                              (sub.code && sub.code.toLowerCase().includes(q))
+                            );
+                            return (
+                              <Badge
+                                key={sub._id || sub.name}
+                                variant="outline"
+                                className={`text-[10px] cursor-pointer transition-colors ${
+                                  isMatch
+                                    ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 font-bold"
+                                    : "bg-muted/50 text-muted-foreground hover:text-foreground"
+                                }`}
+                                onClick={() => {
+                                  setSelectedSubCategory(cat);
+                                  setIsSubModalOpen(true);
+                                }}
+                              >
+                                {sub.name}
+                              </Badge>
+                            );
+                          })}
+                          {cat.subcategories?.length > 3 && (
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              +{cat.subcategories.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
                       {cat.description || "—"}
                     </TableCell>
@@ -234,8 +278,9 @@ export function CategoryManager() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
+                );
+              })}
+            </TableBody>
             </Table>
 
             <PaginationBar
