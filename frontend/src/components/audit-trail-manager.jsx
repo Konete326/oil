@@ -3,12 +3,16 @@ import { HistoryIcon, SearchIcon, FilterIcon, RefreshCwIcon, UserCheckIcon } fro
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { fetchAuditLogsApi } from "@/lib/api";
+
+const PAGE_SIZE = 10;
 
 export function AuditTrailManager() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedModule, setSelectedModule] = useState("");
 
   const loadAuditLogs = async () => {
@@ -101,7 +105,7 @@ export function AuditTrailManager() {
                   </td>
                 </tr>
               ) : (
-                logs.map((log) => (
+                logs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((log) => (
                   <tr key={log._id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground font-mono text-[11px]">
                       {new Date(log.timestamp || log.createdAt).toLocaleString()}
@@ -128,6 +132,13 @@ export function AuditTrailManager() {
             </tbody>
           </table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(logs.length / PAGE_SIZE) || 1}
+          totalItems={logs.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
     </div>
   );

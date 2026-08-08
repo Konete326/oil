@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
-export function PaginationBar({ currentPage, totalPages, totalItems, pageSize = 7, onPageChange }) {
+export function PaginationBar({ currentPage, totalPages, totalItems, pageSize = 10, onPageChange }) {
   if (totalPages <= 1) return null;
 
   const startItem = (currentPage - 1) * pageSize + 1;

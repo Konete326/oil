@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchDetailedPartyLedgerApi, fetchMills, fetchSuppliersApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
+import { PaginationBar } from "@/components/ui/pagination-bar";
+
+const PAGE_SIZE = 10;
 
 export function PartyLedgerReportView() {
   const [partyType, setPartyType] = useState("Customer");
@@ -14,6 +17,7 @@ export function PartyLedgerReportView() {
   const [endDate, setEndDate] = useState("");
   const [ledgerData, setLedgerData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (partyType === "Customer") {
@@ -225,7 +229,7 @@ export function PartyLedgerReportView() {
                   </td>
                 </tr>
               ) : (
-                ledgerData.map((item, idx) => (
+                ledgerData.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item, idx) => (
                   <tr key={item._id || idx} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                       {new Date(item.date).toLocaleDateString()}
@@ -250,6 +254,13 @@ export function PartyLedgerReportView() {
             </tbody>
           </table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(ledgerData.length / PAGE_SIZE) || 1}
+          totalItems={ledgerData.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
     </div>
   );

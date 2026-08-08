@@ -23,7 +23,7 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import { Plus as PlusIcon, Edit3 as Edit3Icon, Trash2 as Trash2Icon, Package as PackageIcon, Search as SearchIcon, AlertTriangle as AlertTriangleIcon, Filter as FilterIcon, ShieldAlert as ShieldAlertIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 export function ProductManager() {
   const location = useLocation();

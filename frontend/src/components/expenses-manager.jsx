@@ -266,7 +266,7 @@ export function ExpensesManager() {
                   </td>
                 </tr>
               ) : (
-                expenses.map((exp) => (
+                expenses.slice((page - 1) * 10, page * 10).map((exp) => (
                   <tr key={exp._id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                       {new Date(exp.expenseDate).toLocaleDateString()}

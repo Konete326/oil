@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { SearchIcon, ShoppingCartIcon, FactoryIcon, CalendarIcon, ArrowUpRightIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { PaginationBar } from "@/components/ui/pagination-bar";
+
+const PAGE_SIZE = 10;
 
 export function SalesReportView({ period = "monthly", setPeriod, salesData = { posSales: [], challans: [] }, summary = {}, loading = false }) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const allSalesList = [
     ...(salesData.posSales || []).map((s) => ({
@@ -132,7 +136,7 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
                   </td>
                 </tr>
               ) : (
-                filteredSales.map((item) => (
+                filteredSales.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item) => (
                   <tr key={`${item.type}-${item._id}`} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                       {new Date(item.date).toLocaleDateString()}
@@ -165,6 +169,13 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
             </tbody>
           </table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredSales.length / PAGE_SIZE) || 1}
+          totalItems={filteredSales.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
     </div>
   );

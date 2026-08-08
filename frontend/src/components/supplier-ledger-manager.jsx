@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SupplierPaymentModal } from "@/components/supplier-payment-modal";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
   fetchSuppliersApi,
   createSupplierApi,
@@ -21,12 +22,15 @@ import {
 } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
+const PAGE_SIZE = 10;
+
 export function SupplierLedgerManager() {
   const location = useLocation();
   const [suppliers, setSuppliers] = useState([]);
   const [ledgerEntries, setLedgerEntries] = useState([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -264,7 +268,7 @@ export function SupplierLedgerManager() {
                   </td>
                 </tr>
               ) : (
-                filteredLedgerEntries.map((item) => (
+                filteredLedgerEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item) => (
                   <tr key={item._id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -297,6 +301,13 @@ export function SupplierLedgerManager() {
             </tbody>
           </table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredLedgerEntries.length / PAGE_SIZE) || 1}
+          totalItems={filteredLedgerEntries.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       <SupplierPaymentModal

@@ -20,6 +20,7 @@ import { CashTransactionModal } from "@/components/cash-transaction-modal";
 import { CashPartyReport } from "@/components/cash-party-report";
 import { CashPrintStatementModal } from "@/components/cash-print-statement-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
   fetchCashTransactionsApi,
   fetchPartyCashSummaryApi,
@@ -30,6 +31,8 @@ import {
   exportPartySummaryToExcel,
 } from "@/lib/cash-export-utils";
 
+const PAGE_SIZE = 10;
+
 export function CashManager() {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("all");
@@ -37,6 +40,7 @@ export function CashManager() {
   const [partySummaries, setPartySummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [paymentMode, setPaymentMode] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -300,7 +304,7 @@ export function CashManager() {
                       </td>
                     </tr>
                   ) : (
-                    transactions.map((tx) => (
+                    transactions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((tx) => (
                       <tr key={tx._id} className="hover:bg-muted/30 transition-colors">
                         <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                           {new Date(tx.transactionDate || tx.createdAt).toLocaleDateString()}
@@ -345,6 +349,13 @@ export function CashManager() {
                 </tbody>
               </table>
             </div>
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={Math.ceil(transactions.length / PAGE_SIZE) || 1}
+              totalItems={transactions.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
           </div>
         </div>
       )}

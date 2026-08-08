@@ -21,7 +21,7 @@ const TARGET_UNITS = [
   { label: "Bulk Liter", size: 1 },
 ];
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 export function DecantingManager() {
   const [products, setProducts] = useState([]);

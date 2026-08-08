@@ -20,7 +20,7 @@ import { DashboardCard } from "@/components/dashboard-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 export function DashboardInvoices({ invoices = [], loading }) {
   const [currentPage, setCurrentPage] = useState(1);

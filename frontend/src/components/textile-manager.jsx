@@ -26,7 +26,7 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import { FactoryIcon, TruckIcon, PlusIcon, Edit3Icon, Trash2Icon, SearchIcon, PrinterIcon, ShieldCheckIcon, WalletIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 export function TextileManager() {
   const [activeTab, setActiveTab] = useState("challans");

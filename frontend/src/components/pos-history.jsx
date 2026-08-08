@@ -15,7 +15,7 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import { HistoryIcon, SearchIcon, ReceiptIcon, WalletIcon, ShoppingBagIcon, SparklesIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 export function PosHistory() {
   const [salesHistory, setSalesHistory] = useState([]);

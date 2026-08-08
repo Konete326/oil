@@ -2,9 +2,13 @@ import { useState } from "react";
 import { SearchIcon, PlusIcon, PackageCheckIcon, TruckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PaginationBar } from "@/components/ui/pagination-bar";
+
+const PAGE_SIZE = 10;
 
 export function PurchaseReportView({ purchases = [], totalCost = 0, loading = false, onOpenModal }) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredPurchases = purchases.filter(
     (p) =>
@@ -75,7 +79,7 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
                   </td>
                 </tr>
               ) : (
-                filteredPurchases.map((item) => (
+                filteredPurchases.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item) => (
                   <tr key={item._id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 text-muted-foreground text-[11px]">
                       {new Date(item.purchaseDate || item.createdAt).toLocaleDateString()}
@@ -106,6 +110,13 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
             </tbody>
           </table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredPurchases.length / PAGE_SIZE) || 1}
+          totalItems={filteredPurchases.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
     </div>
   );

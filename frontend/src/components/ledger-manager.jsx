@@ -16,7 +16,7 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import { BookOpenIcon, WalletIcon, SearchIcon, PlusIcon, AlertTriangleIcon, CheckCircle2Icon, ClockIcon, FilterIcon, PrinterIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 const AGING_COLORS = {
   "0-30 Days": "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",

@@ -25,7 +25,7 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import { PlusIcon, Edit3Icon, Trash2Icon, FolderTreeIcon, SearchIcon, TagIcon, LayersIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 export function CategoryManager() {
   const [categories, setCategories] = useState([]);

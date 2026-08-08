@@ -15,12 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserModal } from "@/components/user-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { fetchUsersApi, deleteUserApi } from "@/lib/api";
+
+const PAGE_SIZE = 10;
 
 export function UserManagementManager() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -169,7 +173,7 @@ export function UserManagementManager() {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => {
+                filteredUsers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((user) => {
                   const isSelf = currentUser && currentUser._id === user._id;
                   const isAdminUser = user.role === "admin";
                   const isDeleteDisabled = isSelf || isAdminUser;
@@ -262,6 +266,13 @@ export function UserManagementManager() {
             </tbody>
           </table>
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredUsers.length / PAGE_SIZE) || 1}
+          totalItems={filteredUsers.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       <UserModal

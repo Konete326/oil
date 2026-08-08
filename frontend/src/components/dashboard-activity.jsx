@@ -10,7 +10,7 @@ import { CreditCardIcon, UserPlusIcon, FileTextIcon, RocketIcon } from "lucide-r
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
 
 function getIcon(iconType) {
   switch (iconType) {
