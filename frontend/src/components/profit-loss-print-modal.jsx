@@ -191,11 +191,11 @@ export function ProfitLossPrintModal({
           <div className="grid grid-cols-2 gap-4 pb-4 mb-2">
             <div className="border border-indigo-200 bg-indigo-50/50 p-2 text-xs space-y-0.5">
               <div className="flex justify-between font-semibold">
-                <span>Gross margin [L/J]</span>
+                <span>Gross Profit Margin</span>
                 <span className="font-mono">{grossMarginPct}%</span>
               </div>
               <div className="flex justify-between font-semibold">
-                <span>Return on sales [T/J]</span>
+                <span>Net Profit Margin</span>
                 <span className="font-mono">{returnOnSalesPct}%</span>
               </div>
             </div>
@@ -206,7 +206,7 @@ export function ProfitLossPrintModal({
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-400 text-gray-800 font-bold text-center">
                   <th className="border border-gray-300 p-1.5 text-left w-64">
-                    Line Item / Accounts
+                    Item Description
                   </th>
                   <th className="border border-gray-300 p-1.5 w-16">
                     Prior Period
@@ -215,10 +215,10 @@ export function ProfitLossPrintModal({
                     Budget
                   </th>
                   <th className="border border-gray-300 p-1.5 w-24">
-                    Current Period (PKR)
+                    Amount (Rs)
                   </th>
                   <th className="border border-gray-300 p-1.5 w-20">
-                    Current Period as % of Sales
+                    % of Sales
                   </th>
                   <th className="border border-gray-300 p-1.5 w-16">
                     % Change Prior
@@ -235,7 +235,7 @@ export function ProfitLossPrintModal({
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">POS Counter Sales (Direct / Retail)</td>
+                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Counter Retail Sales</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{posSales.toLocaleString()}</td>
@@ -244,7 +244,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Textile Mill Delivery Challans (Billed Bulk)</td>
+                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Bulk Mill Oil Sales</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{challanSales.toLocaleString()}</td>
@@ -253,7 +253,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr className="bg-gray-100 font-bold">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Sales Revenue [J]</td>
+                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Sales Revenue</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{totalSales.toLocaleString()}</td>
@@ -286,7 +286,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr className="bg-gray-100 font-bold">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Cost of Sales [K]</td>
+                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Cost of Sales</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{totalCost.toLocaleString()}</td>
@@ -296,7 +296,7 @@ export function ProfitLossPrintModal({
                 </tr>
 
                 <tr className="bg-indigo-50 font-bold border-y-2 border-black">
-                  <td className="border border-gray-300 p-1.5 text-left text-indigo-950">Gross Profit [L = J - K]</td>
+                  <td className="border border-gray-300 p-1.5 text-left text-indigo-950">Gross Profit</td>
                   <td className="border border-gray-300 p-1.5 text-center">0</td>
                   <td className="border border-gray-300 p-1.5 text-center">0</td>
                   <td className="border border-gray-300 p-1.5 text-right font-mono text-indigo-950">{grossProfit.toLocaleString()}</td>
@@ -311,7 +311,7 @@ export function ProfitLossPrintModal({
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Sales and Marketing (Logistics & Freight) [M]</td>
+                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Sales & Logistics</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{marketingExp.toLocaleString()}</td>
@@ -320,7 +320,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Wages, Payroll and Salaries</td>
+                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Salaries & Payroll</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{adminSalaries.toLocaleString()}</td>
@@ -329,7 +329,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Utilities, Power & Industrial Rent</td>
+                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Utilities, Power & Rent</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{utilitiesRent.toLocaleString()}</td>
@@ -338,7 +338,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Maintenance & General Admin [O]</td>
+                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Maintenance & General Admin</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{maintenanceMisc.toLocaleString()}</td>
@@ -347,7 +347,7 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>
                 <tr className="bg-gray-100 font-bold">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Operating Expenses [P = M + O]</td>
+                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Operating Expenses</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{totalExpenses.toLocaleString()}</td>
@@ -357,7 +357,7 @@ export function ProfitLossPrintModal({
                 </tr>
 
                 <tr className="font-bold bg-gray-50">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Income from Operations [Q = L - P]</td>
+                  <td className="border border-gray-300 p-1.5 text-left text-black">Operating Profit</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{operatingIncome.toLocaleString()}</td>
@@ -367,7 +367,7 @@ export function ProfitLossPrintModal({
                 </tr>
 
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Other Income (Discounts / Scrap) [R]</td>
+                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Other Income</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{otherIncome.toLocaleString()}</td>
@@ -377,7 +377,7 @@ export function ProfitLossPrintModal({
                 </tr>
 
                 <tr>
-                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Taxes & Provisions [S]</td>
+                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Taxes & Provisions</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{taxes.toLocaleString()}</td>
@@ -388,7 +388,7 @@ export function ProfitLossPrintModal({
 
                 <tr className="bg-emerald-50 font-bold border-t-2 border-b-2 border-black text-black">
                   <td className="border border-gray-300 p-2 text-left uppercase text-xs">
-                    Net Profit / Loss [T = Q + R - S]
+                    Net Profit / Loss
                   </td>
                   <td className="border border-gray-300 p-2 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-2 text-center text-gray-600">0</td>
@@ -410,7 +410,7 @@ export function ProfitLossPrintModal({
               Prepared by: Accounts Department
             </div>
             <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
-              Approved by: Chief Executive Officer / Auditor
+              Approved by: Management
             </div>
           </div>
         </div>

@@ -227,27 +227,27 @@ export function CustomerPrintStatement({
 
             <div className="text-right font-mono">
               <span className="font-bold text-xs uppercase underline">
-                CUSTOMER LEDGER STATEMENT
+                ACCOUNT STATEMENT
               </span>
               <p className="text-[10px] text-gray-700 pt-1">
-                Statement Date: {new Date().toLocaleDateString("en-GB")}
+                Date: {new Date().toLocaleDateString("en-GB")}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pb-4 mb-2 text-xs">
             <div className="space-y-0.5">
-              <p className="text-[10px] uppercase font-bold text-gray-700">Account / Customer Title:</p>
+              <p className="text-[10px] uppercase font-bold text-gray-700">Customer Details:</p>
               <p className="font-bold text-sm text-black uppercase">{currentCustomer.name}</p>
               <p className="text-[11px] text-gray-700">{currentCustomer.address || "Main Industrial Depot"}, {currentCustomer.city || "Karachi"}</p>
               {currentCustomer.phone && <p className="text-[11px] text-gray-700">Phone: {currentCustomer.phone}</p>}
             </div>
 
             <div className="space-y-0.5 text-right font-mono">
-              <p className="text-[10px] font-sans uppercase font-bold text-gray-700">Financial Summary:</p>
+              <p className="text-[10px] font-sans uppercase font-bold text-gray-700">Summary:</p>
               <p className="text-[11px] text-gray-800">Opening Balance: <strong>Rs {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-              <p className="text-[11px] text-gray-800">Total Billed (Debits): <strong>Rs {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-              <p className="text-[11px] text-gray-800">Total Received (Credits): <strong>Rs {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-[11px] text-gray-800">Total Billed: <strong>Rs {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-[11px] text-gray-800">Total Paid: <strong>Rs {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
             </div>
           </div>
 
@@ -256,12 +256,12 @@ export function CustomerPrintStatement({
               <thead>
                 <tr className="border-b border-black font-bold uppercase text-[11px]">
                   <th className="py-2 px-2 w-20 text-left">Date</th>
-                  <th className="py-2 px-2 w-14 text-left">Ref.</th>
-                  <th className="py-2 px-2 w-24 text-left">Branch</th>
-                  <th className="py-2 px-2 text-left">Narration</th>
-                  <th className="py-2 px-2 text-right w-24">Debit (PKR)</th>
-                  <th className="py-2 px-2 text-right w-24">Credit (PKR)</th>
-                  <th className="py-2 px-2 text-right w-28">Balance (PKR)</th>
+                  <th className="py-2 px-2 w-16 text-left">Invoice #</th>
+                  <th className="py-2 px-2 w-24 text-left">Location</th>
+                  <th className="py-2 px-2 text-left">Description</th>
+                  <th className="py-2 px-2 text-right w-24">Billed (Rs)</th>
+                  <th className="py-2 px-2 text-right w-24">Paid (Rs)</th>
+                  <th className="py-2 px-2 text-right w-28">Balance (Rs)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-300 font-sans">
@@ -271,7 +271,7 @@ export function CustomerPrintStatement({
                   </td>
                   <td className="py-1.5 px-2 font-mono text-gray-700">-</td>
                   <td className="py-1.5 px-2 text-gray-700 uppercase">-</td>
-                  <td className="py-1.5 px-2 font-medium text-black">Opening</td>
+                  <td className="py-1.5 px-2 font-medium text-black">Opening Balance</td>
                   <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
                   <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
                   <td className="py-1.5 px-2 text-right font-mono font-semibold text-black">
@@ -318,7 +318,7 @@ export function CustomerPrintStatement({
 
                 <tr className="border-t border-black font-bold bg-gray-50">
                   <td colSpan={4} className="py-2.5 px-2 text-left uppercase text-xs">
-                    Your balance
+                    Current Net Balance
                   </td>
                   <td colSpan={2}></td>
                   <td className="py-2.5 px-2 text-right font-mono text-sm text-black">
@@ -331,10 +331,10 @@ export function CustomerPrintStatement({
 
           <div className="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
             <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
-              Customer Sign & Verification
+              Customer Signature
             </div>
             <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
-              Authorized Accountant (Al Khaleej)
+              Authorized Signature
             </div>
           </div>
         </div>

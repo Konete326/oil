@@ -153,7 +153,7 @@ export function TrialBalancePrintModal({
                 AL KHALEEJ LUBRICANTS
               </h1>
               <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
-                TRIAL BALANCE FINANCIAL STATEMENT
+                TRIAL BALANCE STATEMENT
               </p>
               <p className="text-[11px] text-gray-700 font-medium">
                 Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
@@ -167,7 +167,7 @@ export function TrialBalancePrintModal({
               <span className={`inline-block px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${
                 isBalanced ? "border-emerald-600 text-emerald-700 bg-emerald-50" : "border-amber-600 text-amber-700 bg-amber-50"
               }`}>
-                {isBalanced ? "ACCOUNTS BALANCED" : "RECONCILIATION DIFFERENCE"}
+                {isBalanced ? "BALANCED" : "DIFFERENCE"}
               </span>
               <p className="text-[11px] font-mono text-gray-800 font-semibold pt-1">
                 As of: {currentDate}
@@ -183,16 +183,16 @@ export function TrialBalancePrintModal({
                     Code
                   </th>
                   <th className="border border-black p-2 text-left">
-                    Account Title / Particulars
+                    Account Name
                   </th>
                   <th className="border border-black p-2 w-28 text-center">
-                    Classification
+                    Category
                   </th>
                   <th className="border border-black p-2 w-32 text-right">
-                    Debit Balance (PKR)
+                    Debit (Rs)
                   </th>
                   <th className="border border-black p-2 w-32 text-right">
-                    Credit Balance (PKR)
+                    Credit (Rs)
                   </th>
                 </tr>
               </thead>
@@ -231,7 +231,7 @@ export function TrialBalancePrintModal({
 
                 <tr className="border-t-2 border-black font-bold bg-gray-100 text-xs">
                   <td colSpan={3} className="border border-black p-2 text-left uppercase">
-                    Grand Total Balance
+                    Total Amount
                   </td>
                   <td className="border border-black p-2 text-right font-mono text-black">
                     {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -244,7 +244,7 @@ export function TrialBalancePrintModal({
                 {!isBalanced && (
                   <tr className="bg-amber-50 font-bold text-amber-900">
                     <td colSpan={3} className="border border-black p-1.5 text-left uppercase text-[10px]">
-                      Net Difference (Unbalanced)
+                      Difference
                     </td>
                     <td colSpan={2} className="border border-black p-1.5 text-right font-mono text-xs">
                       Rs. {difference.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -257,18 +257,18 @@ export function TrialBalancePrintModal({
 
           <div className="pt-10 grid grid-cols-2 gap-12 text-xs">
             <div className="space-y-6">
-              <p className="font-semibold text-[11px]">Prepared by: Senior Accounts Officer</p>
+              <p className="font-semibold text-[11px]">Prepared by:</p>
               <div className="pt-4 border-t border-black w-4/5">
-                <p className="font-bold uppercase text-[11px]">AL KHALEEJ FINANCE DEPARTMENT</p>
-                <p className="text-[10px] text-gray-700">Accountant Signature & Stamp</p>
+                <p className="font-bold uppercase text-[11px]">AL KHALEEJ FINANCE</p>
+                <p className="text-[10px] text-gray-700">Accountant Signature</p>
               </div>
             </div>
 
             <div className="space-y-6 text-right flex flex-col items-end">
-              <p className="font-semibold text-[11px]">Audited & Approved by: Financial Controller</p>
+              <p className="font-semibold text-[11px]">Approved by:</p>
               <div className="pt-4 border-t border-black w-4/5 text-right">
-                <p className="font-bold uppercase text-[11px]">CHIEF FINANCIAL OFFICER</p>
-                <p className="text-[10px] text-gray-700">Auditor Signature & Date</p>
+                <p className="font-bold uppercase text-[11px]">MANAGEMENT</p>
+                <p className="text-[10px] text-gray-700">Authorized Signature</p>
               </div>
             </div>
           </div>

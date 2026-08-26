@@ -125,41 +125,41 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
 
           <div className="text-center py-1.5 mb-3 print:py-1 print:mb-2">
             <span className="font-black text-sm tracking-wider uppercase underline underline-offset-4 decoration-2">
-              DELIVERY CHALLAN & OFFICIAL GATE PASS
+              DELIVERY CHALLAN & GATE PASS
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white">
               <p className="text-[10px] font-bold uppercase tracking-wider text-gray-800">
-                CONSIGNEE / TEXTILE MILL:
+                CUSTOMER / TEXTILE MILL:
               </p>
               <p className="font-bold text-sm text-black uppercase">
                 {challan.millName}
               </p>
               <p className="text-[11px] text-gray-700 leading-tight">
-                {challan.mill?.zone || "KARACHI INDUSTRIAL TEXTILE ZONE, SINDH"}
+                {challan.mill?.zone || "Karachi Industrial Zone, Sindh."}
               </p>
               <p className="text-[11px] text-gray-800 font-medium">
-                DISPATCH STATUS: {challan.gatePassStatus || "DISPATCHED / VERIFIED"}
+                STATUS: {challan.gatePassStatus || "DISPATCHED"}
               </p>
             </div>
 
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-right font-mono">
-              <p className="text-[10px] font-sans text-gray-600">
-                Date: {new Date(challan.createdAt || Date.now()).toLocaleDateString("en-GB")}
-              </p>
               <p className="text-xs font-bold text-black">
-                CHALLAN NO: {challan.challanNumber}
+                CHALLAN #: {challan.challanNumber}
               </p>
               <p className="text-[11px] text-gray-800">
-                VEHICLE NO: <strong className="text-black uppercase">{challan.vehicleNumber}</strong>
+                DATE: {new Date(challan.createdAt || Date.now()).toLocaleDateString("en-GB")}
+              </p>
+              <p className="text-[11px] text-gray-800">
+                VEHICLE #: <strong className="text-black uppercase">{challan.vehicleNumber || "-"}</strong>
               </p>
               <p className="text-[10px] text-gray-700 font-sans">
-                DRIVER: <strong>{challan.driverName}</strong> {challan.driverPhone ? `(${challan.driverPhone})` : ""}
+                DRIVER: <strong>{challan.driverName || "-"}</strong> {challan.driverPhone ? `(${challan.driverPhone})` : ""}
               </p>
               <p className="text-[10px] text-gray-700 font-sans">
-                TANKER DIP: <strong>{challan.dipMeasurementInches}" INCHES</strong>
+                DIP: <strong>{challan.dipMeasurementInches ? `${challan.dipMeasurementInches}" Inches` : "-"}</strong>
               </p>
             </div>
           </div>
@@ -168,12 +168,11 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-gray-200 text-black border-b border-black font-bold uppercase text-[11px]">
-                  <th className="py-2 px-3 w-12 text-center border-r border-black">S/L</th>
-                  <th className="py-2 px-3 border-r border-black">PARTICULAR / PRODUCT GRADE</th>
-                  <th className="py-2 px-3 text-center border-r border-black w-28">HS CODE</th>
-                  <th className="py-2 px-3 text-center border-r border-black w-24">LTR / QTY</th>
-                  <th className="py-2 px-3 text-right border-r border-black w-28">RATE (RS/L)</th>
-                  <th className="py-2 px-3 text-right w-32">TOTAL AMOUNT (PKR)</th>
+                  <th className="py-2 px-3 w-12 text-center border-r border-black">#</th>
+                  <th className="py-2 px-3 border-r border-black">PRODUCT DESCRIPTION</th>
+                  <th className="py-2 px-3 text-center border-r border-black w-28">QUANTITY (LTR)</th>
+                  <th className="py-2 px-3 text-right border-r border-black w-28">RATE (RS)</th>
+                  <th className="py-2 px-3 text-right w-32">TOTAL (RS)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-black font-sans">
@@ -181,9 +180,6 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                   <td className="py-2.5 px-3 text-center font-bold border-r border-black font-mono">1</td>
                   <td className="py-2.5 px-3 font-bold text-black uppercase border-r border-black">
                     {challan.productName}
-                  </td>
-                  <td className="py-2.5 px-3 text-center font-mono border-r border-black text-gray-800">
-                    2710.19.31
                   </td>
                   <td className="py-2.5 px-3 text-center font-bold font-mono border-r border-black">
                     {quantityLiters.toLocaleString()}
@@ -196,7 +192,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                   </td>
                 </tr>
                 <tr className="bg-gray-100 font-bold border-t-2 border-black">
-                  <td colSpan={3} className="py-2.5 px-3 text-right uppercase tracking-wider border-r border-black">
+                  <td colSpan={2} className="py-2.5 px-3 text-right uppercase tracking-wider border-r border-black">
                     TOTAL
                   </td>
                   <td className="py-2.5 px-3 text-center font-mono border-r border-black text-black">
@@ -212,16 +208,16 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
           </div>
 
           <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-6 font-mono text-[11px] font-semibold text-black">
-            <span>IN Word Total PKR : </span>
+            <span>Amount in Words: </span>
             <span className="font-bold underline decoration-1">{numberToWords(grandTotal)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-6 pt-2 items-end">
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-[10px] font-mono leading-relaxed">
-              <p className="font-bold text-[11px] text-black">GATE PASS VERIFICATION</p>
+              <p className="font-bold text-[11px] text-black">Gate Pass Verification:</p>
               <p>Vehicle Dispatched from Main Depot</p>
               <p>Tanker Seal Number Verified</p>
-              <p>Security Checkpoint: Cleared & Logged</p>
+              <p>Security Checkpoint: Cleared</p>
             </div>
 
             <div className="space-y-12 text-right">
@@ -229,8 +225,8 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                 <div className="text-center">
                   <div className="size-16 rounded-full border-2 border-dashed border-gray-700 flex flex-col items-center justify-center p-1 text-[8px] font-bold text-gray-800 uppercase tracking-tighter transform -rotate-12 mx-auto mb-1">
                     <span>AL KHALEEJ</span>
-                    <span className="text-[6px]">CO. NO. 323096-W</span>
-                    <span>DISPATCH LOG</span>
+                    <span className="text-[6px]">LUBRICANTS</span>
+                    <span>DISPATCH</span>
                   </div>
                   <div className="border-t border-black pt-1 w-36 text-center font-bold text-[9px] uppercase">
                     <p>AL KHALEEJ LUBRICANTS</p>
@@ -241,7 +237,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                 <div className="text-center">
                   <div className="h-14"></div>
                   <div className="border-t border-black pt-1 w-44 text-center font-bold text-[9px] uppercase">
-                    MILL RECEIVER SIGN & STAMP
+                    Receiver Signature
                   </div>
                 </div>
               </div>

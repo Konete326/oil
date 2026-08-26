@@ -170,7 +170,7 @@ export function ExpensePrintStatementModal({
                 AL KHALEEJ LUBRICANTS
               </h1>
               <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
-                OPERATIONAL EXPENSES SUMMARY & VOUCHER RECONCILIATION
+                EXPENSES STATEMENT
               </p>
               <p className="text-[11px] text-gray-700 font-medium">
                 Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
@@ -182,7 +182,7 @@ export function ExpensePrintStatementModal({
 
             <div className="text-right space-y-1">
               <div className="border border-black p-2 bg-gray-50 text-right">
-                <span className="text-[10px] font-bold text-gray-600 uppercase block">Grand Total Outflow:</span>
+                <span className="text-[10px] font-bold text-gray-600 uppercase block">Total Expenses:</span>
                 <span className="text-sm font-bold font-mono text-black">
                   Rs. {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
@@ -195,7 +195,7 @@ export function ExpensePrintStatementModal({
 
           <div className="mb-4">
             <div className="text-[10px] font-bold uppercase text-gray-800 pb-1">
-              Category-Wise Expenses Breakdown
+              Category Breakdown
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
               {Object.entries(categoryTotals).map(([cat, amt]) => (
@@ -218,16 +218,16 @@ export function ExpensePrintStatementModal({
                     Voucher #
                   </th>
                   <th className="border border-black p-1.5 text-left">
-                    Expense Title / Particulars
+                    Description
                   </th>
                   <th className="border border-black p-1.5 w-28 text-center">
-                    Category Head
+                    Category
                   </th>
                   <th className="border border-black p-1.5 w-20 text-center">
-                    Payment Mode
+                    Payment Method
                   </th>
                   <th className="border border-black p-1.5 w-28 text-right">
-                    Amount (PKR)
+                    Amount (Rs)
                   </th>
                 </tr>
               </thead>
@@ -265,7 +265,7 @@ export function ExpensePrintStatementModal({
 
                 <tr className="border-t-2 border-black font-bold bg-gray-100 text-xs">
                   <td colSpan={5} className="border border-black p-2 text-left uppercase">
-                    Grand Total Operational Expenses :
+                    Total Expenses:
                   </td>
                   <td className="border border-black p-2 text-right font-mono text-black">
                     {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -275,25 +275,18 @@ export function ExpensePrintStatementModal({
             </table>
           </div>
 
-          <div className="pt-8 grid grid-cols-3 gap-6 text-center text-[10px]">
+          <div className="pt-8 grid grid-cols-2 gap-8 text-center text-[10px]">
             <div className="space-y-6">
               <div className="pt-3 border-t border-black">
                 <p className="font-bold uppercase">{activeOperator}</p>
-                <p className="text-gray-700">Prepared by (Cashier / Accounts)</p>
+                <p className="text-gray-700">Prepared By</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="pt-3 border-t border-black">
-                <p className="font-bold uppercase">Senior Accounts Officer</p>
-                <p className="text-gray-700">Verified & Checked by</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="pt-3 border-t border-black">
-                <p className="font-bold uppercase">Managing Director / CFO</p>
-                <p className="text-gray-700">Approved & Certified by</p>
+                <p className="font-bold uppercase">MANAGEMENT</p>
+                <p className="text-gray-700">Approved By</p>
               </div>
             </div>
           </div>

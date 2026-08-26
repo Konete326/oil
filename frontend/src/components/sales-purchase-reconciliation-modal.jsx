@@ -208,32 +208,28 @@ export function SalesPurchaseReconciliationModal({
         >
           <div className="pb-4 space-y-1">
             <h1 className="font-extrabold text-xs uppercase tracking-tight text-black">
-              {activeType.toUpperCase()} TRANSACTION
+              {activeType.toUpperCase()} TRANSACTIONS
             </h1>
             <p className="font-bold text-[11px] uppercase underline text-black">
-              RECONCILIATION OF LISTING FOR ENFORCEMENT
+              MONTHLY RECONCILIATION REPORT
             </p>
             <p className="font-bold text-[10px] uppercase text-black pt-0.5">
-              FOR THE MONTH OF : <span className="underline">{currentMonthName}</span>
+              Month: <span className="underline">{currentMonthName}</span>
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pb-4 mb-1 text-[10px] leading-tight font-sans">
             <div className="space-y-0.5">
               <div className="flex">
-                <span className="w-36 font-bold uppercase">TIN / NTN :</span>
+                <span className="w-36 font-bold uppercase">NTN / STRN:</span>
                 <span className="font-mono font-bold">010-534-770-000</span>
               </div>
               <div className="flex">
-                <span className="w-36 font-bold uppercase">OWNER'S NAME :</span>
+                <span className="w-36 font-bold uppercase">Company Name:</span>
                 <span className="font-bold uppercase">AL KHALEEJ LUBRICANTS</span>
               </div>
               <div className="flex">
-                <span className="w-36 font-bold uppercase">OWNER'S TRADE NAME :</span>
-                <span className="font-bold uppercase">AL KHALEEJ LUBRICANTS</span>
-              </div>
-              <div className="flex">
-                <span className="w-36 font-bold uppercase">OWNER'S ADDRESS :</span>
+                <span className="w-36 font-bold uppercase">Company Address:</span>
                 <span>Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan</span>
               </div>
             </div>
@@ -244,34 +240,34 @@ export function SalesPurchaseReconciliationModal({
               <thead>
                 <tr className="border-b-2 border-black text-center font-bold uppercase tracking-tight">
                   <th className="border border-black p-1.5 w-16">
-                    TAXABLE<br /><br />MONTH<br />(1)
+                    Month
                   </th>
                   <th className="border border-black p-1.5 w-24">
-                    TAXPAYER<br /><br />IDENTIFICATION<br />NUMBER<br />(2)
+                    NTN / Tax #
                   </th>
                   <th className="border border-black p-1.5 w-36">
-                    REGISTERED NAME (IF THE<br />{activeType === "purchases" ? "SUPPLIER" : "CUSTOMER"} IS CORPORATION)<br /><br />(3)
+                    {activeType === "purchases" ? "Supplier Name" : "Customer Name"}
                   </th>
                   <th className="border border-black p-1.5 w-32">
-                    NAME OF {activeType === "purchases" ? "SUPPLIER" : "CUSTOMER"} (IF Sole<br />Proprietor)<br />(Last Name, First Name)<br />(4)
+                    Contact Person
                   </th>
                   <th className="border border-black p-1.5 w-36">
-                    {activeType === "purchases" ? "SUPPLIER'S" : "CUSTOMER'S"} ADDRESS<br /><br /><br />(5)
+                    Address
                   </th>
-                  <th className="border border-black p-1.5 w-40 bg-yellow-300 text-black">
-                    PARTICULAR<br /><br /><br />(6)
-                  </th>
-                  <th className="border border-black p-1.5 w-24">
-                    AMOUNT OF<br /><br />GROSS {activeType === "purchases" ? "PURCHASE" : "SALE"}<br />(Excluded Input Vat)<br />(7)
-                  </th>
-                  <th className="border border-black p-1.5 w-20">
-                    AMOUNT OF<br /><br />EXEMPT<br />{activeType === "purchases" ? "PURCHASE" : "SALE"}<br />(8)
-                  </th>
-                  <th className="border border-black p-1.5 w-20">
-                    AMOUNT OF<br /><br />ZERO-RATED<br />{activeType === "purchases" ? "PURCHASE" : "SALE"}<br />(9)
+                  <th className="border border-black p-1.5 w-40 bg-gray-100 text-black">
+                    Product Description
                   </th>
                   <th className="border border-black p-1.5 w-24">
-                    AMOUNT OF<br /><br />TAXABLE {activeType === "purchases" ? "PURCHASE" : "SALE"}<br />(Total PKR)<br />(10)
+                    Gross Amount (Rs)
+                  </th>
+                  <th className="border border-black p-1.5 w-20">
+                    Tax Exempt (Rs)
+                  </th>
+                  <th className="border border-black p-1.5 w-20">
+                    Tax (Rs)
+                  </th>
+                  <th className="border border-black p-1.5 w-24">
+                    Total Amount (Rs)
                   </th>
                 </tr>
               </thead>
@@ -279,7 +275,7 @@ export function SalesPurchaseReconciliationModal({
                 {displayRows.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="p-8 text-center text-gray-500 border border-black text-[11px]">
-                      No {activeType} reconciliation entries recorded for this period.
+                      No {activeType} reconciliation records found for this period.
                     </td>
                   </tr>
                 ) : (

@@ -175,7 +175,7 @@ export function CashPrintStatementModal({
 
           <div className="text-center pb-4">
             <h1 className="text-sm md:text-base font-bold uppercase tracking-wider text-black">
-              SUBSIDIARY LEDGER FOR CASH TRANSACTIONS & CASH ADVANCES
+              CASH BOOK STATEMENT
             </h1>
             <p className="text-[11px] text-gray-700 font-medium">
               AL KHALEEJ LUBRICANTS
@@ -185,29 +185,25 @@ export function CashPrintStatementModal({
           <div className="border border-black mb-4 text-[11px] leading-relaxed">
             <div className="grid grid-cols-1 divide-y divide-black">
               <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Station / Branch / Depot:</span>
-                <span className="font-bold uppercase text-black">AL KHALEEJ MAIN DEPOT / POS REGISTER</span>
+                <span className="w-48 font-semibold text-black">Branch / Location:</span>
+                <span className="font-bold uppercase text-black">Main Depot / POS Register</span>
               </div>
               <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">City / Industrial Area:</span>
-                <span className="text-black">Plot #44/B, Korangi Industrial Area, Karachi</span>
+                <span className="w-48 font-semibold text-black">Address:</span>
+                <span className="text-black">Plot #44/B, Korangi Industrial Area, Karachi, Pakistan</span>
               </div>
               <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Province / Country:</span>
-                <span className="text-black">Sindh, Pakistan</span>
-              </div>
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Cashier / Treasurer In-Charge:</span>
+                <span className="w-48 font-semibold text-black">Cashier / Operator:</span>
                 <span className="font-semibold text-black uppercase">{activeOperator}</span>
               </div>
               <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Account Title / Party:</span>
+                <span className="w-48 font-semibold text-black">Account / Party Name:</span>
                 <span className="font-bold text-black uppercase">{partyName}</span>
               </div>
               <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Position / Terminal / Period:</span>
+                <span className="w-48 font-semibold text-black">Period:</span>
                 <span className="text-black">
-                  Chief Cashier | {startDate ? new Date(startDate).toLocaleDateString("en-GB") : "All Dates"} — {endDate ? new Date(endDate).toLocaleDateString("en-GB") : new Date().toLocaleDateString("en-GB")}
+                  {startDate ? new Date(startDate).toLocaleDateString("en-GB") : "Start"} — {endDate ? new Date(endDate).toLocaleDateString("en-GB") : new Date().toLocaleDateString("en-GB")}
                 </span>
               </div>
             </div>
@@ -221,21 +217,21 @@ export function CashPrintStatementModal({
                     Date
                   </th>
                   <th rowSpan={2} className="border-r border-black p-2 text-left">
-                    Particulars / Narration
+                    Description
                   </th>
                   <th rowSpan={2} className="border-r border-black p-2 w-20 text-center">
-                    Reference
+                    Voucher #
                   </th>
                   <th colSpan={3} className="border-b border-black p-1.5 text-center">
-                    Amount (PKR)
+                    Amount (Rs)
                   </th>
                 </tr>
                 <tr className="border-b border-black font-bold text-center">
                   <th className="border-r border-black p-1.5 w-28 text-right">
-                    Cash Inflow / Receipt
+                    Cash In
                   </th>
                   <th className="border-r border-black p-1.5 w-28 text-right">
-                    Cash Outflow / Paid
+                    Cash Out
                   </th>
                   <th className="p-1.5 w-28 text-right">
                     Balance
@@ -298,18 +294,18 @@ export function CashPrintStatementModal({
 
           <div className="pt-10 grid grid-cols-2 gap-12 text-xs">
             <div className="space-y-6">
-              <p className="font-semibold text-[11px]">Prepared and Certified Correct by:</p>
+              <p className="font-semibold text-[11px]">Prepared by:</p>
               <div className="pt-4 border-t border-black w-4/5">
                 <p className="font-bold uppercase text-[11px]">{activeOperator}</p>
-                <p className="text-[10px] text-gray-700">Cashier Signature & Date</p>
+                <p className="text-[10px] text-gray-700">Cashier Signature</p>
               </div>
             </div>
 
             <div className="space-y-6 text-right flex flex-col items-end">
-              <p className="font-semibold text-[11px]">Approved and Verified by:</p>
+              <p className="font-semibold text-[11px]">Approved by:</p>
               <div className="pt-4 border-t border-black w-4/5 text-right">
-                <p className="font-bold uppercase text-[11px]">AL KHALEEJ ACCOUNTS AUDITOR</p>
-                <p className="text-[10px] text-gray-700">Accounting Manager / Auditor Signature</p>
+                <p className="font-bold uppercase text-[11px]">AL KHALEEJ ACCOUNTS</p>
+                <p className="text-[10px] text-gray-700">Authorized Signature</p>
               </div>
             </div>
           </div>

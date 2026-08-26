@@ -137,46 +137,40 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
 
           <div className="text-center py-2 mb-4">
             <span className="font-black text-sm tracking-wider uppercase underline underline-offset-4 decoration-2">
-              PROFORMA INVOICE
+              SALES INVOICE
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white">
               <p className="text-[10px] font-bold uppercase tracking-wider text-gray-800">
-                CONSIGNEE / BUYER:
+                CUSTOMER / BUYER:
               </p>
               <p className="font-bold text-sm text-black uppercase">
-                {sale.customerName || sale.millName || "R. M. AUTOMOBILES & TEXTILES"}
+                {sale.customerName || sale.millName || "DIRECT CUSTOMER"}
               </p>
               <p className="text-[11px] text-gray-700 leading-tight">
-                {sale.customerAddress || sale.deliveryAddress || "PLOT NO-03, MAIN ROAD, INDUSTRIAL AREA, KARACHI, PAKISTAN."}
+                {sale.customerAddress || sale.deliveryAddress || "Plot No-03, Main Road, Industrial Area, Karachi."}
               </p>
               {sale.customerPhone && (
                 <p className="text-[11px] text-gray-800 font-medium">
-                  TEL / PHONE: {sale.customerPhone}
+                  Phone: {sale.customerPhone}
                 </p>
               )}
             </div>
 
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-right font-mono">
-              <p className="text-[10px] font-sans text-gray-600">
-                Revised on: {new Date(sale.createdAt || Date.now()).toLocaleDateString("en-GB")}
-              </p>
               <p className="text-xs font-bold text-black">
-                REF NO: {sale.saleNumber || sale.challanNumber || "OV24-RM-001"}
+                INVOICE #: {sale.saleNumber || sale.challanNumber || "INV-001"}
               </p>
               <p className="text-[11px] text-gray-800">
                 DATE: {new Date(sale.createdAt || Date.now()).toLocaleDateString("en-GB")}
               </p>
               <p className="text-[10px] text-gray-700 font-sans">
-                TERMS: <strong className="text-black uppercase">{sale.paymentMode || "CNF / EX-MILL"}</strong>
+                PAYMENT: <strong className="text-black uppercase">{sale.paymentMode || "CASH"}</strong>
               </p>
               <p className="text-[10px] text-gray-700 font-sans">
-                PORT / DESTINATION: <strong>KARACHI INDUSTRIAL ZONE</strong>
-              </p>
-              <p className="text-[10px] text-gray-700 font-sans">
-                VOLUME: <strong>{totalQuantityLiters} LTR / UNITS</strong>
+                TOTAL QUANTITY: <strong>{totalQuantityLiters} UNITS / LTR</strong>
               </p>
             </div>
           </div>
@@ -185,12 +179,11 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-gray-200 text-black border-b border-black font-bold uppercase text-[11px]">
-                  <th className="py-2 px-3 w-12 text-center border-r border-black">S/L</th>
-                  <th className="py-2 px-3 border-r border-black">PARTICULAR</th>
-                  <th className="py-2 px-3 text-center border-r border-black w-28">HS CODE</th>
-                  <th className="py-2 px-3 text-center border-r border-black w-24">LTR / QTY</th>
-                  <th className="py-2 px-3 text-right border-r border-black w-28">UNIT PRICE (PKR)</th>
-                  <th className="py-2 px-3 text-right w-32">TOTAL AMOUNT (PKR)</th>
+                  <th className="py-2 px-3 w-12 text-center border-r border-black">#</th>
+                  <th className="py-2 px-3 border-r border-black">PRODUCT / ITEM</th>
+                  <th className="py-2 px-3 text-center border-r border-black w-24">QUANTITY</th>
+                  <th className="py-2 px-3 text-right border-r border-black w-28">RATE (RS)</th>
+                  <th className="py-2 px-3 text-right w-32">TOTAL (RS)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-black font-sans">
@@ -201,9 +194,6 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                     </td>
                     <td className="py-2 px-3 font-bold text-black uppercase border-r border-black">
                       {item.productName} {item.unitType ? `(${item.unitType})` : ""}
-                    </td>
-                    <td className="py-2 px-3 text-center font-mono border-r border-black text-gray-800">
-                      {item.hsCode || "2710.19.31"}
                     </td>
                     <td className="py-2 px-3 text-center font-bold font-mono border-r border-black">
                       {item.quantity}
@@ -217,7 +207,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                   </tr>
                 ))}
                 <tr className="bg-gray-100 font-bold border-t-2 border-black">
-                  <td colSpan={3} className="py-2.5 px-3 text-right uppercase tracking-wider border-r border-black">
+                  <td colSpan={2} className="py-2.5 px-3 text-right uppercase tracking-wider border-r border-black">
                     TOTAL
                   </td>
                   <td className="py-2.5 px-3 text-center font-mono border-r border-black text-black">
@@ -233,17 +223,16 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
           </div>
 
           <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-6 font-mono text-[11px] font-semibold text-black">
-            <span>IN Word Total PKR : </span>
+            <span>Amount in Words: </span>
             <span className="font-bold underline decoration-1">{numberToWords(grandTotal)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-6 pt-2 items-end">
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-[10px] font-mono leading-relaxed">
-              <p className="font-bold text-[11px] text-black">A/C NO: 0109-900-104-1</p>
-              <p>Beneficiary: <strong>AL KHALEEJ LUBRICANTS</strong></p>
-              <p>UNITED OVERSEAS BANK / MEEZAN BANK LTD</p>
-              <p>31-1 & 31-2 MAIN KORANGI ROAD, KARACHI</p>
-              <p>SWIFT CODE: UOVBMYKL / MEZNPKKA</p>
+              <p className="font-bold text-[11px] text-black">Bank Account Details:</p>
+              <p>Account Title: <strong>AL KHALEEJ LUBRICANTS</strong></p>
+              <p>Account #: 0109-900-104-1</p>
+              <p>Bank: Meezan Bank Ltd / Korangi Branch</p>
             </div>
 
             <div className="space-y-12 text-right">
@@ -251,8 +240,8 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                 <div className="text-center">
                   <div className="size-16 rounded-full border-2 border-dashed border-gray-700 flex flex-col items-center justify-center p-1 text-[8px] font-bold text-gray-800 uppercase tracking-tighter transform -rotate-12 mx-auto mb-1">
                     <span>AL KHALEEJ</span>
-                    <span className="text-[6px]">CO. NO. 323096-W</span>
-                    <span>LUBRICANTS</span>
+                    <span className="text-[6px]">LUBRICANTS</span>
+                    <span>OFFICIAL</span>
                   </div>
                   <div className="border-t border-black pt-1 w-36 text-center font-bold text-[9px] uppercase">
                     <p>AL KHALEEJ LUBRICANTS</p>
@@ -263,7 +252,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                 <div className="text-center">
                   <div className="h-14"></div>
                   <div className="border-t border-black pt-1 w-44 text-center font-bold text-[9px] uppercase">
-                    ACCEPTED & CONFIRMED BY
+                    Customer Signature
                   </div>
                 </div>
               </div>
