@@ -7,8 +7,10 @@ import { seedDatabase } from "./src/config/seed.js";
 
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
-  seedDatabase();
+connectDB().then((conn) => {
+  if (conn) {
+    seedDatabase();
+  }
 });
 
 app.listen(PORT, () => {

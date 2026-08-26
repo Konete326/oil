@@ -11,12 +11,12 @@ export const getCategories = async (req, res, next) => {
 
 export const createCategory = async (req, res, next) => {
   try {
-    const { name, code, description } = req.body;
+    const { name, code } = req.body;
     if (!name || !code) {
       res.status(400);
       throw new Error("Category Name and Code are required");
     }
-    const category = await Category.create({ name, code, description, subcategories: [] });
+    const category = await Category.create({ name, code, subcategories: [] });
     res.status(201).json({ success: true, data: category });
   } catch (error) {
     next(error);
@@ -25,7 +25,7 @@ export const createCategory = async (req, res, next) => {
 
 export const updateCategory = async (req, res, next) => {
   try {
-    const { name, code, description, isActive } = req.body;
+    const { name, code, isActive } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) {
       res.status(404);
@@ -33,7 +33,6 @@ export const updateCategory = async (req, res, next) => {
     }
     category.name = name || category.name;
     category.code = code || category.code;
-    category.description = description !== undefined ? description : category.description;
     category.isActive = isActive !== undefined ? isActive : category.isActive;
     await category.save();
     res.status(200).json({ success: true, data: category });
@@ -58,13 +57,13 @@ export const deleteCategory = async (req, res, next) => {
 
 export const addSubcategory = async (req, res, next) => {
   try {
-    const { name, code, description } = req.body;
+    const { name, code } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) {
       res.status(404);
       throw new Error("Category not found");
     }
-    category.subcategories.push({ name, code, description });
+    category.subcategories.push({ name, code });
     await category.save();
     res.status(201).json({ success: true, data: category });
   } catch (error) {

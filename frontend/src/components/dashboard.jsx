@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDashboardData } from "@/lib/api";
+import { DashboardHeroCards } from "@/components/dashboard-hero-cards";
 import { BillingHealth } from "@/components/billing-health";
 import { ChannelSalesChart } from "@/components/channel-sales-chart";
 import { DashboardActivity } from "@/components/dashboard-activity";
@@ -46,6 +47,8 @@ export function Dashboard() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
         <p className="text-xs text-muted-foreground">Real-time KPI overview, daily cash inflow/outflow, and financial metrics.</p>
       </div>
+
+      <DashboardHeroCards heroCards={data?.heroCards} loading={loading} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi, index) => {

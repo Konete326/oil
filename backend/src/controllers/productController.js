@@ -65,6 +65,10 @@ export const updateProduct = async (req, res, next) => {
       throw new Error("Product not found");
     }
 
+    if (req.body.category && typeof req.body.category === "object" && req.body.category._id) {
+      req.body.category = req.body.category._id;
+    }
+
     Object.assign(product, req.body);
     await product.save();
 

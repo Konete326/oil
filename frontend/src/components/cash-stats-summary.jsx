@@ -35,20 +35,21 @@ export function CashStatsSummary({ totalPaid = 0, totalReceived = 0, partyCount 
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((item, i) => {
         const Icon = item.icon;
         return (
-          <div key={i} className="rounded-xl border border-border/60 bg-card p-4 shadow-sm hover:border-border transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">{item.title}</span>
-              <div className={`p-2 rounded-lg border ${item.accent}`}>
-                <Icon className="size-4" />
-              </div>
+          <div
+            key={i}
+            className="rounded-xl border border-border/60 bg-card p-2.5 px-3.5 shadow-xs hover:border-border transition-all flex items-center justify-between gap-2"
+          >
+            <div className="space-y-0.5">
+              <span className="text-[11px] font-medium text-muted-foreground block">{item.title}</span>
+              <div className="text-base font-bold font-mono tracking-tight text-foreground">{item.value}</div>
+              <p className="text-[10px] text-muted-foreground">{item.subtitle}</p>
             </div>
-            <div className="mt-3">
-              <div className="text-xl font-bold tracking-tight text-foreground">{item.value}</div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{item.subtitle}</p>
+            <div className={`p-2 rounded-lg border shrink-0 ${item.accent}`}>
+              <Icon className="size-4" />
             </div>
           </div>
         );

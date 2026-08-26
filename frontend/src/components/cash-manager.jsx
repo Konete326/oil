@@ -203,7 +203,7 @@ export function CashManager() {
             className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
           >
             <PrinterIcon className="size-3.5 text-primary" />
-            <span>PDF Statement</span>
+            <span>View & Print A4 Statement</span>
           </Button>
         </div>
       </div>

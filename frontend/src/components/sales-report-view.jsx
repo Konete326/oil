@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { SearchIcon, ShoppingCartIcon, FactoryIcon, CalendarIcon, ArrowUpRightIcon } from "lucide-react";
+import { SearchIcon, ShoppingCartIcon, FactoryIcon, CalendarIcon, ArrowUpRightIcon, ReceiptIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { PaginationBar } from "@/components/ui/pagination-bar";
+import { PosReceiptModal } from "@/components/pos-receipt-modal";
 
 const PAGE_SIZE = 10;
 
 export function SalesReportView({ period = "monthly", setPeriod, salesData = { posSales: [], challans: [] }, summary = {}, loading = false }) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [previewSale, setPreviewSale] = useState(null);
 
   const allSalesList = [
     ...(salesData.posSales || []).map((s) => ({
@@ -19,6 +22,7 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
       mode: s.paymentMode,
       date: s.createdAt,
       status: "Completed",
+      rawSale: s,
     })),
     ...(salesData.challans || []).map((c) => ({
       _id: c._id,
@@ -29,6 +33,21 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
       mode: c.paymentStatus || "Billed",
       date: c.createdAt,
       status: c.gatePassStatus || "Dispatched",
+      rawSale: {
+        ...c,
+        saleNumber: c.challanNumber,
+        customerName: c.millName,
+        grandTotal: c.totalAmount,
+        items: [
+          {
+            productName: c.productName || "MINERAL LUBRICANT OIL",
+            quantity: c.quantityLiters || 1,
+            unitPrice: c.overrideRate || 0,
+            subtotal: c.totalAmount,
+            hsCode: "2710.19.31",
+          },
+        ],
+      },
     })),
   ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -119,19 +138,20 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
                 <th className="p-3">Customer / Mill Name</th>
                 <th className="p-3 text-right">Amount (PKR)</th>
                 <th className="p-3">Payment Mode</th>
-                <th className="p-3 pe-4 text-center">Status</th>
+                <th className="p-3 text-center">Status</th>
+                <th className="p-3 pe-4 text-right">A4 Invoice</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
                     Loading sales records...
                   </td>
                 </tr>
               ) : filteredSales.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
                     No sales records found for this period.
                   </td>
                 </tr>
@@ -158,10 +178,21 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
                       Rs. {item.amount.toLocaleString()}
                     </td>
                     <td className="p-3 text-muted-foreground">{item.mode}</td>
-                    <td className="p-3 pe-4 text-center">
+                    <td className="p-3 text-center">
                       <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
                         {item.status}
                       </span>
+                    </td>
+                    <td className="p-3 pe-4 text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 gap-1 text-[11px] cursor-pointer"
+                        onClick={() => setPreviewSale(item.rawSale)}
+                      >
+                        <ReceiptIcon className="size-3 text-primary" />
+                        <span>View A4</span>
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -177,6 +208,12 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
           onPageChange={(page) => setCurrentPage(page)}
         />
       </div>
+
+      <PosReceiptModal
+        isOpen={!!previewSale}
+        onClose={() => setPreviewSale(null)}
+        sale={previewSale}
+      />
     </div>
   );
 }

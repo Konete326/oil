@@ -28,6 +28,7 @@ import salaryRoutes from "./routes/salaryRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import systemLogRoutes from "./routes/systemLogRoutes.js";
 import dataResetRoutes from "./routes/dataResetRoutes.js";
+import syncRoutes from "./routes/syncRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -110,6 +111,7 @@ app.use("/api/salaries", salaryRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/system-logs", systemLogRoutes);
 app.use("/api/data-reset", dataResetRoutes);
+app.use("/api/sync", syncRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

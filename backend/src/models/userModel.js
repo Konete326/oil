@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["admin", "manager", "cashier", "accountant"], default: "admin" },
     permissions: { type: [String], default: ["all"] },
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
+    preferredLanguage: { type: String, default: "en" },
   },
   { timestamps: true }
 );

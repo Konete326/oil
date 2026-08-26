@@ -2,6 +2,7 @@ import { PosSale } from "../models/posSaleModel.js";
 import { Challan } from "../models/challanModel.js";
 import { Product } from "../models/productModel.js";
 import { Mill } from "../models/millModel.js";
+import { Customer } from "../models/customerModel.js";
 import { Expense } from "../models/expenseModel.js";
 import { AuditLog } from "../models/auditModel.js";
 import { CashTransaction } from "../models/cashModel.js";
@@ -11,24 +12,70 @@ export const getDashboardData = async (req, res, next) => {
     const todayStr = new Date().toISOString().split("T")[0];
     const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    const [posSales, challans, products, mills, expenses, auditLogs, cashTxs] = await Promise.all([
+    const [posSales, challans, products, mills, customers, expenses, auditLogs, cashTxs] = await Promise.all([
       PosSale.find().sort({ createdAt: -1 }),
       Challan.find().sort({ createdAt: -1 }),
       Product.find(),
       Mill.find(),
+      Customer.find(),
       Expense.find(),
       AuditLog.find().sort({ timestamp: -1 }).limit(10),
       CashTransaction.find(),
     ]);
 
+    const todayPos = posSales.filter((s) => new Date(s.createdAt).toISOString().split("T")[0] === todayStr);
+    const todayChallanList = challans.filter((c) => new Date(c.createdAt).toISOString().split("T")[0] === todayStr);
+    const todayPosTotal = todayPos.reduce((sum, s) => sum + (s.grandTotal || 0), 0);
+    const todayChallanTotal = todayChallanList.reduce((sum, c) => sum + (c.totalAmount || 0), 0);
+    const todaySalesTotal = todayPosTotal + todayChallanTotal;
+    const todayCashSales = todayPos.filter((s) => s.paymentMode === "Cash").reduce((sum, s) => sum + (s.grandTotal || 0), 0);
+    const todayCreditSales = todaySalesTotal - todayCashSales;
+
+    const stockValuation = products.reduce((sum, p) => sum + ((p.stockQuantity || 0) * (p.costPrice || p.sellingPrice || 0)), 0);
+    const stockSellingValuation = products.reduce((sum, p) => sum + ((p.stockQuantity || 0) * (p.sellingPrice || 0)), 0);
+    const totalStockUnits = products.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+    const inStockCount = products.filter((p) => p.stockQuantity > (p.minStockAlert || 5)).length;
+    const lowStockCount = products.filter((p) => p.stockQuantity <= (p.minStockAlert || 5) && p.stockQuantity > 0).length;
+    const outOfStockCount = products.filter((p) => p.stockQuantity === 0).length;
+
+    const customerReceivable = customers.reduce((sum, c) => sum + (c.currentBalance || 0), 0);
+    const millReceivable = mills.reduce((sum, m) => sum + (m.currentBalance || 0), 0);
+    const totalMarketReceivable = customerReceivable + millReceivable;
+    const pendingPartiesCount = customers.filter((c) => (c.currentBalance || 0) > 0).length + mills.filter((m) => (m.currentBalance || 0) > 0).length;
+
+    const heroCards = {
+      todaySales: {
+        total: todaySalesTotal,
+        formatted: `Rs. ${todaySalesTotal.toLocaleString()}`,
+        ordersCount: todayPos.length + todayChallanList.length,
+        cash: todayCashSales,
+        credit: todayCreditSales,
+      },
+      stockSummary: {
+        valuation: stockValuation,
+        sellingValuation: stockSellingValuation,
+        formattedValuation: `Rs. ${stockValuation.toLocaleString()}`,
+        totalUnits: totalStockUnits,
+        totalProducts: products.length,
+        inStock: inStockCount,
+        lowStock: lowStockCount,
+        outOfStock: outOfStockCount,
+      },
+      receivablesSummary: {
+        totalReceivable: totalMarketReceivable,
+        formattedTotal: `Rs. ${totalMarketReceivable.toLocaleString()}`,
+        customerReceivable,
+        millReceivable,
+        pendingParties: pendingPartiesCount,
+      },
+    };
+
     const todayReceived = cashTxs
       .filter((c) => c.type === "Received" && new Date(c.transactionDate || c.createdAt).toISOString().split("T")[0] === todayStr)
       .reduce((sum, c) => sum + (c.amount || 0), 0);
-
     const todayPaid = cashTxs
       .filter((c) => c.type === "Paid" && new Date(c.transactionDate || c.createdAt).toISOString().split("T")[0] === todayStr)
       .reduce((sum, c) => sum + (c.amount || 0), 0);
-
     const monthlySales = posSales
       .filter((s) => new Date(s.createdAt) >= firstDayOfMonth)
       .reduce((sum, s) => sum + (s.grandTotal || 0), 0) +
@@ -36,44 +83,17 @@ export const getDashboardData = async (req, res, next) => {
       .filter((c) => new Date(c.createdAt) >= firstDayOfMonth)
       .reduce((sum, c) => sum + (c.totalAmount || 0), 0);
 
-    const totalReceivable = mills.reduce((sum, m) => sum + (m.currentBalance || 0), 0);
-
     const kpiCards = [
-      {
-        id: "cash-received",
-        label: "Total Cash Received Today",
-        value: `Rs. ${todayReceived.toLocaleString()}`,
-        raw: todayReceived,
-        type: "green",
-      },
-      {
-        id: "cash-paid",
-        label: "Total Cash Paid Today",
-        value: `Rs. ${todayPaid.toLocaleString()}`,
-        raw: todayPaid,
-        type: "red",
-      },
-      {
-        id: "net-sales",
-        label: "Net Sales Of This Month",
-        value: `Rs. ${monthlySales.toLocaleString()}`,
-        raw: monthlySales,
-        type: "blue",
-      },
-      {
-        id: "receivables",
-        label: "Total Receivable Balance",
-        value: `Rs. ${totalReceivable.toLocaleString()}`,
-        raw: totalReceivable,
-        type: "orange",
-      },
+      { id: "cash-received", label: "Total Cash Received Today", value: `Rs. ${todayReceived.toLocaleString()}`, type: "green" },
+      { id: "cash-paid", label: "Total Cash Paid Today", value: `Rs. ${todayPaid.toLocaleString()}`, type: "red" },
+      { id: "net-sales", label: "Net Sales Of This Month", value: `Rs. ${monthlySales.toLocaleString()}`, type: "blue" },
+      { id: "receivables", label: "Total Receivable Balance", value: `Rs. ${totalMarketReceivable.toLocaleString()}`, type: "orange" },
     ];
 
     const totalPosRevenue = posSales.reduce((acc, s) => acc + (s.grandTotal || 0), 0);
     const totalDcRevenue = challans.reduce((acc, c) => acc + (c.totalAmount || 0), 0);
     const totalRevenue = totalPosRevenue + totalDcRevenue;
     const totalExpensesAmt = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
-    const lowStockCount = products.filter((p) => p.stockQuantity <= (p.minStockAlert || 10)).length;
 
     const stats = [
       { label: "Total Sales Revenue", value: `Rs. ${totalRevenue.toLocaleString()}`, delta: totalRevenue > 0 ? 12.5 : 0 },
@@ -85,20 +105,15 @@ export const getDashboardData = async (req, res, next) => {
     const now = new Date();
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const last7DaysData = [];
-
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const dayName = days[d.getDay()];
       const dateStr = d.toISOString().split("T")[0];
-
       const dayPosSales = posSales.filter((s) => new Date(s.createdAt).toISOString().split("T")[0] === dateStr);
       const dayChallans = challans.filter((c) => new Date(c.createdAt).toISOString().split("T")[0] === dateStr);
       const dayRevenue = dayPosSales.reduce((acc, s) => acc + (s.grandTotal || 0), 0) + dayChallans.reduce((acc, c) => acc + (c.totalAmount || 0), 0);
-      const retailCount = dayPosSales.filter((s) => s.saleType === "Retail").length;
-      const wholesaleCount = dayPosSales.filter((s) => s.saleType === "Wholesale").length + dayChallans.length;
-
-      last7DaysData.push({ day: dayName, date: dateStr, sales: dayRevenue, retail: retailCount, online: wholesaleCount });
+      last7DaysData.push({ day: dayName, date: dateStr, sales: dayRevenue, retail: dayPosSales.length, online: dayChallans.length });
     }
 
     const invoices = [
@@ -116,6 +131,7 @@ export const getDashboardData = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
+        heroCards,
         kpis: kpiCards,
         stats,
         invoices,

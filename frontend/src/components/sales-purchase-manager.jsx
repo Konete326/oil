@@ -13,6 +13,7 @@ import { SalesReportView } from "@/components/sales-report-view";
 import { PurchaseReportView } from "@/components/purchase-report-view";
 import { PartySalesRecord } from "@/components/party-sales-record";
 import { PurchaseModal } from "@/components/purchase-modal";
+import { SalesPurchaseReconciliationModal } from "@/components/sales-purchase-reconciliation-modal";
 import {
   fetchSalesReportApi,
   fetchPurchasesApi,
@@ -30,6 +31,7 @@ export function SalesPurchaseManager() {
   const [partySalesData, setPartySalesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isReconcileModalOpen, setIsReconcileModalOpen] = useState(false);
 
   const loadData = async () => {
     try {
@@ -124,11 +126,21 @@ export function SalesPurchaseManager() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.print()}
+            onClick={async () => {
+              if (purchasesData.length === 0) {
+                const pRes = await fetchPurchasesApi();
+                if (pRes?.success) setPurchasesData(pRes.data);
+              }
+              if (!salesData.posSales || salesData.posSales.length === 0) {
+                const sRes = await fetchSalesReportApi({ period: "monthly" });
+                if (sRes?.success) setSalesData(sRes.data);
+              }
+              setIsReconcileModalOpen(true);
+            }}
             className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
           >
             <PrinterIcon className="size-3.5" />
-            <span>Print Report</span>
+            <span>Print A4 Reconciliation</span>
           </Button>
         </div>
       </div>
@@ -182,6 +194,15 @@ export function SalesPurchaseManager() {
         isOpen={isPurchaseModalOpen}
         onClose={() => setIsPurchaseModalOpen(false)}
         onSuccess={loadData}
+      />
+
+      <SalesPurchaseReconciliationModal
+        isOpen={isReconcileModalOpen}
+        onClose={() => setIsReconcileModalOpen(false)}
+        reportType={activeTab === "purchases" ? "purchases" : "sales"}
+        purchases={purchasesData}
+        sales={[...(salesData.posSales || []), ...(salesData.challans || [])]}
+        period={salesPeriod}
       />
     </div>
   );

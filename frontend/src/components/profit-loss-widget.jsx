@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { fetchProfitLossApi } from "@/lib/api";
+import { ProfitLossPrintModal } from "@/components/profit-loss-print-modal";
 import {
   ResponsiveContainer,
   BarChart,
@@ -25,6 +26,7 @@ export function ProfitLossWidget() {
   const [period, setPeriod] = useState("monthly");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [data, setData] = useState({
     totalSalesRevenue: 0,
     grossProfit: 0,
@@ -79,11 +81,11 @@ export function ProfitLossWidget() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.print()}
+            onClick={() => setIsPrintModalOpen(true)}
             className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
           >
             <PrinterIcon className="size-3.5" />
-            <span>Print P&L Report</span>
+            <span>View & Print A4 Statement</span>
           </Button>
         </div>
       </div>
@@ -198,6 +200,15 @@ export function ProfitLossWidget() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      <ProfitLossPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        data={data}
+        period={period}
+        startDate={startDate}
+        endDate={endDate}
+      />
     </div>
   );
 }

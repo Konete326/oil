@@ -6,7 +6,6 @@ import { XIcon, PlusIcon, Trash2Icon, TagIcon } from "lucide-react";
 
 export function SubcategoryModal({ isOpen, onClose, category, onAddSubcategory, onDeleteSubcategory }) {
   const [subName, setSubName] = useState("");
-  const [subDesc, setSubDesc] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [subNameValid, setSubNameValid] = useState(false);
@@ -31,10 +30,8 @@ export function SubcategoryModal({ isOpen, onClose, category, onAddSubcategory, 
       await onAddSubcategory(category._id, {
         name: subName,
         code: generatedCode,
-        description: subDesc,
       });
       setSubName("");
-      setSubDesc("");
       onClose();
     } catch (err) {
       setError(err.message || "Failed to add subcategory");
@@ -89,14 +86,6 @@ export function SubcategoryModal({ isOpen, onClose, category, onAddSubcategory, 
               value={subName}
               onChange={(e) => setSubName(e.target.value)}
               onValidationChange={setSubNameValid}
-            />
-            <ValidatedInput
-              label="Description (Optional)"
-              rule="text"
-              required={false}
-              placeholder="e.g. Grade specification or usage details"
-              value={subDesc}
-              onChange={(e) => setSubDesc(e.target.value)}
             />
             <Button type="submit" size="sm" className="w-full gap-1 text-xs h-8" disabled={loading || !subNameValid}>
               <PlusIcon className="size-3.5" />

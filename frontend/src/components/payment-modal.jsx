@@ -9,14 +9,13 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Bank Transfer");
   const [referenceNumber, setReferenceNumber] = useState("");
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [clientNameValid, setClientNameValid] = useState(true);
   const [amountValid, setAmountValid] = useState(false);
 
-  const isFormValid = (millId || clientNameValid) && amountValid;
+  const isFormValid = amountValid;
 
   const selectedMill = mills.find((m) => m._id === millId);
 
@@ -27,7 +26,6 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
       setAmount("");
       setPaymentMode("Bank Transfer");
       setReferenceNumber("");
-      setNotes("");
       setError("");
     }
   }, [isOpen, mills]);
@@ -50,11 +48,10 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
     try {
       await onSave({
         millId: millId || undefined,
-        clientName: selectedMill ? selectedMill.name : clientName,
+        clientName: selectedMill ? selectedMill.name : (clientName.trim() || "Walk-in Client"),
         amount: Number(amount),
         paymentMode,
         referenceNumber,
-        notes,
       });
       onClose();
     } catch (err) {
@@ -85,7 +82,7 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="space-y-1">
-            <label className="font-medium text-foreground">Select Textile Mill / Client *</label>
+            <label className="font-medium text-foreground">Select Textile Mill / Client (Optional)</label>
             <select
               value={millId}
               onChange={(e) => setMillId(e.target.value)}
@@ -102,10 +99,10 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
 
           {!millId && (
             <ValidatedInput
-              label="Client Name"
-              rule="name"
-              required
-              placeholder="e.g. SITE Weaving Division"
+              label="Client Name (Optional)"
+              rule="text"
+              required={false}
+              placeholder="e.g. SITE Weaving Division / Walk-in"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               onValidationChange={setClientNameValid}
@@ -114,7 +111,7 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <ValidatedInput
-              label="Amount Received (Rs)"
+              label="Amount Received (Rs) *"
               rule="amount"
               required
               type="number"
@@ -126,7 +123,7 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
             />
 
             <div className="space-y-1">
-              <label className="font-medium text-foreground">Payment Mode *</label>
+              <label className="font-medium text-foreground">Payment Mode</label>
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
@@ -141,21 +138,12 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
           </div>
 
           <ValidatedInput
-            label="Cheque / Bank Reference No."
+            label="Cheque / Bank Reference No. (Optional)"
             rule="text"
             required={false}
             placeholder="e.g. HBL Cheque #492104 or Online Deposit Ref"
             value={referenceNumber}
             onChange={(e) => setReferenceNumber(e.target.value)}
-          />
-
-          <ValidatedInput
-            label="Transaction Notes / Voucher Ref"
-            rule="text"
-            required={false}
-            placeholder="e.g. Received partial payment against Invoice DC-1002"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
           />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">

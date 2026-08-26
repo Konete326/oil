@@ -12,17 +12,13 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
   const [dipMeasurementInches, setDipMeasurementInches] = useState("");
   const [quantityLiters, setQuantityLiters] = useState("");
   const [overrideRate, setOverrideRate] = useState("");
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [vehicleValid, setVehicleValid] = useState(false);
-  const [driverValid, setDriverValid] = useState(false);
-  const [dipValid, setDipValid] = useState(true);
   const [quantityValid, setQuantityValid] = useState(true);
   const [rateValid, setRateValid] = useState(true);
 
-  const isFormValid = !!millId && !!productId && vehicleValid && driverValid && dipValid && quantityValid && rateValid;
+  const isFormValid = !!millId && !!productId && Number(quantityLiters) > 0 && quantityValid && rateValid;
 
   const selectedMillObj = mills.find((m) => m._id === millId);
 
@@ -36,7 +32,6 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
       setDipMeasurementInches("48");
       setQuantityLiters("10000");
       setOverrideRate("");
-      setNotes("");
       setError("");
     }
   }, [isOpen, mills, products]);
@@ -63,13 +58,12 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
       await onSave({
         millId,
         productId,
-        vehicleNumber: vehicleNumber.toUpperCase(),
-        driverName,
-        driverPhone,
-        dipMeasurementInches: Number(dipMeasurementInches),
+        vehicleNumber: vehicleNumber.trim() ? vehicleNumber.toUpperCase().trim() : "N/A",
+        driverName: driverName.trim() || "Standard Delivery",
+        driverPhone: driverPhone.trim() || "",
+        dipMeasurementInches: Number(dipMeasurementInches) || 0,
         quantityLiters: Number(quantityLiters),
-        overrideRate: Number(overrideRate),
-        notes,
+        overrideRate: Number(overrideRate) || rateNum,
       });
       onClose();
     } catch (err) {
@@ -140,25 +134,23 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <ValidatedInput
-              label="Tanker / Vehicle No"
+              label="Tanker / Vehicle No (Optional)"
               rule="code"
-              required
+              required={false}
               placeholder="e.g. TKA-4921"
               value={vehicleNumber}
               onChange={(e) => setVehicleNumber(e.target.value)}
-              onValidationChange={setVehicleValid}
             />
             <ValidatedInput
-              label="Driver Name"
+              label="Driver Name (Optional)"
               rule="name"
-              required
+              required={false}
               placeholder="e.g. Muhammad Aslam"
               value={driverName}
               onChange={(e) => setDriverName(e.target.value)}
-              onValidationChange={setDriverValid}
             />
             <ValidatedInput
-              label="Driver Phone"
+              label="Driver Phone (Optional)"
               rule="phone"
               required={false}
               placeholder="0301-8291044"
@@ -169,17 +161,16 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <ValidatedInput
-              label="Dip Measurement (Inches)"
+              label="Dip Measurement (Optional)"
               rule="positiveNumber"
-              required
+              required={false}
               type="number"
-              placeholder="48"
+              placeholder="48 (Inches)"
               value={dipMeasurementInches}
               onChange={(e) => setDipMeasurementInches(e.target.value)}
-              onValidationChange={setDipValid}
             />
             <ValidatedInput
-              label="Net Quantity (Liters)"
+              label="Net Quantity (Liters) *"
               rule="amount"
               required
               type="number"
@@ -189,7 +180,7 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
               onValidationChange={setQuantityValid}
             />
             <ValidatedInput
-              label="Rate per Liter (Rs)"
+              label="Rate per Liter (Rs) *"
               rule="amount"
               required
               type="number"
@@ -204,15 +195,6 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
             <span className="text-muted-foreground font-medium">Calculated Bill Amount:</span>
             <span className="font-mono font-bold text-sm text-primary">Rs {Number(calculatedTotal).toLocaleString()}</span>
           </div>
-
-          <ValidatedInput
-            label="Special Delivery Instructions / Gate Pass Notes"
-            rule="text"
-            required={false}
-            placeholder="e.g. Deliver to Tank #4 near Spinning Unit B"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">

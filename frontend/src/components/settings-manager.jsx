@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { AdminPasswordModal } from "@/components/admin-password-modal";
 import { SystemLogsTab } from "@/components/system-logs-tab";
 import { DataMaintenanceTab } from "@/components/data-maintenance-tab";
+import { LanguageSelector } from "@/components/language-selector";
+import { ConfirmModal } from "@/components/confirm-modal";
+import { useSync } from "@/context/sync-context";
 import {
   Settings,
   Terminal,
@@ -11,13 +14,21 @@ import {
   Clock,
   CheckCircle2,
   ShieldCheck,
+  Globe,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  HardDrive,
 } from "lucide-react";
 
 export function SettingsManager({ user }) {
-  const [activeTab, setActiveTab] = useState("logs");
+  const [activeTab, setActiveTab] = useState("language");
   const [logs, setLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [showSyncConfirm, setShowSyncConfirm] = useState(false);
+
+  const { isOnline, pendingCount, isSyncing, syncProgress, lastSyncTime, triggerManualSync } = useSync();
 
   const [securityModal, setSecurityModal] = useState({
     isOpen: false,
@@ -75,6 +86,17 @@ export function SettingsManager({ user }) {
     setTimeout(() => setSuccessMsg(""), 4000);
   };
 
+  const handleExecuteSync = async () => {
+    setShowSyncConfirm(false);
+    const res = await triggerManualSync();
+    if (res.success) {
+      setSuccessMsg("Manual cloud sync completed successfully.");
+    } else {
+      setSuccessMsg(res.message || "Sync failed.");
+    }
+    setTimeout(() => setSuccessMsg(""), 4000);
+  };
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
@@ -84,7 +106,7 @@ export function SettingsManager({ user }) {
             System Settings & Diagnostics
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Monitor real-time error logs, system diagnostics, and administrative data maintenance.
+            Monitor real-time error logs, system diagnostics, offline sync engine, and administrative data maintenance.
           </p>
         </div>
 
@@ -98,22 +120,32 @@ export function SettingsManager({ user }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <Terminal className="size-5" />
+          <div
+            className={`size-10 rounded-lg flex items-center justify-center ${
+              isOnline
+                ? "bg-emerald-500/15 text-emerald-500"
+                : "bg-rose-500/15 text-rose-500"
+            }`}
+          >
+            {isOnline ? <Wifi className="size-5" /> : <WifiOff className="size-5" />}
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Logged Diagnostics</p>
-            <p className="text-xl font-bold text-foreground">{logs.length}</p>
+            <p className="text-xs text-muted-foreground font-medium">Network Connection</p>
+            <p className="text-base font-bold text-foreground">
+              {isOnline ? "Online & Connected" : "Offline Mode"}
+            </p>
           </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-500">
-            <ShieldCheck className="size-5" />
+          <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
+            <HardDrive className="size-5" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">System Health</p>
-            <p className="text-base font-bold text-foreground">Active & Monitored</p>
+            <p className="text-xs text-muted-foreground font-medium">IndexedDB Queue</p>
+            <p className="text-base font-bold text-foreground">
+              {pendingCount} Operations
+            </p>
           </div>
         </div>
 
@@ -122,23 +154,41 @@ export function SettingsManager({ user }) {
             <Clock className="size-5" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Log Retention</p>
-            <p className="text-base font-bold text-foreground">7 Days Retention</p>
+            <p className="text-xs text-muted-foreground font-medium">Last Cloud Sync</p>
+            <p className="text-base font-bold text-foreground">
+              {lastSyncTime || "Auto-active"}
+            </p>
           </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
-            <Database className="size-5" />
+          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <Terminal className="size-5" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Data Security</p>
-            <p className="text-base font-bold text-foreground">Admin Controlled</p>
+            <p className="text-xs text-muted-foreground font-medium">Logged Diagnostics</p>
+            <p className="text-xl font-bold text-foreground">{logs.length}</p>
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-2 border-b border-border/60 pb-2">
+        <Button
+          variant={activeTab === "language" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setActiveTab("language")}
+          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+        >
+          <Globe className="size-3.5" /> Language & Translation
+        </Button>
+        <Button
+          variant={activeTab === "sync" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setActiveTab("sync")}
+          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+        >
+          <RefreshCw className="size-3.5" /> Offline Storage & Sync
+        </Button>
         <Button
           variant={activeTab === "logs" ? "default" : "ghost"}
           size="sm"
@@ -156,6 +206,98 @@ export function SettingsManager({ user }) {
           <Database className="size-3.5" /> Data Maintenance & Erase
         </Button>
       </div>
+
+      {activeTab === "language" && (
+        <LanguageSelector variant="full-settings" />
+      )}
+
+      {activeTab === "sync" && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border bg-card p-5 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <HardDrive className="size-5 text-primary" />
+                  IndexedDB Local Offline Engine & Sync Status
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Transactions created offline are automatically stored in browser storage and uploaded as soon as connection is re-established.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="default"
+                disabled={!isOnline || isSyncing}
+                onClick={() => setShowSyncConfirm(true)}
+                className="gap-2 text-xs cursor-pointer"
+              >
+                <RefreshCw className={`size-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+                <span>{isSyncing ? "Syncing..." : "Sync Cloud Data Now"}</span>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="p-3 rounded-lg bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">Connection State</span>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  {isOnline ? (
+                    <span className="text-emerald-500 flex items-center gap-1.5">
+                      <Wifi className="size-4" /> Online (Auto-Sync Ready)
+                    </span>
+                  ) : (
+                    <span className="text-rose-500 flex items-center gap-1.5">
+                      <WifiOff className="size-4" /> Offline (Local Queue Active)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">Pending Unsynced Queue</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-foreground">
+                    {pendingCount} Item{pendingCount === 1 ? "" : "s"}
+                  </span>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold ${
+                      pendingCount > 0
+                        ? "bg-amber-500/15 text-amber-600"
+                        : "bg-emerald-500/15 text-emerald-600"
+                    }`}
+                  >
+                    {pendingCount > 0 ? "Pending Batch" : "Fully Synchronized"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">Last Sync Timestamp</span>
+                <div className="font-bold text-sm text-foreground">
+                  {lastSyncTime || "Continuous Auto-Sync"}
+                </div>
+              </div>
+            </div>
+
+            {isSyncing && (
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-primary">
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="size-4 animate-spin" />
+                    Synchronizing offline records to cloud database...
+                  </span>
+                  <span>{syncProgress.percentage}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-200"
+                    style={{ width: `${syncProgress.percentage}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {activeTab === "logs" && (
         <SystemLogsTab
@@ -182,6 +324,17 @@ export function SettingsManager({ user }) {
         title={securityModal.title}
         message={securityModal.message}
         actionLabel="Confirm Erasure"
+      />
+
+      <ConfirmModal
+        isOpen={showSyncConfirm}
+        onClose={() => setShowSyncConfirm(false)}
+        onConfirm={handleExecuteSync}
+        title="Confirm Manual Cloud Sync"
+        message={`Are you sure you want to upload all ${pendingCount} pending offline records to the central server database?`}
+        confirmText="Sync Now"
+        variant="info"
+        icon={RefreshCw}
       />
     </div>
   );

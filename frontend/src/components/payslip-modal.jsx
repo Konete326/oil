@@ -21,7 +21,6 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
   const [advanceDeducted, setAdvanceDeducted] = useState("0");
   const [otherDeductions, setOtherDeductions] = useState("0");
   const [paymentMode, setPaymentMode] = useState("Cash");
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [monthYearValid, setMonthYearValid] = useState(true);
@@ -64,7 +63,6 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
         advanceDeducted: advDedAmt,
         otherDeductions: othDedAmt,
         paymentMode,
-        notes: notes.trim(),
       });
 
       toast.success("Monthly payslip voucher generated successfully!");
@@ -86,7 +84,6 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
     setAdvanceDeducted("0");
     setOtherDeductions("0");
     setPaymentMode("Cash");
-    setNotes("");
   };
 
   const selectedEmployeeObj = employees.find((e) => e._id === employeeId);
@@ -209,15 +206,6 @@ export function PayslipModal({ isOpen, onClose, employees = [], onSuccess }) {
               <option value="Cheque">Cheque</option>
             </select>
           </div>
-
-          <ValidatedInput
-            label="Notes & Remarks"
-            rule="text"
-            required={false}
-            placeholder="Additional details..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { PaymentModal } from "@/components/payment-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
+import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { BookOpenIcon, WalletIcon, SearchIcon, PlusIcon, AlertTriangleIcon, CheckCircle2Icon, ClockIcon, FilterIcon, PrinterIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -36,6 +37,7 @@ export function LedgerManager() {
   const [search, setSearch] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -98,13 +100,24 @@ export function LedgerManager() {
           </p>
         </div>
 
-        <Button
-          onClick={() => setIsPaymentModalOpen(true)}
-          className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
-        >
-          <PlusIcon className="size-4" />
-          Record Payment Receipt
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsPrintModalOpen(true)}
+            className="gap-2 shadow-xs cursor-pointer"
+          >
+            <PrinterIcon className="size-4" />
+            Print A4 Statement
+          </Button>
+
+          <Button
+            onClick={() => setIsPaymentModalOpen(true)}
+            className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            <PlusIcon className="size-4" />
+            Record Payment Receipt
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -323,6 +336,31 @@ export function LedgerManager() {
         onSave={handleSavePayment}
         mills={mills}
       />
+
+      {isPrintModalOpen && (
+        <CustomerPrintStatement
+          isOpen={isPrintModalOpen}
+          onClose={() => setIsPrintModalOpen(false)}
+          customer={
+            mills.find((m) => m._id === selectedMill)
+              ? {
+                  name: mills.find((m) => m._id === selectedMill).name,
+                  phone: mills.find((m) => m._id === selectedMill).contactPerson || "-",
+                  city: mills.find((m) => m._id === selectedMill).zone || "Karachi",
+                  address: mills.find((m) => m._id === selectedMill).zone || "Industrial Area",
+                  openingBalance: 0,
+                }
+              : {
+                  name: "All Clients Khata Summary",
+                  phone: "-",
+                  city: "Karachi",
+                  address: "Korangi Industrial Area",
+                  openingBalance: 0,
+                }
+          }
+          ledgerEntries={filteredEntries}
+        />
+      )}
     </div>
   );
 }

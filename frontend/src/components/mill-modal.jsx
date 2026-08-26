@@ -191,7 +191,7 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
           </div>
 
           <ValidatedInput
-            label="Full Factory Address"
+            label="Full Factory Address (Optional)"
             rule="text"
             required={false}
             placeholder="e.g. Plot HT/11, Landhi Industrial Area, Karachi"

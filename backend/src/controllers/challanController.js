@@ -25,9 +25,9 @@ export const createChallan = async (req, res, next) => {
       notes,
     } = req.body;
 
-    if (!millId || !productId || !vehicleNumber || !driverName || !dipMeasurementInches || !quantityLiters) {
+    if (!millId || !productId || !quantityLiters || Number(quantityLiters) <= 0) {
       res.status(400);
-      throw new Error("Mill, Product, Tanker Vehicle No, Driver, Dip Measurement, and Quantity are required.");
+      throw new Error("Textile Mill, Product, and a valid Quantity are required.");
     }
 
     const mill = await Mill.findById(millId);
@@ -59,14 +59,14 @@ export const createChallan = async (req, res, next) => {
       millName: mill.name,
       product: product._id,
       productName: product.name,
-      vehicleNumber: vehicleNumber.toUpperCase(),
-      driverName,
-      driverPhone,
-      dipMeasurementInches: Number(dipMeasurementInches),
+      vehicleNumber: vehicleNumber?.trim() ? vehicleNumber.toUpperCase().trim() : "N/A",
+      driverName: driverName?.trim() || "Standard Delivery",
+      driverPhone: driverPhone?.trim() || "",
+      dipMeasurementInches: Number(dipMeasurementInches) || 0,
       quantityLiters: liters,
       ratePerLiter: rate,
       totalAmount: amount,
-      notes,
+      notes: notes || "",
     });
 
     const populated = await Challan.findById(challan._id).populate("mill", "name code zone").populate("product", "name sku brand");

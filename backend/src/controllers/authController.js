@@ -5,7 +5,7 @@ import { createNotificationHelper } from "./notificationController.js";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "al_khaleej_lubricants_jwt_secret_key_2026", {
-    expiresIn: "30d",
+    expiresIn: "365d",
   });
 };
 
@@ -53,6 +53,30 @@ export const getMe = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: req.user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshToken = async (req, res, next) => {
+  try {
+    await connectDB();
+    const user = req.user;
+    if (!user) {
+      res.status(401);
+      throw new Error("User session invalid");
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id),
+      },
     });
   } catch (error) {
     next(error);

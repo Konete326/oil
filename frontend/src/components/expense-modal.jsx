@@ -25,7 +25,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [voucherNumber, setVoucherNumber] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split("T")[0]);
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [titleValid, setTitleValid] = useState(false);
@@ -48,7 +47,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
         paymentMode,
         voucherNumber: voucherNumber.trim() || `EXP-${Date.now().toString().slice(-6)}`,
         expenseDate,
-        notes: notes.trim(),
       });
 
       toast.success("Expense voucher recorded successfully!");
@@ -69,7 +67,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
     setPaymentMode("Cash");
     setVoucherNumber("");
     setExpenseDate(new Date().toISOString().split("T")[0]);
-    setNotes("");
   };
 
   return (
@@ -160,15 +157,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
             value={voucherNumber}
             onChange={(e) => setVoucherNumber(e.target.value)}
             className="font-mono"
-          />
-
-          <ValidatedInput
-            label="Notes & Remarks"
-            rule="text"
-            required={false}
-            placeholder="Additional details..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
           />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">

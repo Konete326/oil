@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExpenseModal } from "@/components/expense-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { ExpensePrintStatementModal } from "@/components/expense-print-statement-modal";
 import { PaginationControl } from "@/components/pagination-control";
 import { fetchExpensesApi, deleteExpenseApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
@@ -36,6 +37,7 @@ export function ExpensesManager() {
   const [page, setPage] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -132,9 +134,9 @@ export function ExpensesManager() {
             <span>Export Excel</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs cursor-pointer">
-            <PrinterIcon className="size-3.5" />
-            <span>Print Report</span>
+          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-xs cursor-pointer">
+            <PrinterIcon className="size-3.5 text-primary" />
+            <span>Print A4 Statement</span>
           </Button>
         </div>
       </div>
@@ -320,6 +322,16 @@ export function ExpensesManager() {
         loading={deleteLoading}
         title="Delete Expense Voucher"
         message="Are you sure you want to delete this expense voucher? This action cannot be undone."
+      />
+
+      <ExpensePrintStatementModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        expenses={expenses}
+        totalAmount={totalAmount}
+        period={period}
+        startDate={startDate}
+        endDate={endDate}
       />
     </div>
   );

@@ -11,7 +11,6 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
   const [employeeId, setEmployeeId] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [amountValid, setAmountValid] = useState(false);
@@ -30,7 +29,6 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
         employeeId,
         amount: Number(amount),
         paymentMode,
-        notes: notes.trim(),
       });
 
       toast.success("Advance cash payment recorded successfully!");
@@ -48,7 +46,6 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
     setEmployeeId("");
     setAmount("");
     setPaymentMode("Cash");
-    setNotes("");
   };
 
   const selectedEmployeeObj = employees.find((e) => e._id === employeeId);
@@ -125,15 +122,6 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess }) {
               </select>
             </div>
           </div>
-
-          <ValidatedInput
-            label="Notes & Particulars"
-            rule="text"
-            required={false}
-            placeholder="e.g. Emergency medical advance..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   fetchCategories,
+  fetchProducts,
   createCategory,
   updateCategory,
   deleteCategory,
@@ -22,13 +23,23 @@ import { CategoryModal } from "@/components/category-modal";
 import { SubcategoryModal } from "@/components/subcategory-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
-import { PlusIcon, Edit3Icon, Trash2Icon, FolderTreeIcon, SearchIcon, TagIcon, LayersIcon } from "lucide-react";
+import {
+  PlusIcon,
+  Edit3Icon,
+  Trash2Icon,
+  FolderTreeIcon,
+  SearchIcon,
+  TagIcon,
+  LayersIcon,
+  PackageCheckIcon,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const PAGE_SIZE = 10;
 
 export function CategoryManager() {
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,40 +48,71 @@ export function CategoryManager() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [confirmDeleteCat, setConfirmDeleteCat] = useState(null);
+  const [subStatus, setSubStatus] = useState("all");
 
-  const loadData = async () => {
-    setLoading(true);
-    const res = await fetchCategories();
-    if (res && res.success) {
-      setCategories(res.data);
+  const loadData = async (showSkeleton = true) => {
+    if (showSkeleton) setLoading(true);
+    try {
+      const [cRes, pRes] = await Promise.all([fetchCategories(), fetchProducts()]);
+      if (cRes && cRes.success && Array.isArray(cRes.data)) setCategories(cRes.data);
+      if (pRes && pRes.success && Array.isArray(pRes.data)) setProducts(pRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (showSkeleton) setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
   }, []);
 
   const handleCreateOrUpdate = async (formData) => {
-    if (editingCategory) {
-      await updateCategory(editingCategory._id, formData);
+    const isEditing = !!editingCategory;
+    const targetId = editingCategory?._id;
+    setIsCatModalOpen(false);
+    setEditingCategory(null);
+
+    if (isEditing) {
+      const optimisticCat = { ...editingCategory, ...formData };
+      setCategories((prev) => prev.map((c) => (c._id === targetId ? optimisticCat : c)));
+      toast.success("Category updated successfully");
+      const res = await updateCategory(targetId, formData);
+      if (res && res.data) {
+        setCategories((prev) => prev.map((c) => (c._id === targetId ? res.data : c)));
+      }
     } else {
-      await createCategory(formData);
+      const tempId = `cat_${Date.now()}`;
+      const optimisticCat = { _id: tempId, subcategories: [], ...formData };
+      setCategories((prev) => [optimisticCat, ...prev]);
+      toast.success("Category added successfully");
+      const res = await createCategory(formData);
+      if (res && res.data) {
+        setCategories((prev) => [res.data, ...prev.filter((c) => c._id !== tempId && c._id !== res.data._id)]);
+      }
     }
-    await loadData();
+
+    fetchCategories().then((cRes) => {
+      if (cRes && cRes.success && Array.isArray(cRes.data)) setCategories(cRes.data);
+    });
   };
 
   const handleDelete = async (id) => {
-    await deleteCategory(id);
+    setCategories((prev) => prev.filter((c) => c._id !== id));
     setConfirmDeleteCat(null);
-    await loadData();
+    toast.success("Category deleted successfully");
+    await deleteCategory(id);
+    fetchCategories().then((cRes) => {
+      if (cRes && cRes.success && Array.isArray(cRes.data)) setCategories(cRes.data);
+    });
   };
 
   const handleAddSub = async (catId, subData) => {
     const res = await addSubcategory(catId, subData);
     if (res && res.success) {
       setSelectedSubCategory(res.data);
-      await loadData();
+      setCategories((prev) => prev.map((c) => (c._id === catId ? res.data : c)));
+      toast.success("Subcategory added successfully");
     }
   };
 
@@ -78,35 +120,35 @@ export function CategoryManager() {
     const res = await deleteSubcategory(catId, subId);
     if (res && res.success) {
       setSelectedSubCategory(res.data);
-      await loadData();
+      setCategories((prev) => prev.map((c) => (c._id === catId ? res.data : c)));
+      toast.success("Subcategory deleted successfully");
     }
   };
-
-  const [subStatus, setSubStatus] = useState("all");
 
   const filteredCategories = categories.filter((c) => {
     const q = search.toLowerCase().trim();
     const matchesCategoryNameOrCode =
       c.name.toLowerCase().includes(q) ||
-      c.code.toLowerCase().includes(q) ||
-      (c.description && c.description.toLowerCase().includes(q));
+      c.code.toLowerCase().includes(q);
 
     const matchesSubcategory =
       c.subcategories &&
       c.subcategories.some(
         (sub) =>
           sub.name.toLowerCase().includes(q) ||
-          (sub.code && sub.code.toLowerCase().includes(q)) ||
-          (sub.description && sub.description.toLowerCase().includes(q))
+          (sub.code && sub.code.toLowerCase().includes(q))
       );
 
     const matchesSearch = matchesCategoryNameOrCode || matchesSubcategory;
 
-    let matchesSub = true;
-    if (subStatus === "withSubs") matchesSub = (c.subcategories?.length || 0) > 0;
-    else if (subStatus === "noSubs") matchesSub = (c.subcategories?.length || 0) === 0;
+    let matchesFilter = true;
+    if (subStatus === "withSubs") {
+      matchesFilter = (c.subcategories?.length || 0) > 0;
+    } else if (subStatus === "noSubs") {
+      matchesFilter = (c.subcategories?.length || 0) === 0;
+    }
 
-    return matchesSearch && matchesSub;
+    return matchesSearch && matchesFilter;
   });
 
   const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
@@ -115,16 +157,33 @@ export function CategoryManager() {
     currentPage * PAGE_SIZE
   );
 
+  const totalSubcategories = categories.reduce((sum, c) => sum + (c.subcategories?.length || 0), 0);
+  const totalInventoryStock = products.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+
+  const getCategoryStockInfo = (catId) => {
+    const catProds = products.filter((p) => (p.category?._id || p.category) === catId);
+    const totalQty = catProds.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+    const unitMap = {};
+    catProds.forEach((p) => {
+      const u = p.unit || "Cans";
+      unitMap[u] = (unitMap[u] || 0) + (p.stockQuantity || 0);
+    });
+    const summary = Object.entries(unitMap)
+      .map(([u, q]) => `${q} ${u}`)
+      .join(" · ");
+    return { count: catProds.length, totalQty, summary: summary || "0 Units" };
+  };
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <FolderTreeIcon className="size-6 text-primary" />
-            Oil Categories & Subcategories
+            Product Categories & Live Stock Overview
           </h2>
           <p className="text-xs text-muted-foreground">
-            Manage main oil categories, subcategories, and product classifications.
+            Structure lubricants into main lines and track real-time stock units per category.
           </p>
         </div>
         <Button
@@ -132,19 +191,52 @@ export function CategoryManager() {
             setEditingCategory(null);
             setIsCatModalOpen(true);
           }}
-          className="gap-2 shadow-xs cursor-pointer"
+          className="gap-2 shadow-xs cursor-pointer bg-primary text-primary-foreground font-medium text-xs"
         >
           <PlusIcon className="size-4" />
-          Add Category
+          Add Category / Subcategory
         </Button>
       </div>
 
-      <div className="bg-card p-3 rounded-xl border border-border">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <FolderTreeIcon className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Main Categories</p>
+            <p className="text-xl font-bold text-foreground">{categories.length}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
+            <LayersIcon className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Total Subcategories</p>
+            <p className="text-xl font-bold text-foreground">{totalSubcategories}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-500">
+            <PackageCheckIcon className="size-5" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Total Stock in Categories</p>
+            <p className="text-xl font-bold text-foreground">{totalInventoryStock.toLocaleString()} Units</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-4 space-y-4 shadow-xs">
+        <div className="grid grid-cols-12 gap-3">
           <div className="relative col-span-12 md:col-span-10">
             <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
-              placeholder="Quick search by category name, code, or subcategory name..."
+              type="text"
+              placeholder="Search category or subcategory name..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -164,8 +256,8 @@ export function CategoryManager() {
               className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="all">All Types</option>
-              <option value="withSubs">With Subs</option>
-              <option value="noSubs">No Subs</option>
+              <option value="withSubs">With Subcategories</option>
+              <option value="noSubs">No Subcategories</option>
             </select>
           </div>
         </div>
@@ -181,8 +273,8 @@ export function CategoryManager() {
         ) : filteredCategories.length === 0 ? (
           <div className="p-8 text-center space-y-2">
             <LayersIcon className="size-8 mx-auto text-muted-foreground/60" />
-            <p className="text-sm font-medium text-foreground">No Matching Categories or Subcategories</p>
-            <p className="text-xs text-muted-foreground">Try clearing your search query or click "Add Category".</p>
+            <p className="text-sm font-medium text-foreground">No Categories Found</p>
+            <p className="text-xs text-muted-foreground">Click "Add Category / Subcategory" to add your first entry.</p>
           </div>
         ) : (
           <>
@@ -190,15 +282,16 @@ export function CategoryManager() {
               <TableHeader>
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-[120px]">Code</TableHead>
-                  <TableHead>Category Name</TableHead>
-                  <TableHead>Subcategories & Quick Preview</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead>Main Category Name</TableHead>
+                  <TableHead>Subcategories</TableHead>
+                  <TableHead>Live Inventory Stock</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedCategories.map((cat) => {
                   const q = search.toLowerCase().trim();
+                  const stockInfo = getCategoryStockInfo(cat._id);
                   return (
                     <TableRow key={cat._id} className="hover:bg-muted/20">
                       <TableCell className="font-mono text-xs font-semibold text-primary">
@@ -221,7 +314,7 @@ export function CategoryManager() {
                             <TagIcon className="size-3 text-primary" />
                             <span>{cat.subcategories?.length || 0} Subcategories</span>
                           </Button>
-                          {cat.subcategories?.slice(0, 3).map((sub) => {
+                          {cat.subcategories?.slice(0, 4).map((sub) => {
                             const isMatch = q.length > 0 && (
                               sub.name.toLowerCase().includes(q) ||
                               (sub.code && sub.code.toLowerCase().includes(q))
@@ -244,43 +337,59 @@ export function CategoryManager() {
                               </Badge>
                             );
                           })}
-                          {cat.subcategories?.length > 3 && (
+                          {cat.subcategories?.length > 4 && (
                             <span className="text-[10px] text-muted-foreground font-mono">
-                              +{cat.subcategories.length - 3} more
+                              +{cat.subcategories.length - 4} more
                             </span>
                           )}
                         </div>
                       </TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
-                      {cat.description || "—"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground hover:text-foreground cursor-pointer"
-                          onClick={() => {
-                            setEditingCategory(cat);
-                            setIsCatModalOpen(true);
-                          }}
-                        >
-                          <Edit3Icon className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground hover:text-destructive cursor-pointer"
-                          onClick={() => setConfirmDeleteCat(cat)}
-                        >
-                          <Trash2Icon className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+                      <TableCell>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`text-[11px] font-bold px-2 py-0.5 rounded-md border font-mono ${
+                                stockInfo.totalQty > 0
+                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                                  : "bg-muted text-muted-foreground border-border"
+                              }`}
+                            >
+                              {stockInfo.totalQty} Units
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">({stockInfo.count} Products)</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-xs">
+                            {stockInfo.summary}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={() => {
+                              setEditingCategory(cat);
+                              setIsCatModalOpen(true);
+                            }}
+                          >
+                            <Edit3Icon className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-muted-foreground hover:text-destructive cursor-pointer"
+                            onClick={() => setConfirmDeleteCat(cat)}
+                          >
+                            <Trash2Icon className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
             </Table>
 
             <PaginationBar
@@ -301,6 +410,8 @@ export function CategoryManager() {
           setEditingCategory(null);
         }}
         onSave={handleCreateOrUpdate}
+        onSaveSubcategory={handleAddSub}
+        categories={categories}
         initialData={editingCategory}
       />
 

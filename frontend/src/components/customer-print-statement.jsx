@@ -1,168 +1,361 @@
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { PrinterIcon, XIcon, Building2Icon, FileTextIcon } from "lucide-react";
+import { PrinterIcon, XIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
+import logoImg from "@/assets/logo.png";
+import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
-export function CustomerPrintStatement({ isOpen, onClose, customer, summary, posSales, ledgerEntries }) {
-  if (!isOpen || !customer) return null;
+export function CustomerPrintStatement({
+  isOpen,
+  onClose,
+  customer,
+  summary,
+  posSales = [],
+  ledgerEntries = [],
+}) {
+  if (!isOpen || typeof window === "undefined") return null;
+
+  const currentCustomer = customer || { name: "Customer Khata", phone: "-", city: "Karachi", openingBalance: 0 };
 
   const handlePrint = () => {
+    const orig = document.title;
+    const cust = (currentCustomer.name || "Customer").replace(/[^a-zA-Z0-9-_]/g, "_");
+    document.title = `Al_Khaleej_Customer_Ledger_${cust}`;
     window.print();
+    const restore = () => {
+      document.title = orig;
+      window.removeEventListener("afterprint", restore);
+    };
+    window.addEventListener("afterprint", restore);
+    setTimeout(restore, 2000);
   };
 
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const openingBal = Number(currentCustomer.openingBalance || 0);
+
+  const rawRows = [];
+
+  if (ledgerEntries && ledgerEntries.length > 0) {
+    ledgerEntries.forEach((entry) => {
+      const isDebit = entry.transactionType?.toLowerCase().includes("debit") || entry.type?.toLowerCase().includes("debit") || (entry.debit && entry.debit > 0);
+      const isCredit = entry.transactionType?.toLowerCase().includes("credit") || entry.type?.toLowerCase().includes("credit") || (entry.credit && entry.credit > 0);
+
+      const debitAmt = entry.debit !== undefined ? Number(entry.debit) : isDebit ? Number(entry.amount || 0) : 0;
+      const creditAmt = entry.credit !== undefined ? Number(entry.credit) : isCredit ? Number(entry.amount || 0) : 0;
+
+      rawRows.push({
+        date: new Date(entry.createdAt || entry.date || Date.now()),
+        docNo: entry.referenceNo || entry.voucherNumber || entry._id?.slice(-6) || "-",
+        description: entry.description || entry.notes || (debitAmt > 0 ? "Debit Entry" : "Payment / Credit Entry"),
+        type: debitAmt > 0 ? "Debit" : "Credit",
+        debit: debitAmt,
+        credit: creditAmt,
+      });
+    });
+  }
+
+  if (posSales && posSales.length > 0) {
+    posSales.forEach((sale) => {
+      rawRows.push({
+        date: new Date(sale.createdAt || Date.now()),
+        docNo: sale.saleNumber || "-",
+        description: `POS Counter Sale (${sale.saleType || "Retail"}) - ${sale.items?.length || 1} Item(s)`,
+        type: "Debit",
+        debit: Number(sale.grandTotal || sale.totalAmount || 0),
+        credit: 0,
+      });
+
+      if (sale.paymentMode?.toLowerCase().includes("cash") || sale.paymentMode?.toLowerCase().includes("paid") || sale.paymentMode?.toLowerCase().includes("bank")) {
+        rawRows.push({
+          date: new Date(sale.createdAt || Date.now()),
+          docNo: `${sale.saleNumber}-PAY`,
+          description: `POS Counter Receipt (${sale.paymentMode})`,
+          type: "Credit",
+          debit: 0,
+          credit: Number(sale.grandTotal || sale.totalAmount || 0),
+        });
+      }
+    });
+  }
+
+  rawRows.sort((a, b) => a.date - b.date);
+
+  let runningBalance = openingBal;
+  const computedRows = rawRows.map((r) => {
+    runningBalance += (Number(r.debit) || 0) - (Number(r.credit) || 0);
+    const safeDate = r.date instanceof Date && !isNaN(r.date.getTime()) ? r.date : new Date();
+    return {
+      ...r,
+      date: safeDate,
+      dateStr: safeDate.toLocaleDateString("en-GB"),
+      ref: r.docNo || "-",
+      branch: r.branch || "Main Depot",
+      narration: r.description || "-",
+      balance: runningBalance,
+    };
   });
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-3xl bg-card rounded-2xl border border-border shadow-2xl overflow-hidden my-6">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30 print:hidden">
-          <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-            <PrinterIcon className="size-4 text-primary" />
-            A4 Print Statement Preview
+  const totalDebit = computedRows.reduce((sum, r) => sum + (Number(r.debit) || 0), 0);
+  const totalCredit = computedRows.reduce((sum, r) => sum + (Number(r.credit) || 0), 0);
+  const finalBalance = runningBalance;
+
+  const handleExportExcel = () => {
+    exportTransactionsToExcel({
+      title: `CUSTOMER_LEDGER_${currentCustomer.name.replace(/\s+/g, "_")}`,
+      subtitle: `Customer: ${currentCustomer.name} | Phone: ${currentCustomer.phone || "-"} | Address: ${currentCustomer.address || currentCustomer.zone || "-"}`,
+      headers: ["Date", "Doc / Invoice #", "Description", "Debit (Rs)", "Credit (Rs)", "Balance (Rs)"],
+      data: computedRows.map((r) => ({
+        "Date": r.dateStr,
+        "Doc / Invoice #": r.ref,
+        "Description": r.narration,
+        "Debit (Rs)": r.debit,
+        "Credit (Rs)": r.credit,
+        "Balance (Rs)": r.balance,
+      })),
+      totalDebit,
+      totalCredit,
+      closingBalance: finalBalance,
+    });
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = `*AL KHALEEJ LUBRICANTS - CUSTOMER STATEMENT*\n*Customer:* ${currentCustomer.name}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Current Balance:* Rs ${finalBalance.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const modalContent = (
+    <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 4mm 6mm;
+          }
+          html, body {
+            background: white !important;
+            color: black !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print-portal {
+            position: static !important;
+            display: block !important;
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+          .a4-sheet {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: white !important;
+            color: black !important;
+          }
+          .print\\:hidden,
+          [class*="print:hidden"] {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:p-0 print:block print:bg-white">
+        <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+            <CheckCircle2Icon className="size-4 text-emerald-500" />
+            <span>Customer Khata & Ledger Statement (A4 Standard)</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handlePrint} size="sm" className="gap-1.5 cursor-pointer text-xs font-semibold">
+            <Button
+              size="sm"
+              onClick={handleShareWhatsApp}
+              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <SendIcon className="size-3.5" />
+              <span>Share WhatsApp</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              className="gap-1.5 text-xs cursor-pointer"
+            >
+              <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
+              <span>Export Excel</span>
+            </Button>
+            <Button
+              size="sm"
+              onClick={handlePrint}
+              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+            >
               <PrinterIcon className="size-3.5" />
-              Print A4 Document
+              <span>Print A4 Statement</span>
             </Button>
-            <Button variant="ghost" size="icon" onClick={onClose} className="size-7 cursor-pointer">
-              <XIcon className="size-3.5" />
+            <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer">
+              <XIcon className="size-4" />
             </Button>
           </div>
         </div>
 
-        <div className="p-8 text-foreground bg-white dark:bg-zinc-950 print:p-0 print:bg-white print:text-black">
-          <style>{`
-            @media print {
-              body * { visibility: hidden; }
-              #printable-a4-area, #printable-a4-area * { visibility: visible; }
-              #printable-a4-area { position: absolute; left: 0; top: 0; width: 100%; font-size: 11px; padding: 20px; }
-              @page { size: A4; margin: 15mm; }
-            }
-          `}</style>
-
-          <div id="printable-a4-area" className="space-y-6">
-            <div className="flex justify-between items-start border-b border-border pb-5">
+        <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
+          <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate" dir="ltr" lang="en">
+          <div className="flex justify-between items-start border-b border-black pb-4 mb-4">
+            <div className="flex items-center gap-3">
+              <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
               <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-primary flex items-center gap-2">
-                  <Building2Icon className="size-6 text-primary" />
-                  AL KHALEEJ LUBRICANTS LLC
+                <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                  AL KHALEEJ LUBRICANTS
                 </h1>
-                <p className="text-xs text-muted-foreground mt-1">
-                  High Performance Industrial & Automotive Lubricants
+                <p className="text-[11px] text-gray-700 font-medium">
+                  Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
                 </p>
-                <p className="text-[11px] text-muted-foreground">
-                  Plot #45, Industrial Zone, Karachi, Pakistan | Phone: +92 21 34567890
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="inline-block px-3 py-1 bg-primary/10 text-primary font-bold text-xs rounded border border-primary/20">
-                  CUSTOMER STATEMENT
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Date: <strong className="text-foreground">{currentDate}</strong>
+                <p className="text-[10px] text-gray-600">
+                  Tel: (021) 35091244 | NTN: 7894561-2
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 rounded-xl border border-border p-4 bg-muted/20">
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Customer Details</p>
-                <h2 className="text-sm font-bold text-foreground">{customer.name}</h2>
-                <p className="text-xs text-muted-foreground">Phone: {customer.phone || "N/A"}</p>
-                <p className="text-xs text-muted-foreground">Address: {customer.address || "N/A"}, {customer.city}</p>
-                <p className="text-xs text-muted-foreground">Category: <span className="font-semibold text-foreground">{customer.customerType}</span></p>
-              </div>
-              <div className="space-y-1 text-right border-l border-border pl-4">
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Account Summary</p>
-                <div className="text-xs space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Credit Limit:</span>
-                    <span className="font-mono font-semibold">Rs {(customer.creditLimit || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Purchases:</span>
-                    <span className="font-mono font-semibold">Rs {(summary?.totalSpent || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between pt-1 border-t border-border font-bold text-sm text-primary">
-                    <span>Current Khata Balance:</span>
-                    <span className="font-mono">Rs {(customer.currentBalance || 0).toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-xs text-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <FileTextIcon className="size-3.5 text-primary" /> Recent POS Sales & Invoices
-              </h3>
-              <table className="w-full border-collapse border border-border text-xs">
-                <thead>
-                  <tr className="bg-muted/40 text-muted-foreground">
-                    <th className="border border-border p-2 text-left">Date</th>
-                    <th className="border border-border p-2 text-left">Invoice #</th>
-                    <th className="border border-border p-2 text-left">Items</th>
-                    <th className="border border-border p-2 text-center">Payment</th>
-                    <th className="border border-border p-2 text-right">Amount (Rs)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {posSales && posSales.length > 0 ? (
-                    posSales.slice(0, 10).map((sale) => (
-                      <tr key={sale._id} className="border-b border-border hover:bg-muted/10">
-                        <td className="border border-border p-2">
-                          {new Date(sale.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="border border-border p-2 font-mono font-semibold">
-                          {sale.saleNumber}
-                        </td>
-                        <td className="border border-border p-2">
-                          {sale.items?.map((i) => i.productName).join(", ") || "General Sale"}
-                        </td>
-                        <td className="border border-border p-2 text-center">
-                          <span className="px-1.5 py-0.5 rounded bg-muted text-[10px]">
-                            {sale.paymentMode}
-                          </span>
-                        </td>
-                        <td className="border border-border p-2 text-right font-mono font-semibold">
-                          {(sale.grandTotal || 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="border border-border p-3 text-center text-muted-foreground">
-                        No sales transactions recorded.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
-              <div className="border-t border-border pt-2 text-muted-foreground">
-                Customer Signature & Stamp
-              </div>
-              <div className="border-t border-border pt-2 text-muted-foreground">
-                Authorized Signatory (Al Khaleej)
-              </div>
+            <div className="text-right font-mono">
+              <span className="font-bold text-xs uppercase underline">
+                CUSTOMER LEDGER STATEMENT
+              </span>
+              <p className="text-[10px] text-gray-700 pt-1">
+                Statement Date: {new Date().toLocaleDateString("en-GB")}
+              </p>
             </div>
           </div>
-        </div>
 
-        <div className="px-6 py-4 border-t border-border bg-muted/30 flex justify-end gap-2 print:hidden">
-          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
-            Close
-          </Button>
-          <Button onClick={handlePrint} size="sm" className="gap-1.5 cursor-pointer text-xs font-semibold">
-            <PrinterIcon className="size-3.5" />
-            Print A4 Document
-          </Button>
+          <div className="grid grid-cols-2 gap-4 pb-4 mb-2 text-xs">
+            <div className="space-y-0.5">
+              <p className="text-[10px] uppercase font-bold text-gray-700">Account / Customer Title:</p>
+              <p className="font-bold text-sm text-black uppercase">{currentCustomer.name}</p>
+              <p className="text-[11px] text-gray-700">{currentCustomer.address || "Main Industrial Depot"}, {currentCustomer.city || "Karachi"}</p>
+              {currentCustomer.phone && <p className="text-[11px] text-gray-700">Phone: {currentCustomer.phone}</p>}
+            </div>
+
+            <div className="space-y-0.5 text-right font-mono">
+              <p className="text-[10px] font-sans uppercase font-bold text-gray-700">Financial Summary:</p>
+              <p className="text-[11px] text-gray-800">Opening Balance: <strong>Rs {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-[11px] text-gray-800">Total Billed (Debits): <strong>Rs {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-[11px] text-gray-800">Total Received (Credits): <strong>Rs {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+            </div>
+          </div>
+
+          <div className="mb-6 overflow-hidden">
+            <table className="w-full text-left border-collapse text-[11px]">
+              <thead>
+                <tr className="border-b border-black font-bold uppercase text-[11px]">
+                  <th className="py-2 px-2 w-20 text-left">Date</th>
+                  <th className="py-2 px-2 w-14 text-left">Ref.</th>
+                  <th className="py-2 px-2 w-24 text-left">Branch</th>
+                  <th className="py-2 px-2 text-left">Narration</th>
+                  <th className="py-2 px-2 text-right w-24">Debit (PKR)</th>
+                  <th className="py-2 px-2 text-right w-24">Credit (PKR)</th>
+                  <th className="py-2 px-2 text-right w-28">Balance (PKR)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-300 font-sans">
+                <tr className="border-b border-gray-300">
+                  <td className="py-1.5 px-2 font-mono text-gray-700">
+                    {new Date(currentCustomer.createdAt || Date.now()).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="py-1.5 px-2 font-mono text-gray-700">-</td>
+                  <td className="py-1.5 px-2 text-gray-700 uppercase">-</td>
+                  <td className="py-1.5 px-2 font-medium text-black">Opening</td>
+                  <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
+                  <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
+                  <td className="py-1.5 px-2 text-right font-mono font-semibold text-black">
+                    {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                </tr>
+
+                {computedRows.map((row, idx) => (
+                  <tr key={idx} className="border-b border-gray-200">
+                    <td className="py-1.5 px-2 font-mono text-gray-800">
+                      {row.date.toLocaleDateString("en-GB")}
+                    </td>
+                    <td className="py-1.5 px-2 font-mono text-gray-800">{row.ref}</td>
+                    <td className="py-1.5 px-2 text-gray-800 uppercase font-semibold text-[10px]">{row.branch}</td>
+                    <td className="py-1.5 px-2 text-black leading-tight">{row.narration}</td>
+                    <td className="py-1.5 px-2 text-right font-mono text-gray-900">
+                      {row.debit > 0
+                        ? row.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : "0.00"}
+                    </td>
+                    <td className="py-1.5 px-2 text-right font-mono text-gray-900">
+                      {row.credit > 0
+                        ? row.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : "0.00"}
+                    </td>
+                    <td className="py-1.5 px-2 text-right font-mono font-semibold text-black">
+                      {row.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))}
+
+                <tr className="border-t-2 border-black font-bold">
+                  <td colSpan={4} className="py-2 px-2 text-left uppercase">
+                    Total:
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono">
+                    {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono">
+                    {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className="py-2 px-2"></td>
+                </tr>
+
+                <tr className="border-t border-black font-bold bg-gray-50">
+                  <td colSpan={4} className="py-2.5 px-2 text-left uppercase text-xs">
+                    Your balance
+                  </td>
+                  <td colSpan={2}></td>
+                  <td className="py-2.5 px-2 text-right font-mono text-sm text-black">
+                    {finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
+            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+              Customer Sign & Verification
+            </div>
+            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+              Authorized Accountant (Al Khaleej)
+            </div>
+          </div>
         </div>
       </div>
+
+      <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
+        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+          Close Preview
+        </Button>
+        <Button
+          size="sm"
+          onClick={handlePrint}
+          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+        >
+          <PrinterIcon className="size-3.5" />
+          <span>Print A4 Statement</span>
+        </Button>
+      </div>
     </div>
-  );
+  </div>
+);
+
+return createPortal(modalContent, document.body);
 }

@@ -3,46 +3,53 @@ import { Input } from "@/components/ui/input";
 import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export function formatPhoneNumber(val) {
+  if (!val) return "";
+  const digits = val.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 4) return digits;
+  return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+}
+
 export const VALIDATION_RULES = {
   email: {
     regex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    suggestion: "Enter a valid email address (e.g. user@domain.com)",
-    validMsg: "Valid Email Format",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
   password: {
     regex: /^.{6,}$/,
-    suggestion: "Minimum 6 characters required",
-    validMsg: "Password Strength OK",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
   name: {
     regex: /^[a-zA-Z0-9\s._\-\/\(\)]{2,}$/,
-    suggestion: "Minimum 2 characters required",
-    validMsg: "Valid Name",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
   text: {
     regex: /^\s*\S[\s\S]*$/,
-    suggestion: "This field cannot be empty",
-    validMsg: "Looks Good",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
   phone: {
-    regex: /^[0-9\+\-\s\(\)]{7,15}$/,
-    suggestion: "Enter valid contact number (7-15 digits)",
-    validMsg: "Valid Contact",
+    regex: /^(03\d{2}-\d{7}|\d{4}-\d{7})$/,
+    suggestion: "0300-1234567 (11 Digits)",
+    validMsg: "Valid (11 Digits)",
   },
   positiveNumber: {
     regex: /^(0|[1-9]\d*)(\.\d+)?$/,
-    suggestion: "Enter a valid non-negative number",
-    validMsg: "Valid Number",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
   amount: {
     regex: /^[1-9]\d*(\.\d+)?$/,
-    suggestion: "Enter amount greater than 0",
-    validMsg: "Valid Amount",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
   code: {
     regex: /^[a-zA-Z0-9_\-]{2,}$/,
-    suggestion: "Min 2 alphanumeric chars required",
-    validMsg: "Valid Code",
+    suggestion: "Invalid",
+    validMsg: "Valid",
   },
 };
 
@@ -64,6 +71,7 @@ export const ValidatedInput = React.forwardRef(
       showSuccess = true,
       placeholder,
       disabled = false,
+      maxLength,
       ...props
     },
     ref
@@ -72,8 +80,8 @@ export const ValidatedInput = React.forwardRef(
 
     const ruleConfig = VALIDATION_RULES[rule] || VALIDATION_RULES.text;
     const activeRegex = customRegex || ruleConfig.regex;
-    const suggestionText = customSuggestion || ruleConfig.suggestion;
-    const validText = customValidMsg || ruleConfig.validMsg;
+    const suggestionText = customSuggestion || ruleConfig.suggestion || "Invalid";
+    const validText = customValidMsg || ruleConfig.validMsg || "Valid";
 
     const strVal = value !== null && value !== undefined ? String(value) : "";
     const isEmpty = strVal.trim() === "";
@@ -95,11 +103,18 @@ export const ValidatedInput = React.forwardRef(
     };
 
     const handleChange = (e) => {
-      if (!touched && e.target.value.length > 0) {
+      let finalVal = e.target.value;
+      if (rule === "phone") {
+        finalVal = formatPhoneNumber(finalVal);
+        e.target.value = finalVal;
+      }
+      if (!touched && finalVal.length > 0) {
         setTouched(true);
       }
       if (onChange) onChange(e);
     };
+
+    const effectiveMaxLength = maxLength || (rule === "phone" ? 12 : undefined);
 
     const showErrorState = touched && !isValid;
     const showValidState = touched && isValid && !isEmpty && showSuccess;
@@ -132,6 +147,7 @@ export const ValidatedInput = React.forwardRef(
             value={value}
             disabled={disabled}
             placeholder={placeholder}
+            maxLength={effectiveMaxLength}
             onChange={handleChange}
             onBlur={handleBlur}
             className={cn(

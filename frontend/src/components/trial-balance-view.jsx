@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { ScaleIcon, CheckCircle2Icon, AlertCircleIcon, FileSpreadsheetIcon, PrinterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TrialBalancePrintModal } from "@/components/trial-balance-print-modal";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function TrialBalanceView({ accounts = [], summary = {}, loading = false }) {
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+
   const handleExportExcel = () => {
     const data = accounts.map((a) => ({
       "Account Code": a.code,
@@ -52,7 +55,7 @@ export function TrialBalanceView({ accounts = [], summary = {}, loading = false 
             <span>Export Excel</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs cursor-pointer">
+          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-xs cursor-pointer">
             <PrinterIcon className="size-3.5" />
             <span>Print Sheet</span>
           </Button>
@@ -121,6 +124,13 @@ export function TrialBalanceView({ accounts = [], summary = {}, loading = false 
           </table>
         </div>
       </div>
+
+      <TrialBalancePrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        accounts={accounts}
+        summary={summary}
+      />
     </div>
   );
 }

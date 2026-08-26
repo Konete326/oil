@@ -36,7 +36,6 @@ export function DecantingManager() {
   const [targetUnitLabel, setTargetUnitLabel] = useState("Medium Can 4L");
   const [targetProductId, setTargetProductId] = useState("");
   const [wastagePercentage, setWastagePercentage] = useState("0.5");
-  const [notes, setNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [drumsValid, setDrumsValid] = useState(true);
@@ -98,12 +97,10 @@ export function DecantingManager() {
         targetUnitSize: unitSizeNum,
         targetProductId: targetProductId || undefined,
         wastagePercentage: wastePctNum,
-        notes,
       });
 
       setSuccessMsg(`Successfully decanted ${drumsCountNum} drum(s) into ${producedUnits} units of ${targetUnitLabel}!`);
       setSourceDrumsCount("1");
-      setNotes("");
       await loadData();
     } catch (err) {
       setError(err.message || "Failed to process decanting entry.");
@@ -220,26 +217,15 @@ export function DecantingManager() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <ValidatedInput
-                label="Handling & Evaporation Loss (%)"
-                rule="positiveNumber"
-                type="number"
-                placeholder="0.5"
-                value={wastagePercentage}
-                onChange={(e) => setWastagePercentage(e.target.value)}
-                onValidationChange={setWastageValid}
-              />
-
-              <ValidatedInput
-                label="Batch Notes / Operator Ref"
-                rule="text"
-                required={false}
-                placeholder="e.g. Decanted Lot #402 for SITE Mill order"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-            </div>
+            <ValidatedInput
+              label="Handling & Evaporation Loss (%)"
+              rule="positiveNumber"
+              type="number"
+              placeholder="0.5"
+              value={wastagePercentage}
+              onChange={(e) => setWastagePercentage(e.target.value)}
+              onValidationChange={setWastageValid}
+            />
 
             <Button type="submit" disabled={submitting || !isFormValid} className="w-full h-10 gap-2 cursor-pointer font-semibold shadow-xs">
               <RefreshCwIcon className="size-4" />

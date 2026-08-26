@@ -12,12 +12,11 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [referenceNumber, setReferenceNumber] = useState("");
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [amountValid, setAmountValid] = useState(false);
 
-  const isFormValid = !!supplierId && amountValid;
+  const isFormValid = amountValid;
 
   if (!isOpen) return null;
 
@@ -27,12 +26,12 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
 
     try {
       setLoading(true);
+      const targetSupplierId = supplierId || suppliers[0]?._id;
       await createSupplierPaymentApi({
-        supplierId,
+        supplierId: targetSupplierId,
         amount: Number(amount),
         paymentMode,
-        referenceNumber,
-        notes,
+        referenceNumber: paymentMode === "Cash" ? "" : referenceNumber,
       });
 
       toast.success("Supplier payment recorded successfully!");
@@ -51,7 +50,6 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
     setAmount("");
     setPaymentMode("Cash");
     setReferenceNumber("");
-    setNotes("");
   };
 
   const selectedSupplierObj = suppliers.find((s) => s._id === supplierId);
@@ -71,17 +69,16 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="space-y-1">
-            <label className="font-medium text-foreground">Select Supplier / Refinery *</label>
+            <label className="font-medium text-foreground">Select Supplier / Refinery (Optional)</label>
             <select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
               className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              required
             >
-              <option value="">-- Choose Supplier --</option>
+              <option value="">-- Choose Supplier (Default: First Available) --</option>
               {suppliers.map((sup) => (
                 <option key={sup._id} value={sup._id}>
-                  {sup.name} (Balance: Rs. {sup.currentBalance.toLocaleString()})
+                  {sup.name} (Balance: Rs. {sup.currentBalance?.toLocaleString() || 0})
                 </option>
               ))}
             </select>
@@ -91,13 +88,13 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
             <div className="p-3 bg-muted/40 rounded-lg border border-border space-y-1 text-xs">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Current Balance Owed:</span>
-                <span className="font-mono font-bold text-amber-500">Rs. {selectedSupplierObj.currentBalance.toLocaleString()}</span>
+                <span className="font-mono font-bold text-amber-500">Rs. {selectedSupplierObj.currentBalance?.toLocaleString() || 0}</span>
               </div>
             </div>
           )}
 
           <ValidatedInput
-            label="Payment Amount Paid (Rs.)"
+            label="Payment Amount Paid (Rs.) *"
             rule="amount"
             required
             type="number"
@@ -123,24 +120,17 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
             </select>
           </div>
 
-          <ValidatedInput
-            label="Reference / Cheque / Bank Slip No."
-            rule="text"
-            required={false}
-            placeholder="e.g. CHQ-90412 or Bank Ref #"
-            value={referenceNumber}
-            onChange={(e) => setReferenceNumber(e.target.value)}
-            className="font-mono"
-          />
-
-          <ValidatedInput
-            label="Notes & Particulars"
-            rule="text"
-            required={false}
-            placeholder="Additional remarks..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+          {paymentMode !== "Cash" && (
+            <ValidatedInput
+              label="Reference / Cheque / Bank Slip No. (Optional)"
+              rule="text"
+              required={false}
+              placeholder="e.g. CHQ-90412 or Bank Ref #"
+              value={referenceNumber}
+              onChange={(e) => setReferenceNumber(e.target.value)}
+              className="font-mono"
+            />
+          )}
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>

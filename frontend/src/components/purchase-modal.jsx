@@ -14,7 +14,6 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
   const [unitPrice, setUnitPrice] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("Paid");
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [notes, setNotes] = useState("");
   const [productsList, setProductsList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +59,6 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
         unitPrice: Number(unitPrice),
         paymentStatus,
         invoiceNumber,
-        notes,
       });
 
       toast.success("Stock purchase recorded successfully!");
@@ -81,7 +79,6 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
     setQuantity("");
     setUnitPrice("");
     setInvoiceNumber("");
-    setNotes("");
   };
 
   const calculatedTotal = Number(quantity || 0) * Number(unitPrice || 0);
@@ -201,15 +198,6 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
               className="font-mono"
             />
           </div>
-
-          <ValidatedInput
-            label="Notes & Remarks"
-            rule="text"
-            required={false}
-            placeholder="Batch number, tank lorry details, etc."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>

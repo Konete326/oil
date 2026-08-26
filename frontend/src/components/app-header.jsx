@@ -10,6 +10,8 @@ import { navLinks } from "@/components/app-shared";
 import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
 import { NavUser } from "@/components/nav-user";
 import { useToastNotification } from "@/components/toast-notification-provider";
+import { LanguageSelector } from "@/components/language-selector";
+import { SyncStatusBadge } from "@/components/sync-status-badge";
 import {
   fetchProducts,
   fetchCashTransactionsApi,
@@ -401,14 +403,17 @@ export function AppHeader({ user, onLogout }) {
           </div>
         )}
 
+        <SyncStatusBadge />
+        <LanguageSelector />
+
         <Button
           aria-label="Notifications"
-          size="icon-sm"
+          size="sm"
           variant="outline"
           onClick={() => navigate("/notifications")}
-          className="cursor-pointer relative shrink-0"
+          className="cursor-pointer relative shrink-0 size-9 p-0 rounded-lg border-border/80 bg-background/50 hover:bg-muted/80 flex items-center justify-center"
         >
-          <BellIcon />
+          <BellIcon className="size-4" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
               {unreadCount > 9 ? "9+" : unreadCount}

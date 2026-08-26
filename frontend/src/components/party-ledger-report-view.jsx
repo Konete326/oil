@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { fetchDetailedPartyLedgerApi, fetchMills, fetchSuppliersApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { PaginationBar } from "@/components/ui/pagination-bar";
+import { CustomerPrintStatement } from "@/components/customer-print-statement";
 
 const PAGE_SIZE = 10;
 
@@ -18,6 +19,7 @@ export function PartyLedgerReportView() {
   const [ledgerData, setLedgerData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   useEffect(() => {
     if (partyType === "Customer") {
@@ -163,7 +165,7 @@ export function PartyLedgerReportView() {
             <span>Export Excel</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs cursor-pointer">
+          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-xs cursor-pointer">
             <PrinterIcon className="size-3.5" />
             <span>Print Statement</span>
           </Button>
@@ -262,6 +264,13 @@ export function PartyLedgerReportView() {
           onPageChange={(page) => setCurrentPage(page)}
         />
       </div>
+
+      <CustomerPrintStatement
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        customer={{ name: partyName, city: "KARACHI", openingBalance: 0 }}
+        ledgerEntries={ledgerData}
+      />
     </div>
   );
 }

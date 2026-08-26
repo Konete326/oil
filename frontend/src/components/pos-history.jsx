@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchPosSales } from "@/lib/api";
+import { fetchPosSales, deletePosSaleApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,9 +11,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PosReceiptModal } from "@/components/pos-receipt-modal";
+import { PosDeleteReasonModal } from "@/components/pos-delete-reason-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
-import { HistoryIcon, SearchIcon, ReceiptIcon, WalletIcon, ShoppingBagIcon, SparklesIcon } from "lucide-react";
+import { HistoryIcon, SearchIcon, ReceiptIcon, WalletIcon, ShoppingBagIcon, SparklesIcon, Trash2Icon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
@@ -24,13 +26,38 @@ export function PosHistory() {
   const [saleTypeFilter, setSaleTypeFilter] = useState("all");
   const [paymentModeFilter, setPaymentModeFilter] = useState("all");
   const [completedSale, setCompletedSale] = useState(null);
+  const [saleToDelete, setSaleToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = currentUser?.role === "admin";
 
   const loadData = async () => {
     setLoading(true);
     const res = await fetchPosSales();
     if (res && res.success) setSalesHistory(res.data);
     setLoading(false);
+  };
+
+  const handleDeleteSale = async ({ reason, notes }) => {
+    if (!saleToDelete) return;
+    setIsDeleting(true);
+    try {
+      const res = await deletePosSaleApi(saleToDelete._id, { reason, notes });
+      if (res && res.success) {
+        toast.success(`POS Sale ${saleToDelete.saleNumber} deleted & inventory restored`);
+        setSalesHistory((prev) => prev.filter((s) => s._id !== saleToDelete._id));
+        setSaleToDelete(null);
+      } else {
+        toast.error(res?.message || "Failed to delete sale");
+      }
+    } catch {
+      toast.error("Error deleting POS sale");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   useEffect(() => {
@@ -179,7 +206,7 @@ export function PosHistory() {
                   <TableHead className="text-center">Items Purchased</TableHead>
                   <TableHead>Payment Mode</TableHead>
                   <TableHead className="text-right">Grand Total</TableHead>
-                  <TableHead className="text-right">Thermal Slip</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -209,15 +236,28 @@ export function PosHistory() {
                       Rs {sale.grandTotal?.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 gap-1 text-xs cursor-pointer"
-                        onClick={() => setCompletedSale(sale)}
-                      >
-                        <ReceiptIcon className="size-3.5 text-primary" />
-                        <span>Print Slip</span>
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 gap-1.5 text-xs cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                          onClick={() => setCompletedSale(sale)}
+                        >
+                          <ReceiptIcon className="size-3.5 text-primary" />
+                          <span>View & Print A4</span>
+                        </Button>
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+                            onClick={() => setSaleToDelete(sale)}
+                            title="Delete Sale & Restore Stock (Super Admin Only)"
+                          >
+                            <Trash2Icon className="size-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -239,6 +279,14 @@ export function PosHistory() {
         isOpen={!!completedSale}
         onClose={() => setCompletedSale(null)}
         sale={completedSale}
+      />
+
+      <PosDeleteReasonModal
+        isOpen={!!saleToDelete}
+        onClose={() => setSaleToDelete(null)}
+        onConfirm={handleDeleteSale}
+        sale={saleToDelete}
+        loading={isDeleting}
       />
     </div>
   );

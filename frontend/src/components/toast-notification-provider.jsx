@@ -29,22 +29,9 @@ export function ToastNotificationProvider({ children }) {
 
       if (isFirstLoadRef.current) {
         fetchedList.forEach((n) => knownIdsRef.current.add(n._id));
-        const unreadStockAndLogin = fetchedList.filter(
-          (n) => !n.isRead && (n.type === "stock" || n.type === "login" || n.type === "warning")
-        );
-        if (unreadStockAndLogin.length > 0) {
-          const latestToasts = unreadStockAndLogin.slice(0, 3).map((n) => ({
-            id: n._id,
-            title: n.title,
-            message: n.message,
-            type: n.type,
-            createdAt: n.createdAt,
-          }));
-          setActiveToasts(latestToasts);
-        }
         isFirstLoadRef.current = false;
       } else {
-        const newItems = fetchedList.filter((n) => !knownIdsRef.current.has(n._id));
+        const newItems = fetchedList.filter((n) => !knownIdsRef.current.has(n._id) && !n.isRead);
         if (newItems.length > 0) {
           newItems.forEach((n) => knownIdsRef.current.add(n._id));
           const toastsToAdd = newItems.map((n) => ({
@@ -54,7 +41,7 @@ export function ToastNotificationProvider({ children }) {
             type: n.type,
             createdAt: n.createdAt,
           }));
-          setActiveToasts((prev) => [...toastsToAdd, ...prev].slice(0, 4));
+          setActiveToasts((prev) => [...toastsToAdd, ...prev].slice(0, 3));
         }
       }
     }
@@ -62,12 +49,13 @@ export function ToastNotificationProvider({ children }) {
 
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 10000);
+    const interval = setInterval(loadNotifications, 15000);
     return () => clearInterval(interval);
   }, [loadNotifications]);
 
   const dismissToast = useCallback((id) => {
     setActiveToasts((prev) => prev.filter((t) => t.id !== id));
+    markNotificationReadApi(id).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -111,7 +99,7 @@ export function ToastNotificationProvider({ children }) {
       }}
     >
       {children}
-      <div className="fixed top-16 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      <div className="fixed top-16 right-4 rtl:right-auto rtl:left-4 ltr:right-4 ltr:left-auto z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none transition-all duration-200">
         {activeToasts.map((toast) => (
           <div
             key={toast.id}

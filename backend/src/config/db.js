@@ -17,14 +17,17 @@ export const connectDB = async () => {
     bufferCommands: true,
   };
 
-  cachedPromise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => {
-    console.log(`MongoDB Connected: ${m.connection.host}`);
-    return m.connection;
-  }).catch((err) => {
-    cachedPromise = null;
-    console.error(`MongoDB Connection Error: ${err.message}`);
-    throw err;
-  });
+  cachedPromise = mongoose
+    .connect(process.env.MONGO_URI, opts)
+    .then((m) => {
+      console.log(`MongoDB Connected: ${m.connection.host}`);
+      return m.connection;
+    })
+    .catch((err) => {
+      cachedPromise = null;
+      console.warn(`MongoDB Connection Warning: ${err.message}. Running in offline fallback mode.`);
+      return null;
+    });
 
   return cachedPromise;
 };

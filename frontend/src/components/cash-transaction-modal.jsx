@@ -26,7 +26,6 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [referenceNo, setReferenceNo] = useState("");
   const [transactionDate, setTransactionDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [partyValid, setPartyValid] = useState(false);
@@ -50,7 +49,6 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
         paymentMode,
         referenceNo,
         transactionDate,
-        notes,
       });
 
       toast.success(`${type} cash transaction recorded successfully!`);
@@ -70,7 +68,6 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
     setCategory("General");
     setPaymentMode("Cash");
     setReferenceNo("");
-    setNotes("");
     setTransactionDate(new Date().toISOString().split("T")[0]);
   };
 
@@ -190,15 +187,6 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
             value={referenceNo}
             onChange={(e) => setReferenceNo(e.target.value)}
             className="font-mono"
-          />
-
-          <ValidatedInput
-            label="Notes & Details (Optional)"
-            rule="text"
-            required={false}
-            placeholder="Add additional remarks..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
           />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">

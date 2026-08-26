@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { loginUserApi } from "@/lib/api";
+import { loginUserApi, fetchHydrationDataApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LogoIcon } from "@/components/logo";
@@ -34,6 +34,7 @@ export function LoginPage({ onLoginSuccess }) {
 
     try {
       const user = await loginUserApi(email, password);
+      fetchHydrationDataApi().catch(() => {});
       toast.success("Welcome back! Redirecting to dashboard...");
       if (onLoginSuccess) onLoginSuccess(user);
       navigate("/");
