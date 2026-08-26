@@ -127,19 +127,23 @@ export function SalesPurchaseManager() {
             variant="outline"
             size="sm"
             onClick={async () => {
-              if (purchasesData.length === 0) {
-                const pRes = await fetchPurchasesApi();
-                if (pRes?.success) setPurchasesData(pRes.data);
-              }
-              if (!salesData.posSales || salesData.posSales.length === 0) {
-                const sRes = await fetchSalesReportApi({ period: "monthly" });
-                if (sRes?.success) setSalesData(sRes.data);
-              }
               setIsReconcileModalOpen(true);
+              try {
+                if (purchasesData.length === 0) {
+                  const pRes = await fetchPurchasesApi();
+                  if (pRes?.success) setPurchasesData(pRes.data);
+                }
+                if (!salesData.posSales || salesData.posSales.length === 0) {
+                  const sRes = await fetchSalesReportApi({ period: "monthly" });
+                  if (sRes?.success) setSalesData(sRes.data);
+                }
+              } catch (e) {
+                console.error(e);
+              }
             }}
-            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+            className="flex items-center gap-1.5 text-xs cursor-pointer"
           >
-            <PrinterIcon className="size-3.5" />
+            <PrinterIcon className="size-3.5 text-primary" />
             <span>Print A4 Reconciliation</span>
           </Button>
         </div>

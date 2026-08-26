@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,12 @@ export function SalesPurchaseReconciliationModal({
 }) {
   const [activeType, setActiveType] = useState(reportType);
 
+  useEffect(() => {
+    if (reportType) {
+      setActiveType(reportType);
+    }
+  }, [reportType]);
+
   if (!isOpen || typeof window === "undefined") return null;
 
   const currentMonthName = new Date().toLocaleDateString("en-US", {
@@ -21,39 +27,45 @@ export function SalesPurchaseReconciliationModal({
     year: "numeric",
   }).toUpperCase();
 
-  const purchaseRows = (purchases || []).map((p) => ({
-    month: new Date(p.purchaseDate || p.createdAt || Date.now()).toLocaleDateString("en-GB"),
-    tin: p.purchaseNumber || "010-534-770-000",
-    name: p.supplierName || p.supplier || "Supplier",
-    regName: p.registeredName || p.supplierName || "Al Khaleej Lubricants",
-    address: p.address || "Korangi Industrial Area, Karachi",
-    nature: "PURCHASE",
-    grossTaxable: Number(p.grossAmount || p.totalAmount || 0),
-    exempt: 0,
-    zeroRated: 0,
-    taxAmount: Number(p.taxAmount || 0),
-    totalGross: Number(p.totalAmount || 0),
-  }));
+  const purchaseRows = (purchases || []).map((p) => {
+    const gross = Number(p.totalAmount || p.totalCost || p.grossAmount || 0);
+    return {
+      month: new Date(p.purchaseDate || p.createdAt || Date.now()).toLocaleDateString("en-GB"),
+      tin: p.purchaseNumber || "010-534-770-000",
+      corpName: p.supplierName || p.supplier || "Supplier",
+      proprietor: p.contactPerson || p.supplierName || "Al Khaleej Partner",
+      address: p.address || "Korangi Industrial Area, Karachi",
+      particular: p.productName || p.particular || p.description || "Base Oil / Drum Stock",
+      gross: gross,
+      exempt: 0,
+      taxAmount: Number(p.taxAmount || 0),
+      total: gross,
+    };
+  });
 
-  const salesRows = (sales || []).map((s) => ({
-    month: new Date(s.saleDate || s.createdAt || Date.now()).toLocaleDateString("en-GB"),
-    tin: s.saleNumber || "010-534-770-001",
-    name: s.customerName || s.millName || "Client",
-    regName: s.customerName || "Commercial Client",
-    address: s.address || "Karachi, Pakistan",
-    nature: s.saleType || "RETAIL SALE",
-    grossTaxable: Number(s.subtotal || s.grandTotal || 0),
-    exempt: 0,
-    zeroRated: 0,
-    taxAmount: Number(s.taxAmount || 0),
-    totalGross: Number(s.grandTotal || s.totalAmount || 0),
-  }));
+  const salesRows = (sales || []).map((s) => {
+    const gross = Number(s.grandTotal || s.totalAmount || s.subtotal || 0);
+    const itemNames = s.items?.length
+      ? s.items.map((i) => i.productName).join(", ")
+      : s.productName || "Industrial Lubricants";
+
+    return {
+      month: new Date(s.saleDate || s.createdAt || Date.now()).toLocaleDateString("en-GB"),
+      tin: s.saleNumber || s.challanNumber || "010-534-770-001",
+      corpName: s.customerName || s.millName || "Client / Buyer",
+      proprietor: s.driverName || s.customerName || "Purchaser",
+      address: s.customerAddress || s.deliveryAddress || s.address || "Karachi, Pakistan",
+      particular: itemNames,
+      gross: gross,
+      exempt: 0,
+      taxAmount: Number(s.taxAmount || 0),
+      total: gross,
+    };
+  });
 
   const displayRows = activeType === "purchases" ? purchaseRows : salesRows;
-
-  const grandGrossTaxable = displayRows.reduce((sum, r) => sum + r.grossTaxable, 0);
-  const grandTax = displayRows.reduce((sum, r) => sum + r.taxAmount, 0);
-  const grandTotal = displayRows.reduce((sum, r) => sum + r.totalGross, 0);
+  const totalGross = displayRows.reduce((sum, r) => sum + (r.gross || 0), 0);
+  const grandTotal = totalGross;
 
   const handlePrint = () => {
     const orig = document.title;
