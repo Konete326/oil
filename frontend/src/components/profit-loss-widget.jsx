@@ -82,7 +82,7 @@ export function ProfitLossWidget() {
             variant="outline"
             size="sm"
             onClick={() => setIsPrintModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+            className="flex items-center gap-1.5 text-xs cursor-pointer"
           >
             <PrinterIcon className="size-3.5" />
             <span>View & Print A4 Statement</span>

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
@@ -10,7 +11,7 @@ export function ProfitLossPrintModal({
   startDate = "",
   endDate = "",
 }) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof window === "undefined") return null;
 
   const totalSales = Number(data.totalSalesRevenue || 0);
   const posSales = Number(data.posRevenue || totalSales * 0.45);
@@ -62,11 +63,11 @@ export function ProfitLossPrintModal({
       { "Category": "SALES REVENUE (J)", "Description": "Mill Delivery Challans", "Total Value (PKR)": challanSales, "Margin %": "55.00%", "Prior Year": 0, "Variance %": "0%" },
       { "Category": "SALES REVENUE (J)", "Description": "TOTAL NET SALES", "Total Value (PKR)": totalSales, "Margin %": "100.00%", "Prior Year": 0, "Variance %": "0%" },
       { "Category": "COST OF GOODS SOLD (K)", "Description": "Base Lubricant Oil Raw Material", "Total Value (PKR)": baseOilCost, "Margin %": "85.00%", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "COST OF GOODS SOLD (K)", "Description": "Chemicals & Processing Additives", "Total Value (PKR)": chemicalsCost, "Margin %": "15.00%", "Prior Year": 0, "Variance %": "0%" },
+      { "Category": "COST OF GOODS SOLD (K)", "Description": "Chemicals & Packaging Materials", "Total Value (PKR)": packagingCost, "Margin %": "15.00%", "Prior Year": 0, "Variance %": "0%" },
       { "Category": "COST OF GOODS SOLD (K)", "Description": "TOTAL COST OF GOODS SOLD", "Total Value (PKR)": totalCost, "Margin %": "-", "Prior Year": 0, "Variance %": "0%" },
       { "Category": "GROSS PROFIT (L)", "Description": "GROSS PROFIT / LOSS (J - K)", "Total Value (PKR)": grossProfit, "Margin %": `${grossMarginPct}%`, "Prior Year": 0, "Variance %": "0%" },
       { "Category": "OPERATING EXPENSES (S)", "Description": "Total Operating & Factory Overheads", "Total Value (PKR)": totalExpenses, "Margin %": "-", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "NET PROFIT (T)", "Description": "NET PROFIT BEFORE TAX (L - S)", "Total Value (PKR)": netOperatingProfit, "Margin %": `${returnOnSalesPct}%`, "Prior Year": 0, "Variance %": "0%" },
+      { "Category": "NET PROFIT (T)", "Description": "NET PROFIT BEFORE TAX (L - S)", "Total Value (PKR)": netProfit, "Margin %": `${returnOnSalesPct}%`, "Prior Year": 0, "Variance %": "0%" },
     ];
     exportTransactionsToExcel(
       excelData,
@@ -75,7 +76,7 @@ export function ProfitLossPrintModal({
   };
 
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS - PROFIT & LOSS STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Sales (J):* Rs ${totalSales.toLocaleString()}\n*Cost of Goods (K):* Rs ${totalCost.toLocaleString()}\n*Gross Profit (L):* Rs ${grossProfit.toLocaleString()} (${grossMarginPct}%)\n*Operating Expenses (S):* Rs ${totalExpenses.toLocaleString()}\n*Net Operating Profit (T):* Rs ${netOperatingProfit.toLocaleString()} (${returnOnSalesPct}%)\n*Generated on:* ${new Date().toLocaleDateString()}`;
+    const text = `*AL KHALEEJ LUBRICANTS - PROFIT & LOSS STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Sales (J):* Rs ${totalSales.toLocaleString()}\n*Cost of Goods (K):* Rs ${totalCost.toLocaleString()}\n*Gross Profit (L):* Rs ${grossProfit.toLocaleString()} (${grossMarginPct}%)\n*Operating Expenses (S):* Rs ${totalExpenses.toLocaleString()}\n*Net Operating Profit (T):* Rs ${netProfit.toLocaleString()} (${returnOnSalesPct}%)\n*Generated on:* ${new Date().toLocaleDateString()}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
