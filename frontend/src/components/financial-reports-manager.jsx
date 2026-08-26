@@ -43,8 +43,8 @@ export function FinancialReportsManager() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between border-b border-border overflow-x-auto">
+        <div className="flex items-center gap-1 min-w-max pb-1">
           {[
             { id: "trialBalance", label: "Trial Balance Sheet" },
             { id: "profitLoss", label: "Profit & Loss Statement" },
@@ -53,7 +53,7 @@ export function FinancialReportsManager() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"

@@ -88,7 +88,7 @@ export function LedgerManager() {
   const paginatedEntries = filteredEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -100,19 +100,19 @@ export function LedgerManager() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             onClick={() => setIsPrintModalOpen(true)}
-            className="gap-2 shadow-xs cursor-pointer"
+            className="gap-2 shadow-xs cursor-pointer text-xs"
           >
-            <PrinterIcon className="size-4" />
+            <PrinterIcon className="size-4 text-primary" />
             Print A4 Statement
           </Button>
 
           <Button
             onClick={() => setIsPaymentModalOpen(true)}
-            className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
           >
             <PlusIcon className="size-4" />
             Record Payment Receipt

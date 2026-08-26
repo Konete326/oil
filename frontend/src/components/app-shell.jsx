@@ -26,7 +26,9 @@ export function AppShell({ user, onLogout, children }) {
         <div
           className={cn(
             "flex flex-1 flex-col w-full",
-            isPos ? "p-1.5 sm:p-2 md:p-2.5 h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden" : "p-3 md:p-4 lg:p-5"
+            isPos
+              ? "p-1.5 sm:p-2 md:p-2.5 lg:h-[calc(100vh-3.5rem)] lg:max-h-[calc(100vh-3.5rem)] lg:overflow-hidden overflow-y-auto"
+              : "p-2.5 sm:p-3 md:p-4 lg:p-5"
           )}
         >
           {children}

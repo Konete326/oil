@@ -305,19 +305,19 @@ export function AppHeader({ user, onLogout }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-xl justify-end">
-        <div ref={searchRef} className="relative w-full max-w-xs sm:max-w-md">
+      <div className="flex items-center gap-1.5 sm:gap-3 flex-1 max-w-xl justify-end min-w-0">
+        <div ref={searchRef} className="relative w-full max-w-[150px] sm:max-w-xs md:max-w-md">
           <div className="relative">
             <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Global Search (party, invoice, product, voucher...)"
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => handleGlobalSearch(e.target.value)}
               onFocus={() => {
                 if (searchQuery.trim().length >= 2) setIsSearchOpen(true);
               }}
-              className="ps-8 pe-4 text-xs h-9 w-full bg-muted/30 focus:bg-background"
+              className="ps-8 pe-3 text-xs h-9 w-full bg-muted/30 focus:bg-background"
             />
           </div>
 

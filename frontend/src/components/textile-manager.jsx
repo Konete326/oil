@@ -102,7 +102,7 @@ export function TextileManager() {
   const paginatedMills = filteredMills.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -114,10 +114,10 @@ export function TextileManager() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             onClick={() => setIsChallanModalOpen(true)}
-            className="gap-2 shadow-xs cursor-pointer"
+            className="gap-2 shadow-xs cursor-pointer text-xs"
           >
             <TruckIcon className="size-4" />
             Issue Delivery Challan
@@ -128,10 +128,10 @@ export function TextileManager() {
               setEditingMill(null);
               setIsMillModalOpen(true);
             }}
-            className="gap-2 shadow-xs cursor-pointer"
+            className="gap-2 shadow-xs cursor-pointer text-xs"
           >
             <PlusIcon className="size-4" />
-            Register Mill
+            Add Textile Mill
           </Button>
         </div>
       </div>

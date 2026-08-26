@@ -119,11 +119,11 @@ export function ExpensesManager() {
           <p className="text-xs text-muted-foreground">Track daily, monthly, and category-wise business operational expenses.</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 cursor-pointer text-xs"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
           >
             <PlusIcon className="size-3.5" />
             <span>Record Expense Voucher</span>

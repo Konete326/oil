@@ -42,7 +42,7 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="w-full space-y-6">
       <div className="border-b border-border pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
         <p className="text-xs text-muted-foreground">Real-time KPI overview, daily cash inflow/outflow, and financial metrics.</p>

@@ -39,15 +39,15 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-        <div className="w-full max-w-4xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden my-6">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-primary/5">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
+        <div className="w-full max-w-4xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-primary/5 shrink-0">
             <div className="flex items-center gap-2">
-              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                 <UserIcon className="size-5" />
               </div>
               <div>
-                <h3 className="font-bold text-base text-foreground flex items-center gap-2">
+                <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2 flex-wrap">
                   {customer ? customer.name : "Customer Analytics & Details"}
                   {customer?.customerType && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-mono">
@@ -55,20 +55,20 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                     </span>
                   )}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
                   {customer?.phone ? `Phone: ${customer.phone}` : "No phone registered"} | City: {customer?.city || "N/A"}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 self-end sm:self-auto">
               <Button
                 onClick={() => setIsPrintOpen(true)}
                 size="sm"
                 className="gap-1.5 cursor-pointer text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <PrinterIcon className="size-3.5" />
-                Print A4 Statement
+                <span>Print A4 Statement</span>
               </Button>
               <Button variant="ghost" size="icon" onClick={onClose} className="size-8 cursor-pointer">
                 <XIcon className="size-4" />
@@ -83,8 +83,8 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
           ) : error ? (
             <div className="p-8 text-center text-destructive text-xs">{error}</div>
           ) : (
-            <div className="p-6 space-y-6 text-xs max-h-[80vh] overflow-y-auto">
-              <div className="grid grid-cols-4 gap-3">
+            <div className="p-4 sm:p-6 space-y-5 text-xs overflow-y-auto flex-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                     <ShoppingBagIcon className="size-3.5 text-primary" /> Total Purchases

@@ -350,9 +350,9 @@ export function PosCounter() {
   });
 
   return (
-    <div className="h-full max-h-full flex flex-col overflow-hidden select-none">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 h-full flex-1 overflow-hidden min-h-0">
-        <div className="lg:col-span-7 xl:col-span-8 flex flex-col h-full overflow-hidden space-y-1.5 min-h-0">
+    <div className="h-full max-h-full flex flex-col lg:overflow-hidden select-none">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:h-full flex-1 min-h-0">
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col lg:h-full space-y-1.5 min-h-0">
           <div className="flex items-center justify-between gap-2 border-b border-border pb-1 shrink-0">
             <div>
               <h2 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
@@ -392,51 +392,53 @@ export function PosCounter() {
             </select>
           </div>
 
-          <div className="flex-1 overflow-y-auto pe-1.5 rounded-xl border border-border/70 bg-muted/10 p-1.5 min-h-0">
+          <div className="flex-1 overflow-y-auto max-h-[45vh] lg:max-h-none pe-1.5 rounded-xl border border-border/70 bg-muted/10 p-1.5 min-h-0">
             {loading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div key={i} className="h-32 rounded-xl border border-border bg-card p-2 space-y-1.5">
                     <Skeleton className="h-14 w-full" />
-                    <Skeleton className="h-3.5 w-3/4" />
-                    <Skeleton className="h-3.5 w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                   </div>
                 ))}
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="h-full min-h-[140px] flex flex-col items-center justify-center text-center text-muted-foreground text-xs space-y-1.5 rounded-xl border border-border bg-card p-4">
-                <PackageIcon className="size-7 text-muted-foreground/50" />
+              <div className="py-12 text-center text-muted-foreground text-xs space-y-1.5 flex flex-col items-center justify-center h-full">
+                <PackageIcon className="size-8 text-muted-foreground/40" />
                 <p className="font-semibold text-foreground">No Products Found</p>
-                <p className="text-[11px]">Try searching for a different brand, grade, or category.</p>
+                <p className="text-[10px]">Try searching a different SKU, name or category.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5">
                 {filteredProducts.map((prod) => {
-                  const isLowStock = prod.stockQuantity <= prod.minStockAlert;
+                  const isLowStock = prod.stockQuantity <= 5;
                   return (
                     <div
                       key={prod._id}
                       onClick={() => {
-                        if (prod.stockQuantity > 0) {
-                          addToCart(prod);
-                          searchInputRef.current?.focus();
-                        }
+                        addToCart(prod);
+                        searchInputRef.current?.focus();
                       }}
-                      className={`group rounded-xl border border-border bg-card shadow-xs hover:border-primary/50 transition-all flex flex-col overflow-hidden ${
-                        prod.stockQuantity > 0 ? "cursor-pointer" : "opacity-60"
-                      }`}
+                      className={cn(
+                        "group relative rounded-xl border bg-card p-1.5 shadow-2xs hover:shadow-sm transition-all duration-150 flex flex-col justify-between cursor-pointer active:scale-[0.98]",
+                        prod.stockQuantity <= 0
+                          ? "opacity-50 border-border"
+                          : "border-border/80 hover:border-primary/50"
+                      )}
                     >
-                      <div className="h-15 bg-muted/30 flex items-center justify-center overflow-hidden relative">
+                      <div className="h-16 w-full rounded-lg bg-muted/40 flex items-center justify-center overflow-hidden relative shrink-0">
                         {prod.imageUrl ? (
                           <img
                             src={prod.imageUrl}
                             alt={prod.name}
-                            className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform duration-300"
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
                           />
                         ) : (
-                          <svg viewBox="0 0 64 64" className="size-7 text-primary/20 fill-current" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M32 4C32 4 14 24 14 38a18 18 0 0 0 36 0C50 24 32 4 32 4z" />
-                            <ellipse cx="24" cy="36" rx="4" ry="6" className="fill-background/40" />
+                          <svg className="size-6 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
                           </svg>
                         )}
                         <span
@@ -454,29 +456,9 @@ export function PosCounter() {
                         <h4 className="font-bold text-[11px] text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-tight">
                           {prod.name}
                         </h4>
-
-                        <p className="text-[9px] text-muted-foreground line-clamp-1">
-                          {prod.brand} {prod.grade ? `· ${prod.grade}` : ""}
-                        </p>
-
                         <p className="font-mono font-bold text-xs text-primary pt-0.5">
                           Rs {prod.sellingPrice?.toLocaleString()} <span className="text-[8.5px] font-normal text-muted-foreground">/{prod.unit}</span>
                         </p>
-
-                        <div onClick={(e) => e.stopPropagation()} className="mt-auto pt-0.5">
-                          <Button
-                            size="sm"
-                            className="w-full h-5.5 gap-1 text-[9.5px] cursor-pointer shadow-xs bg-primary text-primary-foreground font-medium"
-                            onClick={() => {
-                              addToCart(prod);
-                              searchInputRef.current?.focus();
-                            }}
-                            disabled={prod.stockQuantity <= 0}
-                          >
-                            <PlusIcon className="size-2.5" />
-                            <span>{prod.stockQuantity <= 0 ? "Out of Stock" : "Add to Cart"}</span>
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   );
@@ -486,7 +468,7 @@ export function PosCounter() {
           </div>
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-4 rounded-2xl border border-border bg-card p-2 sm:p-2.5 shadow-md flex flex-col justify-between h-full overflow-hidden min-h-0">
+        <div className="lg:col-span-5 xl:col-span-4 rounded-2xl border border-border bg-card p-2 sm:p-2.5 shadow-md flex flex-col justify-between lg:h-full min-h-0">
           <div className="space-y-1 flex-1 flex flex-col overflow-hidden min-h-0">
             <div className="flex items-center justify-between border-b border-border pb-1 shrink-0">
               <div className="flex items-center gap-1.5">

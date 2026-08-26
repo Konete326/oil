@@ -98,7 +98,7 @@ export function SettingsManager({ user }) {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -172,7 +172,7 @@ export function SettingsManager({ user }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-border/60 pb-2">
+      <div className="flex items-center gap-2 border-b border-border/60 pb-2 overflow-x-auto min-w-0">
         <Button
           variant={activeTab === "language" ? "default" : "ghost"}
           size="sm"

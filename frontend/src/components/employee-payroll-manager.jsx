@@ -150,11 +150,11 @@ export function EmployeePayrollManager() {
           <p className="text-xs text-muted-foreground">Manage staff directory, advance salary khata, and monthly payslip vouchers.</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
             onClick={() => setIsPayslipModalOpen(true)}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 cursor-pointer text-xs"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
           >
             <ReceiptIcon className="size-3.5" />
             <span>Generate Payslip</span>
@@ -163,13 +163,13 @@ export function EmployeePayrollManager() {
           <Button
             size="sm"
             onClick={() => setIsAdvanceModalOpen(true)}
-            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-xs"
+            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
           >
             <HandCoinsIcon className="size-3.5" />
             <span>Record Advance Cash</span>
           </Button>
 
-          <Button size="sm" onClick={handleOpenAddEmployee} className="gap-1.5 cursor-pointer text-xs">
+          <Button size="sm" onClick={handleOpenAddEmployee} className="gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none">
             <PlusIcon className="size-3.5" />
             <span>Add Employee</span>
           </Button>

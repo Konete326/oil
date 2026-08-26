@@ -79,27 +79,27 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
-        <div className="w-full max-w-4xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden my-6">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-primary/5">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
+        <div className="w-full max-w-4xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-primary/5 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+              <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                 <TruckIcon className="size-5" />
               </div>
               <div>
-                <h3 className="font-bold text-base text-foreground flex items-center gap-2">
+                <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2 flex-wrap">
                   {currentSup.name}
                   <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 font-mono font-medium">
                     Vendor / Refinery
                   </span>
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
                   {currentSup.phone ? `Phone: ${currentSup.phone}` : "No phone registered"} | {currentSup.address || "Address not provided"}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
               <Button
                 variant="outline"
                 size="sm"
@@ -130,8 +130,8 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
               <CloudLoader label="Loading vendor transactions & ledger history..." />
             </div>
           ) : (
-            <div className="p-6 space-y-6 text-xs max-h-[80vh] overflow-y-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="p-4 sm:p-6 space-y-5 text-xs overflow-y-auto flex-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                     <ArrowUpRightIcon className="size-3.5 text-amber-500" /> Total Purchases
