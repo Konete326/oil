@@ -14,9 +14,11 @@ export function CashPrintStatementModal({
 }) {
   if (!isOpen || typeof window === "undefined") return null;
 
-  const sortedTransactions = [...transactions].sort(
-    (a, b) => new Date(a.transactionDate || a.createdAt) - new Date(b.transactionDate || b.createdAt)
-  );
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const dateA = new Date(a.transactionDate || a.date || a.createdAt || Date.now()).getTime();
+    const dateB = new Date(b.transactionDate || b.date || b.createdAt || Date.now()).getTime();
+    return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+  });
 
   let running = 0;
   const computedRows = sortedTransactions.map((t) => {
@@ -25,18 +27,27 @@ export function CashPrintStatementModal({
     const inflow = isInflow ? amountNum : 0;
     const outflow = !isInflow ? amountNum : 0;
     running = running + inflow - outflow;
+
+    const parsedDate = new Date(t.transactionDate || t.date || t.createdAt || Date.now());
+    const validDate = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+    const formattedDate = validDate.toLocaleDateString("en-GB");
+
     return {
       ...t,
+      date: validDate,
+      formattedDate,
+      particulars: t.particulars || t.description || t.notes || (isInflow ? `Received from ${t.partyName || "Party"}` : `Paid to ${t.partyName || "Party"}`),
+      reference: t.reference || t.voucherNumber || t.referenceNumber || t._id?.slice(-6) || "-",
       inflow,
       outflow,
       balance: running,
-      formattedDate: new Date(t.transactionDate || t.createdAt || Date.now()).toLocaleDateString("en-GB"),
     };
   });
 
   const totalInflow = computedRows.reduce((sum, r) => sum + r.inflow, 0);
   const totalOutflow = computedRows.reduce((sum, r) => sum + r.outflow, 0);
   const closingBalance = running;
+  const finalBalance = running;
 
   const handlePrint = () => {
     const orig = document.title;
@@ -56,8 +67,8 @@ export function CashPrintStatementModal({
       "Sr #": idx + 1,
       Date: r.formattedDate,
       "Party / Customer": r.partyName || r.partyId?.name || "Direct Cash",
-      "Voucher #": r.voucherNumber || r._id?.slice(-6) || "-",
-      Description: r.description || "-",
+      "Voucher #": r.reference,
+      Description: r.particulars,
       "Cash Inflow (Debit)": r.inflow,
       "Cash Outflow (Credit)": r.outflow,
       "Closing Balance": r.balance,
