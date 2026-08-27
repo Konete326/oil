@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { useToastNotification } from "@/components/toast-notification-provider";
-import { markNotificationReadApi, deleteNotificationApi, clearAllNotificationsApi } from "@/lib/api";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,24 +7,23 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { NotificationItem } from "@/components/notification-item";
 import { NotificationFilter } from "@/components/notification-filter";
 import { PaginationControl } from "@/components/pagination-control";
+import { toast } from "sonner";
 import {
   BellIcon,
   RefreshCwIcon,
   CheckCheckIcon,
   Trash2Icon,
   InboxIcon,
-  PackageXIcon,
-  UserCheckIcon,
-  AlertTriangleIcon,
 } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
 export function NotificationManager({ user }) {
-  const { notifications, unreadCount, refreshNotifications } = useToastNotification();
+  const { notifications, unreadCount, refreshNotifications, markRead, deleteNotification, clearAll } = useToastNotification();
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
@@ -34,18 +32,18 @@ export function NotificationManager({ user }) {
 
   const counts = useMemo(() => {
     return {
-      total: notifications.length,
-      stock: notifications.filter((n) => n.type === "stock").length,
-      login: notifications.filter((n) => n.type === "login").length,
+      total: (notifications || []).length,
+      stock: (notifications || []).filter((n) => n.type === "stock").length,
+      login: (notifications || []).filter((n) => n.type === "login").length,
       unread: unreadCount,
     };
   }, [notifications, unreadCount]);
 
   const filteredNotifications = useMemo(() => {
-    return notifications.filter((n) => {
+    return (notifications || []).filter((n) => {
       const matchesSearch =
-        n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        n.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (n.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (n.message || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (n.userName && n.userName.toLowerCase().includes(searchTerm.toLowerCase()));
 
       if (!matchesSearch) return false;
@@ -67,11 +65,24 @@ export function NotificationManager({ user }) {
     return filteredNotifications.slice(start, start + PAGE_SIZE);
   }, [filteredNotifications, currentPage]);
 
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshNotifications();
+      toast.success("Notifications refreshed");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to refresh notifications");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleMarkAllRead = async () => {
     setLoadingAction(true);
     try {
-      await markNotificationReadApi("all");
-      await refreshNotifications();
+      await markRead("all");
+      toast.success("All notifications marked as read");
     } catch (err) {
       console.error(err);
     } finally {
@@ -82,8 +93,7 @@ export function NotificationManager({ user }) {
   const handleMarkSingleRead = async (id, isRead) => {
     if (isRead) return;
     try {
-      await markNotificationReadApi(id);
-      await refreshNotifications();
+      await markRead(id);
     } catch (err) {
       console.error(err);
     }
@@ -91,53 +101,60 @@ export function NotificationManager({ user }) {
 
   const handleConfirmDelete = async () => {
     if (!deleteTargetId || !isAdmin) return;
-    setLoadingAction(true);
+    const target = deleteTargetId;
+    setDeleteTargetId(null);
     try {
-      await deleteNotificationApi(deleteTargetId);
-      await refreshNotifications();
+      await deleteNotification(target);
+      toast.success("Notification removed");
     } catch (err) {
       console.error(err);
-    } finally {
-      setDeleteTargetId(null);
-      setLoadingAction(false);
+      toast.error("Failed to delete notification");
     }
   };
 
   const handleConfirmClearAll = async () => {
     if (!isAdmin) return;
+    setShowClearModal(false);
     setLoadingAction(true);
     try {
-      await clearAllNotificationsApi();
-      await refreshNotifications();
+      await clearAll();
+      toast.success("All notifications cleared");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to clear notifications");
     } finally {
-      setShowClearModal(false);
       setLoadingAction(false);
     }
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="space-y-3.5 p-3 md:p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <BellIcon className="size-6 text-primary" />
-            Notification Center
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            Real-time audit events, inventory stock warnings, and authentication alerts.
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <BellIcon className="size-5 text-primary" />
+              <span>Notification Center</span>
+            </h2>
+            <Badge variant="outline" className="text-[9px] bg-primary/10 border-primary/30 font-medium py-0">
+              Auto-prunes after 30 Days
+            </Badge>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Real-time audit alerts, inventory stock warnings, and authentication session logs.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
           <Button
             variant="outline"
             size="sm"
-            onClick={refreshNotifications}
-            className="cursor-pointer gap-1.5 text-xs h-8"
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+            className="cursor-pointer gap-1.5 text-xs h-7.5 px-2.5"
           >
-            <RefreshCwIcon className="size-3.5 text-muted-foreground" /> Refresh
+            <RefreshCwIcon className={`size-3 text-muted-foreground ${refreshing ? "animate-spin" : ""}`} />
+            <span>Refresh</span>
           </Button>
 
           {unreadCount > 0 && (
@@ -146,70 +163,30 @@ export function NotificationManager({ user }) {
               size="sm"
               onClick={handleMarkAllRead}
               disabled={loadingAction}
-              className="cursor-pointer gap-1.5 text-xs h-8 font-medium"
+              className="cursor-pointer gap-1 text-xs h-7.5 px-2.5 font-medium"
             >
-              <CheckCheckIcon className="size-3.5 text-primary" /> Mark All Read
+              <CheckCheckIcon className="size-3 text-primary" />
+              <span>Mark All Read</span>
             </Button>
           )}
 
-          {isAdmin && notifications.length > 0 && (
+          {isAdmin && (notifications || []).length > 0 && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowClearModal(true)}
               disabled={loadingAction}
-              className="cursor-pointer gap-1.5 text-xs h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="cursor-pointer gap-1 text-xs h-7.5 px-2.5 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2Icon className="size-3.5" /> Clear History
+              <Trash2Icon className="size-3" />
+              <span>Clear History</span>
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <BellIcon className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Total Notifications</p>
-            <p className="text-xl font-bold text-foreground">{counts.total}</p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
-            <PackageXIcon className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Low Stock Warnings</p>
-            <p className="text-xl font-bold text-foreground">{counts.stock}</p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-500">
-            <UserCheckIcon className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Session Logins</p>
-            <p className="text-xl font-bold text-foreground">{counts.login}</p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-sky-500/15 flex items-center justify-center text-sky-500">
-            <AlertTriangleIcon className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Unread Messages</p>
-            <p className="text-xl font-bold text-foreground">{counts.unread}</p>
-          </div>
-        </div>
-      </div>
-
-      <Card className="border-border shadow-xs bg-card">
-        <CardHeader className="p-4 border-b border-border/40">
+      <Card className="border-border shadow-xs bg-card overflow-hidden">
+        <CardHeader className="p-2.5 sm:p-3 border-b border-border/40">
           <NotificationFilter
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -224,13 +201,13 @@ export function NotificationManager({ user }) {
 
         <CardContent className="p-0 divide-y divide-border/30">
           {paginatedNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-14 text-center p-6">
-              <div className="p-3 rounded-full bg-muted/60 mb-3 text-muted-foreground">
-                <InboxIcon className="size-6" />
+            <div className="flex flex-col items-center justify-center py-10 text-center p-4">
+              <div className="p-2.5 rounded-full bg-muted/60 mb-2 text-muted-foreground">
+                <InboxIcon className="size-5" />
               </div>
-              <h3 className="text-xs font-semibold text-foreground">No notifications</h3>
-              <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">
-                There are no notifications matching your current filter.
+              <h3 className="text-xs font-semibold text-foreground">No notifications found</h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+                There are no notifications matching your active filter.
               </p>
             </div>
           ) : (

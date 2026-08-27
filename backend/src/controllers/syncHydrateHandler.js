@@ -7,10 +7,11 @@ import { Expense } from "../models/expenseModel.js";
 import { CashTransaction } from "../models/cashModel.js";
 import { PosSale } from "../models/posSaleModel.js";
 import { Challan } from "../models/challanModel.js";
-import { Decanting } from "../models/decantingModel.js";
+import { SystemLog } from "../models/systemLogModel.js";
 
 export const getHydrateData = async (req, res) => {
   try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const [
       products,
       categories,
@@ -21,7 +22,7 @@ export const getHydrateData = async (req, res) => {
       cashTransactions,
       posSales,
       challans,
-      decantings,
+      systemLogs,
     ] = await Promise.all([
       Product.find().sort({ createdAt: -1 }).lean(),
       Category.find().sort({ createdAt: -1 }).lean(),
@@ -32,7 +33,7 @@ export const getHydrateData = async (req, res) => {
       CashTransaction.find().sort({ date: -1, createdAt: -1 }).limit(200).lean(),
       PosSale.find().sort({ createdAt: -1 }).limit(200).lean(),
       Challan.find().sort({ createdAt: -1 }).limit(200).lean(),
-      Decanting.find().sort({ createdAt: -1 }).limit(200).lean(),
+      SystemLog.find({ createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).limit(200).lean(),
     ]);
 
     res.status(200).json({
@@ -48,7 +49,7 @@ export const getHydrateData = async (req, res) => {
         cashTransactions: cashTransactions || [],
         posSales: posSales || [],
         challans: challans || [],
-        decantings: decantings || [],
+        systemLogs: systemLogs || [],
       },
     });
   } catch (error) {

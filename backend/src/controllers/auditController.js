@@ -20,8 +20,11 @@ export const logActivity = async ({ user, userName, userRole, action, module, de
 export const getAuditLogs = async (req, res, next) => {
   try {
     await connectDB();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    await AuditLog.deleteMany({ createdAt: { $lt: thirtyDaysAgo } });
+
     const { module, search } = req.query;
-    let query = {};
+    let query = { createdAt: { $gte: thirtyDaysAgo } };
 
     if (module) query.module = module;
     if (search) {

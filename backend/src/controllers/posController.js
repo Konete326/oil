@@ -14,7 +14,7 @@ export const getPosSales = async (req, res, next) => {
 
 export const createPosSale = async (req, res, next) => {
   try {
-    const { customerName, customerPhone, saleType, items, subtotal, discount, taxAmount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
+    const { customerName, customerPhone, saleType, items, subtotal, discount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
     if (!items || items.length === 0 || !grandTotal) {
       res.status(400);
       throw new Error("Cart cannot be empty for POS transaction.");
@@ -57,7 +57,6 @@ export const createPosSale = async (req, res, next) => {
       items,
       subtotal: Number(subtotal),
       discount: Number(discount) || 0,
-      taxAmount: Number(taxAmount) || 0,
       grandTotal: Number(grandTotal),
       paymentMode: paymentMode || "Cash",
       cashReceived: Number(cashReceived) || 0,

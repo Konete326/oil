@@ -16,7 +16,7 @@ const expenseSchema = new mongoose.Schema(
         "Rent",
         "Maintenance & Repairs",
         "Office Petty Cash",
-        "Tax & Licenses",
+        "Official Fees & Licenses",
         "Other",
       ],
       default: "Other",

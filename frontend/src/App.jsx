@@ -6,7 +6,6 @@ import { ToastNotificationProvider } from "@/components/toast-notification-provi
 import { Dashboard } from "@/components/dashboard";
 import { CategoryManager } from "@/components/category-manager";
 import { ProductManager } from "@/components/product-manager";
-import { DecantingManager } from "@/components/decanting-manager";
 import { TextileManager } from "@/components/textile-manager";
 import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
@@ -139,7 +138,6 @@ export default function App() {
                         <Route path="/products" element={<ProductManager />} />
                         <Route path="/pos" element={<PosCounter />} />
                         <Route path="/pos/history" element={<PosHistory />} />
-                        <Route path="/decanting" element={<DecantingManager />} />
                         <Route path="/textile" element={<TextileManager />} />
                         <Route path="/customers" element={<CustomerManager />} />
                         <Route path="/ledger" element={<LedgerManager />} />

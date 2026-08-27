@@ -112,31 +112,51 @@ export function ExpensesManager() {
   };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full space-y-3.5 p-1 sm:p-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-border/60 pb-2.5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Expenses Management (Akhrajaat)</h1>
-          <p className="text-xs text-muted-foreground">Track daily, monthly, and category-wise business operational expenses.</p>
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <ReceiptIcon className="size-5 text-primary" />
+            <span>Expenses Management (Akhrajaat)</span>
+          </h1>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Track daily, monthly, and category-wise business operational expenses.</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <Button
+            type="button"
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 cursor-pointer text-xs h-7.5 px-3 flex-1 sm:flex-none"
           >
             <PlusIcon className="size-3.5" />
-            <span>Record Expense Voucher</span>
+            <span>Record Expense</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-xs cursor-pointer">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportExcel}
+            className="gap-1 text-xs h-7.5 px-2.5 cursor-pointer"
+          >
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
             <span>Export Excel</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-xs cursor-pointer">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsPrintModalOpen(true);
+            }}
+            className="gap-1 text-xs h-7.5 px-2.5 cursor-pointer"
+          >
             <PrinterIcon className="size-3.5 text-primary" />
-            <span>Print A4 Statement</span>
+            <span>Print A4</span>
           </Button>
         </div>
       </div>
@@ -213,7 +233,7 @@ export function ExpensesManager() {
               <option value="Rent">Rent</option>
               <option value="Maintenance & Repairs">Maintenance & Repairs</option>
               <option value="Office Petty Cash">Office Petty Cash</option>
-              <option value="Tax & Licenses">Tax & Licenses</option>
+              <option value="Official Fees & Licenses">Official Fees & Licenses</option>
               <option value="Other">Other</option>
             </select>
           </div>

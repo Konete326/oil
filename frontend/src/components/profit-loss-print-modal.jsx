@@ -32,8 +32,7 @@ export function ProfitLossPrintModal({
 
   const operatingIncome = grossProfit - totalExpenses;
   const otherIncome = totalSales > 0 ? Math.round(totalSales * 0.015) : 0;
-  const taxes = operatingIncome > 0 ? Math.round(operatingIncome * 0.05) : 0;
-  const netProfit = Number(data.netProfit || operatingIncome + otherIncome - taxes);
+  const netProfit = Number(data.netProfit || operatingIncome + otherIncome);
   const returnOnSalesPct = totalSales > 0 ? ((netProfit / totalSales) * 100).toFixed(1) : "0.0";
 
   const getPctOfSales = (val) => {
@@ -67,7 +66,7 @@ export function ProfitLossPrintModal({
       { "Category": "COST OF GOODS SOLD (K)", "Description": "TOTAL COST OF GOODS SOLD", "Total Value (PKR)": totalCost, "Margin %": "-", "Prior Year": 0, "Variance %": "0%" },
       { "Category": "GROSS PROFIT (L)", "Description": "GROSS PROFIT / LOSS (J - K)", "Total Value (PKR)": grossProfit, "Margin %": `${grossMarginPct}%`, "Prior Year": 0, "Variance %": "0%" },
       { "Category": "OPERATING EXPENSES (S)", "Description": "Total Operating & Factory Overheads", "Total Value (PKR)": totalExpenses, "Margin %": "-", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "NET PROFIT (T)", "Description": "NET PROFIT BEFORE TAX (L - S)", "Total Value (PKR)": netProfit, "Margin %": `${returnOnSalesPct}%`, "Prior Year": 0, "Variance %": "0%" },
+      { "Category": "NET PROFIT (T)", "Description": "NET PROFIT / LOSS (L - S)", "Total Value (PKR)": netProfit, "Margin %": `${returnOnSalesPct}%`, "Prior Year": 0, "Variance %": "0%" },
     ];
     exportTransactionsToExcel(
       excelData,
@@ -373,16 +372,6 @@ export function ProfitLossPrintModal({
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-right font-mono">{otherIncome.toLocaleString()}</td>
                   <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(otherIncome)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Taxes & Provisions</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{taxes.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(taxes)}</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                   <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
                 </tr>

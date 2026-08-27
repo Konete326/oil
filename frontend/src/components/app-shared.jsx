@@ -48,11 +48,6 @@ export const navGroups = [
             path: "/categories",
             icon: <FolderTreeIcon />,
           },
-          {
-            title: "Drum Decanting",
-            path: "/decanting",
-            icon: <RefreshCwIcon />,
-          },
         ],
       },
       {

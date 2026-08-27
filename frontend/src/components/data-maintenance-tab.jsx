@@ -15,191 +15,134 @@ import {
 } from "lucide-react";
 
 export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerEraseModuleModal }) {
+  const MODULES = [
+    {
+      key: "products",
+      name: "Inventory & Stock",
+      desc: "All products & categories",
+      icon: <Boxes className="size-4 text-amber-500" />,
+      btnLabel: "Erase Stock",
+    },
+    {
+      key: "sales",
+      name: "POS Sales & Delivery",
+      desc: "POS counter & delivery challans",
+      icon: <ShoppingCart className="size-4 text-emerald-500" />,
+      btnLabel: "Erase Sales",
+    },
+    {
+      key: "ledgers",
+      name: "Khatas & Ledgers",
+      desc: "Customer & supplier khatas",
+      icon: <BookOpen className="size-4 text-blue-500" />,
+      btnLabel: "Erase Ledgers",
+    },
+    {
+      key: "cash",
+      name: "Cash Register",
+      desc: "Cash in/out transactions",
+      icon: <Banknote className="size-4 text-cyan-500" />,
+      btnLabel: "Erase Cash",
+    },
+    {
+      key: "expenses",
+      name: "Expense Vouchers",
+      desc: "Operating expense logs",
+      icon: <Receipt className="size-4 text-purple-500" />,
+      btnLabel: "Erase Expenses",
+    },
+    {
+      key: "payroll",
+      name: "Employee Payroll",
+      desc: "Staff salary & advance history",
+      icon: <UserCheck className="size-4 text-indigo-500" />,
+      btnLabel: "Erase Payroll",
+    },
+    {
+      key: "textile",
+      name: "Textile Mills",
+      desc: "Textile mill profiles & rates",
+      icon: <Factory className="size-4 text-teal-500" />,
+      btnLabel: "Erase Mills",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <Card className="border-rose-500/30 bg-rose-950/10 backdrop-blur-sm">
-        <CardHeader className="p-4 border-b border-rose-500/20">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500">
-              <ShieldAlert className="size-6" />
-            </div>
-            <div>
-              <CardTitle className="text-sm font-bold text-rose-500">Full System Data Erasure</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                Permanently wipes all product inventory, sales, ledgers, transactions, and employee vouchers.
-                <span className="font-semibold text-foreground"> Admin login credentials remain preserved.</span>
-              </CardDescription>
-            </div>
+    <div className="space-y-3">
+      <div className="rounded-xl border border-rose-500/30 bg-rose-950/10 p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-rose-500/10 text-rose-500 shrink-0">
+            <ShieldAlert className="size-4.5" />
           </div>
-        </CardHeader>
-        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p>• Requires valid Administrator Password confirmation.</p>
-            <p>• Cannot be undone once executed.</p>
+          <div>
+            <h3 className="text-xs sm:text-sm font-bold text-rose-500 flex items-center gap-1.5">
+              <span>Full System Data Erasure</span>
+              <Badge variant="outline" className="text-[9px] text-rose-400 border-rose-500/30 py-0 font-normal">
+                Dangerous
+              </Badge>
+            </h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Permanently wipes all product inventory, sales, ledgers, and transactions. Admin user login is preserved.
+            </p>
           </div>
-          {isAdmin ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={triggerEraseAllModal}
-              className="cursor-pointer gap-2 font-semibold text-xs shrink-0"
-            >
-              <Trash2 className="size-4" /> Erase All Application Data
-            </Button>
-          ) : (
-            <Badge variant="outline" className="text-xs text-muted-foreground">Admin Only</Badge>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {isAdmin ? (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={triggerEraseAllModal}
+            className="cursor-pointer gap-1.5 font-semibold text-xs h-7.5 px-3 shrink-0"
+          >
+            <Trash2 className="size-3.5" />
+            <span>Erase All Data</span>
+          </Button>
+        ) : (
+          <Badge variant="outline" className="text-[10px] text-muted-foreground">Admin Only</Badge>
+        )}
+      </div>
 
       <Card className="border-border shadow-xs bg-card">
-        <CardHeader className="p-4 border-b border-border/40">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Database className="size-4 text-primary" /> Selective Module Data Erasure
+        <CardHeader className="p-3 sm:p-3.5 border-b border-border/40 space-y-0.5">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+            <Database className="size-4 text-primary" />
+            <span>Selective Module Data Erasure</span>
           </CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Selectively hard-delete specific operational module data from database with password verification.
+          <CardDescription className="text-[10px]">
+            Selectively purge specific module records from database with Super Admin password authentication.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Boxes className="size-5 text-amber-500" />
-              <div>
-                <h4 className="text-xs font-semibold">Inventory & Stock</h4>
-                <p className="text-[11px] text-muted-foreground">All products & categories</p>
-              </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("products", "Inventory & Stock")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
-              >
-                Erase Products Data
-              </Button>
-            )}
-          </div>
 
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <ShoppingCart className="size-5 text-emerald-500" />
-              <div>
-                <h4 className="text-xs font-semibold">POS Sales & Delivery</h4>
-                <p className="text-[11px] text-muted-foreground">POS counter transactions & DC</p>
-              </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("sales", "POS Sales & Challans")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
+        <CardContent className="p-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+            {MODULES.map((mod) => (
+              <div
+                key={mod.key}
+                className="p-2.5 rounded-lg border border-border/70 bg-muted/20 hover:bg-muted/30 transition-colors flex flex-col justify-between gap-2.5"
               >
-                Erase Sales Data
-              </Button>
-            )}
-          </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="p-1.5 rounded-md bg-background border border-border/50 shrink-0 mt-0.5">
+                    {mod.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-semibold text-foreground truncate">{mod.name}</h4>
+                    <p className="text-[10px] text-muted-foreground truncate">{mod.desc}</p>
+                  </div>
+                </div>
 
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <BookOpen className="size-5 text-blue-500" />
-              <div>
-                <h4 className="text-xs font-semibold">Khatas & Ledgers</h4>
-                <p className="text-[11px] text-muted-foreground">Customer & supplier accounts</p>
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => triggerEraseModuleModal(mod.key, mod.name)}
+                    className="w-full h-6.5 text-[11px] cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive transition-colors gap-1"
+                  >
+                    <Trash2 className="size-3" />
+                    <span>{mod.btnLabel}</span>
+                  </Button>
+                )}
               </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("ledgers", "Khatas & Ledgers")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
-              >
-                Erase Ledger Data
-              </Button>
-            )}
-          </div>
-
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Banknote className="size-5 text-cyan-500" />
-              <div>
-                <h4 className="text-xs font-semibold">Cash Register</h4>
-                <p className="text-[11px] text-muted-foreground">Cashbook in/out logs</p>
-              </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("cash", "Cash Register")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
-              >
-                Erase Cash Log
-              </Button>
-            )}
-          </div>
-
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Receipt className="size-5 text-purple-500" />
-              <div>
-                <h4 className="text-xs font-semibold">Expense Vouchers</h4>
-                <p className="text-[11px] text-muted-foreground">Operating expense records</p>
-              </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("expenses", "Expenses")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
-              >
-                Erase Expenses
-              </Button>
-            )}
-          </div>
-
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <UserCheck className="size-5 text-indigo-500" />
-              <div>
-                <h4 className="text-xs font-semibold">Employee Payroll</h4>
-                <p className="text-[11px] text-muted-foreground">Staff profiles & salary advances</p>
-              </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("payroll", "Employee Payroll")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
-              >
-                Erase Payroll
-              </Button>
-            )}
-          </div>
-
-          <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Factory className="size-5 text-teal-500" />
-              <div>
-                <h4 className="text-xs font-semibold">Textile Mills</h4>
-                <p className="text-[11px] text-muted-foreground">Textile profiles & contracts</p>
-              </div>
-            </div>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => triggerEraseModuleModal("textile", "Textile Mills")}
-                className="text-xs cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10"
-              >
-                Erase Textile Data
-              </Button>
-            )}
+            ))}
           </div>
         </CardContent>
       </Card>

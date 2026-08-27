@@ -12,7 +12,7 @@ const EXPENSE_CATEGORIES = [
   "Rent",
   "Maintenance & Repairs",
   "Office Petty Cash",
-  "Tax & Licenses",
+  "Official Fees & Licenses",
   "Other",
 ];
 

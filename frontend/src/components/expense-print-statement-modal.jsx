@@ -28,11 +28,14 @@ export function ExpensePrintStatementModal({
 
   const categoryList = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
 
-  const currentDate = new Date().toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const periodLabel =
+    period === "daily"
+      ? "Daily Statement"
+      : period === "monthly"
+      ? "Monthly Statement"
+      : period === "custom" && (startDate || endDate)
+      ? `${startDate || "Start"} to ${endDate || "End"}`
+      : "All Expenses Statement";
 
   const handlePrint = () => {
     const orig = document.title;
@@ -161,154 +164,154 @@ export function ExpensePrintStatementModal({
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
             className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
-          dir="ltr"
-          lang="en"
-        >
-          <div className="flex justify-between items-start border-b border-black pb-3 mb-3">
-            <div>
-              <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
-                AL KHALEEJ LUBRICANTS
-              </h1>
-              <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
-                EXPENSES STATEMENT
-              </p>
-              <p className="text-[11px] text-gray-700 font-medium">
-                Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
-              </p>
-              <p className="text-[10px] text-gray-600">
-                NTN: 8941203-7 | STRN: 12-34-5678-901-23
-              </p>
-            </div>
-
-            <div className="text-right space-y-1">
-              <div className="border border-black p-2 bg-gray-50 text-right">
-                <span className="text-[10px] font-bold text-gray-600 uppercase block">Total Expenses:</span>
-                <span className="text-sm font-bold font-mono text-black">
-                  Rs. {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
+            dir="ltr"
+            lang="en"
+          >
+            <div className="flex justify-between items-start border-b border-black pb-3 mb-3">
+              <div>
+                <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                  AL KHALEEJ LUBRICANTS
+                </h1>
+                <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
+                  EXPENSES STATEMENT
+                </p>
+                <p className="text-[11px] text-gray-700 font-medium">
+                  Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
+                </p>
+                <p className="text-[10px] text-gray-600">
+                  Tel: (021) 35091244 | Korangi Industrial Area, Karachi
+                </p>
               </div>
-              <p className="text-[10px] text-gray-700 font-semibold pt-0.5">
-                {periodLabel}
-              </p>
-            </div>
-          </div>
 
-          <div className="mb-4">
-            <div className="text-[10px] font-bold uppercase text-gray-800 pb-1">
-              Category Breakdown
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
-              {Object.entries(categoryTotals).map(([cat, amt]) => (
-                <div key={cat} className="border border-black p-1.5 bg-gray-50/50 flex justify-between items-center">
-                  <span className="font-semibold text-gray-800">{cat}:</span>
-                  <span className="font-mono font-bold text-black">Rs. {amt.toLocaleString()}</span>
+              <div className="text-right space-y-1">
+                <div className="border border-black p-2 bg-gray-50 text-right">
+                  <span className="text-[10px] font-bold text-gray-600 uppercase block">Total Expenses:</span>
+                  <span className="text-sm font-bold font-mono text-black">
+                    Rs. {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
-              ))}
+                <p className="text-[10px] text-gray-700 font-semibold pt-0.5">
+                  {periodLabel}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="mb-6 overflow-hidden">
-            <table className="w-full border-collapse border border-black text-[10px]">
-              <thead>
-                <tr className="bg-gray-100 border-b border-black font-bold uppercase tracking-tight text-center">
-                  <th className="border border-black p-1.5 w-16">
-                    Date
-                  </th>
-                  <th className="border border-black p-1.5 w-24">
-                    Voucher #
-                  </th>
-                  <th className="border border-black p-1.5 text-left">
-                    Description
-                  </th>
-                  <th className="border border-black p-1.5 w-28 text-center">
-                    Category
-                  </th>
-                  <th className="border border-black p-1.5 w-20 text-center">
-                    Payment Method
-                  </th>
-                  <th className="border border-black p-1.5 w-28 text-right">
-                    Amount (Rs)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-300">
-                {sortedExpenses.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-8 text-center text-gray-500 border border-black">
-                      No expense records recorded for this period.
-                    </td>
+            <div className="mb-4">
+              <div className="text-[10px] font-bold uppercase text-gray-800 pb-1">
+                Category Breakdown
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
+                {categoryList.map(([cat, amt]) => (
+                  <div key={cat} className="border border-black p-1.5 bg-gray-50/50 flex justify-between items-center">
+                    <span className="font-semibold text-gray-800">{cat}:</span>
+                    <span className="font-mono font-bold text-black">Rs. {amt.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6 overflow-hidden">
+              <table className="w-full border-collapse border border-black text-[10px]">
+                <thead>
+                  <tr className="bg-gray-100 border-b border-black font-bold uppercase tracking-tight text-center">
+                    <th className="border border-black p-1.5 w-16">
+                      Date
+                    </th>
+                    <th className="border border-black p-1.5 w-24">
+                      Voucher #
+                    </th>
+                    <th className="border border-black p-1.5 text-left">
+                      Description
+                    </th>
+                    <th className="border border-black p-1.5 w-28 text-center">
+                      Category
+                    </th>
+                    <th className="border border-black p-1.5 w-20 text-center">
+                      Payment Method
+                    </th>
+                    <th className="border border-black p-1.5 w-28 text-right">
+                      Amount (Rs)
+                    </th>
                   </tr>
-                ) : (
-                  sortedExpenses.map((e, idx) => (
-                    <tr key={idx} className="border-b border-gray-200">
-                      <td className="border border-gray-300 p-1 text-center font-mono text-gray-800">
-                        {new Date(e.expenseDate || e.createdAt).toLocaleDateString("en-GB")}
-                      </td>
-                      <td className="border border-gray-300 p-1 text-center font-mono font-medium text-black">
-                        {e.voucherNumber || "-"}
-                      </td>
-                      <td className="border border-gray-300 p-1 font-semibold text-black leading-tight">
-                        {e.title}
-                      </td>
-                      <td className="border border-gray-300 p-1 text-center text-[9px] uppercase font-medium text-gray-700">
-                        {e.category}
-                      </td>
-                      <td className="border border-gray-300 p-1 text-center text-[9px] font-mono text-gray-700">
-                        {e.paymentMode || "Cash"}
-                      </td>
-                      <td className="border border-gray-300 p-1 text-right font-mono font-bold text-gray-900">
-                        {Number(e.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </thead>
+                <tbody className="divide-y divide-gray-300">
+                  {sortedExpenses.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-gray-500 border border-black">
+                        No expense records recorded for this period.
                       </td>
                     </tr>
-                  ))
-                )}
+                  ) : (
+                    sortedExpenses.map((e, idx) => (
+                      <tr key={idx} className="border-b border-gray-200">
+                        <td className="border border-gray-300 p-1 text-center font-mono text-gray-800">
+                          {new Date(e.expenseDate || e.createdAt).toLocaleDateString("en-GB")}
+                        </td>
+                        <td className="border border-gray-300 p-1 text-center font-mono font-medium text-black">
+                          {e.voucherNumber || "-"}
+                        </td>
+                        <td className="border border-gray-300 p-1 font-semibold text-black leading-tight">
+                          {e.title}
+                        </td>
+                        <td className="border border-gray-300 p-1 text-center text-[9px] uppercase font-medium text-gray-700">
+                          {e.category}
+                        </td>
+                        <td className="border border-gray-300 p-1 text-center text-[9px] font-mono text-gray-700">
+                          {e.paymentMode || "Cash"}
+                        </td>
+                        <td className="border border-gray-300 p-1 text-right font-mono font-bold text-gray-900">
+                          {Number(e.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
 
-                <tr className="border-t-2 border-black font-bold bg-gray-100 text-xs">
-                  <td colSpan={5} className="border border-black p-2 text-left uppercase">
-                    Total Expenses:
-                  </td>
-                  <td className="border border-black p-2 text-right font-mono text-black">
-                    {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="pt-8 grid grid-cols-2 gap-8 text-center text-[10px]">
-            <div className="space-y-6">
-              <div className="pt-3 border-t border-black">
-                <p className="font-bold uppercase">{activeOperator}</p>
-                <p className="text-gray-700">Prepared By</p>
-              </div>
+                  <tr className="border-t-2 border-black font-bold bg-gray-100 text-xs">
+                    <td colSpan={5} className="border border-black p-2 text-left uppercase">
+                      Total Expenses:
+                    </td>
+                    <td className="border border-black p-2 text-right font-mono text-black">
+                      {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
-            <div className="space-y-6">
-              <div className="pt-3 border-t border-black">
-                <p className="font-bold uppercase">MANAGEMENT</p>
-                <p className="text-gray-700">Approved By</p>
+            <div className="pt-8 grid grid-cols-2 gap-8 text-center text-[10px]">
+              <div className="space-y-6">
+                <div className="pt-3 border-t border-black">
+                  <p className="font-bold uppercase">{activeOperator}</p>
+                  <p className="text-gray-700">Prepared By</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="pt-3 border-t border-black">
+                  <p className="font-bold uppercase">MANAGEMENT</p>
+                  <p className="text-gray-700">Approved By</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
-          Close Preview
-        </Button>
-        <Button
-          size="sm"
-          onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
-        >
-          <PrinterIcon className="size-3.5" />
-          <span>Print A4 Statement</span>
-        </Button>
+        <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
+          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+            Close Preview
+          </Button>
+          <Button
+            size="sm"
+            onClick={handlePrint}
+            className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          >
+            <PrinterIcon className="size-3.5" />
+            <span>Print A4 Statement</span>
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
-return createPortal(modalContent, document.body);
+  return createPortal(modalContent, document.body);
 }

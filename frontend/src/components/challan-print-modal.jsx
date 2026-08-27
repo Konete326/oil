@@ -119,7 +119,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
               PLOT NO. 44/B, SECTOR 15, KORANGI INDUSTRIAL AREA, KARACHI, PAKISTAN.
             </p>
             <p className="text-[10px] text-gray-600">
-              TEL: (021) 35091244, 35091245, FAX: (021) 35091246 | NTN: 7894561-2 | STRN: 3277876123456
+              TEL: (021) 35091244, 35091245, FAX: (021) 35091246
             </p>
           </div>
 

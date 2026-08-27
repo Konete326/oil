@@ -310,7 +310,7 @@ export function PosCounter() {
 
   const handleCheckout = async (checkoutData) => {
     setSubmitting(true);
-    const { customerName, saleType, discount, taxAmount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
+    const { customerName, saleType, discount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
     try {
       const res = await createPosSale({
         customerName,
@@ -319,7 +319,6 @@ export function PosCounter() {
         items: cart,
         subtotal: grossSubtotal,
         discount,
-        taxAmount,
         grandTotal,
         paymentMode,
         cashReceived,

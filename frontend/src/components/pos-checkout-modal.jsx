@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { CustomerVendorSelect } from "@/components/ui/customer-vendor-select";
-import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, BadgePercentIcon, CreditCardIcon, BanknoteIcon, AlertTriangleIcon } from "lucide-react";
+import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, CreditCardIcon, AlertTriangleIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export function PosCheckoutModal({
@@ -19,14 +19,11 @@ export function PosCheckoutModal({
   const [saleType, setSaleType] = useState("Retail");
   const [discountMode, setDiscountMode] = useState("fixed");
   const [discount, setDiscount] = useState("0");
-  const [showTax, setShowTax] = useState(false);
-  const [taxPercent, setTaxPercent] = useState("0");
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [cashReceived, setCashReceived] = useState("");
 
   const [customerValid, setCustomerValid] = useState(true);
   const [discountValid, setDiscountValid] = useState(true);
-  const [taxValid, setTaxValid] = useState(true);
   const [cashReceivedValid, setCashReceivedValid] = useState(true);
 
   useEffect(() => {
@@ -40,8 +37,6 @@ export function PosCheckoutModal({
       if (initialPaymentMode) {
         setPaymentMode(initialPaymentMode);
       }
-      setShowTax(false);
-      setTaxPercent("0");
     }
   }, [isOpen, initialDiscount, initialPaymentMode]);
 
@@ -51,9 +46,7 @@ export function PosCheckoutModal({
   const discountNum = discountMode === "percent"
     ? Number(((cartSubtotal * discountRaw) / 100).toFixed(2))
     : discountRaw;
-  const taxPctNum = showTax ? Number(taxPercent) || 0 : 0;
-  const taxAmount = Number(((cartSubtotal - discountNum) * (taxPctNum / 100)).toFixed(2));
-  const grandTotal = Math.max(0, Number((cartSubtotal - discountNum + (taxAmount > 0 ? taxAmount : 0)).toFixed(2)));
+  const grandTotal = Math.max(0, Number((cartSubtotal - discountNum).toFixed(2)));
   const cashReceivedNum = Number(cashReceived) || 0;
   const changeDue = Math.max(0, Number((cashReceivedNum - grandTotal).toFixed(2)));
 
@@ -61,7 +54,7 @@ export function PosCheckoutModal({
   const credLimit = selectedCustomerObj?.creditLimit || 0;
   const isCreditBreached = credLimit > 0 && (currentBal + (paymentMode === "Credit / Khata" ? grandTotal : 0) > credLimit);
 
-  const isFormValid = customerValid && discountValid && (!showTax || taxValid) && cashReceivedValid;
+  const isFormValid = customerValid && discountValid && cashReceivedValid;
 
   const handleConfirm = () => {
     if (!isFormValid) return;
@@ -69,7 +62,7 @@ export function PosCheckoutModal({
       toast.error("Cash received is less than the Grand Total.");
       return;
     }
-    onConfirm({ customerName, saleType, discount: discountNum, taxAmount, grandTotal, paymentMode, cashReceived: cashReceivedNum, changeDue });
+    onConfirm({ customerName, saleType, discount: discountNum, grandTotal, paymentMode, cashReceived: cashReceivedNum, changeDue });
   };
 
   return (
@@ -103,12 +96,6 @@ export function PosCheckoutModal({
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400 text-[11px]">
                 <span>Discount{discountMode === "percent" ? ` (${discountRaw}%)` : ""}</span>
                 <span className="font-mono font-semibold">- Rs {discountNum.toLocaleString()}</span>
-              </div>
-            )}
-            {showTax && taxAmount > 0 && (
-              <div className="flex justify-between text-muted-foreground text-[11px]">
-                <span>GST ({taxPctNum}%)</span>
-                <span className="font-mono font-semibold">+ Rs {taxAmount.toLocaleString()}</span>
               </div>
             )}
             <div className="flex justify-between text-primary font-bold text-sm pt-1 border-t border-border/60">
@@ -212,40 +199,6 @@ export function PosCheckoutModal({
                 className="h-8 text-xs"
               />
             </div>
-          </div>
-
-          <div className="pt-0.5">
-            {!showTax ? (
-              <button
-                type="button"
-                onClick={() => setShowTax(true)}
-                className="text-[10px] text-muted-foreground hover:text-primary transition-colors cursor-pointer flex items-center gap-1"
-              >
-                <span>+ Add GST / Tax Invoice</span>
-              </button>
-            ) : (
-              <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg border border-border bg-muted/20 animate-in fade-in duration-100">
-                <div className="flex-1">
-                  <ValidatedInput
-                    label="GST Tax Rate (%)"
-                    rule="positiveNumber"
-                    type="number"
-                    value={taxPercent}
-                    onChange={(e) => setTaxPercent(e.target.value)}
-                    onValidationChange={setTaxValid}
-                    placeholder="e.g. 18"
-                    className="h-7 text-xs"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setShowTax(false); setTaxPercent("0"); }}
-                  className="text-[10px] text-destructive hover:underline cursor-pointer self-end mb-1"
-                >
-                  Remove Tax
-                </button>
-              </div>
-            )}
           </div>
 
           {paymentMode === "Cash" && (

@@ -18,7 +18,6 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
   const [zone, setZone] = useState("Korangi Industrial Area, Karachi");
   const [contactPerson, setContactPerson] = useState("");
   const [phone, setPhone] = useState("");
-  const [ntnNumber, setNtnNumber] = useState("");
   const [contractRatePerLiter, setContractRatePerLiter] = useState("");
   const [creditLimit, setCreditLimit] = useState("500000");
   const [address, setAddress] = useState("");
@@ -40,7 +39,6 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
       setZone(initialData.zone || "Korangi Industrial Area, Karachi");
       setContactPerson(initialData.contactPerson || "");
       setPhone(initialData.phone || "");
-      setNtnNumber(initialData.ntnNumber || "");
       setContractRatePerLiter(initialData.contractRatePerLiter !== undefined ? String(initialData.contractRatePerLiter) : "");
       setCreditLimit(initialData.creditLimit !== undefined ? String(initialData.creditLimit) : "500000");
       setAddress(initialData.address || "");
@@ -50,7 +48,6 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
       setZone("Korangi Industrial Area, Karachi");
       setContactPerson("");
       setPhone("");
-      setNtnNumber("");
       setContractRatePerLiter("");
       setCreditLimit("500000");
       setAddress("");
@@ -72,7 +69,6 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
         zone,
         contactPerson,
         phone,
-        ntnNumber,
         contractRatePerLiter: Number(contractRatePerLiter),
         creditLimit: Number(creditLimit) || 500000,
         address,
@@ -86,29 +82,28 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-background p-6 shadow-2xl space-y-4 my-8">
-        <div className="flex items-center justify-between border-b pb-3">
-          <h3 className="font-semibold text-lg text-foreground">
-            {initialData ? "Edit Textile Mill Profile" : "Register New Textile Mill"}
-          </h3>
-          <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-primary/5">
+          <h2 className="text-base font-bold text-foreground">
+            {initialData ? "Edit Textile Mill / Client" : "Register New Textile Mill"}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer size-7">
             <XIcon className="size-4" />
           </Button>
         </div>
 
-        {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-xs text-destructive">
-            {error}
-          </div>
-        )}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          {error && (
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive font-medium">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <ValidatedInput
               label="Mill Name"
-              rule="name"
-              required
+              rule="nonEmpty"
               placeholder="e.g. Al-Karam Textile Mills"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -116,56 +111,49 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
             />
             <ValidatedInput
               label="Mill Code"
-              rule="code"
-              required
-              placeholder="e.g. AKTM-01"
+              rule="nonEmpty"
+              placeholder="MILL-001"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               onValidationChange={setCodeValid}
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Industrial Zone / City *</label>
-            <select
-              value={zone}
-              onChange={(e) => setZone(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
-            >
-              {INDUSTRIAL_ZONES.map((z) => (
-                <option key={z} value={z}>
-                  {z}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-medium text-foreground">Industrial Zone / Area</label>
+              <select
+                value={zone}
+                onChange={(e) => setZone(e.target.value)}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                {INDUSTRIAL_ZONES.map((z) => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </select>
+            </div>
             <ValidatedInput
-              label="Contact Person"
-              rule="name"
-              required
-              placeholder="e.g. Tariq Mahmood"
+              label="Contact Person (Manager)"
+              rule="nonEmpty"
+              placeholder="e.g. Tariq Mehmood"
               value={contactPerson}
               onChange={(e) => setContactPerson(e.target.value)}
               onValidationChange={setContactValid}
             />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
             <ValidatedInput
               label="Phone Number"
               rule="phone"
-              required
-              placeholder="e.g. 0300-8219401"
+              placeholder="0300-1234567"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               onValidationChange={setPhoneValid}
             />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <ValidatedInput
-              label="Contract Rate (Rs/L)"
-              rule="amount"
-              required
+              label="Contract Rate/Ltr (Rs)"
+              rule="positiveNumber"
               type="number"
               placeholder="530"
               value={contractRatePerLiter}
@@ -179,14 +167,6 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
               placeholder="500000"
               value={creditLimit}
               onChange={(e) => setCreditLimit(e.target.value)}
-            />
-            <ValidatedInput
-              label="NTN / STRN"
-              rule="text"
-              required={false}
-              placeholder="0712394-8"
-              value={ntnNumber}
-              onChange={(e) => setNtnNumber(e.target.value)}
             />
           </div>
 

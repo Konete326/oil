@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
+import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
@@ -31,14 +31,12 @@ export function SalesPurchaseReconciliationModal({
     const gross = Number(p.totalAmount || p.totalCost || p.grossAmount || 0);
     return {
       month: new Date(p.purchaseDate || p.createdAt || Date.now()).toLocaleDateString("en-GB"),
-      tin: p.purchaseNumber || "010-534-770-000",
+      refNo: p.purchaseNumber || "PO-000",
       corpName: p.supplierName || p.supplier || "Supplier",
       proprietor: p.contactPerson || p.supplierName || "Al Khaleej Partner",
       address: p.address || "Korangi Industrial Area, Karachi",
       particular: p.productName || p.particular || p.description || "Base Oil / Drum Stock",
       gross: gross,
-      exempt: 0,
-      taxAmount: Number(p.taxAmount || 0),
       total: gross,
     };
   });
@@ -51,14 +49,12 @@ export function SalesPurchaseReconciliationModal({
 
     return {
       month: new Date(s.saleDate || s.createdAt || Date.now()).toLocaleDateString("en-GB"),
-      tin: s.saleNumber || s.challanNumber || "010-534-770-001",
+      refNo: s.saleNumber || s.challanNumber || "INV-001",
       corpName: s.customerName || s.millName || "Client / Buyer",
       proprietor: s.driverName || s.customerName || "Purchaser",
       address: s.customerAddress || s.deliveryAddress || s.address || "Karachi, Pakistan",
       particular: itemNames,
       gross: gross,
-      exempt: 0,
-      taxAmount: Number(s.taxAmount || 0),
       total: gross,
     };
   });
@@ -83,16 +79,12 @@ export function SalesPurchaseReconciliationModal({
     const data = displayRows.map((r, idx) => ({
       "Sr #": idx + 1,
       Month: r.month,
-      "TIN / NTN": r.tin,
-      "Name of Registered Person": r.name,
-      "Registered Name": r.regName,
+      "Ref / Voucher #": r.refNo,
+      "Party Name": r.corpName,
+      "Contact Person": r.proprietor,
       Address: r.address,
-      Nature: r.nature,
-      "Gross Taxable (PKR)": r.grossTaxable,
-      "Exempt (PKR)": r.exempt,
-      "Zero Rated (PKR)": r.zeroRated,
-      "Tax Amount (PKR)": r.taxAmount,
-      "Total Amount (PKR)": r.totalGross,
+      "Product Description": r.particular,
+      "Total Amount (PKR)": r.total,
     }));
     exportTransactionsToExcel(data, `${activeType.toUpperCase()}_Reconciliation_Report.xlsx`);
   };
@@ -215,161 +207,134 @@ export function SalesPurchaseReconciliationModal({
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
             className="w-full max-w-[287mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-[10px] print:shadow-none print:border-none print:p-0 a4-landscape-sheet relative notranslate"
-          dir="ltr"
-          lang="en"
-        >
-          <div className="pb-4 space-y-1">
-            <h1 className="font-extrabold text-xs uppercase tracking-tight text-black">
-              {activeType.toUpperCase()} TRANSACTIONS
-            </h1>
-            <p className="font-bold text-[11px] uppercase underline text-black">
-              MONTHLY RECONCILIATION REPORT
-            </p>
-            <p className="font-bold text-[10px] uppercase text-black pt-0.5">
-              Month: <span className="underline">{currentMonthName}</span>
-            </p>
-          </div>
+            dir="ltr"
+            lang="en"
+          >
+            <div className="pb-4 space-y-1">
+              <h1 className="font-extrabold text-xs uppercase tracking-tight text-black">
+                {activeType.toUpperCase()} TRANSACTIONS
+              </h1>
+              <p className="font-bold text-[11px] uppercase underline text-black">
+                MONTHLY RECONCILIATION REPORT
+              </p>
+              <p className="font-bold text-[10px] uppercase text-black pt-0.5">
+                Month: <span className="underline">{currentMonthName}</span>
+              </p>
+            </div>
 
-          <div className="grid grid-cols-2 gap-4 pb-4 mb-1 text-[10px] leading-tight font-sans">
-            <div className="space-y-0.5">
-              <div className="flex">
-                <span className="w-36 font-bold uppercase">NTN / STRN:</span>
-                <span className="font-mono font-bold">010-534-770-000</span>
-              </div>
-              <div className="flex">
-                <span className="w-36 font-bold uppercase">Company Name:</span>
-                <span className="font-bold uppercase">AL KHALEEJ LUBRICANTS</span>
-              </div>
-              <div className="flex">
-                <span className="w-36 font-bold uppercase">Company Address:</span>
-                <span>Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan</span>
+            <div className="grid grid-cols-2 gap-4 pb-4 mb-1 text-[10px] leading-tight font-sans">
+              <div className="space-y-0.5">
+                <div className="flex">
+                  <span className="w-36 font-bold uppercase">Company Name:</span>
+                  <span className="font-bold uppercase">AL KHALEEJ LUBRICANTS</span>
+                </div>
+                <div className="flex">
+                  <span className="w-36 font-bold uppercase">Company Address:</span>
+                  <span>Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan</span>
+                </div>
+                <div className="flex">
+                  <span className="w-36 font-bold uppercase">Contact:</span>
+                  <span>Tel: (021) 35091244, 35091245</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="mb-4">
-            <table className="w-full border-collapse border-2 border-black text-[9px]">
-              <thead>
-                <tr className="border-b-2 border-black text-center font-bold uppercase tracking-tight">
-                  <th className="border border-black p-1.5 w-16">
-                    Month
-                  </th>
-                  <th className="border border-black p-1.5 w-24">
-                    NTN / Tax #
-                  </th>
-                  <th className="border border-black p-1.5 w-36">
-                    {activeType === "purchases" ? "Supplier Name" : "Customer Name"}
-                  </th>
-                  <th className="border border-black p-1.5 w-32">
-                    Contact Person
-                  </th>
-                  <th className="border border-black p-1.5 w-36">
-                    Address
-                  </th>
-                  <th className="border border-black p-1.5 w-40 bg-gray-100 text-black">
-                    Product Description
-                  </th>
-                  <th className="border border-black p-1.5 w-24">
-                    Gross Amount (Rs)
-                  </th>
-                  <th className="border border-black p-1.5 w-20">
-                    Tax Exempt (Rs)
-                  </th>
-                  <th className="border border-black p-1.5 w-20">
-                    Tax (Rs)
-                  </th>
-                  <th className="border border-black p-1.5 w-24">
-                    Total Amount (Rs)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black">
-                {displayRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={10} className="p-8 text-center text-gray-500 border border-black text-[11px]">
-                      No {activeType} reconciliation records found for this period.
-                    </td>
+            <div className="mb-4">
+              <table className="w-full border-collapse border-2 border-black text-[9px]">
+                <thead>
+                  <tr className="border-b-2 border-black text-center font-bold uppercase tracking-tight">
+                    <th className="border border-black p-1.5 w-16">
+                      Month
+                    </th>
+                    <th className="border border-black p-1.5 w-24">
+                      Voucher / Ref #
+                    </th>
+                    <th className="border border-black p-1.5 w-40">
+                      {activeType === "purchases" ? "Supplier Name" : "Customer Name"}
+                    </th>
+                    <th className="border border-black p-1.5 w-32">
+                      Contact Person
+                    </th>
+                    <th className="border border-black p-1.5 w-40">
+                      Address
+                    </th>
+                    <th className="border border-black p-1.5 w-48 bg-gray-100 text-black">
+                      Product Description
+                    </th>
+                    <th className="border border-black p-1.5 w-28 text-right">
+                      Total Amount (Rs)
+                    </th>
                   </tr>
-                ) : (
-                  displayRows.map((row, idx) => (
-                    <tr key={idx} className="border-b border-black">
-                      <td className="border border-black p-1 text-center font-mono">
-                        {row.month}
-                      </td>
-                      <td className="border border-black p-1 text-center font-mono font-medium">
-                        {row.tin}
-                      </td>
-                      <td className="border border-black p-1 font-bold uppercase leading-tight">
-                        {row.corpName}
-                      </td>
-                      <td className="border border-black p-1 text-center text-gray-800">
-                        {row.proprietor}
-                      </td>
-                      <td className="border border-black p-1 text-gray-800 leading-tight">
-                        {row.address}
-                      </td>
-                      <td className="border border-black p-1 font-semibold leading-tight bg-yellow-50/50">
-                        {row.particular}
-                      </td>
-                      <td className="border border-black p-1 text-right font-mono">
-                        {row.gross.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </td>
-                      <td className="border border-black p-1 text-right font-mono text-gray-700">
-                        -
-                      </td>
-                      <td className="border border-black p-1 text-right font-mono text-gray-700">
-                        -
-                      </td>
-                      <td className="border border-black p-1 text-right font-mono font-bold">
-                        {row.taxableTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </thead>
+                <tbody className="divide-y divide-black">
+                  {displayRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-gray-500 border border-black text-[11px]">
+                        No {activeType} reconciliation records found for this period.
                       </td>
                     </tr>
-                  ))
-                )}
+                  ) : (
+                    displayRows.map((row, idx) => (
+                      <tr key={idx} className="border-b border-black">
+                        <td className="border border-black p-1 text-center font-mono">
+                          {row.month}
+                        </td>
+                        <td className="border border-black p-1 text-center font-mono font-medium">
+                          {row.refNo}
+                        </td>
+                        <td className="border border-black p-1 font-bold uppercase leading-tight">
+                          {row.corpName}
+                        </td>
+                        <td className="border border-black p-1 text-center text-gray-800">
+                          {row.proprietor}
+                        </td>
+                        <td className="border border-black p-1 text-gray-800 leading-tight">
+                          {row.address}
+                        </td>
+                        <td className="border border-black p-1 font-semibold leading-tight bg-yellow-50/50">
+                          {row.particular}
+                        </td>
+                        <td className="border border-black p-1 text-right font-mono font-bold">
+                          {Number(row.total || row.gross || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
 
-                <tr className="border-t-2 border-black font-bold bg-gray-50">
-                  <td colSpan={6} className="border border-black p-1.5 text-left uppercase">
-                    Grand Total :
-                  </td>
-                  <td className="border border-black p-1.5 text-right font-mono">
-                    {totalGross.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                  <td className="border border-black p-1.5 text-right font-mono">
-                    -
-                  </td>
-                  <td className="border border-black p-1.5 text-right font-mono">
-                    -
-                  </td>
-                  <td className="border border-black p-1.5 text-right font-mono font-bold text-[10px]">
-                    {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  <tr className="border-t-2 border-black font-bold bg-gray-50">
+                    <td colSpan={6} className="border border-black p-1.5 text-left uppercase">
+                      Grand Total :
+                    </td>
+                    <td className="border border-black p-1.5 text-right font-mono font-bold text-[10px]">
+                      {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          <div className="pt-2 text-[10px] font-bold uppercase text-black">
-            END OF REPORT
+            <div className="pt-2 text-[10px] font-bold uppercase text-black">
+              END OF REPORT
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
-          Close Preview
-        </Button>
-        <Button
-          size="sm"
-          onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
-        >
-          <PrinterIcon className="size-3.5" />
-          <span>Print A4 Document</span>
-        </Button>
+        <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
+          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+            Close Preview
+          </Button>
+          <Button
+            size="sm"
+            onClick={handlePrint}
+            className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          >
+            <PrinterIcon className="size-3.5" />
+            <span>Print A4 Document</span>
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
-return createPortal(modalContent, document.body);
+  return createPortal(modalContent, document.body);
 }

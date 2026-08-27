@@ -118,60 +118,6 @@ export function SettingsManager({ user }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div
-            className={`size-10 rounded-lg flex items-center justify-center ${
-              isOnline
-                ? "bg-emerald-500/15 text-emerald-500"
-                : "bg-rose-500/15 text-rose-500"
-            }`}
-          >
-            {isOnline ? <Wifi className="size-5" /> : <WifiOff className="size-5" />}
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Network Connection</p>
-            <p className="text-base font-bold text-foreground">
-              {isOnline ? "Online & Connected" : "Offline Mode"}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
-            <HardDrive className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">IndexedDB Queue</p>
-            <p className="text-base font-bold text-foreground">
-              {pendingCount} Operations
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-sky-500/15 flex items-center justify-center text-sky-500">
-            <Clock className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Last Cloud Sync</p>
-            <p className="text-base font-bold text-foreground">
-              {lastSyncTime || "Auto-active"}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <Terminal className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Logged Diagnostics</p>
-            <p className="text-xl font-bold text-foreground">{logs.length}</p>
-          </div>
-        </div>
-      </div>
-
       <div className="flex items-center gap-2 border-b border-border/60 pb-2 overflow-x-auto min-w-0">
         <Button
           variant={activeTab === "language" ? "default" : "ghost"}

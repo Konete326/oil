@@ -9,7 +9,6 @@ import mediaRoutes from "./routes/mediaRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import decantingRoutes from "./routes/decantingRoutes.js";
 import millRoutes from "./routes/millRoutes.js";
 import challanRoutes from "./routes/challanRoutes.js";
 import posRoutes from "./routes/posRoutes.js";
@@ -74,7 +73,6 @@ app.get("/", (req, res) => {
       dashboard: "/api/dashboard",
       categories: "/api/categories",
       products: "/api/products",
-      decanting: "/api/decanting",
       mills: "/api/mills",
       challans: "/api/challans",
       pos: "/api/pos/sales",
@@ -92,7 +90,6 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api/decanting", decantingRoutes);
 app.use("/api/mills", millRoutes);
 app.use("/api/challans", challanRoutes);
 app.use("/api/pos", posRoutes);

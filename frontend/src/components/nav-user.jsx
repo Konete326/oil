@@ -37,7 +37,7 @@ export function NavUser({ user: currentUser, onLogout }) {
   const savedUser = currentUser || JSON.parse(localStorage.getItem("user") || '{"name":"Admin User","email":"admin@gmail.com"}');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const { isOnline, pendingCount, isSyncing, syncProgress, networkSpeed, lastSyncTime, triggerManualSync } = useSync();
+  const { isOnline, pendingCount, isSyncing, syncProgress, networkSpeed, networkDetails, lastSyncTime, triggerManualSync } = useSync();
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -70,7 +70,9 @@ export function NavUser({ user: currentUser, onLogout }) {
   };
 
   const getSpeedLabel = () => {
-    if (networkSpeed === "slow") return "Slow Network (Throttled)";
+    if (!isOnline) return "Offline";
+    if (networkDetails?.label) return networkDetails.label;
+    if (networkSpeed === "slow") return "Slow 2G (Throttled)";
     if (networkSpeed === "medium") return "Medium 3G Speed";
     return "High Speed 4G/WiFi";
   };

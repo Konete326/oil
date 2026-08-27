@@ -19,7 +19,6 @@ const posSaleSchema = new mongoose.Schema(
     items: [posSaleItemSchema],
     subtotal: { type: Number, required: true },
     discount: { type: Number, default: 0 },
-    taxAmount: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true },
     paymentMode: { type: String, enum: ["Cash", "Card", "Bank Transfer", "Credit / Khata"], default: "Cash" },
     cashReceived: { type: Number, default: 0 },

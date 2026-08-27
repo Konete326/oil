@@ -210,3 +210,57 @@ export const deleteFromLocalSnapshot = async (key, itemId) => {
     await saveLocalSnapshot(key, updated);
   } catch (err) {}
 };
+
+export const getOfflineStorageEstimate = async () => {
+  try {
+    if (typeof navigator !== "undefined" && navigator.storage && navigator.storage.estimate) {
+      const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+      const usedMB = (usage / (1024 * 1024)).toFixed(2);
+      const quotaMB = (quota / (1024 * 1024)).toFixed(0);
+      const percent = quota > 0 ? Math.min(100, Math.max(1, Math.round((usage / quota) * 100))) : 1;
+      return { usedMB, quotaMB, percent, rawUsage: usage, rawQuota: quota };
+    }
+  } catch (err) {}
+
+  let totalBytes = 0;
+  try {
+    if (typeof localStorage !== "undefined") {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        totalBytes += (k.length + (localStorage.getItem(k) || "").length) * 2;
+      }
+    }
+  } catch (err) {}
+
+  const usedMB = (totalBytes / (1024 * 1024)).toFixed(2);
+  return { usedMB, quotaMB: "500", percent: Math.max(1, Math.min(100, Math.round((totalBytes / (500 * 1024 * 1024)) * 100))), rawUsage: totalBytes, rawQuota: 500 * 1024 * 1024 };
+};
+
+export const cleanupOldOfflineCache = async (days = 30) => {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  let cleanedCount = 0;
+  try {
+    const db = await openOfflineDB();
+    const tx = db.transaction("cached_snapshots", "readwrite");
+    const store = tx.objectStore("cached_snapshots");
+    const req = store.openCursor();
+    await new Promise((resolve) => {
+      req.onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) {
+          const val = cursor.value;
+          if (val.updatedAt && new Date(val.updatedAt).getTime() < cutoff) {
+            cursor.delete();
+            cleanedCount++;
+          }
+          cursor.continue();
+        } else {
+          resolve(true);
+        }
+      };
+      req.onerror = () => resolve(false);
+    });
+  } catch (err) {}
+
+  return { success: true, cleanedCount };
+};

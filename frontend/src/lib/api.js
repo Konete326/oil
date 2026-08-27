@@ -32,7 +32,7 @@ export async function fetchHydrationDataApi() {
           cash_transactions: result.data.cashTransactions || [],
           pos_sales: result.data.posSales || [],
           challans: result.data.challans || [],
-          decantings: result.data.decantings || [],
+          system_logs: result.data.systemLogs || [],
         });
         return result.data;
       }
@@ -479,54 +479,6 @@ export async function deleteProduct(id) {
   await deleteFromLocalSnapshot("products", id);
   await addOfflineOperation("product_delete", "delete", { _id: id });
   return { success: true, message: "Deleted locally" };
-}
-
-
-export async function fetchDecantingLogs() {
-  try {
-    const res = await fetch(`${API_URL}/decanting`, {
-      headers: { ...getAuthHeader() },
-    });
-    handleAuthResponse(res);
-    if (res.ok) {
-      const result = await res.json();
-      if (result && Array.isArray(result.data)) {
-        await saveLocalSnapshot("decantings", result.data);
-      }
-      return result;
-    }
-  } catch (err) {
-    console.warn("Decanting API error, using IndexedDB snapshot", err);
-  }
-  const cached = await getLocalSnapshot("decantings");
-  const list = Array.isArray(cached) ? cached : [];
-  return { success: true, count: list.length, data: list };
-}
-
-export async function createDecantingLog(data) {
-  try {
-    const res = await fetch(`${API_URL}/decanting`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      body: JSON.stringify(data),
-    });
-    handleAuthResponse(res);
-    if (res.ok) {
-      const json = await res.json();
-      if (json.data) await updateLocalSnapshotItem("decantings", json.data);
-      return json;
-    }
-  } catch (err) {
-    console.warn("createDecantingLog offline, queueing sync");
-  }
-  const localItem = {
-    ...data,
-    _id: `dec_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-  };
-  await updateLocalSnapshotItem("decantings", localItem);
-  await addOfflineOperation("decanting_entry", "create", localItem);
-  return { success: true, data: localItem };
 }
 
 export async function fetchMills() {
@@ -1171,17 +1123,29 @@ export async function deleteUserApi(id) {
 }
 
 export async function fetchAuditLogsApi(params = {}) {
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
   try {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/audit?${query}`, {
       headers: { ...getAuthHeader() },
     });
-    if (!res.ok) throw new Error("Failed to fetch audit logs");
-    return await res.json();
+    if (res.ok) {
+      const json = await res.json();
+      const valid = (json.data || []).filter(
+        (l) => new Date(l.timestamp || l.createdAt || Date.now()).getTime() >= thirtyDaysAgo
+      );
+      await saveLocalSnapshot("audit_logs", valid);
+      return { success: true, count: valid.length, data: valid };
+    }
   } catch (err) {
-    console.warn("Audit log API error", err);
-    return { success: false, data: [] };
+    console.warn("Audit log API offline, using local snapshot", err);
   }
+
+  const cached = await getLocalSnapshot("audit_logs");
+  const list = (Array.isArray(cached) ? cached : []).filter(
+    (l) => new Date(l.timestamp || l.createdAt || Date.now()).getTime() >= thirtyDaysAgo
+  );
+  return { success: true, count: list.length, data: list };
 }
 
 export async function fetchExpensesApi(params = {}) {
@@ -1339,98 +1303,182 @@ export async function generateSalaryVoucherApi(payload) {
 }
 
 export async function fetchNotificationsApi() {
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
   try {
     const res = await fetch(`${API_URL}/notifications`, {
       headers: { ...getAuthHeader() },
     });
     handleAuthResponse(res);
-    if (!res.ok) throw new Error("Failed to fetch notifications");
-    return await res.json();
+    if (res.ok) {
+      const json = await res.json();
+      const valid = (json.data || []).filter(
+        (n) => new Date(n.createdAt || Date.now()).getTime() >= thirtyDaysAgo
+      );
+      await saveLocalSnapshot("notifications", valid);
+      return { success: true, data: valid, unreadCount: valid.filter((n) => !n.isRead).length };
+    }
   } catch (err) {
-    console.warn("Notifications API error", err);
-    return { success: false, data: [], unreadCount: 0 };
+    console.warn("Notifications API offline, reading snapshot", err);
   }
+
+  const cached = await getLocalSnapshot("notifications");
+  const list = (Array.isArray(cached) ? cached : []).filter(
+    (n) => new Date(n.createdAt || Date.now()).getTime() >= thirtyDaysAgo
+  );
+  return { success: true, data: list, unreadCount: list.filter((n) => !n.isRead).length };
 }
 
 export async function markNotificationReadApi(id) {
-  const res = await fetch(`${API_URL}/notifications/read/${id}`, {
-    method: "PUT",
-    headers: { ...getAuthHeader() },
-  });
-  handleAuthResponse(res);
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.message || "Failed to update notification");
-  return data;
+  try {
+    const res = await fetch(`${API_URL}/notifications/read/${id}`, {
+      method: "PUT",
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+  } catch (err) {
+    console.warn("Offline mark read:", err);
+  }
+
+  const cached = await getLocalSnapshot("notifications");
+  const list = Array.isArray(cached) ? cached : [];
+  const updated = list.map((n) => (id === "all" || n._id === id ? { ...n, isRead: true } : n));
+  await saveLocalSnapshot("notifications", updated);
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("app-notification-changed"));
+  return { success: true, message: "Marked as read" };
 }
 
 export async function deleteNotificationApi(id) {
-  const res = await fetch(`${API_URL}/notifications/${id}`, {
-    method: "DELETE",
-    headers: { ...getAuthHeader() },
-  });
-  handleAuthResponse(res);
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete notification");
-  return data;
+  try {
+    const res = await fetch(`${API_URL}/notifications/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+  } catch (err) {
+    console.warn("Offline delete notification:", err);
+  }
+
+  const cached = await getLocalSnapshot("notifications");
+  const list = Array.isArray(cached) ? cached : [];
+  const updated = list.filter((n) => n._id !== id);
+  await saveLocalSnapshot("notifications", updated);
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("app-notification-changed"));
+  return { success: true, message: "Notification deleted" };
 }
 
 export async function clearAllNotificationsApi() {
-  const res = await fetch(`${API_URL}/notifications/clear-all`, {
-    method: "DELETE",
-    headers: { ...getAuthHeader() },
-  });
-  handleAuthResponse(res);
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.message || "Failed to clear notifications");
-  return data;
+  try {
+    const res = await fetch(`${API_URL}/notifications/clear-all`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+  } catch (err) {
+    console.warn("Offline clear all notifications:", err);
+  }
+
+  await saveLocalSnapshot("notifications", []);
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("app-notification-changed"));
+  return { success: true, message: "All notifications cleared" };
 }
 
 export async function fetchSystemLogsApi() {
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   try {
     const res = await fetch(`${API_URL}/system-logs`, {
       headers: { ...getAuthHeader() },
     });
     handleAuthResponse(res);
-    if (!res.ok) throw new Error("Failed to fetch system logs");
-    return await res.json();
+    if (res.ok) {
+      const result = await res.json();
+      const validLogs = (result.data || []).filter(
+        (log) => new Date(log.createdAt || Date.now()).getTime() >= sevenDaysAgo
+      );
+      await saveLocalSnapshot("system_logs", validLogs);
+      return { success: true, count: validLogs.length, data: validLogs };
+    }
   } catch (err) {
-    console.warn("System logs API error", err);
-    return { success: false, count: 0, data: [] };
+    console.warn("System logs API error, using local storage snapshot", err);
   }
+
+  const cached = await getLocalSnapshot("system_logs");
+  const list = (Array.isArray(cached) ? cached : []).filter(
+    (log) => new Date(log.createdAt || Date.now()).getTime() >= sevenDaysAgo
+  );
+  await saveLocalSnapshot("system_logs", list);
+  return { success: true, count: list.length, data: list };
 }
 
 export async function createSystemLogApi(payload) {
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   try {
     const res = await fetch(`${API_URL}/system-logs`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...getAuthHeader() },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data) await updateLocalSnapshotItem("system_logs", json.data);
+      return json;
+    }
   } catch (err) {
-    console.warn("Failed to create system log", err);
-    return { success: false };
+    console.warn("createSystemLogApi offline, queueing sync");
   }
+
+  const localItem = {
+    ...payload,
+    _id: `syslog_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  const cached = await getLocalSnapshot("system_logs");
+  const list = (Array.isArray(cached) ? cached : []).filter(
+    (log) => new Date(log.createdAt || Date.now()).getTime() >= sevenDaysAgo
+  );
+  list.unshift(localItem);
+  await saveLocalSnapshot("system_logs", list);
+  await addOfflineOperation("system_log_entry", "create", localItem);
+
+  return { success: true, data: localItem };
 }
 
 export async function clearSystemLogsApi() {
-  const res = await fetch(`${API_URL}/system-logs/clear-all`, {
-    method: "DELETE",
-    headers: { ...getAuthHeader() },
-  });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.message || "Failed to clear system logs");
-  return data;
+  try {
+    const res = await fetch(`${API_URL}/system-logs/clear-all`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    if (res.ok) {
+      await saveLocalSnapshot("system_logs", []);
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn("clearSystemLogsApi offline, queueing sync");
+  }
+
+  await saveLocalSnapshot("system_logs", []);
+  await addOfflineOperation("system_log_clear", "delete", {});
+  return { success: true, message: "Cleared all system logs" };
 }
 
 export async function deleteSingleSystemLogApi(id) {
-  const res = await fetch(`${API_URL}/system-logs/${id}`, {
-    method: "DELETE",
-    headers: { ...getAuthHeader() },
-  });
-  const data = await res.json();
-  if (!res.ok || !data.success) throw new Error(data.message || "Failed to delete system log");
-  return data;
+  try {
+    const res = await fetch(`${API_URL}/system-logs/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    if (res.ok) {
+      await deleteFromLocalSnapshot("system_logs", id);
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn("deleteSingleSystemLogApi offline, queueing sync");
+  }
+
+  await deleteFromLocalSnapshot("system_logs", id);
+  await addOfflineOperation("system_log_delete", "delete", { _id: id });
+  return { success: true, message: "Deleted system log record" };
 }
 
 export async function eraseAllDataApi(password) {

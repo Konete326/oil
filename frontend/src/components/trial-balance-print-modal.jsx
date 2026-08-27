@@ -159,7 +159,7 @@ export function TrialBalancePrintModal({
                 Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
               </p>
               <p className="text-[10px] text-gray-600">
-                NTN: 8941203-7 | STRN: 12-34-5678-901-23
+                Tel: (021) 35091244 | Korangi Industrial Area, Karachi
               </p>
             </div>
 

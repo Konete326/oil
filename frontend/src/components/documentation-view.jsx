@@ -56,11 +56,7 @@ const MODULE_GUIDES = [
   },
   {
     name: "POS Counter & Sales History",
-    desc: "Fast retail & wholesale checkout terminal supporting cash, card POS, bank transfers, credit khata, custom discounts, GST tax, and printable invoices.",
-  },
-  {
-    name: "Drum Decanting & Packaging",
-    desc: "Convert 208L Master Drums into smaller retail packaging (1L/4L Cans/Buckets) with automated evaporation wastage percentage calculation and instant stock adjustment.",
+    desc: "Fast retail & wholesale checkout terminal supporting cash, card POS, bank transfers, credit khata, custom discounts, and printable invoices.",
   },
   {
     name: "Textile Mills & DC Gate Pass",
@@ -203,7 +199,7 @@ export function DocumentationView() {
                 </div>
 
                 <p className="text-xs leading-relaxed text-foreground/90">
-                  Welcome to the official operating system for <strong>Al Khaleej Lubricants LLC</strong>. This enterprise platform is engineered to streamline end-to-end lube blending operations, raw oil drum purchasing, decanting into retail cans, retail counter POS sales, textile mill contract shipments via tanker trucks, customer credit khatas, and automated profit &amp; loss analytics.
+                  Welcome to the official operating system for <strong>Al Khaleej Lubricants LLC</strong>. This enterprise platform is engineered to streamline end-to-end lube blending operations, raw oil drum purchasing, retail counter POS sales, textile mill contract shipments via tanker trucks, customer credit khatas, and automated profit &amp; loss analytics.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
@@ -323,7 +319,7 @@ export function DocumentationView() {
                         <td className="p-3 text-center text-amber-500 font-bold">Read-Only</td>
                       </tr>
                       <tr>
-                        <td className="p-3 font-medium text-foreground">Products &amp; Decanting</td>
+                        <td className="p-3 font-medium text-foreground">Products &amp; Inventory</td>
                         <td className="p-3 text-center text-emerald-500 font-bold">Full</td>
                         <td className="p-3 text-center text-emerald-500 font-bold">Full</td>
                         <td className="p-3 text-center text-destructive font-bold">Denied</td>

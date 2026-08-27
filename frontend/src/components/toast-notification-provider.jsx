@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { fetchNotificationsApi, markNotificationReadApi } from "@/lib/api";
+import { fetchNotificationsApi, markNotificationReadApi, deleteNotificationApi, clearAllNotificationsApi } from "@/lib/api";
 import { PackageX, UserCheck, AlertTriangle, Info, CheckCircle2, X, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,8 @@ const NotificationContext = createContext({
   unreadCount: 0,
   refreshNotifications: () => {},
   markRead: () => {},
+  deleteNotification: () => {},
+  clearAll: () => {},
 });
 
 export const useToastNotification = () => useContext(NotificationContext);
@@ -49,8 +51,16 @@ export function ToastNotificationProvider({ children }) {
 
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 15000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadNotifications, 4000);
+    const handleNotificationEvent = () => loadNotifications();
+    window.addEventListener("app-notification-changed", handleNotificationEvent);
+    window.addEventListener("focus", handleNotificationEvent);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("app-notification-changed", handleNotificationEvent);
+      window.removeEventListener("focus", handleNotificationEvent);
+    };
   }, [loadNotifications]);
 
   const dismissToast = useCallback((id) => {
@@ -69,8 +79,28 @@ export function ToastNotificationProvider({ children }) {
   }, [activeToasts, dismissToast]);
 
   const markRead = async (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (id === "all" || n._id === id ? { ...n, isRead: true } : n))
+    );
+    setUnreadCount((prev) => (id === "all" ? 0 : Math.max(0, prev - 1)));
     await markNotificationReadApi(id);
-    loadNotifications();
+  };
+
+  const deleteNotification = async (id) => {
+    setNotifications((prev) => {
+      const target = prev.find((n) => n._id === id);
+      if (target && !target.isRead) {
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+      return prev.filter((n) => n._id !== id);
+    });
+    await deleteNotificationApi(id);
+  };
+
+  const clearAll = async () => {
+    setNotifications([]);
+    setUnreadCount(0);
+    await clearAllNotificationsApi();
   };
 
   const getToastIcon = (type) => {
@@ -96,6 +126,8 @@ export function ToastNotificationProvider({ children }) {
         unreadCount,
         refreshNotifications: loadNotifications,
         markRead,
+        deleteNotification,
+        clearAll,
       }}
     >
       {children}

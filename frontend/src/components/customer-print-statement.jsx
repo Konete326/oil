@@ -101,10 +101,10 @@ export function CustomerPrintStatement({
     exportTransactionsToExcel({
       title: `CUSTOMER_LEDGER_${currentCustomer.name.replace(/\s+/g, "_")}`,
       subtitle: `Customer: ${currentCustomer.name} | Phone: ${currentCustomer.phone || "-"} | Address: ${currentCustomer.address || currentCustomer.zone || "-"}`,
-      headers: ["Date", "Doc / Invoice #", "Description", "Debit (Rs)", "Credit (Rs)", "Balance (Rs)"],
+      headers: ["Date", "Invoice No", "Description", "Debit (Rs)", "Credit (Rs)", "Balance (Rs)"],
       data: computedRows.map((r) => ({
         "Date": r.dateStr,
-        "Doc / Invoice #": r.ref,
+        "Invoice No": r.ref,
         "Description": r.narration,
         "Debit (Rs)": r.debit,
         "Credit (Rs)": r.credit,
@@ -217,10 +217,10 @@ export function CustomerPrintStatement({
                   AL KHALEEJ LUBRICANTS
                 </h1>
                 <p className="text-[11px] text-gray-700 font-medium">
-                  Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
+                  Plot 44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
                 </p>
                 <p className="text-[10px] text-gray-600">
-                  Tel: (021) 35091244 | NTN: 7894561-2
+                  Tel: (021) 35091244
                 </p>
               </div>
             </div>
@@ -256,7 +256,7 @@ export function CustomerPrintStatement({
               <thead>
                 <tr className="border-b border-black font-bold uppercase text-[11px]">
                   <th className="py-2 px-2 w-20 text-left">Date</th>
-                  <th className="py-2 px-2 w-16 text-left">Invoice #</th>
+                  <th className="py-2 px-2 w-16 text-left">Invoice No</th>
                   <th className="py-2 px-2 w-24 text-left">Location</th>
                   <th className="py-2 px-2 text-left">Description</th>
                   <th className="py-2 px-2 text-right w-24">Billed (Rs)</th>

@@ -2,7 +2,6 @@ import { User } from "../models/userModel.js";
 import { Product } from "../models/productModel.js";
 import { Category } from "../models/categoryModel.js";
 import { PosSale } from "../models/posSaleModel.js";
-import { Decanting } from "../models/decantingModel.js";
 import { Mill } from "../models/millModel.js";
 import { Challan } from "../models/challanModel.js";
 import { Ledger } from "../models/ledgerModel.js";
@@ -36,7 +35,7 @@ export const eraseAllData = async (req, res, next) => {
     }
     await Promise.all([
       Product.deleteMany({}), Category.deleteMany({}), PosSale.deleteMany({}),
-      Decanting.deleteMany({}), Mill.deleteMany({}), Challan.deleteMany({}),
+      Mill.deleteMany({}), Challan.deleteMany({}),
       Ledger.deleteMany({}), Supplier.deleteMany({}), SupplierLedger.deleteMany({}),
       CashTransaction.deleteMany({}), Expense.deleteMany({}), SalaryVoucher.deleteMany({}),
       Employee.deleteMany({}), AuditLog.deleteMany({}), Notification.deleteMany({}),

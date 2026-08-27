@@ -14,6 +14,7 @@ import {
   fetchMills,
   fetchPosSales,
   fetchCashTransactionsApi,
+  fetchSystemLogsApi,
 } from "@/lib/api";
 
 const SyncContext = createContext(null);
@@ -54,6 +55,27 @@ function getNetworkSpeedName() {
   return "fast";
 }
 
+function getLiveNetworkDetails() {
+  if (typeof navigator === "undefined" || !navigator.onLine) {
+    return { status: "offline", label: "Offline Mode", downlinkMbps: 0, rttMs: 0 };
+  }
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    const downlink = conn.downlink || (conn.effectiveType === "4g" ? 25 : conn.effectiveType === "3g" ? 5 : 1);
+    const rtt = conn.rtt || 28;
+    const type = conn.effectiveType ? conn.effectiveType.toUpperCase() : "4G";
+    const speedStr = downlink >= 1 ? `${downlink.toFixed(1)} Mbps` : `${Math.round(downlink * 1000)} Kbps`;
+    return {
+      status: "online",
+      effectiveType: type,
+      downlinkMbps: Number(downlink.toFixed(1)),
+      rttMs: Math.round(rtt),
+      label: `${speedStr} (${type} · ${Math.round(rtt)}ms)`,
+    };
+  }
+  return { status: "online", effectiveType: "4G", downlinkMbps: 25.0, rttMs: 25, label: "25.0 Mbps (4G · 25ms)" };
+}
+
 export function SyncProvider({ children }) {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
@@ -62,6 +84,7 @@ export function SyncProvider({ children }) {
   const [isHydrating, setIsHydrating] = useState(false);
   const [syncProgress, setSyncProgress] = useState({ current: 0, total: 0, percentage: 0 });
   const [networkSpeed, setNetworkSpeed] = useState(() => getNetworkSpeedName());
+  const [networkDetails, setNetworkDetails] = useState(() => getLiveNetworkDetails());
   const [lastSyncTime, setLastSyncTime] = useState(() => {
     return localStorage.getItem("last_sync_time") || null;
   });
@@ -78,6 +101,7 @@ export function SyncProvider({ children }) {
     if (!navigator.onLine) return false;
     try {
       setIsHydrating(true);
+      const startT = performance.now();
       const data = await fetchHydrationDataApi();
       if (!data) {
         await Promise.allSettled([
@@ -88,8 +112,18 @@ export function SyncProvider({ children }) {
           fetchMills(),
           fetchPosSales(),
           fetchCashTransactionsApi(),
+          fetchSystemLogsApi(),
         ]);
       }
+      const durMs = Math.max(10, Math.round(performance.now() - startT));
+      const live = getLiveNetworkDetails();
+      const calculatedSpeed = Math.min(100, Math.max(1, ((500 * 8) / (durMs / 1000) / 1024))).toFixed(1);
+      setNetworkDetails({
+        ...live,
+        rttMs: durMs,
+        label: `${calculatedSpeed} Mbps (Live Sync · ${durMs}ms)`,
+      });
+
       const now = new Date().toISOString();
       setLastSyncTime(now);
       localStorage.setItem("last_sync_time", now);
@@ -113,17 +147,46 @@ export function SyncProvider({ children }) {
         return;
       }
 
+      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const expiredIds = pending
+        .filter((p) => p.type === "system_log_entry" && new Date(p.payload?.createdAt || 0).getTime() < sevenDaysAgo)
+        .map((p) => p.id)
+        .filter(Boolean);
+
+      if (expiredIds.length > 0) {
+        await removePendingOperations(expiredIds);
+      }
+
+      const activePending = pending.filter((p) => !expiredIds.includes(p.id));
+      if (activePending.length === 0) {
+        await refreshCount();
+        return;
+      }
+
       const rawBatchSize = getInitialBatchSize();
-      const items = pending.slice(0, rawBatchSize);
+      const items = activePending.slice(0, rawBatchSize);
       setSyncProgress({ current: 0, total: items.length, percentage: 0 });
 
       const rawApiUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/+$/, "");
       const API_URL = rawApiUrl.endsWith("/api") ? rawApiUrl : `${rawApiUrl}/api`;
 
+      const jsonPayload = JSON.stringify({ items, operations: items });
+      const payloadBytes = jsonPayload.length;
+      const startT = performance.now();
+
       const response = await fetch(`${API_URL}/sync/batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, operations: items }),
+        body: jsonPayload,
+      });
+
+      const durMs = Math.max(10, Math.round(performance.now() - startT));
+      const transferMbps = Math.min(100, Math.max(1, ((payloadBytes * 8) / (durMs / 1000) / (1024 * 1024)))).toFixed(1);
+      const live = getLiveNetworkDetails();
+      setNetworkDetails({
+        ...live,
+        rttMs: durMs,
+        label: `${transferMbps} Mbps (Live Sync · ${durMs}ms)`,
       });
 
       if (response.ok) {
@@ -165,12 +228,14 @@ export function SyncProvider({ children }) {
 
     const updateNetworkStatus = () => {
       setNetworkSpeed(getNetworkSpeedName());
+      setNetworkDetails(getLiveNetworkDetails());
       resetSyncTimer();
     };
 
     const handleOnline = () => {
       setIsOnline(true);
       setNetworkSpeed(getNetworkSpeedName());
+      setNetworkDetails(getLiveNetworkDetails());
       registerBackgroundSync();
       processSync();
       resetSyncTimer();
@@ -179,6 +244,7 @@ export function SyncProvider({ children }) {
     const handleOffline = () => {
       setIsOnline(false);
       setNetworkSpeed("offline");
+      setNetworkDetails({ status: "offline", label: "Offline Mode", downlinkMbps: 0, rttMs: 0 });
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
 
@@ -236,6 +302,7 @@ export function SyncProvider({ children }) {
         isHydrating,
         syncProgress,
         networkSpeed,
+        networkDetails,
         lastSyncTime,
         queueAction,
         triggerManualSync,
