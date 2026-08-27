@@ -43,8 +43,8 @@ export function SyncStatusBadge() {
         )}
 
         {pendingCount > 0 && !isWorking && (
-          <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white shadow-xs">
-            {pendingCount > 9 ? "9+" : pendingCount}
+          <span className="absolute -top-1 -right-1 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white shadow-xs font-mono">
+            {pendingCount}
           </span>
         )}
 

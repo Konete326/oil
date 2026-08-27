@@ -415,8 +415,8 @@ export function AppHeader({ user, onLogout }) {
         >
           <BellIcon className="size-4" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
+            <span className="absolute -top-1 -right-1 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-primary text-[9.5px] font-bold text-primary-foreground font-mono">
+              {unreadCount}
             </span>
           )}
         </Button>

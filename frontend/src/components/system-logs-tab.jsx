@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { PaginationControl } from "@/components/pagination-control";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CloudLoader } from "@/components/ui/cloud-loader";
 import {
@@ -29,7 +29,7 @@ import {
   FileText,
 } from "lucide-react";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 4;
 
 export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSuccessMsg }) {
   const [searchLog, setSearchLog] = useState("");
@@ -167,7 +167,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
 
   return (
     <>
-      <Card className="border-border shadow-xs bg-card">
+      <Card className="border-border shadow-xs bg-card overflow-hidden">
         <CardHeader className="p-3 sm:p-3.5 border-b border-border/40 space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
@@ -291,7 +291,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
           </div>
         </CardHeader>
 
-        <CardContent className="p-3 space-y-2">
+        <CardContent className="p-0">
           {loadingLogs ? (
             <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
               <CloudLoader size="sm" />
@@ -304,92 +304,94 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
               <p className="text-[11px]">No errors or system warnings found in the active log registry.</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {paginatedLogs.map((log) => {
-                const fullLogString = `[${(log.level || "ERROR").toUpperCase()}] ${log.title}\nTime: ${new Date(
-                  log.createdAt
-                ).toLocaleString()}\nSource: ${log.source}\nMessage: ${log.message}\nStack: ${log.stack || "N/A"}`;
+            <div>
+              <div className="p-3 space-y-2 max-h-[calc(100vh-320px)] min-h-[220px] overflow-y-auto">
+                {paginatedLogs.map((log) => {
+                  const fullLogString = `[${(log.level || "ERROR").toUpperCase()}] ${log.title}\nTime: ${new Date(
+                    log.createdAt
+                  ).toLocaleString()}\nSource: ${log.source}\nMessage: ${log.message}\nStack: ${log.stack || "N/A"}`;
 
-                const isError = log.level === "error";
+                  const isError = log.level === "error";
 
-                return (
-                  <div
-                    key={log._id}
-                    className="p-2.5 rounded-lg border border-border/80 bg-muted/20 space-y-1.5 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <Badge
-                            variant={isError ? "destructive" : "warning"}
-                            className="text-[9px] uppercase font-bold px-1.5 py-0"
-                          >
-                            {log.level || "error"}
-                          </Badge>
-                          <span className="font-semibold text-xs text-foreground">{log.title}</span>
-                          <span className="text-[9px] text-muted-foreground font-mono bg-muted/60 px-1 py-0.2 rounded">
-                            {log.source || "frontend"}
-                          </span>
+                  return (
+                    <div
+                      key={log._id}
+                      className="p-2.5 rounded-lg border border-border/80 bg-muted/20 space-y-1.5 hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <Badge
+                              variant={isError ? "destructive" : "warning"}
+                              className="text-[9px] uppercase font-bold px-1.5 py-0"
+                            >
+                              {log.level || "error"}
+                            </Badge>
+                            <span className="font-semibold text-xs text-foreground">{log.title}</span>
+                            <span className="text-[9px] text-muted-foreground font-mono bg-muted/60 px-1 py-0.2 rounded">
+                              {log.source || "frontend"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-foreground/90 font-mono break-all leading-tight">{log.message}</p>
                         </div>
-                        <p className="text-[11px] text-foreground/90 font-mono break-all leading-tight">{log.message}</p>
-                      </div>
 
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleCopyLog(log._id, fullLogString)}
-                          title="Copy full trace"
-                          className="cursor-pointer size-6"
-                        >
-                          {copiedId === log._id ? (
-                            <Check className="size-3 text-emerald-500" />
-                          ) : (
-                            <Copy className="size-3 text-muted-foreground" />
-                          )}
-                        </Button>
-
-                        {isAdmin && (
+                        <div className="flex items-center gap-1 shrink-0">
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => setDeletingLogId(log._id)}
-                            title="Delete this record"
-                            className="cursor-pointer size-6 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleCopyLog(log._id, fullLogString)}
+                            title="Copy full trace"
+                            className="cursor-pointer size-6"
                           >
-                            <Trash2 className="size-3" />
+                            {copiedId === log._id ? (
+                              <Check className="size-3 text-emerald-500" />
+                            ) : (
+                              <Copy className="size-3 text-muted-foreground" />
+                            )}
                           </Button>
-                        )}
+
+                          {isAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => setDeletingLogId(log._id)}
+                              title="Delete this record"
+                              className="cursor-pointer size-6 text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="size-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {log.stack && (
+                        <div className="p-2 rounded-md bg-black/80 text-zinc-300 font-mono text-[9px] leading-relaxed overflow-x-auto max-h-20 border border-border/40">
+                          <pre className="whitespace-pre-wrap break-words">{log.stack}</pre>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between text-[9.5px] text-muted-foreground pt-0.5 border-t border-border/40">
+                        <div className="flex items-center gap-1">
+                          <Clock className="size-2.5" />
+                          <span>{new Date(log.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span>User: {log.userName || "System"}</span>
+                          <span>•</span>
+                          <span>Role: {log.userRole || "Admin"}</span>
+                        </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
 
-                    {log.stack && (
-                      <div className="p-2 rounded-md bg-black/80 text-zinc-300 font-mono text-[9px] leading-relaxed overflow-x-auto max-h-20 border border-border/40">
-                        <pre className="whitespace-pre-wrap break-words">{log.stack}</pre>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between text-[9.5px] text-muted-foreground pt-0.5 border-t border-border/40">
-                      <div className="flex items-center gap-1">
-                        <Clock className="size-2.5" />
-                        <span>{new Date(log.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span>User: {log.userName || "System"}</span>
-                        <span>•</span>
-                        <span>Role: {log.userRole || "Admin"}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <PaginationControl
+              <PaginationBar
                 currentPage={currentPage}
                 totalPages={totalPages}
-                onPageChange={setCurrentPage}
                 totalItems={filteredLogs.length}
                 pageSize={PAGE_SIZE}
+                onPageChange={(p) => setCurrentPage(p)}
               />
             </div>
           )}
