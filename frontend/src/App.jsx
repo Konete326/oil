@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { getCurrentUserApi, refreshTokenApi, logoutUserApi } from "@/lib/api";
+import { getCurrentUserApi, refreshTokenApi, logoutUserApi, fetchHydrationDataApi } from "@/lib/api";
 import { AppShell } from "@/components/app-shell";
 import { ToastNotificationProvider } from "@/components/toast-notification-provider";
 import { Dashboard } from "@/components/dashboard";
