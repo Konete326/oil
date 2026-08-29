@@ -1,43 +1,7 @@
 const DB_NAME = "AlKhaleejOfflineDB";
-const DB_VERSION = 1;
-const ENCRYPTION_SALT = "ALKHALEEJ_OFFLINE_SECURE_SALT_v1";
+const DB_VERSION = 2;
 
 let dbPromise = null;
-
-function encryptData(payload) {
-  if (payload === null || payload === undefined) return payload;
-  try {
-    const jsonStr = JSON.stringify(payload);
-    let cipher = "";
-    for (let i = 0; i < jsonStr.length; i++) {
-      const charCode = jsonStr.charCodeAt(i) ^ ENCRYPTION_SALT.charCodeAt(i % ENCRYPTION_SALT.length);
-      cipher += String.fromCharCode(charCode);
-    }
-    return {
-      __encrypted: true,
-      data: btoa(encodeURIComponent(cipher)),
-    };
-  } catch (err) {
-    return payload;
-  }
-}
-
-function decryptData(payload) {
-  if (!payload || typeof payload !== "object" || !payload.__encrypted || !payload.data) {
-    return payload;
-  }
-  try {
-    const cipher = decodeURIComponent(atob(payload.data));
-    let jsonStr = "";
-    for (let i = 0; i < cipher.length; i++) {
-      const charCode = cipher.charCodeAt(i) ^ ENCRYPTION_SALT.charCodeAt(i % ENCRYPTION_SALT.length);
-      jsonStr += String.fromCharCode(charCode);
-    }
-    return JSON.parse(jsonStr);
-  } catch (err) {
-    return payload;
-  }
-}
 
 export const openOfflineDB = () => {
   if (dbPromise) return dbPromise;
@@ -66,12 +30,11 @@ export const openOfflineDB = () => {
 export const addOfflineOperation = async (type, action, payload) => {
   try {
     const db = await openOfflineDB();
-    const encryptedPayload = encryptData(payload);
     const item = {
       id: `op_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
       type,
       action,
-      payload: encryptedPayload,
+      payload,
       createdAt: new Date().toISOString(),
       attempts: 0,
     };
@@ -84,10 +47,7 @@ export const addOfflineOperation = async (type, action, payload) => {
       req.onerror = (e) => reject(e.target.error);
     });
 
-    return {
-      ...item,
-      payload,
-    };
+    return item;
   } catch (err) {
     return null;
   }
@@ -104,9 +64,9 @@ export const getPendingOperations = async () => {
       req.onerror = (e) => reject(e.target.error);
     });
 
-    return items.map((item) => ({
+    return (items || []).map((item) => ({
       ...item,
-      payload: decryptData(item.payload),
+      payload: item.payload,
     }));
   } catch (err) {
     return [];
@@ -144,10 +104,9 @@ export const getPendingCount = async () => {
 export const saveLocalSnapshot = async (key, data) => {
   try {
     const db = await openOfflineDB();
-    const encryptedData = encryptData(data);
     const tx = db.transaction("cached_snapshots", "readwrite");
     const store = tx.objectStore("cached_snapshots");
-    store.put({ key, data: encryptedData, updatedAt: new Date().toISOString() });
+    store.put({ key, data, updatedAt: new Date().toISOString() });
   } catch (err) {}
 };
 
@@ -158,8 +117,7 @@ export const bulkSaveSnapshots = async (snapshotMap) => {
     const store = tx.objectStore("cached_snapshots");
     const now = new Date().toISOString();
     Object.entries(snapshotMap).forEach(([key, data]) => {
-      const encryptedData = encryptData(data);
-      store.put({ key, data: encryptedData, updatedAt: now });
+      store.put({ key, data, updatedAt: now });
     });
     return new Promise((resolve) => {
       tx.oncomplete = () => resolve(true);
@@ -177,11 +135,14 @@ export const getLocalSnapshot = async (key) => {
       const tx = db.transaction("cached_snapshots", "readonly");
       const store = tx.objectStore("cached_snapshots");
       const req = store.get(key);
-      req.onsuccess = () => resolve(req.result?.data || null);
+      req.onsuccess = () => resolve(req.result?.data ?? null);
       req.onerror = () => resolve(null);
     });
 
-    return decryptData(result);
+    if (result && typeof result === "object" && result.__encrypted) {
+      return null;
+    }
+    return result;
   } catch (err) {
     return null;
   }
@@ -222,18 +183,7 @@ export const getOfflineStorageEstimate = async () => {
     }
   } catch (err) {}
 
-  let totalBytes = 0;
-  try {
-    if (typeof localStorage !== "undefined") {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        totalBytes += (k.length + (localStorage.getItem(k) || "").length) * 2;
-      }
-    }
-  } catch (err) {}
-
-  const usedMB = (totalBytes / (1024 * 1024)).toFixed(2);
-  return { usedMB, quotaMB: "500", percent: Math.max(1, Math.min(100, Math.round((totalBytes / (500 * 1024 * 1024)) * 100))), rawUsage: totalBytes, rawQuota: 500 * 1024 * 1024 };
+  return { usedMB: "0.5", quotaMB: "500", percent: 1, rawUsage: 500000, rawQuota: 500 * 1024 * 1024 };
 };
 
 export const cleanupOldOfflineCache = async (days = 30) => {

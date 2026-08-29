@@ -227,18 +227,29 @@ export function SyncProvider({ children }) {
     refreshCount();
     resetSyncTimer();
 
+    if (navigator.onLine) {
+      hydrateAllData();
+    }
+
+    const periodicHydration = setInterval(() => {
+      if (navigator.onLine) {
+        hydrateAllData();
+      }
+    }, 5 * 60 * 1000);
+
     const updateNetworkStatus = () => {
       setNetworkSpeed(getNetworkSpeedName());
       setNetworkDetails(getLiveNetworkDetails());
       resetSyncTimer();
     };
 
-    const handleOnline = () => {
+    const handleOnline = async () => {
       setIsOnline(true);
       setNetworkSpeed(getNetworkSpeedName());
       setNetworkDetails(getLiveNetworkDetails());
       registerBackgroundSync();
-      processSync();
+      await processSync();
+      await hydrateAllData();
       resetSyncTimer();
     };
 
@@ -264,8 +275,9 @@ export function SyncProvider({ children }) {
         conn.removeEventListener("change", updateNetworkStatus);
       }
       if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(periodicHydration);
     };
-  }, [processSync, refreshCount, resetSyncTimer]);
+  }, [processSync, refreshCount, resetSyncTimer, hydrateAllData]);
 
   useEffect(() => {
     if (isOnline && pendingCount > 0 && !isSyncing) {

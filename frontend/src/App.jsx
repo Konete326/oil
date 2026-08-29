@@ -59,6 +59,7 @@ export default function App() {
       getCurrentUserApi().then((fresh) => {
         if (fresh) setUser(fresh);
       });
+      fetchHydrationDataApi().catch(() => {});
     }
   }, []);
 
