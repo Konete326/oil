@@ -7,20 +7,22 @@ const sendLog = (title, message, stack, level, source = "frontend") => {
   if (typeof navigator !== "undefined" && !navigator.onLine) return;
   const msgStr = String(message || "");
   if (
+    !msgStr ||
     msgStr.includes("offline") ||
     msgStr.includes("sync") ||
     msgStr.includes("IndexedDB") ||
     msgStr.includes("ERR_INTERNET_DISCONNECTED") ||
     msgStr.includes("System logs API error") ||
-    msgStr.includes("Failed to create system log")
+    msgStr.includes("Failed to create system log") ||
+    msgStr.includes("ResizeObserver")
   ) {
     return;
   }
 
-  const key = `${level}:${title}:${msgStr.slice(0, 100)}`;
+  const key = `${level}:${title}:${msgStr.slice(0, 80)}`;
   if (recentLogs.has(key)) return;
   recentLogs.add(key);
-  setTimeout(() => recentLogs.delete(key), 5000);
+  setTimeout(() => recentLogs.delete(key), 10000);
 
   createSystemLogApi({
     title,
@@ -51,18 +53,4 @@ export function initConsoleLogger() {
     const stack = reason?.stack || "";
     sendLog("Unhandled Promise Rejection", msg, stack, "error", "frontend");
   });
-
-  const originalConsoleError = console.error;
-  console.error = (...args) => {
-    originalConsoleError.apply(console, args);
-    const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
-    sendLog("Console Error Log", msg, "", "error", "frontend");
-  };
-
-  const originalConsoleWarn = console.warn;
-  console.warn = (...args) => {
-    originalConsoleWarn.apply(console, args);
-    const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
-    sendLog("Console Warning Log", msg, "", "warning", "frontend");
-  };
 }

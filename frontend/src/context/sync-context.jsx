@@ -215,13 +215,13 @@ export function SyncProvider({ children }) {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!navigator.onLine) return;
 
-    const intervalMs = getSyncIntervalMs();
+    const intervalMs = Math.max(10000, getSyncIntervalMs());
     intervalRef.current = setInterval(() => {
-      if (navigator.onLine) {
+      if (navigator.onLine && pendingCount > 0) {
         processSync();
       }
     }, intervalMs);
-  }, [processSync]);
+  }, [processSync, pendingCount]);
 
   useEffect(() => {
     refreshCount();
