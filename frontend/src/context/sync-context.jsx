@@ -15,6 +15,7 @@ import {
   fetchPosSales,
   fetchCashTransactionsApi,
   fetchSystemLogsApi,
+  getAuthHeader,
 } from "@/lib/api";
 
 const SyncContext = createContext(null);
@@ -176,7 +177,7 @@ export function SyncProvider({ children }) {
 
       const response = await fetch(`${API_URL}/sync/batch`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeader() },
         body: jsonPayload,
       });
 

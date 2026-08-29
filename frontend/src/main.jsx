@@ -6,18 +6,13 @@ import './index.css'
 import App from './App.jsx'
 import { initConsoleLogger } from './lib/console-logger.js'
 
-initConsoleLogger();
+import { registerSW } from 'virtual:pwa-register'
 
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => {
-        reg.update();
-      })
-      .catch(() => {});
-  });
-}
+initConsoleLogger()
+
+registerSW({
+  immediate: true,
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
