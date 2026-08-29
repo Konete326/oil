@@ -4,8 +4,8 @@ import {
   createEmployee,
   updateEmployee,
   deleteEmployee,
-  recordEmployeeAdvance,
 } from "../controllers/employeeController.js";
+import { recordEmployeeAdvance } from "../controllers/employeeAdvanceController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();

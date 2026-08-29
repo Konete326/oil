@@ -11,6 +11,7 @@ import { Challan } from "../models/challanModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
 import { Ledger } from "../models/ledgerModel.js";
 import { SupplierLedger } from "../models/supplierLedgerModel.js";
+import { Employee } from "../models/employeeModel.js";
 
 const cleanPayload = (p) => {
   const c = { ...p };
@@ -32,7 +33,7 @@ async function syncUpsert(Model, query, payload, targetId) {
 async function handleDelete(type, targetId) {
   if (type === "system_log_clear") return await SystemLog.deleteMany({});
   if (!targetId || !mongoose.isValidObjectId(targetId)) return;
-  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger };
+  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger, employee: Employee };
   const key = Object.keys(models).find((k) => type.startsWith(k));
   if (key && models[key]) await models[key].findByIdAndDelete(targetId);
 }
@@ -67,6 +68,7 @@ async function processSingleItem(item) {
   else if (type === "category_entry") await syncUpsert(Category, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "supplier_entry") await syncUpsert(Supplier, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "mill_entry") await syncUpsert(Mill, payload.name ? { name: payload.name } : null, payload, targetId);
+  else if (type === "employee_entry") await syncUpsert(Employee, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "challan_entry") {
     const exists = await Challan.findOne({ challanNumber: payload.challanNumber });
     if (!exists) await Challan.create(cleaned);

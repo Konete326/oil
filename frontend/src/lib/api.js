@@ -38,6 +38,7 @@ export async function fetchHydrationDataApi() {
           system_logs: result.data.systemLogs || [],
           ledger_entries: result.data.ledgerEntries || [],
           supplier_ledger_entries: result.data.supplierLedgerEntries || [],
+          employees: result.data.employees || [],
         });
         return result.data;
       }
@@ -1962,6 +1963,21 @@ export async function deleteExpenseApi(id) {
 
 
 export async function fetchEmployeesApi(params = {}) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("employees");
+    let list = Array.isArray(cached) ? [...cached] : [];
+    if (params.search) {
+      const s = params.search.toLowerCase().trim();
+      list = list.filter((e) => (e.name || "").toLowerCase().includes(s) || (e.designation || "").toLowerCase().includes(s) || (e.department || "").toLowerCase().includes(s));
+    }
+    const page = Number(params.page) || 1;
+    const limit = Number(params.limit) || 10;
+    const total = list.length;
+    const pages = Math.ceil(total / limit) || 1;
+    const paginated = list.slice((page - 1) * limit, page * limit);
+    return { success: true, count: paginated.length, total, page, pages, data: paginated };
+  }
+
   try {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/employees?${query}`, {
@@ -1974,16 +1990,30 @@ export async function fetchEmployeesApi(params = {}) {
       }
       return json;
     }
-  } catch (err) {
-    console.warn("Employees API error, using local snapshot");
-  }
+  } catch (err) {}
 
   const cached = await getLocalSnapshot("employees");
-  const list = Array.isArray(cached) ? cached : [];
-  return { success: true, count: list.length, total: list.length, page: 1, pages: 1, data: list };
+  let list = Array.isArray(cached) ? [...cached] : [];
+  if (params.search) {
+    const s = params.search.toLowerCase().trim();
+    list = list.filter((e) => (e.name || "").toLowerCase().includes(s) || (e.designation || "").toLowerCase().includes(s) || (e.department || "").toLowerCase().includes(s));
+  }
+  const page = Number(params.page) || 1;
+  const limit = Number(params.limit) || 10;
+  const total = list.length;
+  const pages = Math.ceil(total / limit) || 1;
+  const paginated = list.slice((page - 1) * limit, page * limit);
+  return { success: true, count: paginated.length, total, page, pages, data: paginated };
 }
 
 export async function createEmployeeApi(payload) {
+  const localItem = { ...payload, _id: `emp_${Date.now()}`, createdAt: new Date().toISOString() };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("employees", localItem);
+    await addOfflineOperation("employee_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/employees`, {
       method: "POST",
@@ -1995,16 +2025,21 @@ export async function createEmployeeApi(payload) {
       if (data.data) await updateLocalSnapshotItem("employees", data.data);
       return data;
     }
-  } catch (err) {
-    console.warn("createEmployeeApi offline, queueing sync");
-  }
+  } catch (err) {}
 
-  const localItem = { ...payload, _id: `emp_${Date.now()}` };
   await updateLocalSnapshotItem("employees", localItem);
+  await addOfflineOperation("employee_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function updateEmployeeApi(id, payload) {
+  const localItem = { ...payload, _id: id };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("employees", localItem);
+    await addOfflineOperation("employee_entry", "update", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/employees/${id}`, {
       method: "PUT",
@@ -2016,16 +2051,20 @@ export async function updateEmployeeApi(id, payload) {
       if (data.data) await updateLocalSnapshotItem("employees", data.data);
       return data;
     }
-  } catch (err) {
-    console.warn("updateEmployeeApi offline");
-  }
+  } catch (err) {}
 
-  const localItem = { ...payload, _id: id };
   await updateLocalSnapshotItem("employees", localItem);
+  await addOfflineOperation("employee_entry", "update", localItem);
   return { success: true, data: localItem };
 }
 
 export async function deleteEmployeeApi(id) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await deleteFromLocalSnapshot("employees", id);
+    await addOfflineOperation("employee_delete", "delete", { _id: id });
+    return { success: true, message: "Deleted employee profile locally" };
+  }
+
   try {
     const res = await fetch(`${API_URL}/employees/${id}`, {
       method: "DELETE",
@@ -2035,28 +2074,14 @@ export async function deleteEmployeeApi(id) {
       await deleteFromLocalSnapshot("employees", id);
       return await res.json();
     }
-  } catch (err) {
-    console.warn("deleteEmployeeApi offline");
-  }
+  } catch (err) {}
 
   await deleteFromLocalSnapshot("employees", id);
+  await addOfflineOperation("employee_delete", "delete", { _id: id });
   return { success: true, message: "Deleted employee profile locally" };
 }
 
 export async function recordEmployeeAdvanceApi(payload) {
-  try {
-    const res = await fetch(`${API_URL}/employees/advance`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (err) {
-    console.warn("recordEmployeeAdvanceApi offline");
-  }
-
   const localItem = {
     _id: `adv_${Date.now()}`,
     amount: payload.amount,
@@ -2068,12 +2093,51 @@ export async function recordEmployeeAdvanceApi(payload) {
     createdAt: new Date().toISOString(),
   };
 
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("cash_transactions", localItem);
+    const employees = await getLocalSnapshot("employees");
+    if (Array.isArray(employees) && payload.employeeId) {
+      const eIdx = employees.findIndex((e) => (e._id || e.id) === payload.employeeId);
+      if (eIdx >= 0) {
+        employees[eIdx].advanceBalance = (employees[eIdx].advanceBalance || 0) + Number(payload.amount);
+        await saveLocalSnapshot("employees", employees);
+      }
+    }
+    await addOfflineOperation("cash_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/employees/advance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+
   await updateLocalSnapshotItem("cash_transactions", localItem);
+  const employees = await getLocalSnapshot("employees");
+  if (Array.isArray(employees) && payload.employeeId) {
+    const eIdx = employees.findIndex((e) => (e._id || e.id) === payload.employeeId);
+    if (eIdx >= 0) {
+      employees[eIdx].advanceBalance = (employees[eIdx].advanceBalance || 0) + Number(payload.amount);
+      await saveLocalSnapshot("employees", employees);
+    }
+  }
   await addOfflineOperation("cash_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function fetchSalaryVouchersApi(params = {}) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("salary_vouchers");
+    const list = Array.isArray(cached) ? cached : [];
+    return { success: true, count: list.length, total: list.length, page: 1, pages: 1, data: list };
+  }
+
   try {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/salaries?${query}`, {
@@ -2086,9 +2150,7 @@ export async function fetchSalaryVouchersApi(params = {}) {
       }
       return json;
     }
-  } catch (err) {
-    console.warn("Salary vouchers API error, using local snapshot");
-  }
+  } catch (err) {}
 
   const cached = await getLocalSnapshot("salary_vouchers");
   const list = Array.isArray(cached) ? cached : [];
@@ -2096,6 +2158,13 @@ export async function fetchSalaryVouchersApi(params = {}) {
 }
 
 export async function generateSalaryVoucherApi(payload) {
+  const localItem = { ...payload, _id: `vchr_${Date.now()}`, createdAt: new Date().toISOString() };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("salary_vouchers", localItem);
+    await addOfflineOperation("salary_voucher_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/salaries`, {
       method: "POST",
@@ -2107,12 +2176,10 @@ export async function generateSalaryVoucherApi(payload) {
       if (json.data) await updateLocalSnapshotItem("salary_vouchers", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("generateSalaryVoucherApi offline");
-  }
+  } catch (err) {}
 
-  const localItem = { ...payload, _id: `vchr_${Date.now()}`, createdAt: new Date().toISOString() };
   await updateLocalSnapshotItem("salary_vouchers", localItem);
+  await addOfflineOperation("salary_voucher_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 

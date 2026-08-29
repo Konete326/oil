@@ -43,33 +43,6 @@ export const getDashboardData = async (req, res, next) => {
     const totalMarketReceivable = customerReceivable + millReceivable;
     const pendingPartiesCount = customers.filter((c) => (c.currentBalance || 0) > 0).length + mills.filter((m) => (m.currentBalance || 0) > 0).length;
 
-    const heroCards = {
-      todaySales: {
-        total: todaySalesTotal,
-        formatted: `Rs. ${todaySalesTotal.toLocaleString()}`,
-        ordersCount: todayPos.length + todayChallanList.length,
-        cash: todayCashSales,
-        credit: todayCreditSales,
-      },
-      stockSummary: {
-        valuation: stockValuation,
-        sellingValuation: stockSellingValuation,
-        formattedValuation: `Rs. ${stockValuation.toLocaleString()}`,
-        totalUnits: totalStockUnits,
-        totalProducts: products.length,
-        inStock: inStockCount,
-        lowStock: lowStockCount,
-        outOfStock: outOfStockCount,
-      },
-      receivablesSummary: {
-        totalReceivable: totalMarketReceivable,
-        formattedTotal: `Rs. ${totalMarketReceivable.toLocaleString()}`,
-        customerReceivable,
-        millReceivable,
-        pendingParties: pendingPartiesCount,
-      },
-    };
-
     const todayReceived = cashTxs
       .filter((c) => c.type === "Received" && new Date(c.transactionDate || c.createdAt).toISOString().split("T")[0] === todayStr)
       .reduce((sum, c) => sum + (c.amount || 0), 0);
@@ -82,25 +55,6 @@ export const getDashboardData = async (req, res, next) => {
       challans
       .filter((c) => new Date(c.createdAt) >= firstDayOfMonth)
       .reduce((sum, c) => sum + (c.totalAmount || 0), 0);
-
-    const kpiCards = [
-      { id: "cash-received", label: "Total Cash Received Today", value: `Rs. ${todayReceived.toLocaleString()}`, type: "green" },
-      { id: "cash-paid", label: "Total Cash Paid Today", value: `Rs. ${todayPaid.toLocaleString()}`, type: "red" },
-      { id: "net-sales", label: "Net Sales Of This Month", value: `Rs. ${monthlySales.toLocaleString()}`, type: "blue" },
-      { id: "receivables", label: "Total Receivable Balance", value: `Rs. ${totalMarketReceivable.toLocaleString()}`, type: "orange" },
-    ];
-
-    const totalPosRevenue = posSales.reduce((acc, s) => acc + (s.grandTotal || 0), 0);
-    const totalDcRevenue = challans.reduce((acc, c) => acc + (c.totalAmount || 0), 0);
-    const totalRevenue = totalPosRevenue + totalDcRevenue;
-    const totalExpensesAmt = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
-
-    const stats = [
-      { label: "Total Sales Revenue", value: `Rs. ${totalRevenue.toLocaleString()}`, delta: totalRevenue > 0 ? 12.5 : 0 },
-      { label: "Products in Catalog", value: `${products.length} Items`, delta: lowStockCount > 0 ? -lowStockCount : 0 },
-      { label: "Active Textile Mills", value: `${mills.length} Mills`, delta: mills.length > 0 ? 5.0 : 0 },
-      { label: "Operational Expenses", value: `Rs. ${totalExpensesAmt.toLocaleString()}`, delta: totalExpensesAmt > 0 ? -2.4 : 0 },
-    ];
 
     const now = new Date();
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -128,27 +82,35 @@ export const getDashboardData = async (req, res, next) => {
       iconType: log.module === "pos" ? "card" : log.module === "users" ? "user" : "file",
     }));
 
+    const totalRevenue = posSales.reduce((acc, s) => acc + (s.grandTotal || 0), 0) + challans.reduce((acc, c) => acc + (c.totalAmount || 0), 0);
+    const totalExpensesAmt = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+
     res.status(200).json({
       success: true,
       data: {
-        heroCards,
-        kpis: kpiCards,
-        stats,
+        heroCards: {
+          todaySales: { total: todaySalesTotal, formatted: `Rs. ${todaySalesTotal.toLocaleString()}`, ordersCount: todayPos.length + todayChallanList.length, cash: todayCashSales, credit: todayCreditSales },
+          stockSummary: { valuation: stockValuation, sellingValuation: stockSellingValuation, formattedValuation: `Rs. ${stockValuation.toLocaleString()}`, totalUnits: totalStockUnits, totalProducts: products.length, inStock: inStockCount, lowStock: lowStockCount, outOfStock: outOfStockCount },
+          receivablesSummary: { totalReceivable: totalMarketReceivable, formattedTotal: `Rs. ${totalMarketReceivable.toLocaleString()}`, customerReceivable, millReceivable, pendingParties: pendingPartiesCount },
+        },
+        kpis: [
+          { id: "cash-received", label: "Total Cash Received Today", value: `Rs. ${todayReceived.toLocaleString()}`, type: "green" },
+          { id: "cash-paid", label: "Total Cash Paid Today", value: `Rs. ${todayPaid.toLocaleString()}`, type: "red" },
+          { id: "net-sales", label: "Net Sales Of This Month", value: `Rs. ${monthlySales.toLocaleString()}`, type: "blue" },
+          { id: "receivables", label: "Total Receivable Balance", value: `Rs. ${totalMarketReceivable.toLocaleString()}`, type: "orange" },
+        ],
+        stats: [
+          { label: "Total Sales Revenue", value: `Rs. ${totalRevenue.toLocaleString()}`, delta: totalRevenue > 0 ? 12.5 : 0 },
+          { label: "Products in Catalog", value: `${products.length} Items`, delta: lowStockCount > 0 ? -lowStockCount : 0 },
+          { label: "Active Textile Mills", value: `${mills.length} Mills`, delta: mills.length > 0 ? 5.0 : 0 },
+          { label: "Operational Expenses", value: `Rs. ${totalExpensesAmt.toLocaleString()}`, delta: totalExpensesAmt > 0 ? -2.4 : 0 },
+        ],
         invoices,
         activities,
         revenue: last7DaysData,
         channelSales: last7DaysData,
       },
     });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const createInvoice = async (req, res, next) => {
-  try {
-    const { invoiceId, customer, amount, status } = req.body;
-    res.status(201).json({ success: true, data: { invoiceId, customer, amount, status } });
   } catch (error) {
     next(error);
   }

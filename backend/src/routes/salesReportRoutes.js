@@ -1,10 +1,12 @@
 import express from "express";
 import {
   getSalesReport,
-  getPurchases,
-  createPurchase,
   getPartySalesRecord,
 } from "../controllers/salesReportController.js";
+import {
+  getPurchases,
+  createPurchase,
+} from "../controllers/purchaseController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
