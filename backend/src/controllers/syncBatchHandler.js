@@ -9,6 +9,7 @@ import { Supplier } from "../models/supplierModel.js";
 import { Mill } from "../models/millModel.js";
 import { Challan } from "../models/challanModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
+import { Ledger } from "../models/ledgerModel.js";
 
 const cleanPayload = (p) => {
   const c = { ...p };
@@ -30,7 +31,7 @@ async function syncUpsert(Model, query, payload, targetId) {
 async function handleDelete(type, targetId) {
   if (type === "system_log_clear") return await SystemLog.deleteMany({});
   if (!targetId || !mongoose.isValidObjectId(targetId)) return;
-  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog };
+  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger };
   const key = Object.keys(models).find((k) => type.startsWith(k));
   if (key && models[key]) await models[key].findByIdAndDelete(targetId);
 }
@@ -68,6 +69,11 @@ async function processSingleItem(item) {
   else if (type === "challan_entry") {
     const exists = await Challan.findOne({ challanNumber: payload.challanNumber });
     if (!exists) await Challan.create(cleaned);
+  } else if (type === "ledger_entry") {
+    await Ledger.create(cleaned);
+    if (payload.mill && mongoose.isValidObjectId(payload.mill) && payload.amount) {
+      await Mill.findByIdAndUpdate(payload.mill, { $inc: { currentBalance: -Number(payload.amount) } });
+    }
   } else if (type === "product_stock" && payload.productId && mongoose.isValidObjectId(payload.productId)) {
     await Product.findByIdAndUpdate(payload.productId, { $inc: { stockQuantity: payload.stockChange } });
   }

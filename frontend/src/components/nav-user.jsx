@@ -83,7 +83,7 @@ export function NavUser({ user: currentUser, onLogout }) {
         <DropdownMenuTrigger asChild>
           <div className="relative inline-block cursor-pointer">
             <Avatar className="size-8">
-              <AvatarImage src="https://github.com/shabanhr.png" />
+              {savedUser.avatar && <AvatarImage src={savedUser.avatar} />}
               <AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
             </Avatar>
             <span
@@ -106,7 +106,7 @@ export function NavUser({ user: currentUser, onLogout }) {
             <DropdownMenuLabel className="flex items-center gap-3">
               <div className="relative">
                 <Avatar className="size-10">
-                  <AvatarImage src="https://github.com/shabanhr.png" />
+                  {savedUser.avatar && <AvatarImage src={savedUser.avatar} />}
                   <AvatarFallback>{savedUser.name?.charAt(0) || "A"}</AvatarFallback>
                 </Avatar>
                 <span

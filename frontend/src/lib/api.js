@@ -15,6 +15,9 @@ export function handleAuthResponse(res) {
 }
 
 export async function fetchHydrationDataApi() {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    return null;
+  }
   try {
     const res = await fetch(`${API_URL}/sync/hydrate`, {
       headers: { ...getAuthHeader() },
@@ -33,6 +36,7 @@ export async function fetchHydrationDataApi() {
           pos_sales: result.data.posSales || [],
           challans: result.data.challans || [],
           system_logs: result.data.systemLogs || [],
+          ledger_entries: result.data.ledgerEntries || [],
         });
         return result.data;
       }
@@ -513,6 +517,11 @@ export async function deleteProduct(id) {
 }
 
 export async function fetchMills() {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("mills");
+    const list = Array.isArray(cached) ? cached : [];
+    return { success: true, count: list.length, data: list };
+  }
   try {
     const res = await fetch(`${API_URL}/mills`, {
       headers: { ...getAuthHeader() },
@@ -525,15 +534,19 @@ export async function fetchMills() {
       }
       return result;
     }
-  } catch (err) {
-    console.warn("Mills API error, using IndexedDB snapshot", err);
-  }
+  } catch (err) {}
   const cached = await getLocalSnapshot("mills");
   const list = Array.isArray(cached) ? cached : [];
   return { success: true, count: list.length, data: list };
 }
 
 export async function createMill(data) {
+  const localItem = { ...data, _id: `mill_${Date.now()}` };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("mills", localItem);
+    await addOfflineOperation("mill_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
   try {
     const res = await fetch(`${API_URL}/mills`, {
       method: "POST",
@@ -546,16 +559,19 @@ export async function createMill(data) {
       if (json.data) await updateLocalSnapshotItem("mills", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("createMill offline, queueing sync");
-  }
-  const localItem = { ...data, _id: `mill_${Date.now()}` };
+  } catch (err) {}
   await updateLocalSnapshotItem("mills", localItem);
   await addOfflineOperation("mill_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function updateMill(id, data) {
+  const localItem = { ...data, _id: id };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("mills", localItem);
+    await addOfflineOperation("mill_entry", "update", localItem);
+    return { success: true, data: localItem };
+  }
   try {
     const res = await fetch(`${API_URL}/mills/${id}`, {
       method: "PUT",
@@ -568,16 +584,18 @@ export async function updateMill(id, data) {
       if (json.data) await updateLocalSnapshotItem("mills", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("updateMill offline, queueing sync");
-  }
-  const localItem = { ...data, _id: id };
+  } catch (err) {}
   await updateLocalSnapshotItem("mills", localItem);
   await addOfflineOperation("mill_entry", "update", localItem);
   return { success: true, data: localItem };
 }
 
 export async function deleteMill(id) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await deleteFromLocalSnapshot("mills", id);
+    await addOfflineOperation("mill_delete", "delete", { _id: id });
+    return { success: true, message: "Deleted mill locally" };
+  }
   try {
     const res = await fetch(`${API_URL}/mills/${id}`, {
       method: "DELETE",
@@ -589,15 +607,18 @@ export async function deleteMill(id) {
       await deleteFromLocalSnapshot("mills", id);
       return json;
     }
-  } catch (err) {
-    console.warn("deleteMill offline, queueing sync");
-  }
+  } catch (err) {}
   await deleteFromLocalSnapshot("mills", id);
   await addOfflineOperation("mill_delete", "delete", { _id: id });
   return { success: true, message: "Deleted mill locally" };
 }
 
 export async function fetchChallans() {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("challans");
+    const list = Array.isArray(cached) ? cached : [];
+    return { success: true, count: list.length, data: list };
+  }
   try {
     const res = await fetch(`${API_URL}/challans`, {
       headers: { ...getAuthHeader() },
@@ -610,15 +631,24 @@ export async function fetchChallans() {
       }
       return result;
     }
-  } catch (err) {
-    console.warn("Challans API error, using IndexedDB snapshot", err);
-  }
+  } catch (err) {}
   const cached = await getLocalSnapshot("challans");
   const list = Array.isArray(cached) ? cached : [];
   return { success: true, count: list.length, data: list };
 }
 
 export async function createChallan(data) {
+  const localItem = {
+    ...data,
+    _id: `chl_${Date.now()}`,
+    challanNumber: data.challanNumber || `CHL-OFF-${Date.now().toString().slice(-6)}`,
+    createdAt: new Date().toISOString(),
+  };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("challans", localItem);
+    await addOfflineOperation("challan_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
   try {
     const res = await fetch(`${API_URL}/challans`, {
       method: "POST",
@@ -631,21 +661,19 @@ export async function createChallan(data) {
       if (json.data) await updateLocalSnapshotItem("challans", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("createChallan offline, queueing sync");
-  }
-  const localItem = {
-    ...data,
-    _id: `chl_${Date.now()}`,
-    challanNumber: data.challanNumber || `CHL-OFF-${Date.now().toString().slice(-6)}`,
-    createdAt: new Date().toISOString(),
-  };
+  } catch (err) {}
   await updateLocalSnapshotItem("challans", localItem);
   await addOfflineOperation("challan_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function updateChallanStatus(id, data) {
+  const localItem = { ...data, _id: id };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("challans", localItem);
+    await addOfflineOperation("challan_entry", "update", localItem);
+    return { success: true, data: localItem };
+  }
   try {
     const res = await fetch(`${API_URL}/challans/${id}/status`, {
       method: "PUT",
@@ -658,16 +686,18 @@ export async function updateChallanStatus(id, data) {
       if (json.data) await updateLocalSnapshotItem("challans", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("updateChallanStatus offline, queueing sync");
-  }
-  const localItem = { ...data, _id: id };
+  } catch (err) {}
   await updateLocalSnapshotItem("challans", localItem);
   await addOfflineOperation("challan_entry", "update", localItem);
   return { success: true, data: localItem };
 }
 
 export async function fetchPosSales() {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("pos_sales");
+    const list = Array.isArray(cached) ? cached : [];
+    return { success: true, count: list.length, data: list };
+  }
   try {
     const res = await fetch(`${API_URL}/pos/sales`, {
       headers: { ...getAuthHeader() },
@@ -680,15 +710,41 @@ export async function fetchPosSales() {
       }
       return result;
     }
-  } catch (err) {
-    console.warn("POS API error, using IndexedDB snapshot", err);
-  }
+  } catch (err) {}
   const cached = await getLocalSnapshot("pos_sales");
   const list = Array.isArray(cached) ? cached : [];
   return { success: true, count: list.length, data: list };
 }
 
 export async function createPosSale(data) {
+  const localSaleNumber = `POS-OFF-${Date.now().toString().slice(-6)}`;
+  const localItem = {
+    ...data,
+    _id: `pos_${Date.now()}`,
+    saleNumber: localSaleNumber,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    if (Array.isArray(data.items)) {
+      for (const itm of data.items) {
+        if (itm.product) {
+          const prod = await getLocalSnapshot("products");
+          if (Array.isArray(prod)) {
+            const idx = prod.findIndex((p) => (p._id || p.id) === itm.product);
+            if (idx >= 0) {
+              prod[idx].stockQuantity = Math.max(0, (prod[idx].stockQuantity || 0) - (Number(itm.quantity) || 0));
+              await saveLocalSnapshot("products", prod);
+            }
+          }
+        }
+      }
+    }
+    await updateLocalSnapshotItem("pos_sales", localItem);
+    await addOfflineOperation("pos_sale", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/pos/sales`, {
       method: "POST",
@@ -701,17 +757,7 @@ export async function createPosSale(data) {
       if (json.data) await updateLocalSnapshotItem("pos_sales", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("createPosSale offline, queueing sync");
-  }
-
-  const localSaleNumber = `POS-OFF-${Date.now().toString().slice(-6)}`;
-  const localItem = {
-    ...data,
-    _id: `pos_${Date.now()}`,
-    saleNumber: localSaleNumber,
-    createdAt: new Date().toISOString(),
-  };
+  } catch (err) {}
 
   if (Array.isArray(data.items)) {
     for (const itm of data.items) {
@@ -773,64 +819,184 @@ export async function deletePosSaleApi(id, options = {}) {
 }
 
 export async function fetchLedgerEntries(millId = "") {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const [cachedLedger, challans, cashTxs, mills] = await Promise.all([
+      getLocalSnapshot("ledger_entries"),
+      getLocalSnapshot("challans"),
+      getLocalSnapshot("cash_transactions"),
+      getLocalSnapshot("mills"),
+    ]);
+
+    const mList = Array.isArray(mills) ? mills : [];
+    const entries = [];
+
+    if (Array.isArray(cachedLedger) && cachedLedger.length > 0) {
+      cachedLedger.forEach((entry) => {
+        const entryMillId = entry.mill?._id || entry.mill;
+        if (!millId || entryMillId === millId) {
+          entries.push({
+            ...entry,
+            clientName: entry.clientName || (mList.find((m) => (m._id || m.id) === entryMillId)?.name) || "Client",
+            transactionType: entry.transactionType || "Debit",
+            paymentMode: entry.paymentMode || "Cash",
+            referenceNumber: entry.referenceNumber || "",
+            amount: Number(entry.amount) || 0,
+            createdAt: entry.createdAt || new Date().toISOString(),
+          });
+        }
+      });
+    } else {
+      const cList = Array.isArray(challans) ? challans : [];
+      const cashList = Array.isArray(cashTxs) ? cashTxs : [];
+
+      cList.forEach((c) => {
+        const cMillId = c.mill?._id || c.mill;
+        if (!millId || cMillId === millId) {
+          entries.push({
+            _id: c._id || c.id,
+            createdAt: c.challanDate || c.createdAt || new Date().toISOString(),
+            clientName: c.millName || (mList.find((m) => (m._id || m.id) === cMillId)?.name) || "Textile Mill",
+            transactionType: "Debit (Challan Dispatch)",
+            paymentMode: "Challan Invoice",
+            referenceNumber: c.challanNumber || "—",
+            amount: Number(c.totalAmount) || 0,
+            runningBalance: 0,
+            remarks: c.remarks || "",
+          });
+        }
+      });
+
+      cashList.forEach((tx) => {
+        if (tx.partyType === "mill" || tx.category === "Mill Payment") {
+          entries.push({
+            _id: tx._id || tx.id,
+            createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
+            clientName: tx.party || "Textile Mill",
+            transactionType: tx.type === "Received" ? "Credit (Payment Received)" : "Debit (Cash Paid)",
+            paymentMode: tx.paymentMethod || "Cash",
+            referenceNumber: tx.receiptNo || "Cash Receipt",
+            amount: Number(tx.amount) || 0,
+            runningBalance: 0,
+            remarks: tx.remarks || "",
+          });
+        }
+      });
+    }
+
+    entries.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return { success: true, count: entries.length, data: entries };
+  }
+
   try {
     const url = millId ? `${API_URL}/ledger?millId=${millId}` : `${API_URL}/ledger`;
     const res = await fetch(url, {
       headers: { ...getAuthHeader() },
     });
     if (res.ok) {
-      return await res.json();
+      const result = await res.json();
+      if (result && Array.isArray(result.data)) {
+        await saveLocalSnapshot("ledger_entries", result.data);
+      }
+      return result;
     }
-  } catch (err) {
-    console.warn("Ledger API error, using local snapshot");
-  }
+  } catch (err) {}
 
-  const [challans, cashTxs, mills] = await Promise.all([
+  const [cachedLedger, challans, cashTxs, mills] = await Promise.all([
+    getLocalSnapshot("ledger_entries"),
     getLocalSnapshot("challans"),
     getLocalSnapshot("cash_transactions"),
     getLocalSnapshot("mills"),
   ]);
 
-  const cList = Array.isArray(challans) ? challans : [];
-  const cashList = Array.isArray(cashTxs) ? cashTxs : [];
   const mList = Array.isArray(mills) ? mills : [];
+  const entries = [];
 
-  let entries = [];
-  cList.forEach((c) => {
-    if (!millId || c.mill === millId || c.mill?._id === millId) {
-      entries.push({
-        _id: c._id,
-        date: c.challanDate || c.createdAt,
-        type: "Challan",
-        reference: c.challanNumber,
-        millName: c.millName || (mList.find((m) => (m._id || m.id) === (c.mill?._id || c.mill))?.name) || "Mill",
-        debit: Number(c.totalAmount) || 0,
-        credit: 0,
-        remarks: c.remarks || "",
-      });
-    }
-  });
+  if (Array.isArray(cachedLedger) && cachedLedger.length > 0) {
+    cachedLedger.forEach((entry) => {
+      const entryMillId = entry.mill?._id || entry.mill;
+      if (!millId || entryMillId === millId) {
+        entries.push({
+          ...entry,
+          clientName: entry.clientName || (mList.find((m) => (m._id || m.id) === entryMillId)?.name) || "Client",
+          transactionType: entry.transactionType || "Debit",
+          paymentMode: entry.paymentMode || "Cash",
+          referenceNumber: entry.referenceNumber || "",
+          amount: Number(entry.amount) || 0,
+          createdAt: entry.createdAt || new Date().toISOString(),
+        });
+      }
+    });
+  } else {
+    const cList = Array.isArray(challans) ? challans : [];
+    const cashList = Array.isArray(cashTxs) ? cashTxs : [];
 
-  cashList.forEach((tx) => {
-    if (tx.partyType === "mill" || tx.category === "Mill Payment") {
-      entries.push({
-        _id: tx._id,
-        date: tx.transactionDate || tx.createdAt,
-        type: tx.type || "Cash",
-        reference: tx.receiptNo || "Cash",
-        millName: tx.party || "Mill",
-        debit: tx.type === "Paid" ? Number(tx.amount) || 0 : 0,
-        credit: tx.type === "Received" ? Number(tx.amount) || 0 : 0,
-        remarks: tx.remarks || "",
-      });
-    }
-  });
+    cList.forEach((c) => {
+      const cMillId = c.mill?._id || c.mill;
+      if (!millId || cMillId === millId) {
+        entries.push({
+          _id: c._id || c.id,
+          createdAt: c.challanDate || c.createdAt || new Date().toISOString(),
+          clientName: c.millName || (mList.find((m) => (m._id || m.id) === cMillId)?.name) || "Textile Mill",
+          transactionType: "Debit (Challan Dispatch)",
+          paymentMode: "Challan Invoice",
+          referenceNumber: c.challanNumber || "—",
+          amount: Number(c.totalAmount) || 0,
+          runningBalance: 0,
+          remarks: c.remarks || "",
+        });
+      }
+    });
 
-  entries.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-  return { success: true, data: entries };
+    cashList.forEach((tx) => {
+      if (tx.partyType === "mill" || tx.category === "Mill Payment") {
+        entries.push({
+          _id: tx._id || tx.id,
+          createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
+          clientName: tx.party || "Textile Mill",
+          transactionType: tx.type === "Received" ? "Credit (Payment Received)" : "Debit (Cash Paid)",
+          paymentMode: tx.paymentMethod || "Cash",
+          referenceNumber: tx.receiptNo || "Cash Receipt",
+          amount: Number(tx.amount) || 0,
+          runningBalance: 0,
+          remarks: tx.remarks || "",
+        });
+      }
+    });
+  }
+
+  entries.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return { success: true, count: entries.length, data: entries };
 }
 
 export async function createPaymentEntry(data) {
+  const localItem = {
+    _id: `pay_${Date.now()}`,
+    clientType: "Textile Mill",
+    mill: data.millId,
+    clientName: data.clientName || data.millName || "Textile Mill",
+    transactionType: "Credit (Payment Received)",
+    amount: Number(data.amount) || 0,
+    paymentMode: data.paymentMode || "Cash",
+    referenceNumber: data.referenceNumber || "",
+    notes: data.notes || data.remarks || "",
+    dueDate: data.dueDate || undefined,
+    createdAt: data.date || new Date().toISOString(),
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("ledger_entries", localItem);
+    const mills = await getLocalSnapshot("mills");
+    if (Array.isArray(mills) && data.millId) {
+      const mIdx = mills.findIndex((m) => (m._id || m.id) === data.millId);
+      if (mIdx >= 0) {
+        mills[mIdx].currentBalance = (mills[mIdx].currentBalance || 0) - Number(data.amount);
+        await saveLocalSnapshot("mills", mills);
+      }
+    }
+    await addOfflineOperation("ledger_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/ledger/payment`, {
       method: "POST",
@@ -839,30 +1005,45 @@ export async function createPaymentEntry(data) {
     });
     if (res.ok) {
       const json = await res.json();
+      if (json.data) await updateLocalSnapshotItem("ledger_entries", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("createPaymentEntry offline, queueing sync");
+  } catch (err) {}
+
+  await updateLocalSnapshotItem("ledger_entries", localItem);
+  const mills = await getLocalSnapshot("mills");
+  if (Array.isArray(mills) && data.millId) {
+    const mIdx = mills.findIndex((m) => (m._id || m.id) === data.millId);
+    if (mIdx >= 0) {
+      mills[mIdx].currentBalance = (mills[mIdx].currentBalance || 0) - Number(data.amount);
+      await saveLocalSnapshot("mills", mills);
+    }
   }
-
-  const localItem = {
-    _id: `pay_${Date.now()}`,
-    amount: data.amount,
-    type: data.type || "Received",
-    party: data.millName || "Mill",
-    partyType: "mill",
-    category: "Mill Payment",
-    remarks: data.remarks || "",
-    transactionDate: data.date || new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-  };
-
-  await updateLocalSnapshotItem("cash_transactions", localItem);
-  await addOfflineOperation("cash_entry", "create", localItem);
+  await addOfflineOperation("ledger_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function fetchAgingReport() {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const mills = (await getLocalSnapshot("mills")) || [];
+    const mList = Array.isArray(mills) ? mills : [];
+    const now = new Date();
+    const aging = mList.map((m) => {
+      const days = Math.floor((now - new Date(m.updatedAt || m.createdAt || Date.now())) / (1000 * 60 * 60 * 24));
+      return {
+        _id: m._id || m.id,
+        name: m.name || "",
+        code: m.code || "",
+        zone: m.zone || "",
+        balance: Number(m.currentBalance) || 0,
+        creditLimit: Number(m.creditLimit) || 0,
+        daysOverdue: days,
+        category: days <= 30 ? "0-30 Days" : days <= 60 ? "31-60 Days" : days <= 90 ? "61-90 Days" : "90+ Days (Overdue)",
+      };
+    });
+    return { success: true, data: aging };
+  }
+
   try {
     const res = await fetch(`${API_URL}/ledger/aging`, {
       headers: { ...getAuthHeader() },
@@ -870,23 +1051,26 @@ export async function fetchAgingReport() {
     if (res.ok) {
       return await res.json();
     }
-  } catch (err) {
-    console.warn("Aging API error, using local snapshot");
-  }
+  } catch (err) {}
 
   const mills = (await getLocalSnapshot("mills")) || [];
   const mList = Array.isArray(mills) ? mills : [];
-  const agingData = mList.map((m) => ({
-    millId: m._id || m.id,
-    millName: m.name,
-    totalDue: Number(m.currentBalance) || 0,
-    current: (Number(m.currentBalance) || 0) * 0.5,
-    days30: (Number(m.currentBalance) || 0) * 0.3,
-    days60: (Number(m.currentBalance) || 0) * 0.2,
-    days90Plus: 0,
-  }));
+  const now = new Date();
+  const aging = mList.map((m) => {
+    const days = Math.floor((now - new Date(m.updatedAt || m.createdAt || Date.now())) / (1000 * 60 * 60 * 24));
+    return {
+      _id: m._id || m.id,
+      name: m.name || "",
+      code: m.code || "",
+      zone: m.zone || "",
+      balance: Number(m.currentBalance) || 0,
+      creditLimit: Number(m.creditLimit) || 0,
+      daysOverdue: days,
+      category: days <= 30 ? "0-30 Days" : days <= 60 ? "31-60 Days" : days <= 90 ? "61-90 Days" : "90+ Days (Overdue)",
+    };
+  });
 
-  return { success: true, data: agingData };
+  return { success: true, data: aging };
 }
 
 export async function uploadImageToCloudinary(file, title = "") {

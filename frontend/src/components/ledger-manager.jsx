@@ -68,18 +68,27 @@ export function LedgerManager() {
     await loadData();
   };
 
-  const totalOutstanding = mills.reduce((sum, m) => sum + (m.currentBalance || 0), 0);
-  const totalOverdue = agingData.filter((a) => a.category === "90+ Days (Overdue)").reduce((sum, a) => sum + a.balance, 0);
+  const totalOutstanding = (mills || []).reduce((sum, m) => sum + (Number(m.currentBalance) || 0), 0);
+  const totalOverdue = (agingData || [])
+    .filter((a) => a && a.category === "90+ Days (Overdue)")
+    .reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
 
-  const filteredEntries = entries.filter((e) => {
+  const filteredEntries = (entries || []).filter((e) => {
+    if (!e) return false;
+    const clientName = String(e.clientName || "").toLowerCase();
+    const refNum = String(e.referenceNumber || "").toLowerCase();
+    const transType = String(e.transactionType || "").toLowerCase();
+    const searchLower = String(search || "").toLowerCase().trim();
+
     const matchesSearch =
-      e.clientName.toLowerCase().includes(search.toLowerCase()) ||
-      (e.referenceNumber && e.referenceNumber.toLowerCase().includes(search.toLowerCase())) ||
-      e.transactionType.toLowerCase().includes(search.toLowerCase());
+      !searchLower ||
+      clientName.includes(searchLower) ||
+      refNum.includes(searchLower) ||
+      transType.includes(searchLower);
 
     let matchesType = true;
-    if (transactionTypeFilter === "Debit") matchesType = e.transactionType.includes("Debit");
-    else if (transactionTypeFilter === "Credit") matchesType = e.transactionType.includes("Credit");
+    if (transactionTypeFilter === "Debit") matchesType = transType.includes("debit");
+    else if (transactionTypeFilter === "Credit") matchesType = transType.includes("credit");
 
     return matchesSearch && matchesType;
   });

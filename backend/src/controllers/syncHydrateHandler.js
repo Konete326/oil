@@ -8,6 +8,7 @@ import { CashTransaction } from "../models/cashModel.js";
 import { PosSale } from "../models/posSaleModel.js";
 import { Challan } from "../models/challanModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
+import { Ledger } from "../models/ledgerModel.js";
 
 export const getHydrateData = async (req, res) => {
   try {
@@ -23,6 +24,7 @@ export const getHydrateData = async (req, res) => {
       posSales,
       challans,
       systemLogs,
+      ledgerEntries,
     ] = await Promise.all([
       Product.find().sort({ createdAt: -1 }).lean(),
       Category.find().sort({ createdAt: -1 }).lean(),
@@ -34,6 +36,7 @@ export const getHydrateData = async (req, res) => {
       PosSale.find().sort({ createdAt: -1 }).limit(200).lean(),
       Challan.find().sort({ createdAt: -1 }).limit(200).lean(),
       SystemLog.find({ createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).limit(200).lean(),
+      Ledger.find().sort({ createdAt: -1 }).limit(300).lean(),
     ]);
 
     res.status(200).json({
@@ -50,6 +53,7 @@ export const getHydrateData = async (req, res) => {
         posSales: posSales || [],
         challans: challans || [],
         systemLogs: systemLogs || [],
+        ledgerEntries: ledgerEntries || [],
       },
     });
   } catch (error) {
