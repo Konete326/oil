@@ -51,15 +51,22 @@ export function ToastNotificationProvider({ children }) {
 
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 4000);
+    const interval = setInterval(() => {
+      if (typeof navigator !== "undefined" && navigator.onLine) {
+        loadNotifications();
+      }
+    }, 15000);
     const handleNotificationEvent = () => loadNotifications();
+    const handleOnline = () => loadNotifications();
     window.addEventListener("app-notification-changed", handleNotificationEvent);
     window.addEventListener("focus", handleNotificationEvent);
+    window.addEventListener("online", handleOnline);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener("app-notification-changed", handleNotificationEvent);
       window.removeEventListener("focus", handleNotificationEvent);
+      window.removeEventListener("online", handleOnline);
     };
   }, [loadNotifications]);
 

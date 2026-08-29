@@ -1775,6 +1775,14 @@ export async function generateSalaryVoucherApi(payload) {
 
 export async function fetchNotificationsApi() {
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("notifications");
+    const list = (Array.isArray(cached) ? cached : []).filter(
+      (n) => new Date(n.createdAt || Date.now()).getTime() >= thirtyDaysAgo
+    );
+    return { success: true, data: list, unreadCount: list.filter((n) => !n.isRead).length };
+  }
+
   try {
     const res = await fetch(`${API_URL}/notifications`, {
       headers: { ...getAuthHeader() },
