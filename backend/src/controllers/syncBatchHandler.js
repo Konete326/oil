@@ -10,6 +10,7 @@ import { Mill } from "../models/millModel.js";
 import { Challan } from "../models/challanModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
 import { Ledger } from "../models/ledgerModel.js";
+import { SupplierLedger } from "../models/supplierLedgerModel.js";
 
 const cleanPayload = (p) => {
   const c = { ...p };
@@ -31,7 +32,7 @@ async function syncUpsert(Model, query, payload, targetId) {
 async function handleDelete(type, targetId) {
   if (type === "system_log_clear") return await SystemLog.deleteMany({});
   if (!targetId || !mongoose.isValidObjectId(targetId)) return;
-  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger };
+  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger };
   const key = Object.keys(models).find((k) => type.startsWith(k));
   if (key && models[key]) await models[key].findByIdAndDelete(targetId);
 }
@@ -73,6 +74,12 @@ async function processSingleItem(item) {
     await Ledger.create(cleaned);
     if (payload.mill && mongoose.isValidObjectId(payload.mill) && payload.amount) {
       await Mill.findByIdAndUpdate(payload.mill, { $inc: { currentBalance: -Number(payload.amount) } });
+    }
+  } else if (type === "supplier_ledger_entry") {
+    await SupplierLedger.create(cleaned);
+    if (payload.supplier && mongoose.isValidObjectId(payload.supplier) && payload.amount) {
+      const delta = payload.transactionType?.includes("Purchase") ? Number(payload.amount) : -Number(payload.amount);
+      await Supplier.findByIdAndUpdate(payload.supplier, { $inc: { currentBalance: delta } });
     }
   } else if (type === "product_stock" && payload.productId && mongoose.isValidObjectId(payload.productId)) {
     await Product.findByIdAndUpdate(payload.productId, { $inc: { stockQuantity: payload.stockChange } });

@@ -15,6 +15,10 @@ import {
   fetchPosSales,
   fetchCashTransactionsApi,
   fetchSystemLogsApi,
+  fetchSuppliersApi,
+  fetchLedgerEntries,
+  fetchSupplierLedgerApi,
+  fetchChallans,
   getAuthHeader,
 } from "@/lib/api";
 
@@ -109,11 +113,15 @@ export function SyncProvider({ children }) {
           fetchCategories(),
           fetchProducts(),
           fetchCustomers(),
+          fetchSuppliersApi(),
           fetchExpensesApi(),
           fetchMills(),
           fetchPosSales(),
+          fetchChallans(),
           fetchCashTransactionsApi(),
           fetchSystemLogsApi(),
+          fetchLedgerEntries(),
+          fetchSupplierLedgerApi(),
         ]);
       }
       const durMs = Math.max(10, Math.round(performance.now() - startT));

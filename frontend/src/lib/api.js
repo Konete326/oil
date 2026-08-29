@@ -37,6 +37,7 @@ export async function fetchHydrationDataApi() {
           challans: result.data.challans || [],
           system_logs: result.data.systemLogs || [],
           ledger_entries: result.data.ledgerEntries || [],
+          supplier_ledger_entries: result.data.supplierLedgerEntries || [],
         });
         return result.data;
       }
@@ -1401,6 +1402,15 @@ export async function fetchProfitLossApi(params = {}) {
 }
 
 export async function fetchSuppliersApi(params = {}) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("suppliers");
+    let list = Array.isArray(cached) ? [...cached] : [];
+    if (params.search) {
+      const s = params.search.toLowerCase().trim();
+      list = list.filter((sup) => (sup.name || "").toLowerCase().includes(s) || (sup.phone || "").toLowerCase().includes(s));
+    }
+    return { success: true, count: list.length, total: list.length, data: list };
+  }
   try {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}/suppliers?${query}`, {
@@ -1414,15 +1424,30 @@ export async function fetchSuppliersApi(params = {}) {
       }
       return result;
     }
-  } catch (err) {
-    console.warn("Suppliers API error, using IndexedDB snapshot", err);
-  }
+  } catch (err) {}
   const cached = await getLocalSnapshot("suppliers");
-  const list = Array.isArray(cached) ? cached : [];
+  let list = Array.isArray(cached) ? [...cached] : [];
+  if (params.search) {
+    const s = params.search.toLowerCase().trim();
+    list = list.filter((sup) => (sup.name || "").toLowerCase().includes(s) || (sup.phone || "").toLowerCase().includes(s));
+  }
   return { success: true, count: list.length, total: list.length, data: list };
 }
 
 export async function createSupplierApi(payload) {
+  const localItem = {
+    ...payload,
+    _id: `sup_${Date.now()}`,
+    currentBalance: Number(payload.openingBalance || payload.currentBalance) || 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("suppliers", localItem);
+    await addOfflineOperation("supplier_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/suppliers`, {
       method: "POST",
@@ -1435,16 +1460,41 @@ export async function createSupplierApi(payload) {
       if (data.data) await updateLocalSnapshotItem("suppliers", data.data);
       return data;
     }
-  } catch (err) {
-    console.warn("createSupplierApi offline, queueing sync");
-  }
-  const localItem = { ...payload, _id: `sup_${Date.now()}` };
+  } catch (err) {}
   await updateLocalSnapshotItem("suppliers", localItem);
   await addOfflineOperation("supplier_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function createSupplierPaymentApi(payload) {
+  const localItem = {
+    _id: `suppay_${Date.now()}`,
+    supplier: payload.supplierId || payload.supplier,
+    supplierName: payload.supplierName || "Supplier",
+    transactionType: "Payment (Debit)",
+    amount: Number(payload.amount) || 0,
+    paymentMode: payload.paymentMode || "Cash",
+    referenceNumber: payload.referenceNumber || "",
+    notes: payload.remarks || payload.notes || "",
+    runningBalance: 0,
+    createdAt: payload.date || new Date().toISOString(),
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("supplier_ledger_entries", localItem);
+    const suppliers = await getLocalSnapshot("suppliers");
+    if (Array.isArray(suppliers) && (payload.supplierId || payload.supplier)) {
+      const sId = payload.supplierId || payload.supplier;
+      const sIdx = suppliers.findIndex((s) => (s._id || s.id) === sId);
+      if (sIdx >= 0) {
+        suppliers[sIdx].currentBalance = Math.max(0, (suppliers[sIdx].currentBalance || 0) - Number(payload.amount));
+        await saveLocalSnapshot("suppliers", suppliers);
+      }
+    }
+    await addOfflineOperation("supplier_ledger_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/suppliers/payment`, {
       method: "POST",
@@ -1453,80 +1503,190 @@ export async function createSupplierPaymentApi(payload) {
     });
     handleAuthResponse(res);
     if (res.ok) {
-      return await res.json();
+      const json = await res.json();
+      if (json.data) await updateLocalSnapshotItem("supplier_ledger_entries", json.data);
+      return json;
     }
-  } catch (err) {
-    console.warn("createSupplierPaymentApi offline, queueing sync");
+  } catch (err) {}
+
+  await updateLocalSnapshotItem("supplier_ledger_entries", localItem);
+  const suppliers = await getLocalSnapshot("suppliers");
+  if (Array.isArray(suppliers) && (payload.supplierId || payload.supplier)) {
+    const sId = payload.supplierId || payload.supplier;
+    const sIdx = suppliers.findIndex((s) => (s._id || s.id) === sId);
+    if (sIdx >= 0) {
+      suppliers[sIdx].currentBalance = Math.max(0, (suppliers[sIdx].currentBalance || 0) - Number(payload.amount));
+      await saveLocalSnapshot("suppliers", suppliers);
+    }
   }
-  const localItem = { ...payload, _id: `suppay_${Date.now()}` };
-  await addOfflineOperation("cash_entry", "create", {
-    type: "payment",
-    amount: payload.amount,
-    party: payload.supplierName,
-    partyType: "supplier",
-    category: "Supplier Payment",
-    remarks: payload.remarks || "Supplier payment recorded offline",
-  });
+  await addOfflineOperation("supplier_ledger_entry", "create", localItem);
   return { success: true, data: localItem };
 }
 
 export async function fetchSupplierLedgerApi(supplierId = "") {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const [cachedLedger, suppliers, cashTxs] = await Promise.all([
+      getLocalSnapshot("supplier_ledger_entries"),
+      getLocalSnapshot("suppliers"),
+      getLocalSnapshot("cash_transactions"),
+    ]);
+
+    const supList = Array.isArray(suppliers) ? suppliers : [];
+    const entries = [];
+
+    if (Array.isArray(cachedLedger) && cachedLedger.length > 0) {
+      cachedLedger.forEach((entry) => {
+        const sId = entry.supplier?._id || entry.supplier;
+        if (!supplierId || sId === supplierId) {
+          entries.push({
+            ...entry,
+            supplierName: entry.supplierName || (supList.find((s) => (s._id || s.id) === sId)?.name) || "Supplier",
+            transactionType: entry.transactionType || "Payment (Debit)",
+            amount: Number(entry.amount) || 0,
+            runningBalance: Number(entry.runningBalance) || 0,
+            paymentMode: entry.paymentMode || "Cash",
+            referenceNumber: entry.referenceNumber || "",
+            createdAt: entry.createdAt || new Date().toISOString(),
+          });
+        }
+      });
+    } else {
+      const cashList = Array.isArray(cashTxs) ? cashTxs : [];
+      supList.forEach((s) => {
+        const sId = s._id || s.id;
+        if (!supplierId || sId === supplierId) {
+          entries.push({
+            _id: `sup_init_${sId}`,
+            supplier: sId,
+            supplierName: s.name,
+            transactionType: "Purchase (Credit)",
+            amount: Number(s.currentBalance) || 0,
+            runningBalance: Number(s.currentBalance) || 0,
+            paymentMode: "Balance Forward",
+            referenceNumber: "Opening",
+            createdAt: s.createdAt || new Date().toISOString(),
+          });
+        }
+      });
+
+      cashList.forEach((tx) => {
+        if (tx.partyType === "supplier" || tx.category === "Supplier Payment") {
+          const sup = supList.find((s) => s.name === tx.party);
+          const sId = sup ? (sup._id || sup.id) : null;
+          if (!supplierId || (sId && sId === supplierId) || tx.party === supplierId) {
+            entries.push({
+              _id: tx._id || tx.id,
+              supplier: sId,
+              supplierName: tx.party || "Supplier",
+              transactionType: "Payment (Debit)",
+              amount: Number(tx.amount) || 0,
+              runningBalance: 0,
+              paymentMode: tx.paymentMethod || "Cash",
+              referenceNumber: tx.receiptNo || "Cash Receipt",
+              createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
+            });
+          }
+        }
+      });
+    }
+
+    entries.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return { success: true, count: entries.length, data: entries };
+  }
+
   try {
     const endpoint = supplierId ? `${API_URL}/suppliers/ledger/${supplierId}` : `${API_URL}/suppliers/ledger`;
     const res = await fetch(endpoint, {
       headers: { ...getAuthHeader() },
     });
     if (res.ok) {
-      return await res.json();
+      const result = await res.json();
+      if (result && Array.isArray(result.data)) {
+        await saveLocalSnapshot("supplier_ledger_entries", result.data);
+      }
+      return result;
     }
-  } catch (err) {
-    console.warn("Supplier ledger API error, using local snapshot");
-  }
+  } catch (err) {}
 
-  const [suppliers, cashTxs] = await Promise.all([
+  const [cachedLedger, suppliers, cashTxs] = await Promise.all([
+    getLocalSnapshot("supplier_ledger_entries"),
     getLocalSnapshot("suppliers"),
     getLocalSnapshot("cash_transactions"),
   ]);
 
   const supList = Array.isArray(suppliers) ? suppliers : [];
-  const cashList = Array.isArray(cashTxs) ? cashTxs : [];
+  const entries = [];
 
-  let entries = [];
-  supList.forEach((s) => {
-    if (!supplierId || s._id === supplierId || s.id === supplierId) {
-      entries.push({
-        _id: `sup_init_${s._id}`,
-        date: s.createdAt || new Date().toISOString(),
-        type: "Opening Balance",
-        reference: "Opening",
-        supplierName: s.name,
-        debit: 0,
-        credit: Number(s.currentBalance) || 0,
-        remarks: "Supplier Opening Balance",
-      });
-    }
-  });
+  if (Array.isArray(cachedLedger) && cachedLedger.length > 0) {
+    cachedLedger.forEach((entry) => {
+      const sId = entry.supplier?._id || entry.supplier;
+      if (!supplierId || sId === supplierId) {
+        entries.push({
+          ...entry,
+          supplierName: entry.supplierName || (supList.find((s) => (s._id || s.id) === sId)?.name) || "Supplier",
+          transactionType: entry.transactionType || "Payment (Debit)",
+          amount: Number(entry.amount) || 0,
+          runningBalance: Number(entry.runningBalance) || 0,
+          paymentMode: entry.paymentMode || "Cash",
+          referenceNumber: entry.referenceNumber || "",
+          createdAt: entry.createdAt || new Date().toISOString(),
+        });
+      }
+    });
+  } else {
+    const cashList = Array.isArray(cashTxs) ? cashTxs : [];
+    supList.forEach((s) => {
+      const sId = s._id || s.id;
+      if (!supplierId || sId === supplierId) {
+        entries.push({
+          _id: `sup_init_${sId}`,
+          supplier: sId,
+          supplierName: s.name,
+          transactionType: "Purchase (Credit)",
+          amount: Number(s.currentBalance) || 0,
+          runningBalance: Number(s.currentBalance) || 0,
+          paymentMode: "Balance Forward",
+          referenceNumber: "Opening",
+          createdAt: s.createdAt || new Date().toISOString(),
+        });
+      }
+    });
 
-  cashList.forEach((tx) => {
-    if (tx.partyType === "supplier" || tx.category === "Supplier Payment") {
-      entries.push({
-        _id: tx._id,
-        date: tx.transactionDate || tx.createdAt,
-        type: tx.type || "Payment",
-        reference: tx.receiptNo || "Payment",
-        supplierName: tx.party || "Supplier",
-        debit: Number(tx.amount) || 0,
-        credit: 0,
-        remarks: tx.remarks || "",
-      });
-    }
-  });
+    cashList.forEach((tx) => {
+      if (tx.partyType === "supplier" || tx.category === "Supplier Payment") {
+        const sup = supList.find((s) => s.name === tx.party);
+        const sId = sup ? (sup._id || sup.id) : null;
+        if (!supplierId || (sId && sId === supplierId) || tx.party === supplierId) {
+          entries.push({
+            _id: tx._id || tx.id,
+            supplier: sId,
+            supplierName: tx.party || "Supplier",
+            transactionType: "Payment (Debit)",
+            amount: Number(tx.amount) || 0,
+            runningBalance: 0,
+            paymentMode: tx.paymentMethod || "Cash",
+            referenceNumber: tx.receiptNo || "Cash Receipt",
+            createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
+          });
+        }
+      }
+    });
+  }
 
-  entries.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-  return { success: true, data: entries };
+  entries.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return { success: true, count: entries.length, data: entries };
 }
 
 export async function fetchSupplierDetailApi(supplierId) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const [suppliers, ledger] = await Promise.all([
+      getLocalSnapshot("suppliers"),
+      getLocalSnapshot("supplier_ledger_entries"),
+    ]);
+    const sup = (Array.isArray(suppliers) ? suppliers : []).find((s) => (s._id || s.id) === supplierId) || { _id: supplierId, name: "Supplier", currentBalance: 0 };
+    const supEntries = (Array.isArray(ledger) ? ledger : []).filter((l) => (l.supplier?._id || l.supplier) === supplierId);
+    return { success: true, data: { supplier: sup, ledgerEntries: supEntries } };
+  }
   try {
     const res = await fetch(`${API_URL}/suppliers/${supplierId}`, {
       headers: { ...getAuthHeader() },
@@ -1535,15 +1695,14 @@ export async function fetchSupplierDetailApi(supplierId) {
     if (res.ok) {
       return await res.json();
     }
-  } catch (err) {
-    console.warn("fetchSupplierDetailApi error", err);
-  }
-  const cached = await getLocalSnapshot("suppliers");
-  if (Array.isArray(cached)) {
-    const found = cached.find((s) => (s._id || s.id) === supplierId);
-    if (found) return { success: true, data: found };
-  }
-  return { success: false, data: null };
+  } catch (err) {}
+  const [suppliers, ledger] = await Promise.all([
+    getLocalSnapshot("suppliers"),
+    getLocalSnapshot("supplier_ledger_entries"),
+  ]);
+  const sup = (Array.isArray(suppliers) ? suppliers : []).find((s) => (s._id || s.id) === supplierId) || { _id: supplierId, name: "Supplier", currentBalance: 0 };
+  const supEntries = (Array.isArray(ledger) ? ledger : []).filter((l) => (l.supplier?._id || l.supplier) === supplierId);
+  return { success: true, data: { supplier: sup, ledgerEntries: supEntries } };
 }
 
 export async function fetchTrialBalanceApi() {
@@ -2182,6 +2341,34 @@ export async function eraseModuleDataApi(password, moduleKey) {
 }
 
 export async function fetchCustomers(params = {}) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("customers");
+    let list = Array.isArray(cached) ? [...cached] : [];
+    if (params.search) {
+      const s = params.search.toLowerCase().trim();
+      list = list.filter((c) =>
+        (c.name || "").toLowerCase().includes(s) ||
+        (c.phone || "").toLowerCase().includes(s) ||
+        (c.city || "").toLowerCase().includes(s) ||
+        (c.area || "").toLowerCase().includes(s)
+      );
+    }
+    if (params.customerType && params.customerType !== "all") {
+      list = list.filter((c) => c.customerType === params.customerType);
+    }
+    if (params.status && params.status !== "all") {
+      list = list.filter((c) => c.status === params.status);
+    }
+
+    const total = list.length;
+    const page = Number(params.page) || 1;
+    const limit = Number(params.limit) || total || 10;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const paginated = list.slice((page - 1) * limit, page * limit);
+
+    return { success: true, count: paginated.length, total, totalPages, page, data: paginated };
+  }
+
   try {
     const query = new URLSearchParams();
     if (params.search) query.append("search", params.search);
@@ -2200,35 +2387,108 @@ export async function fetchCustomers(params = {}) {
       }
       return result;
     }
-  } catch (err) {
-    console.warn("Customer API error, using IndexedDB snapshot", err);
-  }
+  } catch (err) {}
+
   const cached = await getLocalSnapshot("customers");
-  const list = Array.isArray(cached) ? cached : [];
-  return { success: true, count: list.length, total: list.length, data: list };
+  let list = Array.isArray(cached) ? [...cached] : [];
+  if (params.search) {
+    const s = params.search.toLowerCase().trim();
+    list = list.filter((c) =>
+      (c.name || "").toLowerCase().includes(s) ||
+      (c.phone || "").toLowerCase().includes(s) ||
+      (c.city || "").toLowerCase().includes(s) ||
+      (c.area || "").toLowerCase().includes(s)
+    );
+  }
+  const total = list.length;
+  const page = Number(params.page) || 1;
+  const limit = Number(params.limit) || total || 10;
+  const totalPages = Math.ceil(total / limit) || 1;
+  const paginated = list.slice((page - 1) * limit, page * limit);
+
+  return { success: true, count: paginated.length, total, totalPages, page, data: paginated };
 }
 
 export async function fetchCustomerDetail(id) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const [customers, posSales, cashTxs] = await Promise.all([
+      getLocalSnapshot("customers"),
+      getLocalSnapshot("pos_sales"),
+      getLocalSnapshot("cash_transactions"),
+    ]);
+    const foundCust = (Array.isArray(customers) ? customers : []).find((c) => (c._id || c.id) === id) || { _id: id, name: "Customer", currentBalance: 0 };
+    const cSales = (Array.isArray(posSales) ? posSales : []).filter((s) => s.customer === id || s.customer?._id === id || s.customer?.name === foundCust.name);
+    const totalPurchased = cSales.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
+    const totalPaid = (Array.isArray(cashTxs) ? cashTxs : [])
+      .filter((t) => t.party === foundCust.name || t.party === id)
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+    return {
+      success: true,
+      customer: foundCust,
+      summary: {
+        totalOrders: cSales.length,
+        totalPurchased,
+        totalPaid,
+        currentBalance: Number(foundCust.currentBalance) || 0,
+      },
+      posSales: cSales,
+      ledgerEntries: [],
+      monthlyData: [],
+    };
+  }
+
   try {
     const res = await fetch(`${API_URL}/customers/${id}`, {
       headers: { ...getAuthHeader() },
     });
     if (res.ok) {
       const data = await res.json();
-      return data.data;
+      return data.data || data;
     }
-  } catch (err) {
-    console.warn("fetchCustomerDetail offline, using local snapshot");
-  }
-  const cached = await getLocalSnapshot("customers");
-  if (Array.isArray(cached)) {
-    const found = cached.find((c) => (c._id || c.id) === id);
-    if (found) return found;
-  }
-  return { _id: id, name: "Customer", currentBalance: 0, phone: "", address: "" };
+  } catch (err) {}
+
+  const [customers, posSales, cashTxs] = await Promise.all([
+    getLocalSnapshot("customers"),
+    getLocalSnapshot("pos_sales"),
+    getLocalSnapshot("cash_transactions"),
+  ]);
+  const foundCust = (Array.isArray(customers) ? customers : []).find((c) => (c._id || c.id) === id) || { _id: id, name: "Customer", currentBalance: 0 };
+  const cSales = (Array.isArray(posSales) ? posSales : []).filter((s) => s.customer === id || s.customer?._id === id || s.customer?.name === foundCust.name);
+  const totalPurchased = cSales.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
+  const totalPaid = (Array.isArray(cashTxs) ? cashTxs : [])
+    .filter((t) => t.party === foundCust.name || t.party === id)
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  return {
+    success: true,
+    customer: foundCust,
+    summary: {
+      totalOrders: cSales.length,
+      totalPurchased,
+      totalPaid,
+      currentBalance: Number(foundCust.currentBalance) || 0,
+    },
+    posSales: cSales,
+    ledgerEntries: [],
+    monthlyData: [],
+  };
 }
 
 export async function createCustomerApi(payload) {
+  const localItem = {
+    ...payload,
+    _id: `cust_${Date.now()}`,
+    currentBalance: Number(payload.openingBalance || payload.currentBalance) || 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("customers", localItem);
+    await addOfflineOperation("customer_entry", "create", localItem);
+    return localItem;
+  }
+
   try {
     const res = await fetch(`${API_URL}/customers`, {
       method: "POST",
@@ -2240,16 +2500,22 @@ export async function createCustomerApi(payload) {
       if (data.data) await updateLocalSnapshotItem("customers", data.data);
       return data.data;
     }
-  } catch (err) {
-    console.warn("createCustomerApi offline, queueing sync");
-  }
-  const localItem = { ...payload, _id: `cust_${Date.now()}` };
+  } catch (err) {}
+
   await updateLocalSnapshotItem("customers", localItem);
   await addOfflineOperation("customer_entry", "create", localItem);
   return localItem;
 }
 
 export async function updateCustomerApi(id, payload) {
+  const localItem = { ...payload, _id: id };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("customers", localItem);
+    await addOfflineOperation("customer_entry", "update", localItem);
+    return localItem;
+  }
+
   try {
     const res = await fetch(`${API_URL}/customers/${id}`, {
       method: "PUT",
@@ -2261,16 +2527,20 @@ export async function updateCustomerApi(id, payload) {
       if (data.data) await updateLocalSnapshotItem("customers", data.data);
       return data.data;
     }
-  } catch (err) {
-    console.warn("updateCustomerApi offline, queueing sync");
-  }
-  const localItem = { ...payload, _id: id };
+  } catch (err) {}
+
   await updateLocalSnapshotItem("customers", localItem);
   await addOfflineOperation("customer_entry", "update", localItem);
   return localItem;
 }
 
 export async function deleteCustomerApi(id) {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await deleteFromLocalSnapshot("customers", id);
+    await addOfflineOperation("customer_delete", "delete", { _id: id });
+    return { success: true, message: "Deleted customer locally" };
+  }
+
   try {
     const res = await fetch(`${API_URL}/customers/${id}`, {
       method: "DELETE",
@@ -2281,9 +2551,8 @@ export async function deleteCustomerApi(id) {
       await deleteFromLocalSnapshot("customers", id);
       return data;
     }
-  } catch (err) {
-    console.warn("deleteCustomerApi offline, queueing sync");
-  }
+  } catch (err) {}
+
   await deleteFromLocalSnapshot("customers", id);
   await addOfflineOperation("customer_delete", "delete", { _id: id });
   return { success: true, message: "Deleted customer locally" };

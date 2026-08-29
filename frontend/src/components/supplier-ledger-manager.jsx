@@ -78,9 +78,11 @@ export function SupplierLedgerManager() {
   }, [search, selectedSupplierId]);
 
   const filteredLedgerEntries = useMemo(() => {
-    return ledgerEntries.filter((item) => {
-      if (transactionTypeFilter === "Purchase") return item.transactionType?.includes("Purchase");
-      if (transactionTypeFilter === "Payment") return item.transactionType?.includes("Payment");
+    return (ledgerEntries || []).filter((item) => {
+      if (!item) return false;
+      const transType = String(item.transactionType || "");
+      if (transactionTypeFilter === "Purchase") return transType.includes("Purchase");
+      if (transactionTypeFilter === "Payment") return transType.includes("Payment");
       return true;
     });
   }, [ledgerEntries, transactionTypeFilter]);
@@ -392,35 +394,35 @@ export function SupplierLedgerManager() {
                     filteredLedgerEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item) => (
                       <tr key={item._id} className="hover:bg-muted/20 transition-colors">
                         <td className="p-2 ps-3.5 text-muted-foreground text-[11px]">
-                          {new Date(item.createdAt).toLocaleDateString()}
+                          {new Date(item.createdAt || Date.now()).toLocaleDateString()}
                         </td>
                         <td className="p-2 font-semibold text-foreground">
                           <button
                             onClick={() => {
-                              const found = suppliers.find((s) => s._id === item.supplier || s.name === item.supplierName);
+                              const found = (suppliers || []).find((s) => (s._id || s.id) === item.supplier || s.name === item.supplierName);
                               if (found) setSupplierToView(found);
                             }}
                             className="hover:underline text-left text-primary font-bold cursor-pointer"
                           >
-                            {item.supplierName}
+                            {item.supplierName || "Supplier"}
                           </button>
                         </td>
                         <td className="p-2">
                           <span
                             className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold border ${
-                              item.transactionType?.includes("Purchase")
+                              String(item.transactionType || "").includes("Purchase")
                                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
                                 : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                             }`}
                           >
-                            {item.transactionType}
+                            {item.transactionType || "Transaction"}
                           </span>
                         </td>
                         <td className="p-2 text-right font-mono font-bold text-foreground text-xs">
-                          Rs. {item.amount?.toLocaleString()}
+                          Rs. {(Number(item.amount) || 0).toLocaleString()}
                         </td>
                         <td className="p-2 text-right font-mono font-bold text-amber-600 dark:text-amber-400 text-xs">
-                          Rs. {item.runningBalance?.toLocaleString()}
+                          Rs. {(Number(item.runningBalance) || 0).toLocaleString()}
                         </td>
                         <td className="p-2 text-muted-foreground text-[11px]">{item.paymentMode || "Cash"}</td>
                         <td className="p-2 pe-3.5 text-right text-muted-foreground text-[11px]">
