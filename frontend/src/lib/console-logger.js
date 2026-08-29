@@ -4,14 +4,27 @@ let initialized = false;
 const recentLogs = new Set();
 
 const sendLog = (title, message, stack, level, source = "frontend") => {
-  const key = `${level}:${title}:${message.slice(0, 100)}`;
+  if (typeof navigator !== "undefined" && !navigator.onLine) return;
+  const msgStr = String(message || "");
+  if (
+    msgStr.includes("offline") ||
+    msgStr.includes("sync") ||
+    msgStr.includes("IndexedDB") ||
+    msgStr.includes("ERR_INTERNET_DISCONNECTED") ||
+    msgStr.includes("System logs API error") ||
+    msgStr.includes("Failed to create system log")
+  ) {
+    return;
+  }
+
+  const key = `${level}:${title}:${msgStr.slice(0, 100)}`;
   if (recentLogs.has(key)) return;
   recentLogs.add(key);
   setTimeout(() => recentLogs.delete(key), 5000);
 
   createSystemLogApi({
     title,
-    message: String(message),
+    message: msgStr,
     stack: String(stack || ""),
     level,
     source,
@@ -43,17 +56,13 @@ export function initConsoleLogger() {
   console.error = (...args) => {
     originalConsoleError.apply(console, args);
     const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
-    if (!msg.includes("System logs API error") && !msg.includes("Failed to create system log")) {
-      sendLog("Console Error Log", msg, "", "error", "frontend");
-    }
+    sendLog("Console Error Log", msg, "", "error", "frontend");
   };
 
   const originalConsoleWarn = console.warn;
   console.warn = (...args) => {
     originalConsoleWarn.apply(console, args);
     const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
-    if (!msg.includes("System logs API error")) {
-      sendLog("Console Warning Log", msg, "", "warning", "frontend");
-    }
+    sendLog("Console Warning Log", msg, "", "warning", "frontend");
   };
 }

@@ -1863,6 +1863,14 @@ export async function clearAllNotificationsApi() {
 
 export async function fetchSystemLogsApi() {
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("system_logs");
+    const list = (Array.isArray(cached) ? cached : []).filter(
+      (log) => new Date(log.createdAt || Date.now()).getTime() >= sevenDaysAgo
+    );
+    return { success: true, count: list.length, data: list };
+  }
+
   try {
     const res = await fetch(`${API_URL}/system-logs`, {
       headers: { ...getAuthHeader() },
@@ -1876,9 +1884,7 @@ export async function fetchSystemLogsApi() {
       await saveLocalSnapshot("system_logs", validLogs);
       return { success: true, count: validLogs.length, data: validLogs };
     }
-  } catch (err) {
-    console.warn("System logs API error, using local storage snapshot", err);
-  }
+  } catch (err) {}
 
   const cached = await getLocalSnapshot("system_logs");
   const list = (Array.isArray(cached) ? cached : []).filter(
@@ -1890,6 +1896,23 @@ export async function fetchSystemLogsApi() {
 
 export async function createSystemLogApi(payload) {
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const localItem = {
+    ...payload,
+    _id: `syslog_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const cached = await getLocalSnapshot("system_logs");
+    const list = (Array.isArray(cached) ? cached : []).filter(
+      (log) => new Date(log.createdAt || Date.now()).getTime() >= sevenDaysAgo
+    );
+    list.unshift(localItem);
+    await saveLocalSnapshot("system_logs", list);
+    await addOfflineOperation("system_log_entry", "create", localItem);
+    return { success: true, data: localItem };
+  }
+
   try {
     const res = await fetch(`${API_URL}/system-logs`, {
       method: "POST",
@@ -1901,15 +1924,7 @@ export async function createSystemLogApi(payload) {
       if (json.data) await updateLocalSnapshotItem("system_logs", json.data);
       return json;
     }
-  } catch (err) {
-    console.warn("createSystemLogApi offline, queueing sync");
-  }
-
-  const localItem = {
-    ...payload,
-    _id: `syslog_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-  };
+  } catch (err) {}
 
   const cached = await getLocalSnapshot("system_logs");
   const list = (Array.isArray(cached) ? cached : []).filter(
