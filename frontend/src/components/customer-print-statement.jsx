@@ -239,7 +239,11 @@ export function CustomerPrintStatement({
 
             <div className="space-y-0.5 text-right font-mono">
               <p className="text-[10px] font-sans uppercase font-bold text-gray-700">Summary:</p>
-              <p className="text-[11px] text-gray-800">Opening Balance: <strong>Rs {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              {openingBal > 0 && (
+                <p className="text-[11px] text-gray-800">
+                  Opening Balance: <strong>Rs {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                </p>
+              )}
               <p className="text-[11px] text-gray-800">Total Billed: <strong>Rs {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
               <p className="text-[11px] text-gray-800">Total Paid: <strong>Rs {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
             </div>
@@ -259,43 +263,53 @@ export function CustomerPrintStatement({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-300 font-sans">
-                <tr className="border-b border-gray-300">
-                  <td className="py-1.5 px-2 font-mono text-gray-700">
-                    {new Date(currentCustomer.createdAt || Date.now()).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className="py-1.5 px-2 font-mono text-gray-700">-</td>
-                  <td className="py-1.5 px-2 text-gray-700 uppercase">-</td>
-                  <td className="py-1.5 px-2 font-medium text-black">Opening Balance</td>
-                  <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
-                  <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
-                  <td className="py-1.5 px-2 text-right font-mono font-semibold text-black">
-                    {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                </tr>
-
-                {computedRows.map((row, idx) => (
-                  <tr key={idx} className="border-b border-gray-200">
-                    <td className="py-1.5 px-2 font-mono text-gray-800">
-                      {row.date.toLocaleDateString("en-GB")}
+                {openingBal > 0 && (
+                  <tr className="border-b border-gray-300">
+                    <td className="py-1.5 px-2 font-mono text-gray-700">
+                      {new Date(currentCustomer.createdAt || Date.now()).toLocaleDateString("en-GB")}
                     </td>
-                    <td className="py-1.5 px-2 font-mono text-gray-800">{row.ref}</td>
-                    <td className="py-1.5 px-2 text-gray-800 uppercase font-semibold text-[10px]">{row.branch}</td>
-                    <td className="py-1.5 px-2 text-black leading-tight">{row.narration}</td>
-                    <td className="py-1.5 px-2 text-right font-mono text-gray-900">
-                      {row.debit > 0
-                        ? row.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                        : "0.00"}
-                    </td>
-                    <td className="py-1.5 px-2 text-right font-mono text-gray-900">
-                      {row.credit > 0
-                        ? row.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                        : "0.00"}
-                    </td>
+                    <td className="py-1.5 px-2 font-mono text-gray-700">-</td>
+                    <td className="py-1.5 px-2 text-gray-700 uppercase">-</td>
+                    <td className="py-1.5 px-2 font-medium text-black">Opening Balance</td>
+                    <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
+                    <td className="py-1.5 px-2 text-right font-mono text-gray-700">-</td>
                     <td className="py-1.5 px-2 text-right font-mono font-semibold text-black">
-                      {row.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
-                ))}
+                )}
+
+                {computedRows.length === 0 && openingBal === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-6 text-center text-gray-500 italic">
+                      No invoices or transactions recorded yet.
+                    </td>
+                  </tr>
+                ) : (
+                  computedRows.map((row, idx) => (
+                    <tr key={idx} className="border-b border-gray-200">
+                      <td className="py-1.5 px-2 font-mono text-gray-800">
+                        {row.date.toLocaleDateString("en-GB")}
+                      </td>
+                      <td className="py-1.5 px-2 font-mono text-gray-800">{row.ref}</td>
+                      <td className="py-1.5 px-2 text-gray-800 uppercase font-semibold text-[10px]">{row.branch}</td>
+                      <td className="py-1.5 px-2 text-black leading-tight">{row.narration}</td>
+                      <td className="py-1.5 px-2 text-right font-mono text-gray-900">
+                        {row.debit > 0
+                          ? row.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : "0.00"}
+                      </td>
+                      <td className="py-1.5 px-2 text-right font-mono text-gray-900">
+                        {row.credit > 0
+                          ? row.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : "0.00"}
+                      </td>
+                      <td className="py-1.5 px-2 text-right font-mono font-semibold text-black">
+                        {row.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))
+                )}
 
                 <tr className="border-t-2 border-black font-bold">
                   <td colSpan={4} className="py-2 px-2 text-left uppercase">
