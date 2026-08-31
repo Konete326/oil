@@ -1,5 +1,7 @@
 import { PosSale } from "../models/posSaleModel.js";
 import { Product } from "../models/productModel.js";
+import { Customer } from "../models/customerModel.js";
+import { CashTransaction } from "../models/cashModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
 import { createNotificationHelper } from "./notificationController.js";
 
@@ -14,7 +16,7 @@ export const getPosSales = async (req, res, next) => {
 
 export const createPosSale = async (req, res, next) => {
   try {
-    const { customerName, customerPhone, saleType, items, subtotal, discount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
+    const { customerName, customerPhone, customerId, saleType, items, subtotal, discount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
     if (!items || items.length === 0 || !grandTotal) {
       res.status(400);
       throw new Error("Cart cannot be empty for POS transaction.");
@@ -48,6 +50,7 @@ export const createPosSale = async (req, res, next) => {
     const lastSale = await PosSale.findOne().sort({ createdAt: -1 });
     const nextSeq = lastSale ? (parseInt(lastSale.saleNumber.replace("POS-", ""), 10) || 1000) + 1 : 1001;
     const saleNumber = `POS-${nextSeq}`;
+    const totalAmount = Number(grandTotal);
 
     const sale = await PosSale.create({
       saleNumber,
@@ -57,12 +60,27 @@ export const createPosSale = async (req, res, next) => {
       items,
       subtotal: Number(subtotal),
       discount: Number(discount) || 0,
-      grandTotal: Number(grandTotal),
+      grandTotal: totalAmount,
       paymentMode: paymentMode || "Cash",
       cashReceived: Number(cashReceived) || 0,
       changeDue: Number(changeDue) || 0,
       cashierName: req.user?.name || "Admin Cashier",
     });
+
+    if (paymentMode === "Credit / Khata" && customerName && customerName !== "Walk-in Customer") {
+      const custQuery = customerId ? { _id: customerId } : { name: customerName.trim() };
+      await Customer.findOneAndUpdate(custQuery, { $inc: { currentBalance: totalAmount } });
+    } else if ((paymentMode || "Cash") === "Cash") {
+      await CashTransaction.create({
+        type: "Received",
+        partyName: customerName || "Walk-in Customer",
+        amount: totalAmount,
+        category: "POS Sale",
+        referenceNo: saleNumber,
+        paymentMode: "Cash",
+        notes: `POS Counter Sale (${saleType || "Retail"})`,
+      });
+    }
 
     res.status(201).json({ success: true, data: sale });
   } catch (error) {
@@ -97,6 +115,12 @@ export const deletePosSale = async (req, res, next) => {
       }
     }
 
+    if (sale.paymentMode === "Credit / Khata" && sale.customerName && sale.customerName !== "Walk-in Customer") {
+      await Customer.findOneAndUpdate({ name: sale.customerName }, { $inc: { currentBalance: -Number(sale.grandTotal) } });
+    } else if (sale.paymentMode === "Cash") {
+      await CashTransaction.findOneAndDelete({ referenceNo: sale.saleNumber });
+    }
+
     await SystemLog.create({
       title: "POS Sale Deleted & Stock Restored",
       message: `Sale ${sale.saleNumber} (Rs ${sale.grandTotal}) deleted by Super Admin (${req.user?.name || "Admin"}). Reason: ${reason}${notes ? " | " + notes : ""}. Stock restored.`,
@@ -107,17 +131,8 @@ export const deletePosSale = async (req, res, next) => {
       metadata: { saleId: sale._id, saleNumber: sale.saleNumber, grandTotal: sale.grandTotal, reason, notes },
     });
 
-    await createNotificationHelper({
-      title: "Sale Record Deleted",
-      message: `POS Sale ${sale.saleNumber} deleted by Super Admin (${req.user?.name}). Reason: ${reason}. Inventory stock restored.`,
-      type: "sale",
-      userName: req.user?.name || "Admin",
-      targetRoles: ["admin"],
-      metadata: { saleNumber: sale.saleNumber, reason },
-    });
-
     await PosSale.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true, message: "POS Sale deleted and inventory restored successfully" });
+    res.status(200).json({ success: true, message: "POS Sale deleted, stock, cash, and khata restored." });
   } catch (error) {
     next(error);
   }

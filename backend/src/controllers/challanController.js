@@ -13,37 +13,27 @@ export const getChallans = async (req, res, next) => {
 
 export const createChallan = async (req, res, next) => {
   try {
-    const {
-      millId,
-      productId,
-      vehicleNumber,
-      driverName,
-      driverPhone,
-      dipMeasurementInches,
-      quantityLiters,
-      overrideRate,
-      notes,
-    } = req.body;
-
-    if (!millId || !productId || !quantityLiters || Number(quantityLiters) <= 0) {
-      res.status(400);
-      throw new Error("Textile Mill, Product, and a valid Quantity are required.");
+    const { millId, productId, productName, vehicleNumber, driverName, driverPhone, dipMeasurementInches, quantityLiters, overrideRate, notes } = req.body;
+    let mill = null;
+    if (millId) {
+      mill = await Mill.findById(millId);
     }
-
-    const mill = await Mill.findById(millId);
+    if (!mill) {
+      mill = await Mill.findOne();
+    }
     if (!mill) {
       res.status(404);
-      throw new Error("Textile Mill profile not found");
+      throw new Error("Textile Mill profile not found. Please register a Mill first.");
     }
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      res.status(404);
-      throw new Error("Product not found");
-    }
+    let product = null;
+    if (productId) product = await Product.findById(productId);
+    if (!product && productName) product = await Product.findOne({ name: new RegExp(`^${productName.trim()}$`, "i") });
+    if (!product) product = await Product.findOne();
 
-    const rate = overrideRate !== undefined && Number(overrideRate) > 0 ? Number(overrideRate) : mill.contractRatePerLiter;
-    const liters = Number(quantityLiters);
+    const finalProductName = (productName && productName.trim()) ? productName.trim() : (product?.name || "Bulk Mineral Lubricant Oil");
+    const liters = Number(quantityLiters) > 0 ? Number(quantityLiters) : 1000;
+    const rate = overrideRate !== undefined && Number(overrideRate) > 0 ? Number(overrideRate) : (mill.contractRatePerLiter || 530);
     const amount = Number((liters * rate).toFixed(2));
 
     const lastChallan = await Challan.findOne().sort({ createdAt: -1 });
@@ -53,12 +43,17 @@ export const createChallan = async (req, res, next) => {
     mill.currentBalance += amount;
     await mill.save();
 
+    if (product) {
+      product.stockQuantity = Math.max(0, (product.stockQuantity || 0) - liters);
+      await product.save();
+    }
+
     const challan = await Challan.create({
       challanNumber,
       mill: mill._id,
       millName: mill.name,
-      product: product._id,
-      productName: product.name,
+      product: product ? product._id : undefined,
+      productName: finalProductName,
       vehicleNumber: vehicleNumber?.trim() ? vehicleNumber.toUpperCase().trim() : "N/A",
       driverName: driverName?.trim() || "Standard Delivery",
       driverPhone: driverPhone?.trim() || "",
@@ -88,6 +83,26 @@ export const updateChallanStatus = async (req, res, next) => {
     if (gatePassStatus) challan.gatePassStatus = gatePassStatus;
     await challan.save();
     res.status(200).json({ success: true, data: challan });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteChallan = async (req, res, next) => {
+  try {
+    const challan = await Challan.findById(req.params.id);
+    if (!challan) {
+      res.status(404);
+      throw new Error("Delivery Challan not found");
+    }
+    if (challan.mill && challan.totalAmount) {
+      await Mill.findByIdAndUpdate(challan.mill, { $inc: { currentBalance: -Number(challan.totalAmount) } });
+    }
+    if (challan.product && challan.quantityLiters) {
+      await Product.findByIdAndUpdate(challan.product, { $inc: { stockQuantity: Number(challan.quantityLiters) } });
+    }
+    await Challan.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: "Challan deleted, stock and mill balance restored." });
   } catch (error) {
     next(error);
   }

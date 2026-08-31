@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { ScaleIcon, CalculatorIcon, BookOpenIcon, PrinterIcon, FileSpreadsheetIcon } from "lucide-react";
+import { ScaleIcon, CalculatorIcon, BookOpenIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { TrialBalanceView } from "@/components/trial-balance-view";
 import { ProfitLossWidget } from "@/components/profit-loss-widget";
 import { PartyLedgerReportView } from "@/components/party-ledger-report-view";
 import { fetchTrialBalanceApi } from "@/lib/api";
 
 export function FinancialReportsManager() {
-  const [activeTab, setActiveTab] = useState("trialBalance");
+  const [activeTab, setActiveTab] = useState("profitLoss");
   const [tbAccounts, setTbAccounts] = useState([]);
   const [tbSummary, setTbSummary] = useState({});
   const [loading, setLoading] = useState(true);
@@ -18,8 +17,8 @@ export function FinancialReportsManager() {
       setLoading(true);
       const res = await fetchTrialBalanceApi();
       if (res?.success) {
-        setTbAccounts(res.data);
-        setTbSummary(res.summary);
+        setTbAccounts(res.data || []);
+        setTbSummary(res.summary || {});
       }
     } catch (err) {
       toast.error("Failed to load trial balance");
@@ -35,42 +34,50 @@ export function FinancialReportsManager() {
   }, [activeTab]);
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full space-y-4 p-3 md:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Financial Reports & Ledger (Maliyaati Reports)</h1>
-          <p className="text-xs text-muted-foreground">Trial Balance Sheet, Profit & Loss Income Statement, and Specific Party Khata Reports.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <CalculatorIcon className="size-5.5 text-primary" />
+            <span>Profit & Financial Reports</span>
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Real-time profit & loss margin calculations, balance sheet accounts, and party ledger statements.
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-b border-border overflow-x-auto">
-        <div className="flex items-center gap-1 min-w-max pb-1">
-          {[
-            { id: "trialBalance", label: "Trial Balance Sheet" },
-            { id: "profitLoss", label: "Profit & Loss Statement" },
-            { id: "partyLedger", label: "Party Ledger Report" },
-          ].map((tab) => (
+      <div className="flex items-center gap-2 border-b border-border/60 pb-2 overflow-x-auto min-w-0">
+        {[
+          { id: "profitLoss", label: "Nafa / Nuqsan (Profit & Loss Statement)", icon: CalculatorIcon },
+          { id: "trialBalance", label: "Dukan Ki Kul Value (Trial Balance Sheet)", icon: ScaleIcon },
+          { id: "partyLedger", label: "Party Khata Report (Ledger Summary)", icon: BookOpenIcon },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isSelected = activeTab === tab.id;
+          return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap border ${
+                isSelected
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                  : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
               }`}
             >
-              {tab.label}
+              <Icon className="size-3.5" />
+              <span>{tab.label}</span>
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
-
-      {activeTab === "trialBalance" && (
-        <TrialBalanceView accounts={tbAccounts} summary={tbSummary} loading={loading} />
-      )}
 
       {activeTab === "profitLoss" && (
         <ProfitLossWidget />
+      )}
+
+      {activeTab === "trialBalance" && (
+        <TrialBalanceView accounts={tbAccounts} summary={tbSummary} loading={loading} />
       )}
 
       {activeTab === "partyLedger" && (

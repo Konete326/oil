@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Globe, Check, Languages, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
+import { LanguageOfflineModal } from "@/components/language-offline-modal";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", native: "English", flag: "🇬🇧" },
@@ -13,6 +14,7 @@ export const SUPPORTED_LANGUAGES = [
 export function LanguageSelector({ variant = "header", className }) {
   const { language: currentLang, changeLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [showOfflineModal, setShowOfflineModal] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -26,6 +28,11 @@ export function LanguageSelector({ variant = "header", className }) {
   }, []);
 
   const handleSelectLanguage = (langCode) => {
+    if (!navigator.onLine) {
+      setShowOfflineModal(true);
+      setIsOpen(false);
+      return;
+    }
     changeLanguage(langCode);
     setIsOpen(false);
   };
@@ -45,7 +52,7 @@ export function LanguageSelector({ variant = "header", className }) {
                 Language & Translation Settings
               </h3>
               <p className="text-xs text-muted-foreground">
-                Switch system language instantly between English, Urdu (اردو), and Aasan Urdu (Roman).
+                Switch system language instantly between English, Urdu (اردو), and Aasan Urdu (Roman). (Online Required)
               </p>
             </div>
           </div>
@@ -58,7 +65,6 @@ export function LanguageSelector({ variant = "header", className }) {
               <button
                 key={lang.code}
                 onClick={() => handleSelectLanguage(lang.code)}
-                
                 className={cn(
                   "flex items-center justify-between p-3 rounded-lg border text-left transition-all cursor-pointer",
                   isSelected
@@ -90,6 +96,11 @@ export function LanguageSelector({ variant = "header", className }) {
             Active Language: <strong className="text-foreground">{activeLanguageObj.label} ({activeLanguageObj.native})</strong>
           </span>
         </div>
+
+        <LanguageOfflineModal
+          isOpen={showOfflineModal}
+          onClose={() => setShowOfflineModal(false)}
+        />
       </div>
     );
   }
@@ -113,7 +124,7 @@ export function LanguageSelector({ variant = "header", className }) {
       {isOpen && (
         <div className="absolute right-0 top-10 z-50 w-52 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg overflow-hidden animate-in fade-in-50 duration-100 p-1 space-y-0.5">
           <div className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground border-b border-border/50 flex items-center justify-between">
-            <span>Select Language / زبان</span>
+            <span>Select Language</span>
             <Globe className="size-3 text-primary" />
           </div>
 
@@ -142,6 +153,11 @@ export function LanguageSelector({ variant = "header", className }) {
           </div>
         </div>
       )}
+
+      <LanguageOfflineModal
+        isOpen={showOfflineModal}
+        onClose={() => setShowOfflineModal(false)}
+      />
     </div>
   );
 }

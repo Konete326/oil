@@ -100,6 +100,10 @@ export const deleteExpense = async (req, res, next) => {
       throw new Error("Expense record not found.");
     }
 
+    if (expense.voucherNumber) {
+      await CashTransaction.findOneAndDelete({ referenceNo: expense.voucherNumber });
+    }
+
     await Expense.findByIdAndDelete(id);
 
     await logActivity({

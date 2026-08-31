@@ -65,7 +65,32 @@ export function PosCounter() {
     return Number((quantity * effectiveUnitPrice).toFixed(2));
   };
 
+  const playLowStockChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    } catch (e) {}
+  };
+
   const addToCart = (product) => {
+    const isLow = product.stockQuantity <= (product.minStockAlert || 5) && product.stockQuantity > 0;
+    if (isLow) {
+      playLowStockChime();
+      toast.warning(`⚠️ Low Stock Alert: Only ${product.stockQuantity} ${product.unit || "Cans"} left for ${product.name}!`, { duration: 2500 });
+    }
+
     const existingIndex = cart.findIndex((item) => item.product === product._id);
     if (existingIndex > -1) {
       const existingItem = cart[existingIndex];
@@ -411,7 +436,9 @@ export function PosCounter() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5">
                 {filteredProducts.map((prod) => {
-                  const isLowStock = prod.stockQuantity <= 5;
+                  const minAlert = prod.minStockAlert !== undefined ? prod.minStockAlert : 5;
+                  const isLowStock = prod.stockQuantity <= minAlert && prod.stockQuantity > 0;
+                  const isOutOfStock = prod.stockQuantity <= 0;
                   return (
                     <div
                       key={prod._id}
@@ -421,8 +448,10 @@ export function PosCounter() {
                       }}
                       className={cn(
                         "group relative rounded-xl border bg-card p-1.5 shadow-2xs hover:shadow-sm transition-all duration-150 flex flex-col justify-between cursor-pointer active:scale-[0.98]",
-                        prod.stockQuantity <= 0
+                        isOutOfStock
                           ? "opacity-50 border-border"
+                          : isLowStock
+                          ? "border-amber-500/50 bg-amber-500/5 hover:border-amber-500"
                           : "border-border/80 hover:border-primary/50"
                       )}
                     >
@@ -441,13 +470,16 @@ export function PosCounter() {
                           </svg>
                         )}
                         <span
-                          className={`absolute top-1 right-1 text-[8px] font-semibold px-1.5 py-0.2 rounded-md border ${
-                            isLowStock
-                              ? "bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                          className={cn(
+                            "absolute top-1 right-1 text-[8px] font-bold px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 shadow-xs",
+                            isOutOfStock
+                              ? "bg-rose-500/20 border-rose-500/40 text-rose-600 dark:text-rose-400"
+                              : isLowStock
+                              ? "bg-amber-500/25 border-amber-500/50 text-amber-700 dark:text-amber-300 font-extrabold animate-pulse"
                               : "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                          }`}
+                          )}
                         >
-                          {prod.stockQuantity} {prod.unit || "Cans"}
+                          {isOutOfStock ? "Out of Stock" : isLowStock ? `⚠️ Only ${prod.stockQuantity} Left` : `${prod.stockQuantity} ${prod.unit || "Cans"}`}
                         </span>
                       </div>
 

@@ -1,11 +1,14 @@
 import { Ledger } from "../models/ledgerModel.js";
 import { Mill } from "../models/millModel.js";
+import { Customer } from "../models/customerModel.js";
+import { CashTransaction } from "../models/cashModel.js";
 
 export const getLedgerEntries = async (req, res, next) => {
   try {
-    const { millId, search } = req.query;
+    const { millId, customerId, search } = req.query;
     let query = {};
     if (millId) query.mill = millId;
+    if (customerId) query.customer = customerId;
     if (search) query.clientName = { $regex: search, $options: "i" };
 
     const entries = await Ledger.find(query).populate("mill", "name code zone").sort({ createdAt: -1 });
@@ -17,9 +20,9 @@ export const getLedgerEntries = async (req, res, next) => {
 
 export const createPaymentEntry = async (req, res, next) => {
   try {
-    const { millId, clientName, amount, paymentMode, referenceNumber, notes, dueDate } = req.body;
+    const { millId, customerId, clientName, amount, paymentMode, referenceNumber, notes, dueDate } = req.body;
 
-    if ((!millId && !clientName) || !amount || Number(amount) <= 0) {
+    if ((!millId && !customerId && !clientName) || !amount || Number(amount) <= 0) {
       res.status(400);
       throw new Error("Client selection and a positive payment amount are required.");
     }
@@ -27,34 +30,53 @@ export const createPaymentEntry = async (req, res, next) => {
     let targetClientName = clientName || "";
     let updatedBalance = 0;
     let targetMill = null;
+    let targetCustomer = null;
 
     if (millId) {
       targetMill = await Mill.findById(millId);
-      if (!targetMill) {
-        res.status(404);
-        throw new Error("Textile Mill profile not found");
+      if (targetMill) {
+        targetClientName = targetMill.name;
+        targetMill.currentBalance -= Number(amount);
+        updatedBalance = targetMill.currentBalance;
+        await targetMill.save();
       }
-      targetClientName = targetMill.name;
-      targetMill.currentBalance -= Number(amount);
-      updatedBalance = targetMill.currentBalance;
-      await targetMill.save();
+    } else if (customerId) {
+      targetCustomer = await Customer.findById(customerId);
+      if (targetCustomer) {
+        targetClientName = targetCustomer.name;
+        targetCustomer.currentBalance -= Number(amount);
+        updatedBalance = targetCustomer.currentBalance;
+        await targetCustomer.save();
+      }
     }
 
     const entry = await Ledger.create({
-      clientType: targetMill ? "Textile Mill" : "General Customer",
+      clientType: targetMill ? "Textile Mill" : targetCustomer ? "Retail Customer" : "General Customer",
       mill: targetMill ? targetMill._id : undefined,
+      customer: targetCustomer ? targetCustomer._id : undefined,
       clientName: targetClientName,
       transactionType: "Credit (Payment Received)",
       amount: Number(amount),
       paymentMode: paymentMode || "Cash",
-      referenceNumber,
+      referenceNumber: referenceNumber || `REC-${Date.now().toString().slice(-6)}`,
       runningBalance: updatedBalance,
       notes,
       dueDate: dueDate || undefined,
     });
 
-    const populated = await Ledger.findById(entry._id).populate("mill", "name code zone");
-    res.status(201).json({ success: true, data: populated });
+    if ((paymentMode || "Cash") === "Cash") {
+      await CashTransaction.create({
+        type: "Received",
+        partyName: targetClientName,
+        amount: Number(amount),
+        category: targetMill ? "Mill Payment" : "Customer Payment",
+        referenceNo: entry.referenceNumber,
+        paymentMode: "Cash",
+        notes: notes || `Payment received from ${targetClientName}`,
+      });
+    }
+
+    res.status(201).json({ success: true, data: entry });
   } catch (error) {
     next(error);
   }

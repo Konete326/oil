@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { PrinterIcon, XIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
+import { PrinterIcon, XIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -117,11 +117,6 @@ export function CustomerPrintStatement({
     });
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name} - CUSTOMER STATEMENT*\n*Customer:* ${currentCustomer.name}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Current Balance:* Rs ${finalBalance.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
   const modalContent = (
     <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
       <style>{`
@@ -178,14 +173,6 @@ export function CustomerPrintStatement({
           </div>
           <div className="flex items-center gap-2">
             <Button
-              size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
-            <Button
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
@@ -220,9 +207,6 @@ export function CustomerPrintStatement({
                     <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                       {COMPANY_CONFIG.name}
                     </h1>
-                    <span className="font-bold text-sm text-emerald-800" dir="rtl">
-                      {COMPANY_CONFIG.nameUrdu}
-                    </span>
                   </div>
                   <p className="text-[10px] text-gray-700 font-semibold">
                     {COMPANY_CONFIG.address}

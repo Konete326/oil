@@ -6,6 +6,7 @@ import {
   PercentIcon,
   BarChart3Icon,
   PrinterIcon,
+  CoinsIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,8 +30,17 @@ export function ProfitLossWidget() {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [data, setData] = useState({
     totalSalesRevenue: 0,
+    posRevenue: 0,
+    challanRevenue: 0,
+    totalCOGS: 0,
+    posCOGS: 0,
+    challanCOGS: 0,
     grossProfit: 0,
+    grossMarginPercentage: 0,
     operatingExpenses: 0,
+    totalStaffSalaries: 0,
+    totalGeneralExpenses: 0,
+    expenseCategoryMap: {},
     netProfit: 0,
     marginPercentage: 0,
     totalStockPurchases: 0,
@@ -61,11 +71,12 @@ export function ProfitLossWidget() {
 
   const chartData = [
     {
-      name: "Financial Summary",
-      "Sales Revenue": data.totalSalesRevenue || 0,
-      "Stock Purchases": data.totalStockPurchases || 0,
-      "Operating Expenses": data.operatingExpenses || 0,
-      "Net Profit": data.netProfit || 0,
+      name: "Financial Overview",
+      "Sales Revenue": Number(data.totalSalesRevenue || 0),
+      "Cost of Goods (COGS)": Number(data.totalCOGS || 0),
+      "Gross Profit": Number(data.grossProfit || 0),
+      "Operating Expenses": Number(data.operatingExpenses || 0),
+      "Net Profit": Number(data.netProfit || 0),
     },
   ];
 
@@ -74,7 +85,7 @@ export function ProfitLossWidget() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Profit & Loss Margin Calculator (Nafa Nuqsan)</h1>
-          <p className="text-xs text-muted-foreground">Automated financial margin analysis: Sales Revenue vs Stock Purchases & Operating Expenses.</p>
+          <p className="text-xs text-muted-foreground">Accurate financial analytics: Revenue vs Real Cost of Goods Sold (COGS) & Operating Expenses.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -130,19 +141,27 @@ export function ProfitLossWidget() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Gross Revenue</span>
+          <span className="text-xs text-muted-foreground font-medium">Total Sales Revenue</span>
           <div className="text-xl font-bold font-mono text-foreground">
             Rs. {(data.totalSalesRevenue || 0).toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Combined Sales Income</p>
+          <p className="text-[11px] text-muted-foreground">POS ({(data.posRevenue || 0).toLocaleString()}) · Challans ({(data.challanRevenue || 0).toLocaleString()})</p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Stock Purchases</span>
+          <span className="text-xs text-muted-foreground font-medium">Cost of Goods Sold (COGS)</span>
           <div className="text-xl font-bold font-mono text-amber-500">
-            Rs. {(data.totalStockPurchases || 0).toLocaleString()}
+            Rs. {(data.totalCOGS || 0).toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Refinery / Supplier Cost</p>
+          <p className="text-[11px] text-muted-foreground">Actual Product Base Cost</p>
+        </div>
+
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-1">
+          <span className="text-xs text-muted-foreground font-medium">Gross Profit (Margin)</span>
+          <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+            Rs. {(data.grossProfit || 0).toLocaleString()}
+          </div>
+          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Margin: {data.grossMarginPercentage || 0}%</p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
@@ -150,11 +169,11 @@ export function ProfitLossWidget() {
           <div className="text-xl font-bold font-mono text-red-500">
             Rs. {(data.operatingExpenses || 0).toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Salaries, Freight, Utilities</p>
+          <p className="text-[11px] text-muted-foreground">Salaries + Operational Bills</p>
         </div>
 
         <div className={`rounded-xl border p-4 space-y-1 ${
-          data.netProfit >= 0 ? "border-emerald-500/30 bg-emerald-500/5" : "border-destructive/30 bg-destructive/5"
+          data.netProfit >= 0 ? "border-emerald-500/30 bg-emerald-500/10" : "border-destructive/30 bg-destructive/10"
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-medium">Net Profit / Loss</span>
@@ -163,24 +182,13 @@ export function ProfitLossWidget() {
           <div className={`text-xl font-bold font-mono ${data.netProfit >= 0 ? "text-emerald-500" : "text-destructive"}`}>
             {data.netProfit >= 0 ? "+" : ""}Rs. {(data.netProfit || 0).toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">{data.netProfit >= 0 ? "Net Profit Earned" : "Net Operating Loss"}</p>
-        </div>
-
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-medium">Net Profit Margin</span>
-            <PercentIcon className="size-4 text-primary" />
-          </div>
-          <div className="text-xl font-bold font-mono text-primary">
-            {data.marginPercentage || 0}%
-          </div>
-          <p className="text-[11px] text-muted-foreground">Margin Ratio</p>
+          <p className="text-[11px] text-muted-foreground">Net Margin: {data.marginPercentage || 0}%</p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5 space-y-4 shadow-xs">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-sm text-foreground">Revenue vs Cost Breakdown Visualization</h2>
+          <h2 className="font-semibold text-sm text-foreground">Revenue, Real COGS & Net Margin Visual Breakdown</h2>
           <span className="text-xs text-muted-foreground font-mono">Period: {period.toUpperCase()}</span>
         </div>
 
@@ -193,9 +201,10 @@ export function ProfitLossWidget() {
               <Tooltip formatter={(value) => [`Rs. ${Number(value).toLocaleString()}`, ""]} />
               <Legend wrapperStyle={{ fontSize: "11px" }} />
               <Bar dataKey="Sales Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Stock Purchases" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Cost of Goods (COGS)" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Gross Profit" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Operating Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Net Profit" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Net Profit" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

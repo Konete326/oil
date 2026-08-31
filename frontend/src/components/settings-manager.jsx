@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AdminPasswordModal } from "@/components/admin-password-modal";
 import { SystemLogsTab } from "@/components/system-logs-tab";
 import { DataMaintenanceTab } from "@/components/data-maintenance-tab";
+import { AuditTrailManager } from "@/components/audit-trail-manager";
 import { LanguageSelector } from "@/components/language-selector";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useSync } from "@/context/sync-context";
@@ -106,7 +107,7 @@ export function SettingsManager({ user }) {
             System Settings & Diagnostics
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Monitor real-time error logs, system diagnostics, offline sync engine, and administrative data maintenance.
+            Manage system configurations, offline storage engine, activity audit trails, and administrative tools.
           </p>
         </div>
 
@@ -135,6 +136,16 @@ export function SettingsManager({ user }) {
         >
           <RefreshCw className="size-3.5" /> Offline Storage & Sync
         </Button>
+        {isAdmin && (
+          <Button
+            variant={activeTab === "audit" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveTab("audit")}
+            className="text-xs cursor-pointer h-8 gap-2 font-medium"
+          >
+            <ShieldCheck className="size-3.5 text-primary" /> Activity Audit Trail
+          </Button>
+        )}
         <Button
           variant={activeTab === "logs" ? "default" : "ghost"}
           size="sm"
@@ -243,6 +254,10 @@ export function SettingsManager({ user }) {
             )}
           </div>
         </div>
+      )}
+
+      {activeTab === "audit" && (
+        <AuditTrailManager />
       )}
 
       {activeTab === "logs" && (

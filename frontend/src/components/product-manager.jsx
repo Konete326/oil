@@ -6,6 +6,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  createCategory,
 } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ProductModal } from "@/components/product-modal";
+import { CategoryModal } from "@/components/category-modal";
 import { BarcodeStickerModal } from "@/components/barcode-sticker-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
@@ -31,6 +33,7 @@ import {
   ScanBarcode as ScanBarcodeIcon,
   LayoutGrid as LayoutGridIcon,
   List as ListIcon,
+  Boxes as BoxesIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -52,6 +55,7 @@ export function ProductManager() {
   const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [confirmDeleteProd, setConfirmDeleteProd] = useState(null);
   const [barcodeProduct, setBarcodeProduct] = useState(null);
@@ -60,6 +64,12 @@ export function ProductManager() {
     if (location.state?.openModal) {
       setEditingProduct(null);
       setIsModalOpen(true);
+    }
+    if (location.state?.search) {
+      setSearch(location.state.search);
+    }
+    if (location.state?.stockStatus) {
+      setStockStatus(location.state.stockStatus);
     }
   }, [location.state]);
 
@@ -141,6 +151,20 @@ export function ProductManager() {
     }
   };
 
+  const handleCreateCategory = async (formData) => {
+    try {
+      const res = await createCategory(formData);
+      if (res && res.data) {
+        setCategories((prev) => [res.data, ...prev]);
+        setSelectedCategory(res.data._id);
+        toast.success(`Category "${res.data.name}" added & selected!`);
+      }
+      setIsCatModalOpen(false);
+    } catch (err) {
+      toast.error(err.message || "Failed to create category");
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       setProducts((prev) => prev.filter((p) => p._id !== id));
@@ -173,9 +197,9 @@ export function ProductManager() {
         const matchesCat = !selectedCategory || (p.category?._id || p.category) === selectedCategory;
 
         let matchesStock = true;
-        if (stockStatus === "inStock") matchesStock = p.stockQuantity > p.minStockAlert;
-        else if (stockStatus === "lowStock") matchesStock = p.stockQuantity <= p.minStockAlert && p.stockQuantity > 0;
-        else if (stockStatus === "outOfStock") matchesStock = p.stockQuantity === 0;
+        if (stockStatus === "inStock") matchesStock = Number(p.stockQuantity) > Number(p.minStockAlert);
+        else if (stockStatus === "lowStock") matchesStock = Number(p.stockQuantity) <= Number(p.minStockAlert) && Number(p.stockQuantity) > 0;
+        else if (stockStatus === "outOfStock") matchesStock = Number(p.stockQuantity) === 0;
 
         return matchesSearch && matchesCat && matchesStock;
       })
@@ -200,10 +224,10 @@ export function ProductManager() {
         <div>
           <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <PackageIcon className="size-5 text-primary" />
-            <span>Oil Products & Inventory</span>
+            <span>Oil Products & Inventory Stock</span>
           </h2>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Manage oil stock, master drums, grades, selling rates, and barcode stickers.
+            Manage oil products, category lines, master drums, retail packs, selling rates, and barcode stickers.
           </p>
         </div>
 
@@ -242,7 +266,7 @@ export function ProductManager() {
               setEditingProduct(null);
               setIsModalOpen(true);
             }}
-            className="gap-1.5 shadow-xs cursor-pointer text-xs h-7.5 px-3"
+            className="gap-1.5 shadow-xs cursor-pointer text-xs h-7.5 px-3 bg-primary text-primary-foreground"
           >
             <PlusIcon className="size-3.5" />
             <span>Add Product</span>
@@ -250,12 +274,68 @@ export function ProductManager() {
         </div>
       </div>
 
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pt-0.5">
+        <button
+          onClick={() => {
+            setSelectedCategory("");
+            setCurrentPage(1);
+          }}
+          className={cn(
+            "px-3 py-1 rounded-full text-xs font-medium shrink-0 cursor-pointer transition-all border",
+            !selectedCategory
+              ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold"
+              : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
+          )}
+        >
+          All Products ({products.length})
+        </button>
+
+        {categories.map((c) => {
+          const isSelected = selectedCategory === c._id;
+          const count = products.filter((p) => (p.category?._id || p.category) === c._id).length;
+          return (
+            <button
+              key={c._id}
+              onClick={() => {
+                setSelectedCategory(c._id);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium shrink-0 cursor-pointer transition-all border flex items-center gap-1.5",
+                isSelected
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold"
+                  : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
+              )}
+            >
+              <span>{c.name}</span>
+              <span
+                className={cn(
+                  "text-[10px] px-1.5 py-0.2 rounded-full font-mono",
+                  isSelected ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
+                )}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+
+        <button
+          onClick={() => setIsCatModalOpen(true)}
+          className="px-2.5 py-1 rounded-full text-xs font-medium shrink-0 cursor-pointer border border-dashed border-primary/50 text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
+          title="Create New Category"
+        >
+          <PlusIcon className="size-3" />
+          <span>Add Category</span>
+        </button>
+      </div>
+
       <div className="rounded-xl border border-border/80 bg-card p-2.5 shadow-xs">
         <div className="grid grid-cols-12 gap-2 items-center">
-          <div className="relative col-span-12 md:col-span-4">
+          <div className="relative col-span-12 md:col-span-6">
             <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search by name, SKU, brand, grade..."
+              placeholder="Search by product name, SKU, brand (Shell, Total, ZIC), grade (20W-50)..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -265,7 +345,7 @@ export function ProductManager() {
             />
           </div>
 
-          <div className="col-span-12 sm:col-span-4 md:col-span-3">
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
             <select
               value={stockStatus}
               onChange={(e) => {
@@ -281,7 +361,7 @@ export function ProductManager() {
             </select>
           </div>
 
-          <div className="col-span-12 sm:col-span-4 md:col-span-3">
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -292,24 +372,6 @@ export function ProductManager() {
               <option value="priceHigh">Sort: Price (High to Low)</option>
               <option value="stockLow">Sort: Stock (Low to High)</option>
               <option value="stockHigh">Sort: Stock (High to Low)</option>
-            </select>
-          </div>
-
-          <div className="col-span-12 sm:col-span-4 md:col-span-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
             </select>
           </div>
         </div>
@@ -337,7 +399,7 @@ export function ProductManager() {
                     <TableRow className="border-b border-border/80">
                       <TableHead className="w-[110px] text-xs h-9">SKU</TableHead>
                       <TableHead className="text-xs h-9">Product Name & Brand</TableHead>
-                      <TableHead className="text-xs h-9">Category / Subcategory</TableHead>
+                      <TableHead className="text-xs h-9">Category</TableHead>
                       <TableHead className="text-xs h-9">Packaging & Grade</TableHead>
                       <TableHead className="text-right text-xs h-9">Cost Rate</TableHead>
                       <TableHead className="text-right text-xs h-9">Selling Rate</TableHead>
@@ -347,7 +409,7 @@ export function ProductManager() {
                   </TableHeader>
                   <TableBody>
                     {paginatedProducts.map((prod) => {
-                      const isLowStock = prod.stockQuantity <= prod.minStockAlert;
+                      const isLowStock = Number(prod.stockQuantity) <= Number(prod.minStockAlert);
                       return (
                         <TableRow key={prod._id} className="hover:bg-muted/20 border-b border-border/40">
                           <TableCell className="font-mono text-[11px] font-semibold text-primary py-2.5">
@@ -373,14 +435,9 @@ export function ProductManager() {
                             </div>
                           </TableCell>
                           <TableCell className="py-2.5">
-                            <div className="space-y-0.5">
-                              <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[10.5px] font-medium text-primary">
-                                {prod.category?.name || "Uncategorized"}
-                              </span>
-                              {prod.subcategoryName && (
-                                <p className="text-[10px] text-muted-foreground">{prod.subcategoryName}</p>
-                              )}
-                            </div>
+                            <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[10.5px] font-medium text-primary">
+                              {prod.category?.name || "Uncategorized"}
+                            </span>
                           </TableCell>
                           <TableCell className="py-2.5">
                             <div className="space-y-0.5 text-xs">
@@ -453,113 +510,84 @@ export function ProductManager() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-2.5 sm:p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-3">
                   {paginatedProducts.map((prod) => {
-                    const isLowStock = prod.stockQuantity <= prod.minStockAlert;
-                    const isOutOfStock = prod.stockQuantity === 0;
-                    const profitPerUnit = (prod.sellingPrice || 0) - (prod.costPrice || 0);
-
+                    const isLowStock = Number(prod.stockQuantity) <= Number(prod.minStockAlert);
                     return (
                       <div
                         key={prod._id}
-                        className="rounded-lg border border-border/80 bg-card p-3 shadow-xs space-y-2 hover:border-primary/40 transition-colors"
+                        className="rounded-xl border border-border/80 bg-card p-3 shadow-xs space-y-2 hover:border-primary/40 transition-colors flex flex-col justify-between"
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[10px] font-bold text-primary">{prod.sku}</span>
+                            <div
+                              className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9.5px] font-medium border"
+                              style={{
+                                backgroundColor: isLowStock ? "rgba(244, 63, 94, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                                borderColor: isLowStock ? "rgba(244, 63, 94, 0.3)" : "rgba(16, 185, 129, 0.3)",
+                                color: isLowStock ? "#f43f5e" : "#10b981",
+                              }}
+                            >
+                              {isLowStock && <ShieldAlertIcon className="size-2.5" />}
+                              <span>{prod.stockQuantity} {prod.unit}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
                             {prod.imageUrl ? (
                               <img
                                 src={prod.imageUrl}
                                 alt={prod.name}
-                                className="size-9 rounded-md object-contain border border-border bg-muted/40 shrink-0"
+                                className="size-10 rounded-md object-contain border border-border bg-muted/40 shrink-0"
                               />
                             ) : (
-                              <div className="size-9 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
+                              <div className="size-10 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
                                 {prod.brand ? prod.brand.slice(0, 2).toUpperCase() : "OL"}
                               </div>
                             )}
                             <div className="min-w-0">
-                              <h4 className="font-semibold text-xs text-foreground truncate">{prod.name}</h4>
-                              <p className="text-[10px] text-muted-foreground truncate">
-                                Brand: <strong className="text-foreground">{prod.brand}</strong> • SKU:{" "}
-                                <span className="font-mono text-primary font-semibold">{prod.sku}</span>
-                              </p>
+                              <h4 className="font-bold text-xs text-foreground truncate">{prod.name}</h4>
+                              <p className="text-[10px] text-muted-foreground truncate">{prod.packagingType} · {prod.grade || "Standard"}</p>
                             </div>
                           </div>
 
-                          <span
-                            className={cn(
-                              "px-1.5 py-0.5 rounded-full text-[9.5px] font-bold shrink-0",
-                              isOutOfStock
-                                ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
-                                : isLowStock
-                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                                : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                            )}
-                          >
-                            {isOutOfStock
-                              ? "Out of Stock"
-                              : isLowStock
-                              ? `${prod.stockQuantity} Left`
-                              : `${prod.stockQuantity} In Stock`}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-md bg-muted/30 text-xs border border-border/50">
-                          <div>
-                            <span className="text-[9px] text-muted-foreground block">Selling Rate</span>
-                            <span className="font-mono font-bold text-foreground text-xs">
-                              Rs {prod.sellingPrice?.toLocaleString()}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-[9px] text-muted-foreground block">Cost Rate</span>
-                            <span className="font-mono text-muted-foreground text-[11px]">
-                              Rs {prod.costPrice?.toLocaleString() || 0}
-                            </span>
-                            {profitPerUnit > 0 && (
-                              <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold block">
-                                +Rs {profitPerUnit.toLocaleString()} profit
-                              </span>
-                            )}
+                          <div className="p-1.5 rounded-lg bg-muted/30 border border-border/50 flex items-center justify-between text-xs">
+                            <span className="text-[10px] text-muted-foreground">Price:</span>
+                            <span className="font-mono font-bold text-foreground">Rs {prod.sellingPrice?.toLocaleString()}</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground">
-                          <span className="truncate">
-                            {prod.category?.name || "General"} • {prod.packagingType}{" "}
-                            {prod.grade ? `(${prod.grade})` : ""}
-                          </span>
-                        </div>
-
-                        <div className="pt-1.5 border-t border-border flex items-center justify-end gap-1">
+                        <div className="pt-2 border-t border-border flex items-center justify-end gap-1">
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-7 text-muted-foreground hover:text-primary cursor-pointer"
+                            title="Generate Barcode"
                             onClick={() => setBarcodeProduct(prod)}
-                            className="h-6.5 text-[11px] gap-1 px-2 cursor-pointer"
                           >
-                            <ScanBarcodeIcon className="size-3 text-primary" />
-                            <span>Sticker</span>
+                            <ScanBarcodeIcon className="size-3.5" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                            title="Edit Product"
                             onClick={() => {
                               setEditingProduct(prod);
                               setIsModalOpen(true);
                             }}
-                            className="h-6.5 text-[11px] gap-1 px-2 cursor-pointer"
                           >
-                            <Edit3Icon className="size-3 text-blue-500" />
-                            <span>Edit</span>
+                            <Edit3Icon className="size-3.5" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-7 text-muted-foreground hover:text-destructive cursor-pointer"
+                            title="Delete Product"
                             onClick={() => setConfirmDeleteProd(prod)}
-                            className="h-6.5 text-[11px] px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
                           >
-                            <Trash2Icon className="size-3" />
+                            <Trash2Icon className="size-3.5" />
                           </Button>
                         </div>
                       </div>
@@ -582,13 +610,16 @@ export function ProductManager() {
 
       <ProductModal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingProduct(null);
-        }}
+        onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         categories={categories}
         initialData={editingProduct}
+      />
+
+      <CategoryModal
+        isOpen={isCatModalOpen}
+        onClose={() => setIsCatModalOpen(false)}
+        onSave={handleCreateCategory}
       />
 
       <BarcodeStickerModal
@@ -600,9 +631,11 @@ export function ProductManager() {
       <ConfirmModal
         isOpen={!!confirmDeleteProd}
         onClose={() => setConfirmDeleteProd(null)}
-        onConfirm={() => handleDelete(confirmDeleteProd._id)}
-        title="Delete Oil Product"
-        message={`Are you sure you want to delete "${confirmDeleteProd?.name}" (SKU: ${confirmDeleteProd?.sku})? This action cannot be undone.`}
+        onConfirm={() => handleDelete(confirmDeleteProd?._id)}
+        title="Delete Product"
+        description={`Are you sure you want to delete "${confirmDeleteProd?.name}" (${confirmDeleteProd?.sku})? Past POS invoices will retain their product details.`}
+        confirmText="Delete Product"
+        variant="destructive"
       />
     </div>
   );

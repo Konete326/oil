@@ -23,6 +23,7 @@ import { AdvanceHistoryTable } from "@/components/advance-history-table";
 import { PayslipModal } from "@/components/payslip-modal";
 import { PaginationControl } from "@/components/pagination-control";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { UserManagementManager } from "@/components/user-management-manager";
 import {
   fetchEmployeesApi,
   deleteEmployeeApi,
@@ -196,7 +197,7 @@ export function EmployeePayrollManager() {
     <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Employee Payroll Management (Laxmi HR)</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Employee Payroll & Staff Management</h1>
           <p className="text-xs text-muted-foreground">Manage staff directory, advance salary khata, and monthly payslip vouchers.</p>
         </div>
 
@@ -255,9 +256,10 @@ export function EmployeePayrollManager() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
         <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-xs">
           {[
-            { id: "employees", label: "Employee Directory" },
+            { id: "employees", label: "Staff Directory" },
             { id: "advance", label: "Advance Salary Khata" },
             { id: "payroll", label: "Monthly Payslips & History" },
+            { id: "users", label: "Cashier & Staff Logins" },
           ].map((btn) => (
             <button
               key={btn.id}
@@ -530,6 +532,10 @@ export function EmployeePayrollManager() {
             onPageChange={(p) => setSalPage(p)}
           />
         </div>
+      )}
+
+      {activeTab === "users" && (
+        <UserManagementManager />
       )}
 
       <EmployeeModal

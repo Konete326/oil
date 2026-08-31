@@ -5,7 +5,7 @@ const challanSchema = new mongoose.Schema(
     challanNumber: { type: String, required: true, unique: true },
     mill: { type: mongoose.Schema.Types.ObjectId, ref: "Mill", required: true },
     millName: { type: String, required: true },
-    product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+    product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
     productName: { type: String, required: true },
     vehicleNumber: { type: String, default: "N/A" },
     driverName: { type: String, default: "Standard Delivery" },

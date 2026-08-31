@@ -1,4 +1,5 @@
 import { Mill } from "../models/millModel.js";
+import { Customer } from "../models/customerModel.js";
 import { Supplier } from "../models/supplierModel.js";
 import { Product } from "../models/productModel.js";
 import { CashTransaction } from "../models/cashModel.js";
@@ -12,35 +13,39 @@ import { connectDB } from "../config/db.js";
 export const getTrialBalance = async (req, res, next) => {
   try {
     await connectDB();
-    const [mills, suppliers, products, cashPaid, cashRec, posSales, challans, purchases] = await Promise.all([
-      Mill.find(),
-      Supplier.find(),
-      Product.find(),
-      CashTransaction.find({ type: "Paid" }),
-      CashTransaction.find({ type: "Received" }),
-      PosSale.find(),
-      Challan.find(),
-      Purchase.find(),
+    const [mills, customers, suppliers, products, cashPaid, cashRec, posSales, challans, purchases] = await Promise.all([
+      Mill.find().lean(),
+      Customer.find().lean(),
+      Supplier.find().lean(),
+      Product.find().lean(),
+      CashTransaction.find({ type: "Paid" }).lean(),
+      CashTransaction.find({ type: "Received" }).lean(),
+      PosSale.find().lean(),
+      Challan.find().lean(),
+      Purchase.find().lean(),
     ]);
 
-    const totalCustomerReceivables = mills.reduce((sum, m) => sum + Math.max(m.currentBalance || 0, 0), 0);
-    const totalSupplierPayables = suppliers.reduce((sum, s) => sum + Math.max(s.currentBalance || 0, 0), 0);
-    const totalInventoryValue = products.reduce((sum, p) => sum + (p.stockQuantity || 0) * (p.price || 0), 0);
+    const millReceivables = mills.reduce((sum, m) => sum + Math.max(Number(m.currentBalance) || 0, 0), 0);
+    const retailReceivables = customers.reduce((sum, c) => sum + Math.max(Number(c.currentBalance) || 0, 0), 0);
+    const totalCustomerReceivables = Number((millReceivables + retailReceivables).toFixed(2));
 
-    const totalCashPaidOut = cashPaid.reduce((sum, c) => sum + (c.amount || 0), 0);
-    const totalCashReceivedIn = cashRec.reduce((sum, c) => sum + (c.amount || 0), 0);
+    const totalSupplierPayables = suppliers.reduce((sum, s) => sum + Math.max(Number(s.currentBalance) || 0, 0), 0);
+    const totalInventoryValue = products.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0) * (Number(p.costPrice) || Number(p.sellingPrice) || 0), 0);
+
+    const totalCashPaidOut = cashPaid.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+    const totalCashReceivedIn = cashRec.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
     const netCashOnHand = Math.max(totalCashReceivedIn - totalCashPaidOut, 0);
 
-    const posTotal = posSales.reduce((sum, s) => sum + (s.grandTotal || 0), 0);
-    const challanTotal = challans.reduce((sum, c) => sum + (c.totalAmount || 0), 0);
-    const totalSalesIncome = posTotal + challanTotal;
+    const posTotal = posSales.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
+    const challanTotal = challans.reduce((sum, c) => sum + (Number(c.totalAmount) || 0), 0);
+    const totalSalesIncome = Number((posTotal + challanTotal).toFixed(2));
 
-    const totalStockPurchases = purchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+    const totalStockPurchases = purchases.reduce((sum, p) => sum + (Number(p.totalAmount) || 0), 0);
     const totalOperatingExpenses = totalCashPaidOut;
 
     const accounts = [
       { code: "1010", accountName: "Cash on Hand Account", category: "Asset", debit: netCashOnHand, credit: 0 },
-      { code: "1020", accountName: "Customer Receivables (Khata)", category: "Asset", debit: totalCustomerReceivables, credit: 0 },
+      { code: "1020", accountName: "Customer & Mill Receivables (Khata)", category: "Asset", debit: totalCustomerReceivables, credit: 0 },
       { code: "1030", accountName: "Inventory Stock Asset Value", category: "Asset", debit: totalInventoryValue, credit: 0 },
       { code: "2010", accountName: "Supplier Payables (Khareedari Khata)", category: "Liability", debit: 0, credit: totalSupplierPayables },
       { code: "4010", accountName: "Sales Revenue Income", category: "Revenue", debit: 0, credit: totalSalesIncome },

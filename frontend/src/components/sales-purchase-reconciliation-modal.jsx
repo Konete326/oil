@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon } from "lucide-react";
+import { XIcon, PrinterIcon, FileSpreadsheetIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -90,11 +90,6 @@ export function SalesPurchaseReconciliationModal({
     exportTransactionsToExcel(data, `${activeType.toUpperCase()}_Reconciliation_Report.xlsx`);
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name} - ${activeType.toUpperCase()} RECONCILIATION REPORT*\n*Period:* ${currentMonthName}\n*Total Records:* ${displayRows.length}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
   const modalContent = (
     <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
       <style>{`
@@ -174,14 +169,6 @@ export function SalesPurchaseReconciliationModal({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
             <Button
               variant="outline"
               size="sm"

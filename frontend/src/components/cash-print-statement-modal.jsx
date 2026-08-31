@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
+import { XIcon, PrinterIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -80,11 +80,6 @@ export function CashPrintStatementModal({
     );
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name} - CASH STATEMENT*\n*Party:* ${partyName}\n*Period:* ${startDate || "Start"} to ${endDate || "Today"}\n*Total Inflow:* Rs ${totalInflow.toLocaleString()}\n*Total Outflow:* Rs ${totalOutflow.toLocaleString()}\n*Closing Balance:* Rs ${closingBalance.toLocaleString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
   const currentUserStr = localStorage.getItem("user");
   const parsedUser = currentUserStr ? JSON.parse(currentUserStr) : null;
   const activeOperator = parsedUser?.name || cashierName;
@@ -144,14 +139,6 @@ export function CashPrintStatementModal({
             <span>Subsidiary Ledger for Cash Transactions (A4 Standard)</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
             <Button
               variant="outline"
               size="sm"

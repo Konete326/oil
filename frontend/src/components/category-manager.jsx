@@ -5,8 +5,6 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-  addSubcategory,
-  deleteSubcategory,
 } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CategoryModal } from "@/components/category-modal";
-import { SubcategoryModal } from "@/components/subcategory-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
@@ -32,13 +29,13 @@ import {
   TagIcon,
   LayoutGrid as LayoutGridIcon,
   List as ListIcon,
-  Boxes,
+  BoxesIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 export function CategoryManager() {
   const [viewMode, setViewMode] = useState(() =>
@@ -50,11 +47,8 @@ export function CategoryManager() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [confirmDeleteCat, setConfirmDeleteCat] = useState(null);
-  const [subStatus, setSubStatus] = useState("all");
 
   const loadData = async (showSkeleton = true) => {
     if (showSkeleton) setLoading(true);
@@ -89,7 +83,7 @@ export function CategoryManager() {
       }
     } else {
       const tempId = `cat_${Date.now()}`;
-      const optimisticCat = { _id: tempId, subcategories: [], ...formData };
+      const optimisticCat = { _id: tempId, ...formData };
       setCategories((prev) => [optimisticCat, ...prev]);
       toast.success("Category added successfully");
       const res = await createCategory(formData);
@@ -113,31 +107,13 @@ export function CategoryManager() {
     });
   };
 
-  const handleAddSub = async (catId, subData) => {
-    const res = await addSubcategory(catId, subData);
-    if (res && res.success) {
-      setSelectedSubCategory(res.data);
-      setCategories((prev) => prev.map((c) => (c._id === catId ? res.data : c)));
-      toast.success("Subcategory added successfully");
-    }
-  };
-
-  const handleDeleteSub = async (catId, subId) => {
-    const res = await deleteSubcategory(catId, subId);
-    if (res && res.success) {
-      setSelectedSubCategory(res.data);
-      setCategories((prev) => prev.map((c) => (c._id === catId ? res.data : c)));
-      toast.success("Subcategory deleted successfully");
-    }
-  };
-
   const getCategoryStockInfo = (catId) => {
     const catProds = products.filter((p) => (p.category?._id || p.category) === catId);
-    const totalQty = catProds.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+    const totalQty = catProds.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0), 0);
     const unitMap = {};
     catProds.forEach((p) => {
       const u = p.unit || "Cans";
-      unitMap[u] = (unitMap[u] || 0) + (p.stockQuantity || 0);
+      unitMap[u] = (unitMap[u] || 0) + (Number(p.stockQuantity) || 0);
     });
     const summary = Object.entries(unitMap)
       .map(([u, q]) => `${q} ${u}`)
@@ -148,30 +124,14 @@ export function CategoryManager() {
   const filteredCategories = useMemo(() => {
     const q = search.toLowerCase().trim();
     return categories.filter((c) => {
-      const matchesCategoryNameOrCode =
+      return (
+        !q ||
         (c.name || "").toLowerCase().includes(q) ||
-        (c.code || "").toLowerCase().includes(q);
-
-      const matchesSubcategory =
-        c.subcategories &&
-        c.subcategories.some(
-          (sub) =>
-            (sub.name || "").toLowerCase().includes(q) ||
-            (sub.code && sub.code.toLowerCase().includes(q))
-        );
-
-      const matchesSearch = !q || matchesCategoryNameOrCode || matchesSubcategory;
-
-      let matchesFilter = true;
-      if (subStatus === "withSubs") {
-        matchesFilter = (c.subcategories?.length || 0) > 0;
-      } else if (subStatus === "noSubs") {
-        matchesFilter = (c.subcategories?.length || 0) === 0;
-      }
-
-      return matchesSearch && matchesFilter;
+        (c.code || "").toLowerCase().includes(q) ||
+        (c.description || "").toLowerCase().includes(q)
+      );
     });
-  }, [categories, search, subStatus]);
+  }, [categories, search]);
 
   const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE) || 1;
   const paginatedCategories = useMemo(() => {
@@ -179,15 +139,15 @@ export function CategoryManager() {
   }, [filteredCategories, currentPage]);
 
   return (
-    <div className="space-y-3 p-3 md:p-4">
+    <div className="space-y-4 p-3 md:p-5 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <FolderTreeIcon className="size-5 text-primary" />
-            <span>Product Categories & Subcategories</span>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <FolderTreeIcon className="size-5.5 text-primary" />
+            <span>Product Categories</span>
           </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Structure lubricant lines, sub-brands, packaging sizes, and track category inventory stock.
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Organize lubricant product lines (Engine Oil, Hydraulic Oil, Gear Oil, Grease, Industrial Oil) and live stock counts.
           </p>
         </div>
 
@@ -196,7 +156,7 @@ export function CategoryManager() {
             <button
               onClick={() => setViewMode("table")}
               className={cn(
-                "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
+                "px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "table"
                   ? "bg-background text-foreground shadow-xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -209,7 +169,7 @@ export function CategoryManager() {
             <button
               onClick={() => setViewMode("cards")}
               className={cn(
-                "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
+                "px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "cards"
                   ? "bg-background text-foreground shadow-xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -226,7 +186,8 @@ export function CategoryManager() {
               setEditingCategory(null);
               setIsCatModalOpen(true);
             }}
-            className="gap-1.5 shadow-xs cursor-pointer text-xs h-7.5 px-3"
+            size="sm"
+            className="gap-1.5 shadow-xs cursor-pointer text-xs h-8 px-3 bg-primary text-primary-foreground"
           >
             <PlusIcon className="size-3.5" />
             <span>Add Category</span>
@@ -234,36 +195,19 @@ export function CategoryManager() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border/80 bg-card p-2.5 shadow-xs">
-        <div className="grid grid-cols-12 gap-2 items-center">
-          <div className="relative col-span-12 md:col-span-9">
-            <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search category or subcategory name..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="ps-8 text-xs h-7.5 w-full bg-muted/30 focus:bg-background"
-            />
-          </div>
-
-          <div className="col-span-12 md:col-span-3">
-            <select
-              value={subStatus}
-              onChange={(e) => {
-                setSubStatus(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="all">All Category Types</option>
-              <option value="withSubs">With Subcategories</option>
-              <option value="noSubs">No Subcategories</option>
-            </select>
-          </div>
+      <div className="rounded-xl border border-border/80 bg-card p-3 shadow-xs">
+        <div className="relative w-full sm:max-w-md">
+          <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search category name, code, description..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="ps-8 text-xs h-8 w-full bg-muted/30 focus:bg-background"
+          />
         </div>
       </div>
 
@@ -276,117 +220,67 @@ export function CategoryManager() {
           </div>
         ) : filteredCategories.length === 0 ? (
           <div className="p-8 text-center space-y-2">
-            <FolderTreeIcon className="size-7 mx-auto text-muted-foreground/60" />
+            <FolderTreeIcon className="size-8 mx-auto text-muted-foreground/60" />
             <p className="text-xs font-semibold text-foreground">No Categories Found</p>
-            <p className="text-[11px] text-muted-foreground">Click "Add Category" to add your first entry.</p>
+            <p className="text-[11px] text-muted-foreground">Click "Add Category" to create a new product category.</p>
           </div>
         ) : (
           <>
-            <div className="max-h-[calc(100vh-250px)] min-h-[320px] overflow-y-auto overflow-x-auto">
+            <div className="max-h-[calc(100vh-280px)] min-h-[280px] overflow-y-auto overflow-x-auto">
               {viewMode === "table" ? (
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                     <TableRow className="border-b border-border/80">
-                      <TableHead className="w-[120px] text-xs h-9">Code</TableHead>
-                      <TableHead className="text-xs h-9">Main Category Name</TableHead>
-                      <TableHead className="text-xs h-9">Subcategories</TableHead>
-                      <TableHead className="text-xs h-9">Live Inventory Stock</TableHead>
+                      <TableHead className="w-[110px] text-xs h-9">Code</TableHead>
+                      <TableHead className="text-xs h-9">Category Name</TableHead>
+                      <TableHead className="text-xs h-9">Description</TableHead>
+                      <TableHead className="text-center text-xs h-9">Product Count</TableHead>
+                      <TableHead className="text-center text-xs h-9">Inventory Stock In-Hand</TableHead>
                       <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedCategories.map((cat) => {
-                      const q = search.toLowerCase().trim();
                       const stockInfo = getCategoryStockInfo(cat._id);
                       return (
-                        <TableRow key={cat._id} className="hover:bg-muted/20 border-b border-border/40">
-                          <TableCell className="font-mono text-[11px] font-semibold text-primary py-2.5">
-                            {cat.code}
+                        <TableRow key={cat._id} className="hover:bg-muted/20 text-xs border-b border-border/40">
+                          <TableCell className="font-mono font-bold text-primary py-2.5">
+                            {cat.code || "CAT-00"}
                           </TableCell>
-                          <TableCell className="font-semibold text-foreground text-xs py-2.5">
+                          <TableCell className="font-bold text-foreground py-2.5">
                             {cat.name}
                           </TableCell>
-                          <TableCell className="py-2.5">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-6 gap-1 px-2 text-[10.5px] border-dashed cursor-pointer shrink-0"
-                                onClick={() => {
-                                  setSelectedSubCategory(cat);
-                                  setIsSubModalOpen(true);
-                                }}
-                              >
-                                <TagIcon className="size-2.5 text-primary" />
-                                <span>{cat.subcategories?.length || 0} Subcategories</span>
-                              </Button>
-                              {cat.subcategories?.slice(0, 4).map((sub) => {
-                                const isMatch =
-                                  q.length > 0 &&
-                                  ((sub.name || "").toLowerCase().includes(q) ||
-                                    (sub.code && sub.code.toLowerCase().includes(q)));
-                                return (
-                                  <Badge
-                                    key={sub._id || sub.name}
-                                    variant="outline"
-                                    className={`text-[9.5px] cursor-pointer transition-colors px-1.5 py-0 ${
-                                      isMatch
-                                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 font-bold"
-                                        : "bg-muted/50 text-muted-foreground hover:text-foreground"
-                                    }`}
-                                    onClick={() => {
-                                      setSelectedSubCategory(cat);
-                                      setIsSubModalOpen(true);
-                                    }}
-                                  >
-                                    {sub.name}
-                                  </Badge>
-                                );
-                              })}
-                              {cat.subcategories?.length > 4 && (
-                                <span className="text-[9.5px] text-muted-foreground font-mono">
-                                  +{cat.subcategories.length - 4} more
-                                </span>
-                              )}
-                            </div>
+                          <TableCell className="text-muted-foreground py-2.5 text-[11px]">
+                            {cat.description || "—"}
                           </TableCell>
-                          <TableCell className="py-2.5">
-                            <div className="flex flex-col gap-0.5">
-                              <div className="flex items-center gap-1.5">
-                                <span
-                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border font-mono ${
-                                    stockInfo.totalQty > 0
-                                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                                      : "bg-muted text-muted-foreground border-border"
-                                  }`}
-                                >
-                                  {stockInfo.totalQty} Units
-                                </span>
-                                <span className="text-[10.5px] text-muted-foreground">({stockInfo.count} Products)</span>
-                              </div>
-                              <span className="text-[9.5px] text-muted-foreground truncate max-w-xs">
-                                {stockInfo.summary}
-                              </span>
-                            </div>
+                          <TableCell className="text-center py-2.5">
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                              {stockInfo.count} Products
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center font-mono py-2.5 font-semibold text-foreground text-xs">
+                            {stockInfo.summary}
                           </TableCell>
                           <TableCell className="text-right py-2.5 pe-4">
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex items-center justify-end gap-1.5">
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
                                 onClick={() => {
                                   setEditingCategory(cat);
                                   setIsCatModalOpen(true);
                                 }}
+                                className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                                title="Edit Category"
                               >
                                 <Edit3Icon className="size-3.5" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                className="size-7 text-muted-foreground hover:text-destructive cursor-pointer"
                                 onClick={() => setConfirmDeleteCat(cat)}
+                                className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                                title="Delete Category"
                               >
                                 <Trash2Icon className="size-3.5" />
                               </Button>
@@ -398,104 +292,38 @@ export function CategoryManager() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-2.5 sm:p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3">
                   {paginatedCategories.map((cat) => {
-                    const q = search.toLowerCase().trim();
                     const stockInfo = getCategoryStockInfo(cat._id);
-
                     return (
                       <div
                         key={cat._id}
-                        className="rounded-lg border border-border/80 bg-card p-3 shadow-xs space-y-2 hover:border-primary/40 transition-colors flex flex-col justify-between"
+                        className="rounded-xl border border-border/80 bg-card p-4 shadow-xs space-y-3 hover:border-primary/40 transition-colors flex flex-col justify-between"
                       >
                         <div className="space-y-2">
                           <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <div className="p-1.5 rounded-md bg-primary/10 text-primary border border-primary/20 shrink-0">
-                                <Boxes className="size-4" />
-                              </div>
-                              <div>
-                                <h4 className="font-semibold text-xs text-foreground">{cat.name}</h4>
-                                <p className="text-[10px] font-mono text-primary font-semibold">Code: {cat.code}</p>
-                              </div>
+                            <div>
+                              <span className="text-[10px] font-mono font-semibold text-primary block">
+                                {cat.code || "CAT-00"}
+                              </span>
+                              <h4 className="font-bold text-sm text-foreground">{cat.name}</h4>
                             </div>
-
-                            <span
-                              className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-full border font-mono shrink-0 ${
-                                stockInfo.totalQty > 0
-                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                                  : "bg-muted text-muted-foreground border-border"
-                              }`}
-                            >
-                              {stockInfo.totalQty} Units
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                              {stockInfo.count} Items
                             </span>
                           </div>
 
-                          <div className="p-1.5 rounded-md bg-muted/30 border border-border/50 text-[10.5px] space-y-1">
-                            <div className="flex items-center justify-between text-muted-foreground">
-                              <span>Linked Products:</span>
-                              <strong className="text-foreground">{stockInfo.count} items</strong>
-                            </div>
-                            <div className="text-[9.5px] text-muted-foreground truncate">{stockInfo.summary}</div>
-                          </div>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">
+                            {cat.description || "Lubricant category line."}
+                          </p>
 
-                          <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-5.5 gap-1 px-1.5 text-[9.5px] border-dashed cursor-pointer"
-                              onClick={() => {
-                                setSelectedSubCategory(cat);
-                                setIsSubModalOpen(true);
-                              }}
-                            >
-                              <TagIcon className="size-2.5 text-primary" />
-                              <span>{cat.subcategories?.length || 0} Subs</span>
-                            </Button>
-                            {cat.subcategories?.slice(0, 3).map((sub) => {
-                              const isMatch =
-                                q.length > 0 &&
-                                ((sub.name || "").toLowerCase().includes(q) ||
-                                  (sub.code && sub.code.toLowerCase().includes(q)));
-                              return (
-                                <Badge
-                                  key={sub._id || sub.name}
-                                  variant="outline"
-                                  className={`text-[9px] cursor-pointer px-1.5 py-0 ${
-                                    isMatch
-                                      ? "bg-amber-500/15 text-amber-600 border-amber-500/40 font-bold"
-                                      : "bg-muted/50 text-muted-foreground"
-                                  }`}
-                                  onClick={() => {
-                                    setSelectedSubCategory(cat);
-                                    setIsSubModalOpen(true);
-                                  }}
-                                >
-                                  {sub.name}
-                                </Badge>
-                              );
-                            })}
-                            {cat.subcategories?.length > 3 && (
-                              <span className="text-[9px] text-muted-foreground font-mono">
-                                +{cat.subcategories.length - 3}
-                              </span>
-                            )}
+                          <div className="p-2 rounded-lg bg-muted/30 border border-border/50 text-xs">
+                            <span className="text-[10px] text-muted-foreground block font-medium">Available Stock Volume:</span>
+                            <span className="font-mono font-bold text-foreground text-xs">{stockInfo.summary}</span>
                           </div>
                         </div>
 
-                        <div className="pt-1.5 border-t border-border flex items-center justify-end gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedSubCategory(cat);
-                              setIsSubModalOpen(true);
-                            }}
-                            className="h-6.5 text-[10.5px] gap-1 px-2 cursor-pointer"
-                          >
-                            <TagIcon className="size-2.5 text-primary" />
-                            <span>Manage Subs</span>
-                          </Button>
+                        <div className="pt-2 border-t border-border flex items-center justify-end gap-1.5">
                           <Button
                             variant="outline"
                             size="sm"
@@ -503,18 +331,18 @@ export function CategoryManager() {
                               setEditingCategory(cat);
                               setIsCatModalOpen(true);
                             }}
-                            className="h-6.5 text-[10.5px] gap-1 px-2 cursor-pointer"
+                            className="h-7 text-xs px-2.5 gap-1 cursor-pointer"
                           >
-                            <Edit3Icon className="size-2.5 text-blue-500" />
+                            <Edit3Icon className="size-3 text-blue-500" />
                             <span>Edit</span>
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setConfirmDeleteCat(cat)}
-                            className="h-6.5 text-[10.5px] px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
+                            className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
                           >
-                            <Trash2Icon className="size-2.5" />
+                            <Trash2Icon className="size-3" />
                           </Button>
                         </div>
                       </div>
@@ -537,33 +365,19 @@ export function CategoryManager() {
 
       <CategoryModal
         isOpen={isCatModalOpen}
-        onClose={() => {
-          setIsCatModalOpen(false);
-          setEditingCategory(null);
-        }}
+        onClose={() => setIsCatModalOpen(false)}
         onSave={handleCreateOrUpdate}
-        onSaveSubcategory={handleAddSub}
-        categories={categories}
         initialData={editingCategory}
-      />
-
-      <SubcategoryModal
-        isOpen={isSubModalOpen}
-        onClose={() => {
-          setIsSubModalOpen(false);
-          setSelectedSubCategory(null);
-        }}
-        category={selectedSubCategory}
-        onAddSubcategory={handleAddSub}
-        onDeleteSubcategory={handleDeleteSub}
       />
 
       <ConfirmModal
         isOpen={!!confirmDeleteCat}
         onClose={() => setConfirmDeleteCat(null)}
-        onConfirm={() => handleDelete(confirmDeleteCat._id)}
+        onConfirm={() => handleDelete(confirmDeleteCat?._id)}
         title="Delete Category"
-        message={`Are you sure you want to delete category "${confirmDeleteCat?.name}"? This action will also delete all attached subcategories.`}
+        description={`Are you sure you want to delete "${confirmDeleteCat?.name}"? Any products assigned to this category will become unassigned.`}
+        confirmText="Delete Category"
+        variant="destructive"
       />
     </div>
   );

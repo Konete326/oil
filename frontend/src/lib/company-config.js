@@ -1,6 +1,5 @@
 export const COMPANY_CONFIG = {
   name: "AL KHALEEJ LUBRICANTS",
-  nameUrdu: "الخلیج لیوبریکنٹس",
   tagline: "Deals in National & International Brands of Industrial, Automotive Oils & Greases",
   proprietor: "Syed Shehzad Ali Shah",
   address: "Shop No. 23, Near Fatima Jinnah Girls College, Nishter Road, Garden, Karachi.",

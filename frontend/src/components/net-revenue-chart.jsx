@@ -44,34 +44,37 @@ export function NetRevenueChart({ revenue = [], loading }) {
   const growthPct = firstDay > 0 ? (((lastDay - firstDay) / firstDay) * 100).toFixed(1) : "0.0";
 
   return (
-    <DashboardCard className="gap-0 md:col-span-2">
-      <CardHeader className="gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <CardTitle>Net Sales Revenue (PKR)</CardTitle>
-          <Delta value={Number(growthPct)} variant="badge">
-            <DeltaIcon variant="trend" />
-            <DeltaValue />
-          </Delta>
+    <DashboardCard className="gap-0 md:col-span-2 shadow-2xs rounded-2xl">
+      <CardHeader className="p-3.5 pb-1 gap-1 border-b border-border/50">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-bold text-foreground">Sales Revenue Performance</CardTitle>
+            <Delta value={Number(growthPct)} variant="badge">
+              <DeltaIcon variant="trend" />
+              <DeltaValue />
+            </Delta>
+          </div>
+          <CardDescription className="text-[11px]">Last 7 Days (PKR)</CardDescription>
         </div>
-        <CardDescription>Daily net sales performance (Last 7 Days).</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3">
         {loading ? (
-          <Skeleton className="h-60 w-full md:h-80" />
+          <Skeleton className="h-44 sm:h-48 w-full" />
         ) : chartRows.length === 0 ? (
-          <div className="h-60 md:h-80 flex items-center justify-center text-xs text-muted-foreground">
+          <div className="h-44 sm:h-48 flex items-center justify-center text-xs text-muted-foreground">
             No sales revenue data available yet.
           </div>
         ) : (
-          <ChartContainer className="aspect-auto h-60 w-full md:h-80" config={chartConfig}>
-            <BarChart accessibilityLayer data={chartRows}>
+          <ChartContainer className="aspect-auto h-44 sm:h-48 w-full" config={chartConfig}>
+            <BarChart accessibilityLayer data={chartRows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
               <XAxis
                 axisLine={false}
                 dataKey="day"
                 interval={0}
                 tickFormatter={(value) => String(value)}
                 tickLine={false}
-                tickMargin={10}
+                tickMargin={6}
+                className="text-[10px]"
               />
               <ChartTooltip content={<ChartTooltipContent hideLabel />} cursor={false} />
               <Bar dataKey="sales" fill="var(--color-sales)" shape={<CustomGradientBar />} />

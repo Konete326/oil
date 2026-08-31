@@ -1,27 +1,17 @@
 import {
   LayoutGridIcon,
-  FolderTreeIcon,
   PackageIcon,
-  RefreshCwIcon,
-  FactoryIcon,
   ShoppingCartIcon,
   HistoryIcon,
+  FactoryIcon,
   BookOpenIcon,
-  BanknoteIcon,
-  TrendingUpIcon,
-  CalculatorIcon,
-  TruckIcon,
-  ScaleIcon,
-  ReceiptIcon,
-  UserCogIcon,
-  ShieldAlertIcon,
-  FileTextIcon,
-  BriefcaseIcon,
-  BoxesIcon,
-  UserCheckIcon,
   UsersIcon,
-  BellIcon,
+  TruckIcon,
+  BanknoteIcon,
+  CalculatorIcon,
+  UserCheckIcon,
   SettingsIcon,
+  BellIcon,
 } from "lucide-react";
 
 export const navGroups = [
@@ -34,124 +24,69 @@ export const navGroups = [
         icon: <LayoutGridIcon />,
       },
       {
-        title: "Inventory & Stock",
+        title: "Inventory",
         path: "/products",
-        icon: <BoxesIcon />,
-        subItems: [
-          {
-            title: "Products & Stock",
-            path: "/products",
-            icon: <PackageIcon />,
-          },
-          {
-            title: "Categories",
-            path: "/categories",
-            icon: <FolderTreeIcon />,
-          },
-        ],
+        icon: <PackageIcon />,
       },
       {
-        title: "POS Counter Sales",
+        title: "POS Sales",
         path: "/pos",
         icon: <ShoppingCartIcon />,
         subItems: [
           {
-            title: "POS Counter",
+            title: "Counter",
             path: "/pos",
             icon: <ShoppingCartIcon />,
           },
           {
-            title: "POS Sales History",
+            title: "Sales History",
             path: "/pos/history",
             icon: <HistoryIcon />,
           },
         ],
       },
       {
-        title: "Textile Mills & DC",
+        title: "Textile Mills",
         path: "/textile",
         icon: <FactoryIcon />,
       },
       {
-        title: "Khatas & Ledgers",
-        path: "/ledger",
+        title: "Accounts",
+        path: "/customers",
         icon: <BookOpenIcon />,
         subItems: [
           {
-            title: "Customers & Accounts",
+            title: "Customers",
             path: "/customers",
             icon: <UsersIcon />,
           },
           {
-            title: "Customer Ledger & Khata",
-            path: "/ledger",
-            icon: <BookOpenIcon />,
-          },
-          {
-            title: "Supplier Ledger",
+            title: "Suppliers",
             path: "/supplier-ledger",
             icon: <TruckIcon />,
           },
           {
-            title: "Cash Transactions",
+            title: "Cash Book",
             path: "/cash",
             icon: <BanknoteIcon />,
           },
           {
-            title: "Sales & Purchases",
-            path: "/sales-purchases",
-            icon: <TrendingUpIcon />,
-          },
-          {
-            title: "Profit & Loss Margin",
-            path: "/profit-loss",
-            icon: <CalculatorIcon />,
-          },
-          {
-            title: "Financial Reports",
+            title: "Reports",
             path: "/financial-reports",
-            icon: <ScaleIcon />,
-          },
-          {
-            title: "Expenses Management",
-            path: "/expenses",
-            icon: <ReceiptIcon />,
+            icon: <CalculatorIcon />,
           },
         ],
       },
       {
-        title: "HR & Administration",
+        title: "Staff & Payroll",
         path: "/payroll",
         icon: <UserCheckIcon />,
-        subItems: [
-          {
-            title: "Employee Payroll",
-            path: "/payroll",
-            icon: <BriefcaseIcon />,
-          },
-          {
-            title: "User Management",
-            path: "/users",
-            icon: <UserCogIcon />,
-          },
-          {
-            title: "Audit Trail Logs",
-            path: "/audit-trail",
-            icon: <ShieldAlertIcon />,
-          },
-        ],
       },
     ],
   },
 ];
 
-export const footerNavLinks = [
-  {
-    title: "Documentation",
-    path: "/documentation",
-    icon: <FileTextIcon />,
-  },
-];
+export const footerNavLinks = [];
 
 export const navLinks = [
   ...navGroups.flatMap((group) =>

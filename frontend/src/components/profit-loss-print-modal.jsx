@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
+import { XIcon, PrinterIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -15,30 +15,26 @@ export function ProfitLossPrintModal({
   if (!isOpen || typeof window === "undefined") return null;
 
   const totalSales = Number(data.totalSalesRevenue || 0);
-  const posSales = Number(data.posRevenue || totalSales * 0.45);
-  const challanSales = Number(data.challanRevenue || totalSales * 0.55);
+  const posSales = Number(data.posRevenue || 0);
+  const challanSales = Number(data.challanRevenue || 0);
 
-  const totalCost = Number(data.totalStockPurchases || 0);
-  const baseOilCost = totalCost * 0.85;
-  const packagingCost = totalCost * 0.15;
+  const totalCOGS = Number(data.totalCOGS || data.totalStockPurchases || 0);
+  const posCOGS = Number(data.posCOGS || (posSales * 0.75));
+  const challanCOGS = Number(data.challanCOGS || (challanSales * 0.75));
 
-  const grossProfit = Number(data.grossProfit || totalSales - totalCost);
+  const grossProfit = Number(data.grossProfit || (totalSales - totalCOGS));
   const grossMarginPct = totalSales > 0 ? ((grossProfit / totalSales) * 100).toFixed(1) : "0.0";
 
   const totalExpenses = Number(data.operatingExpenses || 0);
-  const marketingExp = totalExpenses * 0.25;
-  const adminSalaries = totalExpenses * 0.45;
-  const utilitiesRent = totalExpenses * 0.20;
-  const maintenanceMisc = totalExpenses * 0.10;
+  const expenseCategoryMap = data.expenseCategoryMap || {};
+  const expenseEntries = Object.entries(expenseCategoryMap);
 
-  const operatingIncome = grossProfit - totalExpenses;
-  const otherIncome = totalSales > 0 ? Math.round(totalSales * 0.015) : 0;
-  const netProfit = Number(data.netProfit || operatingIncome + otherIncome);
-  const returnOnSalesPct = totalSales > 0 ? ((netProfit / totalSales) * 100).toFixed(1) : "0.0";
+  const netProfit = Number(data.netProfit || (grossProfit - totalExpenses));
+  const netMarginPct = totalSales > 0 ? ((netProfit / totalSales) * 100).toFixed(1) : "0.0";
 
   const getPctOfSales = (val) => {
-    if (!totalSales || totalSales === 0) return "-";
-    return `${((val / totalSales) * 100).toFixed(1)}%`;
+    if (!totalSales || totalSales === 0) return "0.0%";
+    return `${((Number(val) / totalSales) * 100).toFixed(1)}%`;
   };
 
   const periodLabel = startDate && endDate
@@ -59,25 +55,23 @@ export function ProfitLossPrintModal({
 
   const handleExportExcel = () => {
     const excelData = [
-      { "Category": "SALES REVENUE (J)", "Description": "POS Counter Sales", "Total Value (PKR)": posSales, "Margin %": "45.00%", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "SALES REVENUE (J)", "Description": "Mill Delivery Challans", "Total Value (PKR)": challanSales, "Margin %": "55.00%", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "SALES REVENUE (J)", "Description": "TOTAL NET SALES", "Total Value (PKR)": totalSales, "Margin %": "100.00%", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "COST OF GOODS SOLD (K)", "Description": "Base Lubricant Oil Raw Material", "Total Value (PKR)": baseOilCost, "Margin %": "85.00%", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "COST OF GOODS SOLD (K)", "Description": "Chemicals & Packaging Materials", "Total Value (PKR)": packagingCost, "Margin %": "15.00%", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "COST OF GOODS SOLD (K)", "Description": "TOTAL COST OF GOODS SOLD", "Total Value (PKR)": totalCost, "Margin %": "-", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "GROSS PROFIT (L)", "Description": "GROSS PROFIT / LOSS (J - K)", "Total Value (PKR)": grossProfit, "Margin %": `${grossMarginPct}%`, "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "OPERATING EXPENSES (S)", "Description": "Total Operating & Factory Overheads", "Total Value (PKR)": totalExpenses, "Margin %": "-", "Prior Year": 0, "Variance %": "0%" },
-      { "Category": "NET PROFIT (T)", "Description": "NET PROFIT / LOSS (L - S)", "Total Value (PKR)": netProfit, "Margin %": `${returnOnSalesPct}%`, "Prior Year": 0, "Variance %": "0%" },
+      { "Category": "SALES REVENUE", "Description": "POS Counter Sales", "Total Value (PKR)": posSales, "% of Sales": getPctOfSales(posSales) },
+      { "Category": "SALES REVENUE", "Description": "Mill Delivery Challans", "Total Value (PKR)": challanSales, "% of Sales": getPctOfSales(challanSales) },
+      { "Category": "SALES REVENUE", "Description": "TOTAL NET SALES", "Total Value (PKR)": totalSales, "% of Sales": "100.0%" },
+      { "Category": "COST OF GOODS SOLD (COGS)", "Description": "POS Sold Products Cost", "Total Value (PKR)": posCOGS, "% of Sales": getPctOfSales(posCOGS) },
+      { "Category": "COST OF GOODS SOLD (COGS)", "Description": "Mill Delivery Oil Cost", "Total Value (PKR)": challanCOGS, "% of Sales": getPctOfSales(challanCOGS) },
+      { "Category": "COST OF GOODS SOLD (COGS)", "Description": "TOTAL COST OF GOODS SOLD", "Total Value (PKR)": totalCOGS, "% of Sales": getPctOfSales(totalCOGS) },
+      { "Category": "GROSS PROFIT", "Description": "GROSS PROFIT (SALES - COGS)", "Total Value (PKR)": grossProfit, "% of Sales": `${grossMarginPct}%` },
+      ...expenseEntries.map(([cat, amt]) => ({
+        "Category": "OPERATING EXPENSES",
+        "Description": cat,
+        "Total Value (PKR)": amt,
+        "% of Sales": getPctOfSales(amt),
+      })),
+      { "Category": "OPERATING EXPENSES", "Description": "TOTAL OPERATING EXPENSES", "Total Value (PKR)": totalExpenses, "% of Sales": getPctOfSales(totalExpenses) },
+      { "Category": "NET PROFIT", "Description": "NET PROFIT (GROSS PROFIT - EXPENSES)", "Total Value (PKR)": netProfit, "% of Sales": `${netMarginPct}%` },
     ];
-    exportTransactionsToExcel(
-      excelData,
-      `Profit_Loss_Statement_${new Date().toISOString().slice(0, 10)}.xlsx`
-    );
-  };
-
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name} - PROFIT & LOSS STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Sales (J):* Rs ${totalSales.toLocaleString()}\n*Cost of Goods (K):* Rs ${totalCost.toLocaleString()}\n*Gross Profit (L):* Rs ${grossProfit.toLocaleString()} (${grossMarginPct}%)\n*Operating Expenses (S):* Rs ${totalExpenses.toLocaleString()}\n*Net Operating Profit (T):* Rs ${netProfit.toLocaleString()} (${returnOnSalesPct}%)\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+    exportTransactionsToExcel(excelData, `Profit_Loss_Statement_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   const modalContent = (
@@ -132,17 +126,9 @@ export function ProfitLossPrintModal({
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
           <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
-            <span>Profit and Loss Statement Preview (A4 Standard)</span>
+            <span>Profit and Loss Statement (Real Financials · A4 Standard)</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -169,268 +155,197 @@ export function ProfitLossPrintModal({
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
             className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-portrait-sheet relative notranslate"
-          dir="ltr"
-          lang="en"
-        >
-          <div className="flex justify-between items-start pb-2">
-            <div>
-              <h1 className="font-extrabold text-base tracking-tight text-black">
-                Profit and Loss Statement
-              </h1>
-              <div className="flex items-baseline gap-2">
+            dir="ltr"
+            lang="en"
+          >
+            <div className="flex justify-between items-start pb-2 border-b-2 border-black mb-3">
+              <div>
+                <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                  Statement of Profit and Loss (Income Statement)
+                </h1>
                 <p className="font-bold text-xs text-black uppercase">
                   {COMPANY_CONFIG.name}
                 </p>
-                <span className="font-bold text-xs text-emerald-800" dir="rtl">
-                  {COMPANY_CONFIG.nameUrdu}
-                </span>
+                <p className="text-[10px] text-gray-700 font-medium">
+                  Accounting Period ({period.toUpperCase()}): {periodLabel}
+                </p>
+                <p className="text-[10px] text-gray-600">
+                  {COMPANY_CONFIG.address} | {COMPANY_CONFIG.mobiles}
+                </p>
               </div>
-              <p className="text-[10px] text-gray-700 font-medium">
-                For the {period.toUpperCase()} period ending: {periodLabel}
-              </p>
-              <p className="text-[10px] text-gray-600">
-                {COMPANY_CONFIG.shortAddress} | {COMPANY_CONFIG.mobiles}
-              </p>
-            </div>
-            <div className="text-right text-[11px] font-semibold text-gray-700">
-              Stated in PKR
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 pb-4 mb-2">
-            <div className="border border-indigo-200 bg-indigo-50/50 p-2 text-xs space-y-0.5">
-              <div className="flex justify-between font-semibold">
-                <span>Gross Profit Margin</span>
-                <span className="font-mono">{grossMarginPct}%</span>
-              </div>
-              <div className="flex justify-between font-semibold">
-                <span>Net Profit Margin</span>
-                <span className="font-mono">{returnOnSalesPct}%</span>
+              <div className="text-right text-[11px] font-semibold text-gray-700">
+                <p className="font-bold text-black uppercase">{COMPANY_CONFIG.proprietor}</p>
+                <p className="text-[10px] text-gray-600">Currency: PKR (Rs.)</p>
               </div>
             </div>
-          </div>
 
-          <div className="mb-6 overflow-hidden">
-            <table className="w-full border-collapse border border-gray-400 text-[10px]">
-              <thead>
-                <tr className="bg-gray-100 border-b border-gray-400 text-gray-800 font-bold text-center">
-                  <th className="border border-gray-300 p-1.5 text-left w-64">
-                    Item Description
-                  </th>
-                  <th className="border border-gray-300 p-1.5 w-16">
-                    Prior Period
-                  </th>
-                  <th className="border border-gray-300 p-1.5 w-16">
-                    Budget
-                  </th>
-                  <th className="border border-gray-300 p-1.5 w-24">
-                    Amount (Rs)
-                  </th>
-                  <th className="border border-gray-300 p-1.5 w-20">
-                    % of Sales
-                  </th>
-                  <th className="border border-gray-300 p-1.5 w-16">
-                    % Change Prior
-                  </th>
-                  <th className="border border-gray-300 p-1.5 w-16">
-                    % Change Budget
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr className="bg-gray-50/80 font-bold">
-                  <td colSpan={7} className="border border-gray-300 p-1.5 text-left text-black">
-                    Sales Revenue
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Counter Retail Sales</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{posSales.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(posSales)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Bulk Mill Oil Sales</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{challanSales.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(challanSales)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr className="bg-gray-100 font-bold">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Sales Revenue</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{totalSales.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1.5 text-center font-mono">100.0%</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                </tr>
+            <div className="grid grid-cols-2 gap-4 pb-3 mb-2">
+              <div className="border border-emerald-300 bg-emerald-50/50 p-2 text-xs space-y-0.5 rounded-xs">
+                <div className="flex justify-between font-semibold">
+                  <span className="text-gray-700">Gross Profit Margin:</span>
+                  <span className="font-mono font-bold text-emerald-800">{grossMarginPct}%</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span className="text-gray-700">Gross Profit (Sales - COGS):</span>
+                  <span className="font-mono font-bold text-emerald-800">Rs. {grossProfit.toLocaleString()}</span>
+                </div>
+              </div>
 
-                <tr className="bg-gray-50/80 font-bold">
-                  <td colSpan={7} className="border border-gray-300 p-1.5 text-left text-black">
-                    Cost of Sales
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Raw Base Oil & Bulk Purchases</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{baseOilCost.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(baseOilCost)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Drum & Packaging Materials</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{packagingCost.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(packagingCost)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr className="bg-gray-100 font-bold">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Cost of Sales</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{totalCost.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(totalCost)}</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                </tr>
-
-                <tr className="bg-indigo-50 font-bold border-y-2 border-black">
-                  <td className="border border-gray-300 p-1.5 text-left text-indigo-950">Gross Profit</td>
-                  <td className="border border-gray-300 p-1.5 text-center">0</td>
-                  <td className="border border-gray-300 p-1.5 text-center">0</td>
-                  <td className="border border-gray-300 p-1.5 text-right font-mono text-indigo-950">{grossProfit.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1.5 text-center font-mono">{grossMarginPct}%</td>
-                  <td className="border border-gray-300 p-1.5 text-center">-</td>
-                  <td className="border border-gray-300 p-1.5 text-center">-</td>
-                </tr>
-
-                <tr className="bg-gray-50/80 font-bold">
-                  <td colSpan={7} className="border border-gray-300 p-1.5 text-left text-black">
-                    Operating Expenses
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Sales & Logistics</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{marketingExp.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(marketingExp)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Salaries & Payroll</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{adminSalaries.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(adminSalaries)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Utilities, Power & Rent</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{utilitiesRent.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(utilitiesRent)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 text-gray-800">Maintenance & General Admin</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{maintenanceMisc.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(maintenanceMisc)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-                <tr className="bg-gray-100 font-bold">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Total Operating Expenses</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{totalExpenses.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(totalExpenses)}</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                </tr>
-
-                <tr className="font-bold bg-gray-50">
-                  <td className="border border-gray-300 p-1.5 text-left text-black">Operating Profit</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-1.5 text-right font-mono text-black">{operatingIncome.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(operatingIncome)}</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1.5 text-center text-gray-500">-</td>
-                </tr>
-
-                <tr>
-                  <td className="border border-gray-300 p-1 ps-4 font-semibold text-gray-800">Other Income</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-right font-mono">{otherIncome.toLocaleString()}</td>
-                  <td className="border border-gray-300 p-1 text-center font-mono">{getPctOfSales(otherIncome)}</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-1 text-center text-gray-500">-</td>
-                </tr>
-
-                <tr className="bg-emerald-50 font-bold border-t-2 border-b-2 border-black text-black">
-                  <td className="border border-gray-300 p-2 text-left uppercase text-xs">
-                    Net Profit / Loss
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-2 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-2 text-right font-mono text-sm">
-                    {netProfit.toLocaleString()}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center font-mono text-xs">
-                    {returnOnSalesPct}%
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center text-gray-500">-</td>
-                  <td className="border border-gray-300 p-2 text-center text-gray-500">-</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="pt-6 grid grid-cols-2 gap-8 text-center text-xs">
-            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
-              Prepared by: Accounts Department
+              <div className="border border-indigo-300 bg-indigo-50/50 p-2 text-xs space-y-0.5 rounded-xs">
+                <div className="flex justify-between font-semibold">
+                  <span className="text-gray-700">Net Profit Margin:</span>
+                  <span className="font-mono font-bold text-indigo-800">{netMarginPct}%</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span className="text-gray-700">Net Operating Profit:</span>
+                  <span className="font-mono font-bold text-indigo-800">Rs. {netProfit.toLocaleString()}</span>
+                </div>
+              </div>
             </div>
-            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
-              Approved by: Management
+
+            <div className="mb-6 overflow-hidden">
+              <table className="w-full border-collapse border border-gray-400 text-[10px]">
+                <thead>
+                  <tr className="bg-gray-100 border-b border-gray-400 text-gray-800 font-bold text-center">
+                    <th className="border border-gray-300 p-1.5 text-left w-72">Financial Account Description</th>
+                    <th className="border border-gray-300 p-1.5 text-left w-32">Classification</th>
+                    <th className="border border-gray-300 p-1.5 w-32 text-right">Amount (PKR)</th>
+                    <th className="border border-gray-300 p-1.5 w-24 text-center">% of Revenue</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  <tr className="bg-gray-100 font-bold">
+                    <td colSpan={4} className="border border-gray-300 p-1.5 text-left text-black uppercase">
+                      1. Sales & Operating Revenue
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-1.5 ps-4 text-gray-800">Counter POS Retail Sales</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">Retail Invoices</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono font-semibold">{posSales.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(posSales)}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-1.5 ps-4 text-gray-800">Textile Mill Delivery Challans</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">Bulk Oil Deliveries</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono font-semibold">{challanSales.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(challanSales)}</td>
+                  </tr>
+                  <tr className="bg-gray-50 font-bold">
+                    <td className="border border-gray-300 p-1.5 text-left text-black">TOTAL SALES REVENUE</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">Gross Inflow</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono text-black font-bold">Rs. {totalSales.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono font-bold">100.0%</td>
+                  </tr>
+
+                  <tr className="bg-gray-100 font-bold">
+                    <td colSpan={4} className="border border-gray-300 p-1.5 text-left text-black uppercase">
+                      2. Cost of Goods Sold (COGS)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-1.5 ps-4 text-gray-800">Cost of Products Sold (POS Counter)</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">Product Cost Value</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono">{posCOGS.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(posCOGS)}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-1.5 ps-4 text-gray-800">Cost of Bulk Oil Sold (Mill Challans)</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">Bulk Base Oil Cost</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono">{challanCOGS.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(challanCOGS)}</td>
+                  </tr>
+                  <tr className="bg-gray-50 font-bold">
+                    <td className="border border-gray-300 p-1.5 text-left text-black">TOTAL COST OF GOODS SOLD</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">COGS Outflow</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono text-black font-bold">Rs. {totalCOGS.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono font-bold">{getPctOfSales(totalCOGS)}</td>
+                  </tr>
+
+                  <tr className="bg-emerald-50 font-bold border-y-2 border-black">
+                    <td className="border border-gray-300 p-2 text-left text-emerald-950 uppercase">
+                      GROSS PROFIT (SALES - COGS)
+                    </td>
+                    <td className="border border-gray-300 p-2 text-emerald-900">Gross Margin</td>
+                    <td className="border border-gray-300 p-2 text-right font-mono text-emerald-950 font-extrabold text-xs">
+                      Rs. {grossProfit.toLocaleString()}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center font-mono font-extrabold text-emerald-950">
+                      {grossMarginPct}%
+                    </td>
+                  </tr>
+
+                  <tr className="bg-gray-100 font-bold">
+                    <td colSpan={4} className="border border-gray-300 p-1.5 text-left text-black uppercase">
+                      3. Operating & Administrative Expenses
+                    </td>
+                  </tr>
+                  {expenseEntries.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="border border-gray-300 p-2 text-center text-gray-500 italic">
+                        No operational expenses or salary vouchers recorded in this period.
+                      </td>
+                    </tr>
+                  ) : (
+                    expenseEntries.map(([cat, amt]) => (
+                      <tr key={cat}>
+                        <td className="border border-gray-300 p-1.5 ps-4 text-gray-800">{cat}</td>
+                        <td className="border border-gray-300 p-1.5 text-gray-600">Operating Expense</td>
+                        <td className="border border-gray-300 p-1.5 text-right font-mono">{Number(amt).toLocaleString()}</td>
+                        <td className="border border-gray-300 p-1.5 text-center font-mono">{getPctOfSales(amt)}</td>
+                      </tr>
+                    ))
+                  )}
+                  <tr className="bg-gray-50 font-bold">
+                    <td className="border border-gray-300 p-1.5 text-left text-black">TOTAL OPERATING EXPENSES</td>
+                    <td className="border border-gray-300 p-1.5 text-gray-600">Overhead Outflow</td>
+                    <td className="border border-gray-300 p-1.5 text-right font-mono text-black font-bold">Rs. {totalExpenses.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-1.5 text-center font-mono font-bold">{getPctOfSales(totalExpenses)}</td>
+                  </tr>
+
+                  <tr className="bg-indigo-50 font-bold border-t-2 border-b-2 border-black text-black">
+                    <td className="border border-gray-300 p-2.5 text-left uppercase text-xs">
+                      NET OPERATING PROFIT / LOSS
+                    </td>
+                    <td className="border border-gray-300 p-2.5 text-indigo-900 font-semibold">Net Bottom Line</td>
+                    <td className={`border border-gray-300 p-2.5 text-right font-mono text-sm font-black ${netProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                      Rs. {netProfit.toLocaleString()}
+                    </td>
+                    <td className={`border border-gray-300 p-2.5 text-center font-mono text-xs font-black ${netProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                      {netMarginPct}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pt-6 grid grid-cols-2 gap-8 text-center text-xs">
+              <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+                Prepared by: Accounts Department
+              </div>
+              <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+                Approved by: {COMPANY_CONFIG.proprietor}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
-          Close Preview
-        </Button>
-        <Button
-          size="sm"
-          onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
-        >
-          <PrinterIcon className="size-3.5" />
-          <span>Print A4 Statement</span>
-        </Button>
+        <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
+          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+            Close Preview
+          </Button>
+          <Button
+            size="sm"
+            onClick={handlePrint}
+            className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          >
+            <PrinterIcon className="size-3.5" />
+            <span>Print A4 Statement</span>
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
-return createPortal(modalContent, document.body);
+  return createPortal(modalContent, document.body);
 }

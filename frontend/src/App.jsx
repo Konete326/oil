@@ -135,25 +135,25 @@ export default function App() {
                     <AppShell user={user} onLogout={handleLogout}>
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
-                        <Route path="/categories" element={<CategoryManager />} />
+                        <Route path="/categories" element={<Navigate to="/products" replace />} />
                         <Route path="/products" element={<ProductManager />} />
                         <Route path="/pos" element={<PosCounter />} />
                         <Route path="/pos/history" element={<PosHistory />} />
                         <Route path="/textile" element={<TextileManager />} />
                         <Route path="/customers" element={<CustomerManager />} />
-                        <Route path="/ledger" element={<LedgerManager />} />
+                        <Route path="/ledger" element={<Navigate to="/customers" replace />} />
                         <Route path="/cash" element={<CashManager />} />
-                        <Route path="/sales-purchases" element={<SalesPurchaseManager />} />
-                        <Route path="/profit-loss" element={<ProfitLossWidget />} />
+                        <Route path="/sales-purchases" element={<Navigate to="/pos/history" replace />} />
+                        <Route path="/profit-loss" element={<Navigate to="/financial-reports" replace />} />
                         <Route path="/supplier-ledger" element={<SupplierLedgerManager />} />
                         <Route path="/financial-reports" element={<FinancialReportsManager />} />
-                        <Route path="/expenses" element={<ExpensesManager />} />
+                        <Route path="/expenses" element={<Navigate to="/cash" replace />} />
                         <Route path="/payroll" element={<EmployeePayrollManager />} />
-                        <Route path="/users" element={<UserManagementManager />} />
-                        <Route path="/audit-trail" element={<AuditTrailManager />} />
+                        <Route path="/users" element={<Navigate to="/payroll" replace />} />
+                        <Route path="/audit-trail" element={<Navigate to="/settings" replace />} />
                         <Route path="/settings" element={<SettingsManager user={user} />} />
                         <Route path="/notifications" element={<NotificationManager user={user} />} />
-                        <Route path="/documentation" element={<DocumentationView />} />
+                        <Route path="/documentation" element={<Navigate to="/settings" replace />} />
                         <Route path="*" element={<NotFoundPage />} />
                       </Routes>
                     </AppShell>

@@ -113,12 +113,6 @@ export function PartyLedgerReportView() {
     toast.success("Party ledger exported to Excel!");
   };
 
-  const handleShareWhatsApp = () => {
-    if (!partyName) return;
-    const text = `*${COMPANY_CONFIG.name} - ${partyType.toUpperCase()} LEDGER STATEMENT*\n*Party Name:* ${partyName}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Closing Balance:* Rs ${closingBalance.toLocaleString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
@@ -176,14 +170,6 @@ export function PartyLedgerReportView() {
               className="bg-transparent text-foreground outline-none text-xs"
             />
           </div>
-
-          <Button
-            size="sm"
-            onClick={handleShareWhatsApp}
-            className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            Share on WhatsApp
-          </Button>
 
           <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-xs cursor-pointer">
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />

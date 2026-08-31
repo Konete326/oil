@@ -81,7 +81,6 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
   const [category, setCategory] = useState("");
-  const [subcategoryName, setSubcategoryName] = useState("");
   const [brand, setBrand] = useState("");
   const [grade, setGrade] = useState("");
   const [packagingType, setPackagingType] = useState("Medium Can 4L");
@@ -127,8 +126,6 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
   const [sellingValid, setSellingValid] = useState(false);
   const [stockValid, setStockValid] = useState(true);
 
-  const selectedCategoryObj = categories.find((c) => c._id === category);
-
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
@@ -138,7 +135,6 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
           ? initialData.category._id
           : (initialData.category || categories[0]?._id || "");
       setCategory(catId);
-      setSubcategoryName(initialData.subcategoryName || "");
       setBrand(initialData.brand || (initialData.name ? initialData.name.split(" ")[0] : ""));
       setGrade(initialData.grade || "");
       setPackagingType(initialData.packagingType || "Medium Can 4L");
@@ -154,8 +150,6 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
       setName("");
       setSku(generateSkuCode());
       setCategory(defaultCatId);
-      const firstSub = categories[0]?.subcategories?.[0]?.name || "";
-      setSubcategoryName(firstSub);
       setBrand("");
       setGrade("");
       setPackagingType("Medium Can 4L");
@@ -291,7 +285,6 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
         name: name.trim(),
         sku: sku.trim().toUpperCase(),
         category: resolvedCategory,
-        subcategoryName: subcategoryName.trim(),
         brand: resolvedBrand,
         grade: grade.trim(),
         packagingType: trimmedPkg,
@@ -403,41 +396,22 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <label className="font-medium text-foreground">Category *</label>
               <select
                 value={category}
-                onChange={(e) => handleCategoryChange(e.target.value)}
+                onChange={(e) => setCategory(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 {categories.map((c) => (
                   <option key={c._id} value={c._id}>
-                    {c.name} ({c.code})
+                    {c.name} {c.code ? `(${c.code})` : ""}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Subcategory</label>
-              <select
-                value={subcategoryName}
-                onChange={(e) => setSubcategoryName(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                {selectedCategoryObj?.subcategories?.length ? (
-                  selectedCategoryObj.subcategories.map((sub) => (
-                    <option key={sub._id || sub.name} value={sub.name}>
-                      {sub.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">General (No subcategories)</option>
-                )}
-              </select>
-            </div>
-
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <label className="font-medium text-foreground">Packaging & Unit</label>
               <div className="grid grid-cols-2 gap-1.5">
                 <div className="relative">

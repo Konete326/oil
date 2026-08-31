@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
+import { XIcon, PrinterIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -67,11 +67,6 @@ export function ExpensePrintStatementModal({
     );
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name} - EXPENSES STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Expenses:* Rs ${grandTotal.toLocaleString()}\n*Total Vouchers:* ${sortedExpenses.length}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
   const currentUserStr = localStorage.getItem("user");
   const parsedUser = currentUserStr ? JSON.parse(currentUserStr) : null;
   const activeOperator = parsedUser?.name || "Accounts Officer";
@@ -132,14 +127,6 @@ export function ExpensePrintStatementModal({
           </div>
           <div className="flex items-center gap-2">
             <Button
-              size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
-            <Button
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
@@ -174,9 +161,6 @@ export function ExpensePrintStatementModal({
                   <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                     {COMPANY_CONFIG.name}
                   </h1>
-                  <span className="font-bold text-xs text-emerald-800" dir="rtl">
-                    {COMPANY_CONFIG.nameUrdu}
-                  </span>
                 </div>
                 <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
                   EXPENSES STATEMENT

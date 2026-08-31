@@ -6,7 +6,6 @@ export const getCustomers = async (req, res, next) => {
     await connectDB();
     const { search, customerType, status, page = 1, limit = 20 } = req.query;
     let query = {};
-
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -42,19 +41,17 @@ export const getCustomers = async (req, res, next) => {
 export const createCustomer = async (req, res, next) => {
   try {
     await connectDB();
-    const { name, phone, email, address, city, customerType, creditLimit, openingBalance, notes } = req.body;
-
+    const { name, phone, email, address, city, customerType, creditLimit, openingBalance, currentBalance, notes } = req.body;
     if (!name || !name.trim()) {
       res.status(400);
       throw new Error("Customer name is required.");
     }
-
     const existing = await Customer.findOne({ name: name.trim() });
     if (existing) {
       res.status(400);
       throw new Error("A customer with this name already exists.");
     }
-
+    const initialBalance = currentBalance !== undefined ? currentBalance : openingBalance;
     const customer = await Customer.create({
       name: name.trim(),
       phone: phone || "",
@@ -63,10 +60,9 @@ export const createCustomer = async (req, res, next) => {
       city: city || "",
       customerType: customerType || "Retail",
       creditLimit: Number(creditLimit) || 0,
-      currentBalance: Number(openingBalance) || 0,
+      currentBalance: Number(initialBalance) || 0,
       notes: notes || "",
     });
-
     res.status(201).json({ success: true, data: customer });
   } catch (error) {
     next(error);
@@ -78,13 +74,11 @@ export const updateCustomer = async (req, res, next) => {
     await connectDB();
     const { id } = req.params;
     const { name, phone, email, address, city, customerType, creditLimit, currentBalance, status, notes } = req.body;
-
     const customer = await Customer.findById(id);
     if (!customer) {
       res.status(404);
       throw new Error("Customer not found.");
     }
-
     if (name && name.trim() !== customer.name) {
       const existing = await Customer.findOne({ name: name.trim() });
       if (existing) {
@@ -93,7 +87,6 @@ export const updateCustomer = async (req, res, next) => {
       }
       customer.name = name.trim();
     }
-
     if (phone !== undefined) customer.phone = phone;
     if (email !== undefined) customer.email = email;
     if (address !== undefined) customer.address = address;
@@ -116,12 +109,10 @@ export const deleteCustomer = async (req, res, next) => {
     await connectDB();
     const { id } = req.params;
     const customer = await Customer.findById(id);
-
     if (!customer) {
       res.status(404);
       throw new Error("Customer not found.");
     }
-
     await Customer.findByIdAndDelete(id);
     res.status(200).json({ success: true, message: "Customer deleted successfully." });
   } catch (error) {

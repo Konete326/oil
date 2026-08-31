@@ -1,102 +1,148 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchDashboardData } from "@/lib/api";
+import { fetchDashboardData, createExpenseApi } from "@/lib/api";
 import { DashboardHeroCards } from "@/components/dashboard-hero-cards";
-import { BillingHealth } from "@/components/billing-health";
-import { ChannelSalesChart } from "@/components/channel-sales-chart";
-import { DashboardActivity } from "@/components/dashboard-activity";
-import { DashboardInvoices } from "@/components/dashboard-invoices";
+import { LiveGallaWidget } from "@/components/live-galla-widget";
 import { NetRevenueChart } from "@/components/net-revenue-chart";
-import { DashboardStats } from "@/components/stats";
+import { DashboardInvoices } from "@/components/dashboard-invoices";
+import { ExpenseModal } from "@/components/expense-modal";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowDownLeftIcon,
-  ArrowUpRightIcon,
-  TrendingUpIcon,
-  WalletIcon,
-  PlusIcon,
   ShoppingCartIcon,
   ReceiptIcon,
-  PackageIcon,
+  PackagePlusIcon,
+  TruckIcon,
+  RefreshCwIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchDashboardData().then((res) => {
+  const loadData = useCallback(async (isSilent = false) => {
+    try {
+      if (!isSilent) setLoading(true);
+      else setRefreshing(true);
+      const res = await fetchDashboardData();
       if (res && res.success) {
         setData(res.data);
       }
+    } catch (err) {
+      console.error(err);
+    } finally {
       setLoading(false);
-    });
+      setRefreshing(false);
+    }
   }, []);
 
-  const kpis = data?.kpis || [
-    { label: "Total Cash Received Today", value: "Rs. 0", type: "green" },
-    { label: "Total Cash Paid Today", value: "Rs. 0", type: "red" },
-    { label: "Net Sales Of This Month", value: "Rs. 0", type: "blue" },
-    { label: "Total Receivable Balance", value: "Rs. 0", type: "orange" },
-  ];
+  useEffect(() => {
+    loadData();
+
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 10000);
+
+    const handleFocus = () => {
+      loadData(true);
+    };
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [loadData]);
+
+  const handleExpenseSave = async (expenseData) => {
+    try {
+      const res = await createExpenseApi(expenseData);
+      if (res && res.success) {
+        toast.success("Expense recorded successfully and deducted from Cash Drawer!");
+        loadData();
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to record expense");
+    }
+  };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="border-b border-border pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
-        <p className="text-xs text-muted-foreground">Real-time KPI overview, daily cash inflow/outflow, and financial metrics.</p>
+    <div className="w-full space-y-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border pb-4">
+        <div className="flex items-center gap-2.5">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Al-Khaleej Lubricants Dashboard</h1>
+            <p className="text-xs text-muted-foreground">Real-time live business summary, cash in drawer, stock value, and daily operations.</p>
+          </div>
+          {refreshing && (
+            <RefreshCwIcon className="size-3.5 text-primary animate-spin shrink-0" />
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => navigate("/pos")}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs gap-1.5 cursor-pointer shadow-xs h-8 px-3"
+          >
+            <ShoppingCartIcon className="size-3.5" />
+            <span>New POS Sale (F1)</span>
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => setIsExpenseModalOpen(true)}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs gap-1.5 cursor-pointer shadow-xs h-8 px-3"
+          >
+            <ReceiptIcon className="size-3.5" />
+            <span>Record Expense</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate("/products")}
+            className="border-border text-foreground font-semibold text-xs gap-1.5 cursor-pointer hover:bg-muted/50 shadow-xs h-8 px-3"
+          >
+            <PackagePlusIcon className="size-3.5" />
+            <span>Add Stock</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate("/textile")}
+            className="border-border text-foreground font-semibold text-xs gap-1.5 cursor-pointer hover:bg-muted/50 shadow-xs h-8 px-3"
+          >
+            <TruckIcon className="size-3.5" />
+            <span>Dispatch Challan</span>
+          </Button>
+        </div>
       </div>
 
-      <DashboardHeroCards heroCards={data?.heroCards} loading={loading} />
+      <DashboardHeroCards
+        heroCards={data?.heroCards}
+        gallaStatus={data?.gallaStatus}
+        loading={loading}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi, index) => {
-          let cardStyle = "border-emerald-500/30 bg-emerald-500/10 text-emerald-500";
-          let figureStyle = "text-emerald-500";
-          let Icon = ArrowDownLeftIcon;
+      <LiveGallaWidget
+        lowStockItems={data?.lowStockItems}
+      />
 
-          if (kpi.type === "red" || index === 1) {
-            cardStyle = "border-rose-500/30 bg-rose-500/10 text-rose-500";
-            figureStyle = "text-rose-500";
-            Icon = ArrowUpRightIcon;
-          } else if (kpi.type === "blue" || index === 2) {
-            cardStyle = "border-blue-500/30 bg-blue-500/10 text-blue-500";
-            figureStyle = "text-blue-500";
-            Icon = TrendingUpIcon;
-          } else if (kpi.type === "orange" || index === 3) {
-            cardStyle = "border-amber-500/30 bg-amber-500/10 text-amber-500";
-            figureStyle = "text-amber-500";
-            Icon = WalletIcon;
-          }
-
-          return (
-            <div key={kpi.label || index} className={`rounded-xl border p-4 shadow-sm bg-card transition-all space-y-2`}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
-                <div className={`p-2 rounded-lg border ${cardStyle}`}>
-                  <Icon className="size-4" />
-                </div>
-              </div>
-              <div>
-                <p className={`text-3xl font-extrabold tabular-nums tracking-tight ${figureStyle}`}>
-                  {kpi.value}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1 font-medium">Real-time Metrics</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <DashboardStats stats={data?.stats} loading={loading} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <NetRevenueChart revenue={data?.revenue} loading={loading} />
-        <ChannelSalesChart data={data?.channelSales} loading={loading} />
         <DashboardInvoices invoices={data?.invoices} loading={loading} />
-        <BillingHealth />
-        <DashboardActivity activities={data?.activities} loading={loading} />
       </div>
+
+      <ExpenseModal
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSave={handleExpenseSave}
+      />
     </div>
   );
 }

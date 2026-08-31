@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { XIcon, PrinterIcon, SendIcon, CheckCircle2Icon } from "lucide-react";
+import { XIcon, PrinterIcon, CheckCircle2Icon } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { numberToWords } from "@/lib/number-to-words";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -35,11 +35,6 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
   ];
 
   const totalQuantityLiters = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name}*\n*PROFORMA / SALES INVOICE*\n*Invoice No:* ${sale.saleNumber || sale.challanNumber || "INV-001"}\n*Buyer:* ${sale.customerName || sale.millName || "Client"}\n*Date:* ${new Date(sale.createdAt || Date.now()).toLocaleDateString()}\n*Total Liters / Qty:* ${totalQuantityLiters}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Amount in Words:* ${numberToWords(grandTotal)}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}\nThank you for your business!`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
 
   const modalContent = (
     <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
@@ -98,14 +93,6 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
-            <Button
-              size="sm"
               onClick={handlePrint}
               className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
             >
@@ -130,9 +117,6 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                     <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
                       {COMPANY_CONFIG.name}
                     </h1>
-                    <span className="font-bold text-base text-emerald-800" dir="rtl">
-                      {COMPANY_CONFIG.nameUrdu}
-                    </span>
                   </div>
                   <p className="text-[10px] text-gray-800 font-semibold italic">
                     {COMPANY_CONFIG.tagline}

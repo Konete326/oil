@@ -12,20 +12,21 @@ export const getMills = async (req, res, next) => {
 export const createMill = async (req, res, next) => {
   try {
     const { name, code, zone, contactPerson, phone, ntnNumber, contractRatePerLiter, creditLimit, address } = req.body;
-    if (!name || !code || !contactPerson || !phone || contractRatePerLiter === undefined) {
+    if (!name || !name.trim()) {
       res.status(400);
-      throw new Error("Mill Name, Code, Contact Person, Phone, and Contract Rate are required.");
+      throw new Error("Textile Mill Name is required.");
     }
+    const finalCode = (code && code.trim()) ? code.trim().toUpperCase() : `MILL-${Date.now().toString().slice(-4)}`;
     const mill = await Mill.create({
-      name,
-      code: code.toUpperCase(),
-      zone: zone || "Korangi Industrial Area",
-      contactPerson,
-      phone,
-      ntnNumber,
-      contractRatePerLiter: Number(contractRatePerLiter),
+      name: name.trim(),
+      code: finalCode,
+      zone: zone || "Korangi Industrial Area, Karachi",
+      contactPerson: (contactPerson && contactPerson.trim()) ? contactPerson.trim() : "-",
+      phone: (phone && phone.trim()) ? phone.trim() : "-",
+      ntnNumber: ntnNumber || "",
+      contractRatePerLiter: Number(contractRatePerLiter) || 0,
       creditLimit: Number(creditLimit) || 500000,
-      address,
+      address: address || "",
     });
     res.status(201).json({ success: true, data: mill });
   } catch (error) {

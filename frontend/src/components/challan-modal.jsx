@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ValidatedInput } from "@/components/ui/validated-input";
 import { XIcon, TruckIcon } from "lucide-react";
 
-export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
+export function ChallanModal({ isOpen, onClose, onSave, mills = [], products = [] }) {
   const [millId, setMillId] = useState("");
+  const [productName, setProductName] = useState("");
   const [productId, setProductId] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [driverName, setDriverName] = useState("");
@@ -15,38 +15,54 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [quantityValid, setQuantityValid] = useState(true);
-  const [rateValid, setRateValid] = useState(true);
-
-  const isFormValid = !!millId && !!productId && Number(quantityLiters) > 0 && quantityValid && rateValid;
-
   const selectedMillObj = mills.find((m) => m._id === millId);
 
   useEffect(() => {
     if (isOpen) {
-      setMillId(mills[0]?._id || "");
-      setProductId(products[0]?._id || "");
+      const defaultMill = mills[0];
+      const defaultProduct = products[0];
+      setMillId(defaultMill?._id || "");
+      setProductId(defaultProduct?._id || "");
+      setProductName(defaultProduct ? `${defaultProduct.name} (${defaultProduct.brand || "Standard"})` : "Bulk Mineral Lubricant Oil");
       setVehicleNumber("");
       setDriverName("");
       setDriverPhone("");
-      setDipMeasurementInches("48");
-      setQuantityLiters("10000");
-      setOverrideRate("");
+      setDipMeasurementInches("");
+      setQuantityLiters("1000");
+      setOverrideRate(defaultMill?.contractRatePerLiter ? String(defaultMill.contractRatePerLiter) : "530");
       setError("");
     }
   }, [isOpen, mills, products]);
 
-  useEffect(() => {
-    if (selectedMillObj) {
-      setOverrideRate(String(selectedMillObj.contractRatePerLiter));
+  const handleMillChange = (newMillId) => {
+    setMillId(newMillId);
+    const target = mills.find((m) => m._id === newMillId);
+    if (target && target.contractRatePerLiter) {
+      setOverrideRate(String(target.contractRatePerLiter));
     }
-  }, [millId]);
+  };
+
+  const handleProductNameChange = (value) => {
+    setProductName(value);
+    const matched = products.find(
+      (p) =>
+        p.name?.toLowerCase() === value.toLowerCase() ||
+        `${p.name} (${p.brand || "Standard"})`.toLowerCase() === value.toLowerCase()
+    );
+    if (matched) {
+      setProductId(matched._id);
+    } else {
+      setProductId("");
+    }
+  };
 
   if (!isOpen) return null;
 
-  const rateNum = Number(overrideRate) || selectedMillObj?.contractRatePerLiter || 0;
+  const rateNum = Number(overrideRate) || Number(selectedMillObj?.contractRatePerLiter) || 0;
   const litersNum = Number(quantityLiters) || 0;
   const calculatedTotal = (litersNum * rateNum).toFixed(2);
+
+  const isFormValid = !!millId;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,13 +73,14 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
     try {
       await onSave({
         millId,
-        productId,
+        productId: productId || undefined,
+        productName: productName.trim() || "Bulk Mineral Lubricant Oil",
         vehicleNumber: vehicleNumber.trim() ? vehicleNumber.toUpperCase().trim() : "N/A",
         driverName: driverName.trim() || "Standard Delivery",
         driverPhone: driverPhone.trim() || "",
         dipMeasurementInches: Number(dipMeasurementInches) || 0,
-        quantityLiters: Number(quantityLiters),
-        overrideRate: Number(overrideRate) || rateNum,
+        quantityLiters: litersNum > 0 ? litersNum : 1000,
+        overrideRate: rateNum > 0 ? rateNum : 530,
       });
       onClose();
     } catch (err) {
@@ -75,133 +92,168 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-xl rounded-xl border border-border bg-background p-6 shadow-2xl space-y-4 my-8">
-        <div className="flex items-center justify-between border-b pb-3">
-          <div>
-            <h3 className="font-semibold text-lg text-foreground flex items-center gap-2">
-              <TruckIcon className="size-5 text-primary" />
-              Issue Delivery Challan & Gate Pass
-            </h3>
-            <p className="text-xs text-muted-foreground">Record Tanker Dispatch & Mill Delivery Details</p>
+      <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-2xl space-y-4 my-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between border-b border-border/80 pb-3">
+          <div className="flex items-center gap-2">
+            <TruckIcon className="size-5 text-primary" />
+            <div>
+              <h3 className="font-bold text-base text-foreground leading-none">
+                Issue Delivery Challan &amp; Gate Pass
+              </h3>
+              <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                Bulk oil tanker dispatch &amp; instant invoice generation
+              </p>
+            </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
+          <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer size-7">
             <XIcon className="size-4" />
           </Button>
         </div>
 
         {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-xs text-destructive">
+          <div className="rounded-md bg-destructive/15 p-2.5 text-xs text-destructive">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-medium text-foreground">Target Textile Mill *</label>
+              <div className="flex items-center justify-between">
+                <label className="font-semibold text-foreground text-[11px]">Target Textile Mill *</label>
+                {selectedMillObj?.contractRatePerLiter > 0 && (
+                  <span className="text-[10.5px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                    Contract: Rs {Number(selectedMillObj.contractRatePerLiter).toLocaleString()}/L
+                  </span>
+                )}
+              </div>
               <select
                 value={millId}
-                onChange={(e) => setMillId(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
+                onChange={(e) => handleMillChange(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 required
               >
                 <option value="" disabled>Select Textile Mill</option>
                 {mills.map((m) => (
                   <option key={m._id} value={m._id}>
-                    {m.name} ({m.zone})
+                    [{m.code}] {m.name} ({m.zone || "Karachi"})
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="space-y-1">
-              <label className="font-medium text-foreground">Product / Oil Grade *</label>
-              <select
-                value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
-                required
-              >
-                <option value="" disabled>Select Oil Product</option>
-                {products.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.name} ({p.brand}) — Grade: {p.grade || "N/A"}
-                  </option>
-                ))}
-              </select>
+              <label className="font-medium text-muted-foreground text-[11px]">Product / Oil Grade (Optional)</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  list="challan-products-datalist"
+                  placeholder="Select or type custom product name..."
+                  value={productName}
+                  onChange={(e) => handleProductNameChange(e.target.value)}
+                  className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <datalist id="challan-products-datalist">
+                  {products.map((p) => (
+                    <option key={p._id} value={`${p.name} (${p.brand || "Standard"})`}>
+                      {p.category?.name || "Lubricants"} — Stock: {p.stockQuantity || 0} L
+                    </option>
+                  ))}
+                </datalist>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <ValidatedInput
-              label="Tanker / Vehicle No (Optional)"
-              rule="code"
-              required={false}
-              placeholder="e.g. TKA-4921"
-              value={vehicleNumber}
-              onChange={(e) => setVehicleNumber(e.target.value)}
-            />
-            <ValidatedInput
-              label="Driver Name (Optional)"
-              rule="name"
-              required={false}
-              placeholder="e.g. Muhammad Aslam"
-              value={driverName}
-              onChange={(e) => setDriverName(e.target.value)}
-            />
-            <ValidatedInput
-              label="Driver Phone (Optional)"
-              rule="phone"
-              required={false}
-              placeholder="0301-8291044"
-              value={driverPhone}
-              onChange={(e) => setDriverPhone(e.target.value)}
-            />
+            <div className="space-y-1">
+              <label className="font-medium text-muted-foreground text-[11px]">Tanker / Vehicle No (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. TKA-4921"
+                value={vehicleNumber}
+                onChange={(e) => setVehicleNumber(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs font-mono uppercase text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-medium text-muted-foreground text-[11px]">Driver Name (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. Muhammad Aslam"
+                value={driverName}
+                onChange={(e) => setDriverName(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-medium text-muted-foreground text-[11px]">Driver Phone (Optional)</label>
+              <input
+                type="text"
+                placeholder="0300-1234567"
+                value={driverPhone}
+                onChange={(e) => setDriverPhone(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <ValidatedInput
-              label="Dip Measurement (Optional)"
-              rule="positiveNumber"
-              required={false}
-              type="number"
-              placeholder="48 (Inches)"
-              value={dipMeasurementInches}
-              onChange={(e) => setDipMeasurementInches(e.target.value)}
-            />
-            <ValidatedInput
-              label="Net Quantity (Liters) *"
-              rule="amount"
-              required
-              type="number"
-              placeholder="10000"
-              value={quantityLiters}
-              onChange={(e) => setQuantityLiters(e.target.value)}
-              onValidationChange={setQuantityValid}
-            />
-            <ValidatedInput
-              label="Rate per Liter (Rs) *"
-              rule="amount"
-              required
-              type="number"
-              placeholder="530"
-              value={overrideRate}
-              onChange={(e) => setOverrideRate(e.target.value)}
-              onValidationChange={setRateValid}
-            />
+            <div className="space-y-1">
+              <label className="font-medium text-muted-foreground text-[11px]">Dip Measurement (Optional)</label>
+              <input
+                type="number"
+                placeholder="e.g. 48 (Inches)"
+                value={dipMeasurementInches}
+                onChange={(e) => setDipMeasurementInches(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-medium text-muted-foreground text-[11px]">Quantity (Liters) (Optional)</label>
+              <input
+                type="number"
+                placeholder="e.g. 5000"
+                value={quantityLiters}
+                onChange={(e) => setQuantityLiters(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs font-mono font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                min="1"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-medium text-muted-foreground text-[11px]">Rate per Liter (Rs) (Optional)</label>
+              <input
+                type="number"
+                placeholder="e.g. 530"
+                value={overrideRate}
+                onChange={(e) => setOverrideRate(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs font-mono font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                min="0"
+              />
+            </div>
           </div>
 
-          <div className="p-3 bg-muted/40 rounded-lg border flex justify-between items-center text-xs">
-            <span className="text-muted-foreground font-medium">Calculated Bill Amount:</span>
-            <span className="font-mono font-bold text-sm text-primary">Rs {Number(calculatedTotal).toLocaleString()}</span>
+          <div className="p-3 bg-muted/40 rounded-xl border border-border/80 flex justify-between items-center text-xs">
+            <div>
+              <span className="text-muted-foreground font-medium block text-[11px]">Total Calculated Challan Bill:</span>
+              <span className="text-[10.5px] text-muted-foreground font-mono">
+                {litersNum.toLocaleString()} Liters × Rs {rateNum.toLocaleString()} / L
+              </span>
+            </div>
+            <span className="font-mono font-bold text-base text-primary">
+              Rs {Number(calculatedTotal).toLocaleString()}
+            </span>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t">
-            <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/80">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !isFormValid} className="cursor-pointer">
-              {loading ? "Generating DC..." : "Issue Delivery Challan"}
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="cursor-pointer">
+              {loading ? "Generating..." : "Issue Delivery Challan"}
             </Button>
           </div>
         </form>

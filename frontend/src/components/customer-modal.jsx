@@ -1,20 +1,19 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ValidatedInput } from "@/components/ui/validated-input";
+import { Input } from "@/components/ui/input";
 import { XIcon, UserIcon, Loader2Icon, AlertTriangleIcon } from "lucide-react";
 import { createCustomerApi, updateCustomerApi } from "@/lib/api";
 import { toast } from "sonner";
 
-export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCustomers = [] }) {
+export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, existingCustomers = [] }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [customerType, setCustomerType] = useState("Retail");
-  const [creditLimit, setCreditLimit] = useState("0");
-  const [openingBalance, setOpeningBalance] = useState("0");
+  const [creditLimit, setCreditLimit] = useState("");
+  const [openingBalance, setOpeningBalance] = useState("");
   const [status, setStatus] = useState("Active");
   const [submitting, setSubmitting] = useState(false);
-  const [nameValid, setNameValid] = useState(true);
   const [duplicateWarning, setDuplicateWarning] = useState(null);
 
   useEffect(() => {
@@ -23,16 +22,16 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
       setPhone(customer.phone || "");
       setAddress(customer.address || "");
       setCustomerType(customer.customerType || "Retail");
-      setCreditLimit(String(customer.creditLimit || 0));
-      setOpeningBalance(String(customer.currentBalance || 0));
+      setCreditLimit(customer.creditLimit ? String(customer.creditLimit) : "");
+      setOpeningBalance(customer.currentBalance ? String(customer.currentBalance) : "");
       setStatus(customer.status || "Active");
     } else {
       setName("");
       setPhone("");
       setAddress("");
       setCustomerType("Retail");
-      setCreditLimit("0");
-      setOpeningBalance("0");
+      setCreditLimit("");
+      setOpeningBalance("");
       setStatus("Active");
     }
   }, [customer, isOpen]);
@@ -80,12 +79,16 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
 
       if (customer) {
         const res = await updateCustomerApi(customer._id, payload);
+        const savedData = res?.data || { ...customer, ...payload };
         toast.success("Customer profile updated successfully!");
-        onSuccess(res?.data || { ...customer, ...payload }, true);
+        if (typeof onSuccess === "function") onSuccess(savedData, true);
+        if (typeof onSaved === "function") onSaved(savedData, true);
       } else {
         const res = await createCustomerApi(payload);
+        const savedData = res?.data || { ...payload, _id: `cust_${Date.now()}` };
         toast.success("New Customer profile created successfully!");
-        onSuccess(res?.data || { ...payload, _id: `cust_${Date.now()}` }, false);
+        if (typeof onSuccess === "function") onSuccess(savedData, false);
+        if (typeof onSaved === "function") onSaved(savedData, false);
       }
       onClose();
     } catch (err) {
@@ -109,80 +112,97 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-3 text-xs">
-          <ValidatedInput
-            label="Customer Full Name *"
-            rule="name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onValidationChange={setNameValid}
-            placeholder="e.g. Tariq Autos / Bilal Traders"
-          />
-
-          <div className="space-y-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <ValidatedInput
-                label="Phone Number (Optional)"
-                rule="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0300-1234567"
-              />
-              <div className="space-y-1">
-                <label className="font-medium text-foreground text-[11px]">Customer Type</label>
-                <select
-                  value={customerType}
-                  onChange={(e) => setCustomerType(e.target.value)}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="Retail">Retail Customer</option>
-                  <option value="Wholesale">Wholesale Party</option>
-                  <option value="Corporate">Corporate / Fleet</option>
-                </select>
-              </div>
-            </div>
-
-            {duplicateWarning && (
-              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] flex items-center gap-1.5 animate-in fade-in duration-150 font-medium">
-                <AlertTriangleIcon className="size-3.5 shrink-0" />
-                <span>{duplicateWarning}</span>
-              </div>
-            )}
+          <div className="space-y-1">
+            <label className="font-medium text-foreground text-[11px]">
+              Customer Full Name <span className="text-destructive">*</span>
+            </label>
+            <Input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Tariq Autos / Bilal Traders"
+              className="h-8.5 text-xs bg-muted/20 focus:bg-background"
+              autoFocus
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <ValidatedInput
-              label={customer ? "Current Balance" : "Opening Balance (Optional)"}
-              rule="number"
-              type="number"
-              value={openingBalance}
-              onChange={(e) => setOpeningBalance(e.target.value)}
-              placeholder="0"
-            />
-            <ValidatedInput
-              label="Credit Limit (Optional)"
-              rule="positiveNumber"
-              type="number"
-              value={creditLimit}
-              onChange={(e) => setCreditLimit(e.target.value)}
-              placeholder="0"
+            <div className="space-y-1">
+              <label className="font-medium text-foreground text-[11px]">Phone Number (Optional)</label>
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="0300-1234567"
+                className="h-8.5 text-xs bg-muted/20 focus:bg-background"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="font-medium text-foreground text-[11px]">Customer Type</label>
+              <select
+                value={customerType}
+                onChange={(e) => setCustomerType(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
+              >
+                <option value="Retail">Retail Customer</option>
+                <option value="Wholesale">Wholesale Party</option>
+                <option value="Corporate">Corporate / Fleet</option>
+              </select>
+            </div>
+          </div>
+
+          {duplicateWarning && (
+            <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] flex items-center gap-1.5 animate-in fade-in duration-150 font-medium">
+              <AlertTriangleIcon className="size-3.5 shrink-0" />
+              <span>{duplicateWarning}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="space-y-1">
+              <label className="font-medium text-foreground text-[11px]">
+                {customer ? "Current Balance (Rs)" : "Opening Balance (Optional)"}
+              </label>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={openingBalance}
+                onChange={(e) => setOpeningBalance(e.target.value)}
+                placeholder="0"
+                className="h-8.5 text-xs bg-muted/20 focus:bg-background font-mono"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="font-medium text-foreground text-[11px]">Credit Limit (Optional)</label>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={creditLimit}
+                onChange={(e) => setCreditLimit(e.target.value)}
+                placeholder="0"
+                className="h-8.5 text-xs bg-muted/20 focus:bg-background font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-medium text-foreground text-[11px]">Shop / Street Address (Optional)</label>
+            <Input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Shop # 4, Main Market, Karachi"
+              className="h-8.5 text-xs bg-muted/20 focus:bg-background"
             />
           </div>
 
-          <ValidatedInput
-            label="Shop / Street Address (Optional)"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="e.g. Shop # 4, Main Market, Karachi"
-          />
-
           {customer && (
-            <div className="space-y-1 pt-1">
+            <div className="space-y-1 pt-0.5">
               <label className="font-medium text-foreground text-[11px]">Account Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
               >
                 <option value="Active">Active (Chalu)</option>
                 <option value="Inactive">Inactive (Band)</option>
@@ -194,7 +214,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
             <Button variant="outline" type="button" onClick={onClose} disabled={submitting} className="cursor-pointer text-xs h-8">
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting || !nameValid} className="cursor-pointer text-xs font-semibold h-8 px-4 bg-primary text-primary-foreground">
+            <Button type="submit" disabled={submitting || !name.trim()} className="cursor-pointer text-xs font-semibold h-8 px-4 bg-primary text-primary-foreground">
               {submitting ? (
                 <><Loader2Icon className="size-3.5 animate-spin" /><span>Saving...</span></>
               ) : (

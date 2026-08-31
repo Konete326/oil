@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { XIcon, PrinterIcon, SendIcon, CheckCircle2Icon } from "lucide-react";
+import { XIcon, PrinterIcon, CheckCircle2Icon } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { numberToWords } from "@/lib/number-to-words";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -24,11 +24,6 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
 
   const grandTotal = challan.totalAmount || 0;
   const quantityLiters = challan.quantityLiters || 0;
-
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name}*\n*DELIVERY CHALLAN & GATE PASS*\n*Challan No:* ${challan.challanNumber}\n*Consignee Mill:* ${challan.millName}\n*Product:* ${challan.productName}\n*Quantity:* ${quantityLiters.toLocaleString()} Liters\n*Vehicle No:* ${challan.vehicleNumber}\n*Driver:* ${challan.driverName} (${challan.driverPhone || "N/A"})\n*Total Bill Amount:* Rs ${grandTotal.toLocaleString()}\n*Amount in Words:* ${numberToWords(grandTotal)}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
 
   const modalContent = (
     <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
@@ -87,14 +82,6 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
-            <Button
-              size="sm"
               onClick={handlePrint}
               className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
             >
@@ -119,9 +106,6 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                     <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
                       {COMPANY_CONFIG.name}
                     </h1>
-                    <span className="font-bold text-base text-emerald-800" dir="rtl">
-                      {COMPANY_CONFIG.nameUrdu}
-                    </span>
                   </div>
                   <p className="text-[10px] text-gray-800 font-semibold italic">
                     {COMPANY_CONFIG.tagline}
@@ -172,15 +156,21 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
               <p className="text-[11px] text-gray-800">
                 DATE: {new Date(challan.createdAt || Date.now()).toLocaleDateString("en-GB")}
               </p>
-              <p className="text-[11px] text-gray-800">
-                VEHICLE #: <strong className="text-black uppercase">{challan.vehicleNumber || "-"}</strong>
-              </p>
-              <p className="text-[10px] text-gray-700 font-sans">
-                DRIVER: <strong>{challan.driverName || "-"}</strong> {challan.driverPhone ? `(${challan.driverPhone})` : ""}
-              </p>
-              <p className="text-[10px] text-gray-700 font-sans">
-                DIP: <strong>{challan.dipMeasurementInches ? `${challan.dipMeasurementInches}" Inches` : "-"}</strong>
-              </p>
+              {challan.vehicleNumber && challan.vehicleNumber !== "N/A" && challan.vehicleNumber !== "-" && (
+                <p className="text-[11px] text-gray-800">
+                  VEHICLE #: <strong className="text-black uppercase">{challan.vehicleNumber}</strong>
+                </p>
+              )}
+              {challan.driverName && challan.driverName !== "Standard Delivery" && challan.driverName !== "-" && (
+                <p className="text-[10px] text-gray-700 font-sans">
+                  DRIVER: <strong>{challan.driverName}</strong> {challan.driverPhone && challan.driverPhone !== "-" ? `(${challan.driverPhone})` : ""}
+                </p>
+              )}
+              {Number(challan.dipMeasurementInches) > 0 && (
+                <p className="text-[10px] text-gray-700 font-sans">
+                  DIP: <strong>{challan.dipMeasurementInches}" Inches</strong>
+                </p>
+              )}
             </div>
           </div>
 

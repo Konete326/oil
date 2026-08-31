@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { XIcon, PrinterIcon, SendIcon, CheckCircle2Icon, HandCoinsIcon } from "lucide-react";
+import { XIcon, PrinterIcon, CheckCircle2Icon, HandCoinsIcon } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { numberToWords } from "@/lib/number-to-words";
 import { COMPANY_CONFIG } from "@/lib/company-config";
@@ -23,11 +23,6 @@ export function AdvanceReceiptModal({ isOpen, onClose, voucher }) {
   };
 
   const advanceAmount = Number(voucher.amount || 0);
-
-  const handleShareWhatsApp = () => {
-    const text = `*${COMPANY_CONFIG.name}*\n*STAFF ADVANCE CASH VOUCHER*\n*Voucher #:* ${voucher.voucherNumber}\n*Date:* ${new Date(voucher.date || Date.now()).toLocaleDateString("en-GB")}\n*Employee:* ${voucher.employeeName} (${voucher.designation || "Staff"})\n*Advance Amount:* Rs. ${advanceAmount.toLocaleString()}\n*Amount in Words:* ${numberToWords(advanceAmount)}\n*Payment Mode:* ${voucher.paymentMode || "Cash"}\n*Reason:* ${voucher.reason || "Staff Advance Salary"}\n*New Advance Balance:* Rs. ${(voucher.newAdvanceBalance || 0).toLocaleString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-  };
 
   const modalContent = (
     <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
@@ -86,14 +81,6 @@ export function AdvanceReceiptModal({ isOpen, onClose, voucher }) {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
-            </Button>
-            <Button
-              size="sm"
               onClick={handlePrint}
               className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
             >
@@ -118,9 +105,6 @@ export function AdvanceReceiptModal({ isOpen, onClose, voucher }) {
                       <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                         {COMPANY_CONFIG.name}
                       </h1>
-                      <span className="font-bold text-xs text-emerald-800" dir="rtl">
-                        {COMPANY_CONFIG.nameUrdu}
-                      </span>
                     </div>
                     <p className="text-[9px] text-gray-700 font-semibold italic">
                       {COMPANY_CONFIG.tagline}

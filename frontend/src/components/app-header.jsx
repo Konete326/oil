@@ -24,15 +24,12 @@ import {
   SearchIcon,
   BellIcon,
   FileQuestionIcon,
-  PlusIcon,
   PackageIcon,
   ShoppingCartIcon,
   WalletIcon,
   ReceiptIcon,
   BookOpenIcon,
   TruckIcon,
-  ChevronDownIcon,
-  ShieldAlertIcon,
 } from "lucide-react";
 
 export function AppHeader({ user, onLogout }) {
@@ -44,10 +41,8 @@ export function AppHeader({ user, onLogout }) {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
 
   const searchRef = useRef(null);
-  const quickActionRef = useRef(null);
 
   const activeItem = navLinks.find((item) => item.path === location.pathname) || {
     title: location.pathname === "/notifications" ? "Notifications" : "Page Not Found",
@@ -66,9 +61,6 @@ export function AppHeader({ user, onLogout }) {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setIsSearchOpen(false);
-      }
-      if (quickActionRef.current && !quickActionRef.current.contains(e.target)) {
-        setIsQuickActionOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -152,31 +144,31 @@ export function AppHeader({ user, onLogout }) {
             .slice(0, 3)
             .forEach((s) => {
               results.push({
-                id: `pos-${s._id}`,
-                title: `Slip #${s.saleNumber} - ${s.customerName}`,
-                subtitle: `Total: Rs ${s.grandTotal?.toLocaleString()} | Mode: ${s.paymentMode}`,
-                category: "POS Counter Sales",
+                id: `sale-${s._id}`,
+                title: `POS Sale #${s.saleNumber}`,
+                subtitle: `Customer: ${s.customerName} | Rs. ${s.grandTotal.toLocaleString()} (${s.paymentMode})`,
+                category: "POS Counter",
                 path: "/pos/history",
-                icon: <ShoppingCartIcon className="size-4 text-blue-500" />,
+                icon: <ShoppingCartIcon className="size-4 text-emerald-500" />,
               });
             });
         } else if (modKey === "cash") {
           res.data
             .filter(
               (c) =>
+                c.voucherNumber?.toLowerCase().includes(q) ||
                 c.partyName?.toLowerCase().includes(q) ||
-                c.referenceNo?.toLowerCase().includes(q) ||
-                c.category?.toLowerCase().includes(q)
+                c.description?.toLowerCase().includes(q)
             )
             .slice(0, 3)
             .forEach((c) => {
               results.push({
                 id: `cash-${c._id}`,
-                title: `${c.type} Cash - ${c.partyName}`,
-                subtitle: `Amount: Rs ${c.amount?.toLocaleString()} | Mode: ${c.paymentMode}`,
+                title: `${c.type} Voucher #${c.voucherNumber || "N/A"}`,
+                subtitle: `${c.partyName || "General"} | Rs. ${c.amount?.toLocaleString()} (${c.category})`,
                 category: "Cash Transactions",
                 path: "/cash",
-                icon: <WalletIcon className="size-4 text-emerald-500" />,
+                icon: <WalletIcon className="size-4 text-amber-500" />,
               });
             });
         } else if (modKey === "ledger") {
@@ -184,30 +176,34 @@ export function AppHeader({ user, onLogout }) {
             .filter(
               (m) =>
                 m.name?.toLowerCase().includes(q) ||
-                m.code?.toLowerCase().includes(q) ||
-                m.zone?.toLowerCase().includes(q)
+                m.contactPerson?.toLowerCase().includes(q)
             )
             .slice(0, 3)
             .forEach((m) => {
               results.push({
                 id: `mill-${m._id}`,
                 title: m.name,
-                subtitle: `Mill Code: ${m.code} | Balance: Rs ${m.currentBalance?.toLocaleString()}`,
-                category: "Client Ledger (Mills)",
-                path: "/ledger",
-                icon: <BookOpenIcon className="size-4 text-amber-500" />,
+                subtitle: `Contact: ${m.contactPerson || "N/A"} | Balance: Rs. ${m.currentBalance?.toLocaleString()}`,
+                category: "Textile Mills",
+                path: "/textile",
+                icon: <BookOpenIcon className="size-4 text-indigo-500" />,
               });
             });
         } else if (modKey === "supplier-ledger") {
           res.data
-            .filter((s) => s.name?.toLowerCase().includes(q))
+            .filter(
+              (sup) =>
+                sup.name?.toLowerCase().includes(q) ||
+                sup.companyName?.toLowerCase().includes(q) ||
+                sup.phone?.toLowerCase().includes(q)
+            )
             .slice(0, 3)
-            .forEach((s) => {
+            .forEach((sup) => {
               results.push({
-                id: `sup-${s._id}`,
-                title: s.name,
-                subtitle: `Owed Balance: Rs ${s.currentBalance?.toLocaleString()}`,
-                category: "Supplier / Refinery Ledger",
+                id: `sup-${sup._id}`,
+                title: sup.name,
+                subtitle: `${sup.companyName || "Supplier"} | Balance Owed: Rs. ${sup.currentBalance?.toLocaleString()}`,
+                category: "Supplier Ledger",
                 path: "/supplier-ledger",
                 icon: <TruckIcon className="size-4 text-purple-500" />,
               });
@@ -217,17 +213,18 @@ export function AppHeader({ user, onLogout }) {
             .filter(
               (e) =>
                 e.title?.toLowerCase().includes(q) ||
+                e.category?.toLowerCase().includes(q) ||
                 e.voucherNumber?.toLowerCase().includes(q)
             )
             .slice(0, 3)
             .forEach((e) => {
               results.push({
                 id: `exp-${e._id}`,
-                title: e.title,
-                subtitle: `Voucher: ${e.voucherNumber} | Amount: Rs ${e.amount?.toLocaleString()}`,
-                category: "Expenses & Akhrajaat",
-                path: "/expenses",
-                icon: <ReceiptIcon className="size-4 text-destructive" />,
+                title: `Expense: ${e.title}`,
+                subtitle: `Rs. ${e.amount?.toLocaleString()} | ${e.category} (${new Date(e.expenseDate).toLocaleDateString()})`,
+                category: "Expenses",
+                path: "/cash",
+                icon: <ReceiptIcon className="size-4 text-rose-500" />,
               });
             });
         }
@@ -235,56 +232,12 @@ export function AppHeader({ user, onLogout }) {
 
       setSearchResults(results);
     } catch (err) {
-      console.warn("Global search failed", err);
+      console.error(err);
+      setSearchResults([]);
     } finally {
       setSearchLoading(false);
     }
   };
-
-  const quickActions = [
-    {
-      label: "New POS Sale",
-      path: "/pos",
-      state: null,
-      perm: "pos",
-      icon: <ShoppingCartIcon className="size-3.5 text-blue-500" />,
-    },
-    {
-      label: "Record Received / Paid Cash",
-      path: "/cash",
-      state: { openModal: true, initialType: "Received" },
-      perm: "cash",
-      icon: <WalletIcon className="size-3.5 text-emerald-500" />,
-    },
-    {
-      label: "Record Expense Voucher",
-      path: "/expenses",
-      state: { openModal: true },
-      perm: "expenses",
-      icon: <ReceiptIcon className="size-3.5 text-destructive" />,
-    },
-    {
-      label: "Add Oil Product",
-      path: "/products",
-      state: { openModal: true },
-      perm: "products",
-      icon: <PackageIcon className="size-3.5 text-primary" />,
-    },
-    {
-      label: "Supplier Payment",
-      path: "/supplier-ledger",
-      state: { openModal: true },
-      perm: "supplier-ledger",
-      icon: <TruckIcon className="size-3.5 text-purple-500" />,
-    },
-    {
-      label: "Record Client Payment",
-      path: "/ledger",
-      state: { openModal: true },
-      perm: "ledger",
-      icon: <BookOpenIcon className="size-3.5 text-amber-500" />,
-    },
-  ].filter((a) => hasPermission(a.perm));
 
   return (
     <header
@@ -311,7 +264,7 @@ export function AppHeader({ user, onLogout }) {
             <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search..."
+              placeholder="Search products, sales, vouchers..."
               value={searchQuery}
               onChange={(e) => handleGlobalSearch(e.target.value)}
               onFocus={() => {
@@ -324,7 +277,7 @@ export function AppHeader({ user, onLogout }) {
           {isSearchOpen && (
             <div className="absolute left-0 right-0 top-10 z-50 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg overflow-hidden animate-in fade-in-50 duration-100">
               <div className="p-2 border-b border-border bg-muted/40 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground flex justify-between items-center">
-                <span>Authorized Search Results ({searchResults.length})</span>
+                <span>Search Results ({searchResults.length})</span>
                 <span className="font-mono text-[9px]">Role: {user?.role || "Staff"}</span>
               </div>
 
@@ -332,12 +285,12 @@ export function AppHeader({ user, onLogout }) {
                 {searchLoading ? (
                   <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
                     <div className="size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    <span>Searching permitted modules...</span>
+                    <span>Searching records...</span>
                   </div>
                 ) : searchResults.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground space-y-1">
-                    <p className="font-medium text-foreground">No Permitted Results Found</p>
-                    <p className="text-[11px]">No matching records found in your granted modules.</p>
+                    <p className="font-medium text-foreground">No Records Found</p>
+                    <p className="text-[11px]">No matching records found for "{searchQuery}".</p>
                   </div>
                 ) : (
                   searchResults.map((res) => (
@@ -369,40 +322,6 @@ export function AppHeader({ user, onLogout }) {
           )}
         </div>
 
-        {quickActions.length > 0 && (
-          <div ref={quickActionRef} className="relative hidden sm:block">
-            <Button
-              size="sm"
-              onClick={() => setIsQuickActionOpen(!isQuickActionOpen)}
-              className="gap-1 h-9 px-3 text-xs shadow-xs cursor-pointer bg-primary text-primary-foreground"
-            >
-              <span>Quick Action</span>
-              <ChevronDownIcon className="size-3 ml-0.5" />
-            </Button>
-
-            {isQuickActionOpen && (
-              <div className="absolute right-0 top-10 z-50 w-52 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg overflow-hidden animate-in fade-in-50 duration-100 p-1 space-y-0.5">
-                <div className="px-2 py-1 text-[10px] uppercase font-semibold text-muted-foreground">
-                  Permitted Quick Tasks
-                </div>
-                {quickActions.map((action) => (
-                  <button
-                    key={action.path}
-                    onClick={() => {
-                      setIsQuickActionOpen(false);
-                      navigate(action.path, action.state ? { state: action.state } : undefined);
-                    }}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2 cursor-pointer"
-                  >
-                    {action.icon}
-                    <span>{action.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         <SyncStatusBadge />
         <LanguageSelector />
 
@@ -420,10 +339,7 @@ export function AppHeader({ user, onLogout }) {
             </span>
           )}
         </Button>
-        <Separator
-          className="h-4 data-[orientation=vertical]:self-center"
-          orientation="vertical"
-        />
+
         <NavUser user={user} onLogout={onLogout} />
       </div>
     </header>
