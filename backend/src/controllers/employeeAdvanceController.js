@@ -6,7 +6,7 @@ import { logActivity } from "./auditController.js";
 export const recordEmployeeAdvance = async (req, res, next) => {
   try {
     await connectDB();
-    const { employeeId, amount, paymentMode, notes } = req.body;
+    const { employeeId, amount, paymentMode, notes, reason, date } = req.body;
 
     if (!employeeId || !amount || Number(amount) <= 0) {
       res.status(400);
@@ -23,26 +23,47 @@ export const recordEmployeeAdvance = async (req, res, next) => {
     employee.advanceBalance = (employee.advanceBalance || 0) + advAmt;
     await employee.save();
 
-    if ((paymentMode || "Cash") === "Cash") {
-      await CashTransaction.create({
-        type: "Paid",
-        partyName: `Advance Salary: ${employee.name}`,
-        amount: advAmt,
-        category: "Staff Advance",
-        referenceNo: `ADV-${Date.now().toString().slice(-6)}`,
-        paymentMode: "Cash",
-        notes: notes || `Advance cash paid to staff member ${employee.name}`,
-      });
-    }
+    const voucherNumber = `ADV-${Date.now().toString().slice(-6)}`;
+    const txDate = date ? new Date(date) : new Date();
+    const txRemarks = notes || reason || `Advance cash paid to staff member ${employee.name}`;
+
+    const cashTx = await CashTransaction.create({
+      type: "Paid",
+      partyName: `Advance Salary: ${employee.name}`,
+      amount: advAmt,
+      category: "Staff Advance",
+      referenceNo: voucherNumber,
+      paymentMode: paymentMode || "Cash",
+      transactionDate: isNaN(txDate.getTime()) ? new Date() : txDate,
+      notes: txRemarks,
+    });
 
     await logActivity({
       user: req.user,
       action: "RECORD_STAFF_ADVANCE",
       module: "Employee Payroll",
-      details: `Paid Rs. ${advAmt} advance cash to employee ${employee.name}`,
+      details: `Paid Rs. ${advAmt} advance cash to employee ${employee.name} (Voucher: ${voucherNumber})`,
     });
 
-    res.status(201).json({ success: true, data: employee });
+    res.status(201).json({
+      success: true,
+      data: employee,
+      transaction: cashTx,
+      voucherNumber,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getEmployeeAdvances = async (req, res, next) => {
+  try {
+    await connectDB();
+    const advances = await CashTransaction.find({ category: "Staff Advance" })
+      .sort({ transactionDate: -1, createdAt: -1 })
+      .lean();
+
+    res.status(200).json({ success: true, count: advances.length, data: advances });
   } catch (error) {
     next(error);
   }

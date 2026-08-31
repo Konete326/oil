@@ -9,15 +9,17 @@ import {
   ReceiptIcon,
   Trash2Icon,
   Edit2Icon,
-  UserCheckIcon,
   CheckCircle2Icon,
   XCircleIcon,
+  HistoryIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmployeeModal } from "@/components/employee-modal";
 import { AdvanceModal } from "@/components/advance-modal";
+import { AdvanceReceiptModal } from "@/components/advance-receipt-modal";
+import { AdvanceHistoryTable } from "@/components/advance-history-table";
 import { PayslipModal } from "@/components/payslip-modal";
 import { PaginationControl } from "@/components/pagination-control";
 import { ConfirmModal } from "@/components/confirm-modal";
@@ -46,7 +48,12 @@ export function EmployeePayrollManager() {
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);
+  const [selectedAdvanceEmpId, setSelectedAdvanceEmpId] = useState("");
   const [isPayslipModalOpen, setIsPayslipModalOpen] = useState(false);
+
+  const [currentVoucher, setCurrentVoucher] = useState(null);
+  const [isAdvanceReceiptOpen, setIsAdvanceReceiptOpen] = useState(false);
+  const [advanceRefreshKey, setAdvanceRefreshKey] = useState(0);
 
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -90,6 +97,49 @@ export function EmployeePayrollManager() {
   const handleOpenAddEmployee = () => {
     setEditingEmployee(null);
     setIsEmployeeModalOpen(true);
+  };
+
+  const handleOpenAdvance = (empId = "") => {
+    setSelectedAdvanceEmpId(empId);
+    setIsAdvanceModalOpen(true);
+  };
+
+  const handleAdvanceSuccess = ({ employeeId, amount, updatedEmployee, voucher }) => {
+    if (employeeId && amount) {
+      setEmployees((prev) =>
+        prev.map((emp) => {
+          const id = emp._id || emp.id;
+          if (id === employeeId) {
+            return {
+              ...emp,
+              advanceBalance: (emp.advanceBalance || 0) + Number(amount),
+            };
+          }
+          return emp;
+        })
+      );
+    }
+    setAdvanceRefreshKey((k) => k + 1);
+
+    if (voucher) {
+      setCurrentVoucher(voucher);
+      setIsAdvanceReceiptOpen(true);
+    }
+
+    loadData();
+  };
+
+  const handlePrintVoucher = (voucher) => {
+    const matchedEmp = employees.find((e) => e.name.toLowerCase() === (voucher.employeeName || "").toLowerCase());
+    const fullVoucher = {
+      ...voucher,
+      designation: matchedEmp?.designation || "Staff Member",
+      department: matchedEmp?.department || "General",
+      phone: matchedEmp?.phone || "",
+      newAdvanceBalance: matchedEmp ? matchedEmp.advanceBalance : voucher.amount,
+    };
+    setCurrentVoucher(fullVoucher);
+    setIsAdvanceReceiptOpen(true);
   };
 
   const handleDeleteEmployee = async () => {
@@ -162,7 +212,7 @@ export function EmployeePayrollManager() {
 
           <Button
             size="sm"
-            onClick={() => setIsAdvanceModalOpen(true)}
+            onClick={() => handleOpenAdvance("")}
             className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
           >
             <HandCoinsIcon className="size-3.5" />
@@ -345,58 +395,71 @@ export function EmployeePayrollManager() {
       )}
 
       {activeTab === "advance" && (
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-          <div className="p-4 border-b border-border bg-muted/30 font-semibold text-xs text-foreground flex items-center justify-between">
-            <span>Advance Salary Khata Summary</span>
-            <span className="text-muted-foreground text-[11px]">Total Advance Given to Staff</span>
-          </div>
+        <div className="space-y-6">
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+            <div className="p-4 border-b border-border bg-muted/30 font-semibold text-xs text-foreground flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <HandCoinsIcon className="size-4 text-amber-500" />
+                <span>Active Staff Advance Balances (Khata Summary)</span>
+              </div>
+              <span className="text-muted-foreground text-[11px]">Click "Give Advance" to pre-select employee</span>
+            </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
-                <tr>
-                  <th className="p-3 ps-4">Employee Name</th>
-                  <th className="p-3">Designation</th>
-                  <th className="p-3">Department</th>
-                  <th className="p-3 text-right">Monthly Base Salary (PKR)</th>
-                  <th className="p-3 text-right">Outstanding Advance Balance (PKR)</th>
-                  <th className="p-3 pe-4 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {employees.map((emp) => (
-                  <tr key={emp._id} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-3 ps-4 font-semibold text-foreground">{emp.name}</td>
-                    <td className="p-3 text-muted-foreground">{emp.designation}</td>
-                    <td className="p-3 text-muted-foreground">{emp.department}</td>
-                    <td className="p-3 text-right font-mono font-bold text-foreground">
-                      Rs. {emp.baseSalary.toLocaleString()}
-                    </td>
-                    <td className="p-3 text-right font-mono font-bold text-amber-500">
-                      Rs. {(emp.advanceBalance || 0).toLocaleString()}
-                    </td>
-                    <td className="p-3 pe-4 text-center">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsAdvanceModalOpen(true)}
-                        className="gap-1 text-xs cursor-pointer text-amber-500 hover:text-amber-600"
-                      >
-                        <HandCoinsIcon className="size-3.5" />
-                        <span>Give Advance</span>
-                      </Button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="p-3 ps-4">Employee Name</th>
+                    <th className="p-3">Designation</th>
+                    <th className="p-3">Department</th>
+                    <th className="p-3 text-right">Monthly Base Salary (PKR)</th>
+                    <th className="p-3 text-right">Outstanding Advance Balance (PKR)</th>
+                    <th className="p-3 pe-4 text-center">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {employees.map((emp) => {
+                    const empId = emp._id || emp.id;
+                    return (
+                      <tr key={empId} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-3 ps-4 font-semibold text-foreground">{emp.name}</td>
+                        <td className="p-3 text-muted-foreground">{emp.designation}</td>
+                        <td className="p-3 text-muted-foreground">{emp.department}</td>
+                        <td className="p-3 text-right font-mono font-bold text-foreground">
+                          Rs. {emp.baseSalary.toLocaleString()}
+                        </td>
+                        <td className="p-3 text-right font-mono font-bold text-amber-500">
+                          Rs. {(emp.advanceBalance || 0).toLocaleString()}
+                        </td>
+                        <td className="p-3 pe-4 text-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenAdvance(empId)}
+                            className="gap-1 text-xs cursor-pointer text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
+                          >
+                            <HandCoinsIcon className="size-3.5" />
+                            <span>Give Advance</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <PaginationControl
+              page={empPage}
+              pages={empPages}
+              total={empTotal}
+              onPageChange={(p) => setEmpPage(p)}
+            />
           </div>
 
-          <PaginationControl
-            page={empPage}
-            pages={empPages}
-            total={empTotal}
-            onPageChange={(p) => setEmpPage(p)}
+          <AdvanceHistoryTable
+            onPrintVoucher={handlePrintVoucher}
+            refreshTrigger={advanceRefreshKey}
           />
         </div>
       )}
@@ -480,7 +543,14 @@ export function EmployeePayrollManager() {
         isOpen={isAdvanceModalOpen}
         onClose={() => setIsAdvanceModalOpen(false)}
         employees={employees}
-        onSuccess={loadData}
+        preselectedEmployeeId={selectedAdvanceEmpId}
+        onSuccess={handleAdvanceSuccess}
+      />
+
+      <AdvanceReceiptModal
+        isOpen={isAdvanceReceiptOpen}
+        onClose={() => setIsAdvanceReceiptOpen(false)}
+        voucher={currentVoucher}
       />
 
       <PayslipModal
