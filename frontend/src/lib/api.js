@@ -973,9 +973,10 @@ export async function fetchLedgerEntries(millId = "") {
 export async function createPaymentEntry(data) {
   const localItem = {
     _id: `pay_${Date.now()}`,
-    clientType: "Textile Mill",
+    clientType: data.customerId ? "Retail Customer" : "Textile Mill",
     mill: data.millId,
-    clientName: data.clientName || data.millName || "Textile Mill",
+    customer: data.customerId,
+    clientName: data.clientName || data.millName || "Customer Khata",
     transactionType: "Credit (Payment Received)",
     amount: Number(data.amount) || 0,
     paymentMode: data.paymentMode || "Cash",
@@ -985,16 +986,32 @@ export async function createPaymentEntry(data) {
     createdAt: data.date || new Date().toISOString(),
   };
 
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    await updateLocalSnapshotItem("ledger_entries", localItem);
-    const mills = await getLocalSnapshot("mills");
-    if (Array.isArray(mills) && data.millId) {
-      const mIdx = mills.findIndex((m) => (m._id || m.id) === data.millId);
-      if (mIdx >= 0) {
-        mills[mIdx].currentBalance = (mills[mIdx].currentBalance || 0) - Number(data.amount);
-        await saveLocalSnapshot("mills", mills);
+  const updateSnapshots = async () => {
+    if (data.millId) {
+      const mills = await getLocalSnapshot("mills");
+      if (Array.isArray(mills)) {
+        const mIdx = mills.findIndex((m) => (m._id || m.id) === data.millId);
+        if (mIdx >= 0) {
+          mills[mIdx].currentBalance = Math.max(0, (mills[mIdx].currentBalance || 0) - Number(data.amount));
+          await saveLocalSnapshot("mills", mills);
+        }
       }
     }
+    if (data.customerId) {
+      const custs = await getLocalSnapshot("customers");
+      if (Array.isArray(custs)) {
+        const cIdx = custs.findIndex((c) => (c._id || c.id) === data.customerId);
+        if (cIdx >= 0) {
+          custs[cIdx].currentBalance = Math.max(0, (custs[cIdx].currentBalance || 0) - Number(data.amount));
+          await saveLocalSnapshot("customers", custs);
+        }
+      }
+    }
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    await updateLocalSnapshotItem("ledger_entries", localItem);
+    await updateSnapshots();
     await addOfflineOperation("ledger_entry", "create", localItem);
     return { success: true, data: localItem };
   }
@@ -1008,19 +1025,13 @@ export async function createPaymentEntry(data) {
     if (res.ok) {
       const json = await res.json();
       if (json.data) await updateLocalSnapshotItem("ledger_entries", json.data);
+      await updateSnapshots();
       return json;
     }
   } catch (err) {}
 
   await updateLocalSnapshotItem("ledger_entries", localItem);
-  const mills = await getLocalSnapshot("mills");
-  if (Array.isArray(mills) && data.millId) {
-    const mIdx = mills.findIndex((m) => (m._id || m.id) === data.millId);
-    if (mIdx >= 0) {
-      mills[mIdx].currentBalance = (mills[mIdx].currentBalance || 0) - Number(data.amount);
-      await saveLocalSnapshot("mills", mills);
-    }
-  }
+  await updateSnapshots();
   await addOfflineOperation("ledger_entry", "create", localItem);
   return { success: true, data: localItem };
 }

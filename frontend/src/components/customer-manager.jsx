@@ -139,35 +139,41 @@ export function CustomerManager() {
 
   const handleSaveCustomerPayment = async (paymentData) => {
     const pAmt = Number(paymentData.amount) || 0;
+    const targetCust = paymentTargetCustomer;
+    if (!targetCust) return;
+
+    const targetId = targetCust._id;
+    const targetName = targetCust.name;
+    const oldBalance = Number(targetCust.currentBalance) || 0;
+    const newBalance = Math.max(0, oldBalance - pAmt);
+    const balanceDeducted = oldBalance - newBalance;
+
+    setCustomers((prev) =>
+      prev.map((c) => (c._id === targetId ? { ...c, currentBalance: newBalance } : c))
+    );
+    setSummaryMetrics((prev) => ({
+      ...prev,
+      totalReceivable: Math.max(0, prev.totalReceivable - balanceDeducted),
+      pendingDebtorsCount:
+        newBalance === 0 && oldBalance > 0
+          ? Math.max(0, prev.pendingDebtorsCount - 1)
+          : prev.pendingDebtorsCount,
+    }));
+
     try {
-      if (paymentTargetCustomer) {
-        setCustomers((prev) =>
-          prev.map((c) =>
-            c._id === paymentTargetCustomer._id
-              ? { ...c, currentBalance: Math.max(0, (Number(c.currentBalance) || 0) - pAmt) }
-              : c
-          )
-        );
-        setSummaryMetrics((prev) => ({
-          ...prev,
-          totalReceivable: Math.max(0, prev.totalReceivable - pAmt),
-        }));
-      }
       await createPaymentEntry({
-        customerId: paymentTargetCustomer?._id,
-        clientName: paymentTargetCustomer?.name,
-        amount: paymentData.amount,
-        paymentMode: paymentData.paymentMode,
+        customerId: targetId,
+        clientName: targetName,
+        amount: pAmt,
+        paymentMode: paymentData.paymentMode || "Cash",
         referenceNumber: paymentData.referenceNumber,
-        notes: paymentData.notes || `Khata payment received from ${paymentTargetCustomer?.name}`,
+        notes: paymentData.notes || `Khata payment received from ${targetName}`,
       });
-      toast.success(`Payment of Rs. ${pAmt.toLocaleString()} received & credited to ${paymentTargetCustomer?.name}!`);
-      loadCustomers(false);
-      loadSummary();
+      toast.success(`Payment of Rs. ${pAmt.toLocaleString()} received & credited to ${targetName}!`);
     } catch (err) {
       toast.error(err.message || "Failed to record customer payment.");
-      loadCustomers(false);
-      loadSummary();
+    } finally {
+      await Promise.all([loadCustomers(false), loadSummary()]);
     }
   };
 

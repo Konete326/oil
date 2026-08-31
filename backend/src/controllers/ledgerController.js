@@ -2,9 +2,11 @@ import { Ledger } from "../models/ledgerModel.js";
 import { Mill } from "../models/millModel.js";
 import { Customer } from "../models/customerModel.js";
 import { CashTransaction } from "../models/cashModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getLedgerEntries = async (req, res, next) => {
   try {
+    await connectDB();
     const { millId, customerId, search } = req.query;
     let query = {};
     if (millId) query.mill = millId;
@@ -20,6 +22,7 @@ export const getLedgerEntries = async (req, res, next) => {
 
 export const createPaymentEntry = async (req, res, next) => {
   try {
+    await connectDB();
     const { millId, customerId, clientName, amount, paymentMode, referenceNumber, notes, dueDate } = req.body;
 
     if ((!millId && !customerId && !clientName) || !amount || Number(amount) <= 0) {
@@ -84,6 +87,7 @@ export const createPaymentEntry = async (req, res, next) => {
 
 export const getAgingReport = async (req, res, next) => {
   try {
+    await connectDB();
     const mills = await Mill.find().select("name code zone currentBalance creditLimit updatedAt");
     const now = new Date();
 
