@@ -17,11 +17,18 @@ export const getCustomerById = async (req, res, next) => {
     const [posSales, ledgerEntries] = await Promise.all([
       PosSale.find({
         $or: [
+          { customerId: customer._id },
           { customerName: { $regex: `^${customer.name}$`, $options: "i" } },
-          { customerPhone: customer.phone },
+          ...(customer.phone ? [{ customerPhone: customer.phone }] : []),
         ],
       }).sort({ createdAt: -1 }),
-      Ledger.find({ partyName: { $regex: `^${customer.name}$`, $options: "i" } }).sort({ createdAt: -1 }),
+      Ledger.find({
+        $or: [
+          { customer: customer._id },
+          { clientName: { $regex: `^${customer.name}$`, $options: "i" } },
+          { partyName: { $regex: `^${customer.name}$`, $options: "i" } },
+        ],
+      }).sort({ createdAt: -1 }),
     ]);
 
     const totalSpent = posSales.reduce((acc, sale) => acc + (sale.grandTotal || 0), 0);

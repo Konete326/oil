@@ -11,9 +11,14 @@ export const getLedgerEntries = async (req, res, next) => {
     let query = {};
     if (millId) query.mill = millId;
     if (customerId) query.customer = customerId;
-    if (search) query.clientName = { $regex: search, $options: "i" };
+    if (search) {
+      query.$or = [
+        { clientName: { $regex: search, $options: "i" } },
+        { partyName: { $regex: search, $options: "i" } },
+      ];
+    }
 
-    const entries = await Ledger.find(query).populate("mill", "name code zone").sort({ createdAt: -1 });
+    const entries = await Ledger.find(query).populate("mill", "name code zone").populate("customer", "name phone city").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: entries.length, data: entries });
   } catch (error) {
     next(error);
@@ -58,6 +63,7 @@ export const createPaymentEntry = async (req, res, next) => {
       mill: targetMill ? targetMill._id : undefined,
       customer: targetCustomer ? targetCustomer._id : undefined,
       clientName: targetClientName,
+      partyName: targetClientName,
       transactionType: "Credit (Payment Received)",
       amount: Number(amount),
       paymentMode: paymentMode || "Cash",

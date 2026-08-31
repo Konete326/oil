@@ -2,14 +2,16 @@ import mongoose from "mongoose";
 
 const ledgerSchema = new mongoose.Schema(
   {
-    clientType: { type: String, enum: ["Textile Mill", "General Customer"], default: "Textile Mill" },
+    clientType: { type: String, default: "General Customer" },
     mill: { type: mongoose.Schema.Types.ObjectId, ref: "Mill" },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
     clientName: { type: String, required: true },
-    transactionType: { type: String, enum: ["Debit (Invoice/Challan)", "Credit (Payment Received)"], required: true },
+    partyName: { type: String },
+    transactionType: { type: String, required: true },
     amount: { type: Number, required: true },
-    paymentMode: { type: String, enum: ["Cash", "Cheque", "Bank Transfer", "Online POS"], default: "Cash" },
+    paymentMode: { type: String, default: "Cash" },
     referenceNumber: { type: String },
-    runningBalance: { type: Number, required: true },
+    runningBalance: { type: Number, default: 0 },
     notes: { type: String },
     dueDate: { type: Date },
   },
