@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import {
   getPendingOperations,
   removePendingOperations,
+  updateOperationAttempts,
   getPendingCount,
   addOfflineOperation,
 } from "@/lib/offline-db";
@@ -43,11 +44,11 @@ function getInitialBatchSize() {
 
 function getSyncIntervalMs() {
   const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (!conn) return 5000;
+  if (!conn) return 6000;
   const type = conn.effectiveType;
   if (type === "slow-2g" || type === "2g" || conn.saveData || (conn.rtt && conn.rtt > 1000)) return 15000;
   if (type === "3g") return 8000;
-  return 5000;
+  return 6000;
 }
 
 function getNetworkSpeedName() {
@@ -95,6 +96,8 @@ export function SyncProvider({ children }) {
   });
 
   const intervalRef = useRef(null);
+  const isSyncingRef = useRef(false);
+  const lastFailureTimeRef = useRef(0);
 
   const refreshCount = useCallback(async () => {
     const [count, items] = await Promise.all([getPendingCount(), getPendingOperations()]);
@@ -145,9 +148,11 @@ export function SyncProvider({ children }) {
   }, []);
 
   const processSync = useCallback(async () => {
-    if (isSyncing || !navigator.onLine) return;
+    if (isSyncingRef.current || !navigator.onLine) return;
+    if (Date.now() - lastFailureTimeRef.current < 4000) return;
 
     try {
+      isSyncingRef.current = true;
       setIsSyncing(true);
       const pending = await getPendingOperations();
       if (!pending || pending.length === 0) {
@@ -206,30 +211,40 @@ export function SyncProvider({ children }) {
           setLastSyncTime(now);
           localStorage.setItem("last_sync_time", now);
           setSyncProgress({ current: data.syncedIds.length, total: items.length, percentage: 100 });
+          lastFailureTimeRef.current = 0;
         } else if (data && data.success && data.processedCount === 0 && items.length > 0) {
           const itemIds = items.map((i) => i.id).filter(Boolean);
           await removePendingOperations(itemIds);
+          lastFailureTimeRef.current = 0;
         }
+      } else {
+        lastFailureTimeRef.current = Date.now();
+        const itemIds = items.map((i) => i.id).filter(Boolean);
+        await updateOperationAttempts(itemIds);
       }
       await refreshCount();
     } catch (error) {
+      lastFailureTimeRef.current = Date.now();
       console.warn("Sync processing error:", error);
     } finally {
+      isSyncingRef.current = false;
       setIsSyncing(false);
     }
-  }, [isSyncing, refreshCount]);
+  }, [refreshCount]);
 
   const resetSyncTimer = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!navigator.onLine) return;
 
-    const intervalMs = Math.max(10000, getSyncIntervalMs());
+    const intervalMs = Math.max(6000, getSyncIntervalMs());
     intervalRef.current = setInterval(() => {
-      if (navigator.onLine && pendingCount > 0) {
-        processSync();
+      if (navigator.onLine && !isSyncingRef.current) {
+        getPendingCount().then((cnt) => {
+          if (cnt > 0) processSync();
+        });
       }
     }, intervalMs);
-  }, [processSync, pendingCount]);
+  }, [processSync]);
 
   useEffect(() => {
     refreshCount();
@@ -289,7 +304,12 @@ export function SyncProvider({ children }) {
 
   useEffect(() => {
     if (isOnline && pendingCount > 0 && !isSyncing) {
-      processSync();
+      const timer = setTimeout(() => {
+        if (!isSyncingRef.current && isOnline) {
+          processSync();
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [isOnline, pendingCount, isSyncing, processSync]);
 
@@ -298,7 +318,7 @@ export function SyncProvider({ children }) {
     await refreshCount();
     registerBackgroundSync();
     if (navigator.onLine) {
-      processSync();
+      setTimeout(() => processSync(), 300);
     }
     return item;
   };

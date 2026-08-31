@@ -9,6 +9,7 @@ import {
   LayersIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 const CODE128_PATTERNS = [
   "212222", "222122", "222221", "121223", "121322", "131222", "122213", "122312", "132212", "221213",
@@ -91,7 +92,7 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
     >
       <div className="w-full border-b border-neutral-200 pb-1">
         <p className="text-[9px] font-black tracking-wider uppercase text-neutral-800">
-          AL KHALEEJ LUBRICANTS
+          {COMPANY_CONFIG.name}
         </p>
         <h4 className="text-[11px] font-bold leading-tight truncate text-black">
           {product.name}

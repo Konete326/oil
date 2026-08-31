@@ -2,6 +2,7 @@ import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 export function ProfitLossPrintModal({
   isOpen,
@@ -75,7 +76,7 @@ export function ProfitLossPrintModal({
   };
 
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS - PROFIT & LOSS STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Sales (J):* Rs ${totalSales.toLocaleString()}\n*Cost of Goods (K):* Rs ${totalCost.toLocaleString()}\n*Gross Profit (L):* Rs ${grossProfit.toLocaleString()} (${grossMarginPct}%)\n*Operating Expenses (S):* Rs ${totalExpenses.toLocaleString()}\n*Net Operating Profit (T):* Rs ${netProfit.toLocaleString()} (${returnOnSalesPct}%)\n*Generated on:* ${new Date().toLocaleDateString()}`;
+    const text = `*${COMPANY_CONFIG.name} - PROFIT & LOSS STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Sales (J):* Rs ${totalSales.toLocaleString()}\n*Cost of Goods (K):* Rs ${totalCost.toLocaleString()}\n*Gross Profit (L):* Rs ${grossProfit.toLocaleString()} (${grossMarginPct}%)\n*Operating Expenses (S):* Rs ${totalExpenses.toLocaleString()}\n*Net Operating Profit (T):* Rs ${netProfit.toLocaleString()} (${returnOnSalesPct}%)\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -176,11 +177,19 @@ export function ProfitLossPrintModal({
               <h1 className="font-extrabold text-base tracking-tight text-black">
                 Profit and Loss Statement
               </h1>
-              <p className="font-bold text-xs text-black uppercase">
-                AL KHALEEJ LUBRICANTS
-              </p>
-              <p className="text-[11px] text-gray-700 font-medium">
+              <div className="flex items-baseline gap-2">
+                <p className="font-bold text-xs text-black uppercase">
+                  {COMPANY_CONFIG.name}
+                </p>
+                <span className="font-bold text-xs text-emerald-800" dir="rtl">
+                  {COMPANY_CONFIG.nameUrdu}
+                </span>
+              </div>
+              <p className="text-[10px] text-gray-700 font-medium">
                 For the {period.toUpperCase()} period ending: {periodLabel}
+              </p>
+              <p className="text-[10px] text-gray-600">
+                {COMPANY_CONFIG.shortAddress} | {COMPANY_CONFIG.mobiles}
               </p>
             </div>
             <div className="text-right text-[11px] font-semibold text-gray-700">

@@ -7,6 +7,7 @@ import { fetchDetailedPartyLedgerApi, fetchMills, fetchSuppliersApi } from "@/li
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 const PAGE_SIZE = 10;
 
@@ -18,70 +19,94 @@ export function PartyLedgerReportView() {
   const [endDate, setEndDate] = useState("");
   const [ledgerData, setLedgerData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   useEffect(() => {
-    if (partyType === "Customer") {
-      fetchMills().then((res) => {
-        if (res?.success) {
-          const names = res.data.map((m) => m.name);
-          setPartiesList(names);
-          if (names.length > 0) setPartyName(names[0]);
+    async function loadParties() {
+      try {
+        if (partyType === "Customer") {
+          const res = await fetchMills();
+          const items = res?.data || res || [];
+          setPartiesList(items.map(m => m.name));
+          if (items.length > 0 && !partyName) setPartyName(items[0].name);
+        } else {
+          const res = await fetchSuppliersApi();
+          const items = res?.data || res || [];
+          setPartiesList(items.map(s => s.name));
+          if (items.length > 0 && !partyName) setPartyName(items[0].name);
         }
-      });
-    } else {
-      fetchSuppliersApi().then((res) => {
-        if (res?.success) {
-          const names = res.data.map((s) => s.name);
-          setPartiesList(names);
-          if (names.length > 0) setPartyName(names[0]);
-        }
-      });
+      } catch (err) {
+        console.error("Error loading parties list", err);
+      }
     }
+    loadParties();
   }, [partyType]);
 
-  const loadPartyLedger = async () => {
-    if (!partyName) return;
+  const handleSearch = async () => {
+    if (!partyName) {
+      toast.error("Please enter or select a party name");
+      return;
+    }
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await fetchDetailedPartyLedgerApi({
         partyName,
         partyType,
         startDate,
         endDate,
       });
-
-      if (res?.success) {
-        setLedgerData(res.data);
-      }
+      const entries = res?.data || res?.ledger || res || [];
+      setLedgerData(Array.isArray(entries) ? entries : []);
+      setPage(1);
     } catch (err) {
-      toast.error("Failed to load party ledger details");
+      toast.error("Failed to load party ledger data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPartyLedger();
-  }, [partyName, partyType, startDate, endDate]);
+    if (partyName) {
+      handleSearch();
+    }
+  }, [partyName, partyType]);
 
-  const totalDebit = ledgerData.reduce((sum, item) => sum + (item.debit || 0), 0);
-  const totalCredit = ledgerData.reduce((sum, item) => sum + (item.credit || 0), 0);
-  const closingBalance = ledgerData.length > 0 ? ledgerData[ledgerData.length - 1].runningBalance : 0;
+  let runningBalance = 0;
+  const processedRows = ledgerData.map((row) => {
+    const isDebit = row.type === "debit" || row.transactionType?.toLowerCase().includes("debit") || (row.debit && row.debit > 0);
+    const debit = isDebit ? Number(row.amount || row.debit || 0) : 0;
+    const credit = !isDebit ? Number(row.amount || row.credit || 0) : 0;
+    runningBalance += (debit - credit);
+
+    return {
+      ...row,
+      dateFormatted: new Date(row.createdAt || row.date || Date.now()).toLocaleDateString("en-GB"),
+      docNo: row.referenceNo || row.voucherNumber || row.saleNumber || row.purchaseNumber || row._id?.slice(-6) || "-",
+      debit,
+      credit,
+      balance: runningBalance,
+    };
+  });
+
+  const totalDebit = processedRows.reduce((sum, r) => sum + r.debit, 0);
+  const totalCredit = processedRows.reduce((sum, r) => sum + r.credit, 0);
+  const closingBalance = runningBalance;
 
   const handleExportExcel = () => {
-    const data = ledgerData.map((l, idx) => ({
-      "S.No": idx + 1,
-      Date: new Date(l.date).toLocaleDateString(),
-      "Party Name": partyName,
-      "Transaction Type": l.type,
-      "Debit Amount (PKR)": l.debit,
-      "Credit Amount (PKR)": l.credit,
-      "Running Balance (PKR)": l.runningBalance,
-      "Payment Mode": l.mode || "Cash",
-      "Reference No": l.reference || "-",
-      Notes: l.notes || "-",
+    if (processedRows.length === 0) {
+      toast.error("No ledger rows to export");
+      return;
+    }
+
+    const data = processedRows.map((r, idx) => ({
+      "Sr #": idx + 1,
+      "Date": r.dateFormatted,
+      "Document #": r.docNo,
+      "Description / Particulars": r.description || r.notes || "-",
+      "Debit (PKR)": r.debit,
+      "Credit (PKR)": r.credit,
+      "Running Balance (PKR)": r.balance,
     }));
 
     exportTransactionsToExcel(data, `${partyName}_Detailed_Ledger.xlsx`);
@@ -90,7 +115,7 @@ export function PartyLedgerReportView() {
 
   const handleShareWhatsApp = () => {
     if (!partyName) return;
-    const text = `*AL KHALEEJ LUBRICANTS - ${partyType.toUpperCase()} LEDGER STATEMENT*\n*Party Name:* ${partyName}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Closing Balance:* Rs ${closingBalance.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}`;
+    const text = `*${COMPANY_CONFIG.name} - ${partyType.toUpperCase()} LEDGER STATEMENT*\n*Party Name:* ${partyName}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Closing Balance:* Rs ${closingBalance.toLocaleString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 

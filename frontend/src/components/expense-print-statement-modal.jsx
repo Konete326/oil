@@ -2,6 +2,7 @@ import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 export function ExpensePrintStatementModal({
   isOpen,
@@ -67,7 +68,7 @@ export function ExpensePrintStatementModal({
   };
 
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS - EXPENSES STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Expenses:* Rs ${grandTotal.toLocaleString()}\n*Total Vouchers:* ${sortedExpenses.length}\n*Generated on:* ${new Date().toLocaleDateString()}`;
+    const text = `*${COMPANY_CONFIG.name} - EXPENSES STATEMENT*\n*Period:* ${period.toUpperCase()} (${startDate || "Start"} - ${endDate || "Today"})\n*Total Expenses:* Rs ${grandTotal.toLocaleString()}\n*Total Vouchers:* ${sortedExpenses.length}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -169,17 +170,22 @@ export function ExpensePrintStatementModal({
           >
             <div className="flex justify-between items-start border-b border-black pb-3 mb-3">
               <div>
-                <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
-                  AL KHALEEJ LUBRICANTS
-                </h1>
+                <div className="flex items-baseline gap-2">
+                  <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                    {COMPANY_CONFIG.name}
+                  </h1>
+                  <span className="font-bold text-xs text-emerald-800" dir="rtl">
+                    {COMPANY_CONFIG.nameUrdu}
+                  </span>
+                </div>
                 <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
                   EXPENSES STATEMENT
                 </p>
-                <p className="text-[11px] text-gray-700 font-medium">
-                  Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
+                <p className="text-[10px] text-gray-700 font-medium">
+                  {COMPANY_CONFIG.address}
                 </p>
                 <p className="text-[10px] text-gray-600">
-                  Tel: (021) 35091244 | Korangi Industrial Area, Karachi
+                  {COMPANY_CONFIG.phoneDisplay} | {COMPANY_CONFIG.mobiles}
                 </p>
               </div>
 
@@ -193,6 +199,7 @@ export function ExpensePrintStatementModal({
                 <p className="text-[10px] text-gray-700 font-semibold pt-0.5">
                   {periodLabel}
                 </p>
+                <p className="text-[9px] text-gray-600 font-mono">{COMPANY_CONFIG.email}</p>
               </div>
             </div>
 

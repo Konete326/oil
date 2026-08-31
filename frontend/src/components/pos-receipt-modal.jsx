@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { XIcon, PrinterIcon, SendIcon, CheckCircle2Icon } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { numberToWords } from "@/lib/number-to-words";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 export function PosReceiptModal({ isOpen, onClose, sale }) {
   if (!isOpen || !sale || typeof window === "undefined") return null;
@@ -36,7 +37,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
   const totalQuantityLiters = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
 
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS*\n*PROFORMA / SALES INVOICE*\n*Invoice No:* ${sale.saleNumber || sale.challanNumber || "INV-001"}\n*Consignee / Buyer:* ${sale.customerName || sale.millName || "Client"}\n*Date:* ${new Date(sale.createdAt || Date.now()).toLocaleDateString()}\n*Total Liters / Qty:* ${totalQuantityLiters}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Amount in Words:* ${numberToWords(grandTotal)}\nThank you for your business!`;
+    const text = `*${COMPANY_CONFIG.name}*\n*PROFORMA / SALES INVOICE*\n*Invoice No:* ${sale.saleNumber || sale.challanNumber || "INV-001"}\n*Buyer:* ${sale.customerName || sale.millName || "Client"}\n*Date:* ${new Date(sale.createdAt || Date.now()).toLocaleDateString()}\n*Total Liters / Qty:* ${totalQuantityLiters}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Amount in Words:* ${numberToWords(grandTotal)}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}\nThank you for your business!`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -120,29 +121,47 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0 print:m-0">
           <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 print:m-0 a4-sheet relative notranslate" dir="ltr" lang="en">
 
-          <div className="text-center space-y-1 pb-3 print:pb-2 print:pt-0">
-            <div className="flex items-center justify-center gap-3">
-              <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
-              <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
-                AL KHALEEJ LUBRICANTS
-              </h1>
+          <div className="border-b-2 border-black pb-3 mb-3 print:pb-2 print:mb-2">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img src={logoImg} alt="Al Khaleej Logo" className="size-12 object-contain" />
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
+                      {COMPANY_CONFIG.name}
+                    </h1>
+                    <span className="font-bold text-base text-emerald-800" dir="rtl">
+                      {COMPANY_CONFIG.nameUrdu}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-800 font-semibold italic">
+                    {COMPANY_CONFIG.tagline}
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right text-[10px] leading-tight">
+                <p className="font-bold text-xs text-black uppercase">{COMPANY_CONFIG.proprietor}</p>
+                <p className="text-gray-700">{COMPANY_CONFIG.phoneDisplay}</p>
+                <p className="text-gray-700">{COMPANY_CONFIG.mobiles}</p>
+                <p className="text-gray-700 font-mono text-[9px]">{COMPANY_CONFIG.email}</p>
+              </div>
             </div>
-            <p className="text-[11px] text-gray-700 font-medium">
-              PLOT NO. 44/B, SECTOR 15, KORANGI INDUSTRIAL AREA, KARACHI, PAKISTAN.
-            </p>
-            <p className="text-[10px] text-gray-600">
-              TEL: (021) 35091244, 35091245, FAX: (021) 35091246
-            </p>
+
+            <div className="pt-2 border-t border-gray-300 mt-2 flex justify-between items-center text-[10px] text-gray-700 font-medium">
+              <span>{COMPANY_CONFIG.address}</span>
+              <span className="font-semibold text-gray-900">Karachi, Pakistan</span>
+            </div>
           </div>
 
-          <div className="text-center py-2 mb-4">
+          <div className="text-center py-1.5 mb-3">
             <span className="font-black text-sm tracking-wider uppercase underline underline-offset-4 decoration-2">
               SALES INVOICE
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white">
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="border border-black p-2.5 rounded-xs space-y-1 bg-white">
               <p className="text-[10px] font-bold uppercase tracking-wider text-gray-800">
                 CUSTOMER / BUYER:
               </p>
@@ -150,7 +169,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                 {sale.customerName || sale.millName || "DIRECT CUSTOMER"}
               </p>
               <p className="text-[11px] text-gray-700 leading-tight">
-                {sale.customerAddress || sale.deliveryAddress || "Plot No-03, Main Road, Industrial Area, Karachi."}
+                {sale.customerAddress || sale.deliveryAddress || "Karachi, Pakistan."}
               </p>
               {sale.customerPhone && (
                 <p className="text-[11px] text-gray-800 font-medium">
@@ -159,7 +178,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
               )}
             </div>
 
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-right font-mono">
+            <div className="border border-black p-2.5 rounded-xs space-y-1 bg-white text-right font-mono">
               <p className="text-xs font-bold text-black">
                 INVOICE #: {sale.saleNumber || sale.challanNumber || "INV-001"}
               </p>
@@ -207,14 +226,14 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                   </tr>
                 ))}
                 <tr className="bg-gray-100 font-bold border-t-2 border-black">
-                  <td colSpan={2} className="py-2.5 px-3 text-right uppercase tracking-wider border-r border-black">
+                  <td colSpan={2} className="py-2 px-3 text-right uppercase tracking-wider border-r border-black">
                     TOTAL
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono border-r border-black text-black">
+                  <td className="py-2 px-3 text-center font-mono border-r border-black text-black">
                     {totalQuantityLiters}
                   </td>
-                  <td className="py-2.5 px-3 border-r border-black"></td>
-                  <td className="py-2.5 px-3 text-right font-mono text-sm text-black">
+                  <td className="py-2 px-3 border-r border-black"></td>
+                  <td className="py-2 px-3 text-right font-mono text-sm text-black">
                     Rs {Number(grandTotal).toFixed(2)}
                   </td>
                 </tr>
@@ -222,36 +241,36 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
             </table>
           </div>
 
-          <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-6 font-mono text-[11px] font-semibold text-black">
+          <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-4 font-mono text-[11px] font-semibold text-black">
             <span>Amount in Words: </span>
             <span className="font-bold underline decoration-1">{numberToWords(grandTotal)}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 pt-2 items-end">
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-[10px] font-mono leading-relaxed">
+          <div className="grid grid-cols-2 gap-4 pt-1 items-end">
+            <div className="border border-black p-2.5 rounded-xs space-y-0.5 bg-white text-[10px] font-mono leading-relaxed">
               <p className="font-bold text-[11px] text-black">Bank Account Details:</p>
-              <p>Account Title: <strong>AL KHALEEJ LUBRICANTS</strong></p>
-              <p>Account #: 0109-900-104-1</p>
-              <p>Bank: Meezan Bank Ltd / Korangi Branch</p>
+              <p>Account Title: <strong>{COMPANY_CONFIG.bankDetails.accountTitle}</strong></p>
+              <p>Account #: <strong>{COMPANY_CONFIG.bankDetails.accountNumber}</strong></p>
+              <p>Bank: {COMPANY_CONFIG.bankDetails.bankName} / {COMPANY_CONFIG.bankDetails.branch}</p>
             </div>
 
-            <div className="space-y-12 text-right">
+            <div className="space-y-8 text-right">
               <div className="flex justify-between items-end gap-4">
                 <div className="text-center">
-                  <div className="size-16 rounded-full border-2 border-dashed border-gray-700 flex flex-col items-center justify-center p-1 text-[8px] font-bold text-gray-800 uppercase tracking-tighter transform -rotate-12 mx-auto mb-1">
+                  <div className="size-14 rounded-full border-2 border-dashed border-gray-700 flex flex-col items-center justify-center p-1 text-[7px] font-bold text-gray-800 uppercase tracking-tighter transform -rotate-12 mx-auto mb-1">
                     <span>AL KHALEEJ</span>
-                    <span className="text-[6px]">LUBRICANTS</span>
+                    <span className="text-[5px]">LUBRICANTS</span>
                     <span>OFFICIAL</span>
                   </div>
-                  <div className="border-t border-black pt-1 w-36 text-center font-bold text-[9px] uppercase">
+                  <div className="border-t border-black pt-1 w-32 text-center font-bold text-[9px] uppercase">
                     <p>AL KHALEEJ LUBRICANTS</p>
                     <p className="text-[8px] text-gray-600">SALES DEPARTMENT</p>
                   </div>
                 </div>
 
                 <div className="text-center">
-                  <div className="h-14"></div>
-                  <div className="border-t border-black pt-1 w-44 text-center font-bold text-[9px] uppercase">
+                  <div className="h-10"></div>
+                  <div className="border-t border-black pt-1 w-36 text-center font-bold text-[9px] uppercase">
                     Customer Signature
                   </div>
                 </div>

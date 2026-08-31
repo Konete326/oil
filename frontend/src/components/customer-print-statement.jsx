@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PrinterIcon, XIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 export function CustomerPrintStatement({
   isOpen,
@@ -117,7 +118,7 @@ export function CustomerPrintStatement({
   };
 
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS - CUSTOMER STATEMENT*\n*Customer:* ${currentCustomer.name}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Current Balance:* Rs ${finalBalance.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}`;
+    const text = `*${COMPANY_CONFIG.name} - CUSTOMER STATEMENT*\n*Customer:* ${currentCustomer.name}\n*Total Debits:* Rs ${totalDebit.toLocaleString()}\n*Total Credits:* Rs ${totalCredit.toLocaleString()}\n*Current Balance:* Rs ${finalBalance.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -209,29 +210,38 @@ export function CustomerPrintStatement({
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate" dir="ltr" lang="en">
-          <div className="flex justify-between items-start border-b border-black pb-4 mb-4">
-            <div className="flex items-center gap-3">
-              <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
-              <div>
-                <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
-                  AL KHALEEJ LUBRICANTS
-                </h1>
-                <p className="text-[11px] text-gray-700 font-medium">
-                  Plot 44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
-                </p>
-                <p className="text-[10px] text-gray-600">
-                  Tel: (021) 35091244
-                </p>
+          
+          <div className="border-b-2 border-black pb-3 mb-3">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex items-center gap-3">
+                <img src={logoImg} alt="Al Khaleej Logo" className="size-12 object-contain" />
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                      {COMPANY_CONFIG.name}
+                    </h1>
+                    <span className="font-bold text-sm text-emerald-800" dir="rtl">
+                      {COMPANY_CONFIG.nameUrdu}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-700 font-semibold">
+                    {COMPANY_CONFIG.address}
+                  </p>
+                  <p className="text-[10px] text-gray-600">
+                    {COMPANY_CONFIG.phoneDisplay} | {COMPANY_CONFIG.mobiles}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="text-right font-mono">
-              <span className="font-bold text-xs uppercase underline">
-                ACCOUNT STATEMENT
-              </span>
-              <p className="text-[10px] text-gray-700 pt-1">
-                Date: {new Date().toLocaleDateString("en-GB")}
-              </p>
+              <div className="text-right font-mono">
+                <span className="font-bold text-xs uppercase underline">
+                  ACCOUNT STATEMENT
+                </span>
+                <p className="text-[10px] text-gray-700 pt-1">
+                  Date: {new Date().toLocaleDateString("en-GB")}
+                </p>
+                <p className="text-[9px] text-gray-600 font-sans">{COMPANY_CONFIG.email}</p>
+              </div>
             </div>
           </div>
 

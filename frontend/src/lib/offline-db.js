@@ -86,6 +86,33 @@ export const removePendingOperations = async (ids) => {
   } catch (err) {}
 };
 
+export const updateOperationAttempts = async (ids) => {
+  if (!Array.isArray(ids) || ids.length === 0) return;
+  try {
+    const db = await openOfflineDB();
+    const tx = db.transaction("pending_queue", "readwrite");
+    const store = tx.objectStore("pending_queue");
+    ids.forEach((id) => {
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const item = req.result;
+        if (item) {
+          item.attempts = (item.attempts || 0) + 1;
+          item.lastAttemptAt = new Date().toISOString();
+          if (item.attempts >= 8) {
+            store.delete(id);
+          } else {
+            store.put(item);
+          }
+        }
+      };
+    });
+    return new Promise((resolve) => {
+      tx.oncomplete = () => resolve(true);
+    });
+  } catch (err) {}
+};
+
 export const getPendingCount = async () => {
   try {
     const db = await openOfflineDB();

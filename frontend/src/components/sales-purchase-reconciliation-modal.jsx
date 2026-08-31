@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
+import { COMPANY_CONFIG } from "@/lib/company-config";
 
 export function SalesPurchaseReconciliationModal({
   isOpen,
@@ -34,7 +35,7 @@ export function SalesPurchaseReconciliationModal({
       refNo: p.purchaseNumber || "PO-000",
       corpName: p.supplierName || p.supplier || "Supplier",
       proprietor: p.contactPerson || p.supplierName || "Al Khaleej Partner",
-      address: p.address || "Korangi Industrial Area, Karachi",
+      address: p.address || COMPANY_CONFIG.shortAddress,
       particular: p.productName || p.particular || p.description || "Base Oil / Drum Stock",
       gross: gross,
       total: gross,
@@ -90,7 +91,7 @@ export function SalesPurchaseReconciliationModal({
   };
 
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS - ${activeType.toUpperCase()} RECONCILIATION REPORT*\n*Period:* ${currentMonthName}\n*Total Records:* ${displayRows.length}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Date:* ${new Date().toLocaleDateString()}`;
+    const text = `*${COMPANY_CONFIG.name} - ${activeType.toUpperCase()} RECONCILIATION REPORT*\n*Period:* ${currentMonthName}\n*Total Records:* ${displayRows.length}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Proprietor:* ${COMPANY_CONFIG.proprietor}\n*Contact:* ${COMPANY_CONFIG.mobiles}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -226,15 +227,19 @@ export function SalesPurchaseReconciliationModal({
               <div className="space-y-0.5">
                 <div className="flex">
                   <span className="w-36 font-bold uppercase">Company Name:</span>
-                  <span className="font-bold uppercase">AL KHALEEJ LUBRICANTS</span>
+                  <span className="font-bold uppercase">{COMPANY_CONFIG.name}</span>
                 </div>
                 <div className="flex">
                   <span className="w-36 font-bold uppercase">Company Address:</span>
-                  <span>Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan</span>
+                  <span>{COMPANY_CONFIG.address}</span>
                 </div>
                 <div className="flex">
                   <span className="w-36 font-bold uppercase">Contact:</span>
-                  <span>Tel: (021) 35091244, 35091245</span>
+                  <span>{COMPANY_CONFIG.phoneDisplay} | {COMPANY_CONFIG.mobiles} | {COMPANY_CONFIG.email}</span>
+                </div>
+                <div className="flex">
+                  <span className="w-36 font-bold uppercase">Proprietor:</span>
+                  <span className="font-semibold">{COMPANY_CONFIG.proprietor}</span>
                 </div>
               </div>
             </div>

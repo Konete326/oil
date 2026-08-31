@@ -12,6 +12,8 @@ import { SystemLog } from "../models/systemLogModel.js";
 import { Ledger } from "../models/ledgerModel.js";
 import { SupplierLedger } from "../models/supplierLedgerModel.js";
 import { Employee } from "../models/employeeModel.js";
+import { SalaryVoucher } from "../models/salaryVoucherModel.js";
+import { Purchase } from "../models/purchaseModel.js";
 
 const cleanPayload = (p) => {
   const c = { ...p };
@@ -33,7 +35,7 @@ async function syncUpsert(Model, query, payload, targetId) {
 async function handleDelete(type, targetId) {
   if (type === "system_log_clear") return await SystemLog.deleteMany({});
   if (!targetId || !mongoose.isValidObjectId(targetId)) return;
-  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger, employee: Employee };
+  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger, employee: Employee, salary: SalaryVoucher, purchase: Purchase };
   const key = Object.keys(models).find((k) => type.startsWith(k));
   if (key && models[key]) await models[key].findByIdAndDelete(targetId);
 }
@@ -48,6 +50,14 @@ async function processSingleItem(item) {
   if (type === "pos_sale") {
     const exists = await PosSale.findOne({ saleNumber: payload.saleNumber });
     if (!exists) {
+      if (Array.isArray(cleaned.items)) {
+        for (const itm of cleaned.items) {
+          if (!itm.product || !mongoose.isValidObjectId(itm.product)) {
+            const found = await Product.findOne({ name: itm.productName });
+            itm.product = found ? found._id : new mongoose.Types.ObjectId();
+          }
+        }
+      }
       await PosSale.create(cleaned);
       if (Array.isArray(payload.items)) {
         for (const itm of payload.items) {
@@ -64,8 +74,13 @@ async function processSingleItem(item) {
     const logDate = payload.createdAt ? new Date(payload.createdAt) : new Date();
     if (logDate >= sevenDaysAgo) await SystemLog.create(cleaned);
   } else if (type === "customer_entry") await syncUpsert(Customer, payload.name ? { name: payload.name } : null, payload, targetId);
-  else if (type === "product_entry") await syncUpsert(Product, payload.name ? { name: payload.name } : null, payload, targetId);
-  else if (type === "category_entry") await syncUpsert(Category, payload.name ? { name: payload.name } : null, payload, targetId);
+  else if (type === "product_entry") {
+    if (!cleaned.category || !mongoose.isValidObjectId(cleaned.category)) {
+      const cat = await Category.findOne();
+      if (cat) cleaned.category = cat._id;
+    }
+    await syncUpsert(Product, payload.sku ? { sku: payload.sku } : payload.name ? { name: payload.name } : null, cleaned, targetId);
+  } else if (type === "category_entry") await syncUpsert(Category, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "supplier_entry") await syncUpsert(Supplier, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "mill_entry") await syncUpsert(Mill, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "employee_entry") await syncUpsert(Employee, payload.name ? { name: payload.name } : null, payload, targetId);
@@ -83,6 +98,10 @@ async function processSingleItem(item) {
       const delta = payload.transactionType?.includes("Purchase") ? Number(payload.amount) : -Number(payload.amount);
       await Supplier.findByIdAndUpdate(payload.supplier, { $inc: { currentBalance: delta } });
     }
+  } else if (type === "salary_voucher_entry") {
+    await SalaryVoucher.create(cleaned);
+  } else if (type === "purchase_entry") {
+    await Purchase.create(cleaned);
   } else if (type === "product_stock" && payload.productId && mongoose.isValidObjectId(payload.productId)) {
     await Product.findByIdAndUpdate(payload.productId, { $inc: { stockQuantity: payload.stockChange } });
   }
