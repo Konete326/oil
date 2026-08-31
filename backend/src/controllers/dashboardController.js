@@ -6,9 +6,11 @@ import { Customer } from "../models/customerModel.js";
 import { Expense } from "../models/expenseModel.js";
 import { AuditLog } from "../models/auditModel.js";
 import { CashTransaction } from "../models/cashModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getDashboardData = async (req, res, next) => {
   try {
+    await connectDB();
     const todayStr = new Date().toISOString().split("T")[0];
     const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 

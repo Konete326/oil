@@ -14,8 +14,10 @@ import { Employee } from "../models/employeeModel.js";
 import { AuditLog } from "../models/auditModel.js";
 import { Notification } from "../models/notificationModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
+import { connectDB } from "../config/db.js";
 
 const verifyAdminPassword = async (userId, password) => {
+  await connectDB();
   const user = await User.findById(userId);
   if (!user || user.role !== "admin") return false;
   return await user.matchPassword(password);
@@ -23,6 +25,7 @@ const verifyAdminPassword = async (userId, password) => {
 
 export const eraseAllData = async (req, res, next) => {
   try {
+    await connectDB();
     const { password } = req.body;
     if (!password) {
       res.status(400);
@@ -59,6 +62,7 @@ export const eraseAllData = async (req, res, next) => {
 
 export const eraseModuleData = async (req, res, next) => {
   try {
+    await connectDB();
     const { password, moduleKey } = req.body;
     if (!password || !moduleKey) {
       res.status(400);

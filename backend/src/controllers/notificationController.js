@@ -1,8 +1,10 @@
 import { Notification } from "../models/notificationModel.js";
 import { Product } from "../models/productModel.js";
+import { connectDB } from "../config/db.js";
 
 export const checkLowStockAlerts = async () => {
   try {
+    await connectDB();
     const lowStockProducts = await Product.find({
       $expr: { $lte: ["$stockQuantity", "$minStockAlert"] },
     });
@@ -30,6 +32,7 @@ export const checkLowStockAlerts = async () => {
 
 export const getNotifications = async (req, res, next) => {
   try {
+    await connectDB();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     await Notification.deleteMany({ createdAt: { $lt: thirtyDaysAgo } });
     await checkLowStockAlerts();
@@ -48,6 +51,7 @@ export const getNotifications = async (req, res, next) => {
 
 export const markAsRead = async (req, res, next) => {
   try {
+    await connectDB();
     const { id } = req.params;
     if (id === "all") {
       const role = req.user?.role || "admin";
@@ -64,6 +68,7 @@ export const markAsRead = async (req, res, next) => {
 
 export const deleteNotification = async (req, res, next) => {
   try {
+    await connectDB();
     if (req.user?.role !== "admin") {
       res.status(403);
       throw new Error("Only administrator accounts can delete notifications.");
@@ -77,6 +82,7 @@ export const deleteNotification = async (req, res, next) => {
 
 export const clearAllNotifications = async (req, res, next) => {
   try {
+    await connectDB();
     if (req.user?.role !== "admin") {
       res.status(403);
       throw new Error("Only administrator accounts can clear notifications.");
@@ -97,8 +103,9 @@ export const createNotificationHelper = async ({
   metadata = {},
 }) => {
   try {
+    await connectDB();
     return await Notification.create({ title, message, type, userName, targetRoles, metadata });
   } catch (err) {
-    console.error("Notification creation helper error:", err.message);
+    return null;
   }
 };

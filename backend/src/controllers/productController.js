@@ -1,7 +1,9 @@
 import { Product } from "../models/productModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getProducts = async (req, res, next) => {
   try {
+    await connectDB();
     const products = await Product.find().populate("category", "name code").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: products.length, data: products });
   } catch (error) {
@@ -11,6 +13,7 @@ export const getProducts = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
   try {
+    await connectDB();
     const {
       name,
       sku,
@@ -59,6 +62,7 @@ export const createProduct = async (req, res, next) => {
 
 export const updateProduct = async (req, res, next) => {
   try {
+    await connectDB();
     const product = await Product.findById(req.params.id);
     if (!product) {
       res.status(404);
@@ -81,6 +85,7 @@ export const updateProduct = async (req, res, next) => {
 
 export const deleteProduct = async (req, res, next) => {
   try {
+    await connectDB();
     const product = await Product.findById(req.params.id);
     if (!product) {
       res.status(404);

@@ -1,9 +1,11 @@
 import { Challan } from "../models/challanModel.js";
 import { Mill } from "../models/millModel.js";
 import { Product } from "../models/productModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getChallans = async (req, res, next) => {
   try {
+    await connectDB();
     const challans = await Challan.find().populate("mill", "name code zone").populate("product", "name sku brand").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: challans.length, data: challans });
   } catch (error) {
@@ -13,6 +15,7 @@ export const getChallans = async (req, res, next) => {
 
 export const createChallan = async (req, res, next) => {
   try {
+    await connectDB();
     const { millId, productId, productName, vehicleNumber, driverName, driverPhone, dipMeasurementInches, quantityLiters, overrideRate, notes } = req.body;
     let mill = null;
     if (millId) {
@@ -73,6 +76,7 @@ export const createChallan = async (req, res, next) => {
 
 export const updateChallanStatus = async (req, res, next) => {
   try {
+    await connectDB();
     const { paymentStatus, gatePassStatus } = req.body;
     const challan = await Challan.findById(req.params.id);
     if (!challan) {
@@ -90,6 +94,7 @@ export const updateChallanStatus = async (req, res, next) => {
 
 export const deleteChallan = async (req, res, next) => {
   try {
+    await connectDB();
     const challan = await Challan.findById(req.params.id);
     if (!challan) {
       res.status(404);

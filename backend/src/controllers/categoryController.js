@@ -1,7 +1,9 @@
 import { Category } from "../models/categoryModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getCategories = async (req, res, next) => {
   try {
+    await connectDB();
     const categories = await Category.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: categories.length, data: categories });
   } catch (error) {
@@ -11,6 +13,7 @@ export const getCategories = async (req, res, next) => {
 
 export const createCategory = async (req, res, next) => {
   try {
+    await connectDB();
     const { name, code } = req.body;
     if (!name || !code) {
       res.status(400);
@@ -25,6 +28,7 @@ export const createCategory = async (req, res, next) => {
 
 export const updateCategory = async (req, res, next) => {
   try {
+    await connectDB();
     const { name, code, isActive } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) {
@@ -43,6 +47,7 @@ export const updateCategory = async (req, res, next) => {
 
 export const deleteCategory = async (req, res, next) => {
   try {
+    await connectDB();
     const category = await Category.findById(req.params.id);
     if (!category) {
       res.status(404);
@@ -57,6 +62,7 @@ export const deleteCategory = async (req, res, next) => {
 
 export const addSubcategory = async (req, res, next) => {
   try {
+    await connectDB();
     const { name, code } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) {
@@ -73,6 +79,7 @@ export const addSubcategory = async (req, res, next) => {
 
 export const deleteSubcategory = async (req, res, next) => {
   try {
+    await connectDB();
     const { id, subId } = req.params;
     const category = await Category.findById(id);
     if (!category) {

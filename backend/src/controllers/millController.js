@@ -1,7 +1,9 @@
 import { Mill } from "../models/millModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getMills = async (req, res, next) => {
   try {
+    await connectDB();
     const mills = await Mill.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: mills.length, data: mills });
   } catch (error) {
@@ -11,6 +13,7 @@ export const getMills = async (req, res, next) => {
 
 export const createMill = async (req, res, next) => {
   try {
+    await connectDB();
     const { name, code, zone, contactPerson, phone, ntnNumber, contractRatePerLiter, creditLimit, address } = req.body;
     if (!name || !name.trim()) {
       res.status(400);
@@ -36,6 +39,7 @@ export const createMill = async (req, res, next) => {
 
 export const updateMill = async (req, res, next) => {
   try {
+    await connectDB();
     const mill = await Mill.findById(req.params.id);
     if (!mill) {
       res.status(404);
@@ -51,6 +55,7 @@ export const updateMill = async (req, res, next) => {
 
 export const deleteMill = async (req, res, next) => {
   try {
+    await connectDB();
     const mill = await Mill.findById(req.params.id);
     if (!mill) {
       res.status(404);

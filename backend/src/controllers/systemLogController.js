@@ -1,7 +1,9 @@
 import { SystemLog } from "../models/systemLogModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getSystemLogs = async (req, res, next) => {
   try {
+    await connectDB();
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     await SystemLog.deleteMany({ createdAt: { $lt: sevenDaysAgo } });
 
@@ -20,6 +22,7 @@ export const getSystemLogs = async (req, res, next) => {
 
 export const createSystemLog = async (req, res, next) => {
   try {
+    await connectDB();
     const { title, message, stack, level, source, metadata } = req.body;
     if (!message) {
       res.status(400);
@@ -48,6 +51,7 @@ export const createSystemLog = async (req, res, next) => {
 
 export const deleteSingleSystemLog = async (req, res, next) => {
   try {
+    await connectDB();
     if (req.user?.role !== "admin") {
       res.status(403);
       throw new Error("Only administrator accounts can delete system logs.");
@@ -70,6 +74,7 @@ export const deleteSingleSystemLog = async (req, res, next) => {
 
 export const clearAllSystemLogs = async (req, res, next) => {
   try {
+    await connectDB();
     if (req.user?.role !== "admin") {
       res.status(403);
       throw new Error("Only administrator accounts can clear system logs.");

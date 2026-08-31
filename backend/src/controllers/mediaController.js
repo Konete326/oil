@@ -1,8 +1,10 @@
 import cloudinary from "../config/cloudinary.js";
 import { Media } from "../models/mediaModel.js";
+import { connectDB } from "../config/db.js";
 
 export const uploadImage = async (req, res, next) => {
   try {
+    await connectDB();
     if (!req.file) {
       res.status(400);
       throw new Error("No image file provided");
@@ -38,6 +40,7 @@ export const uploadImage = async (req, res, next) => {
 
 export const getMediaList = async (req, res, next) => {
   try {
+    await connectDB();
     const mediaList = await Media.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
@@ -51,6 +54,7 @@ export const getMediaList = async (req, res, next) => {
 
 export const deleteMedia = async (req, res, next) => {
   try {
+    await connectDB();
     const media = await Media.findById(req.params.id);
     if (!media) {
       res.status(404);
@@ -62,7 +66,7 @@ export const deleteMedia = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Media asset deleted from Cloudinary and database",
+      message: "Media asset deleted successfully",
     });
   } catch (error) {
     next(error);

@@ -11,9 +11,11 @@ import { SystemLog } from "../models/systemLogModel.js";
 import { Ledger } from "../models/ledgerModel.js";
 import { SupplierLedger } from "../models/supplierLedgerModel.js";
 import { Employee } from "../models/employeeModel.js";
+import { connectDB } from "../config/db.js";
 
 export const getHydrateData = async (req, res) => {
   try {
+    await connectDB();
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const [
       products,

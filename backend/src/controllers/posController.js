@@ -4,9 +4,11 @@ import { Customer } from "../models/customerModel.js";
 import { CashTransaction } from "../models/cashModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
 import { createNotificationHelper } from "./notificationController.js";
+import { connectDB } from "../config/db.js";
 
 export const getPosSales = async (req, res, next) => {
   try {
+    await connectDB();
     const sales = await PosSale.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: sales.length, data: sales });
   } catch (error) {
@@ -16,6 +18,7 @@ export const getPosSales = async (req, res, next) => {
 
 export const createPosSale = async (req, res, next) => {
   try {
+    await connectDB();
     const { customerName, customerPhone, customerId, saleType, items, subtotal, discount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
     if (!items || items.length === 0 || !grandTotal) {
       res.status(400);
@@ -90,6 +93,7 @@ export const createPosSale = async (req, res, next) => {
 
 export const deletePosSale = async (req, res, next) => {
   try {
+    await connectDB();
     if (req.user?.role !== "admin") {
       res.status(403);
       throw new Error("Access denied. Only Super Admin has permission to delete sales records.");
@@ -106,11 +110,7 @@ export const deletePosSale = async (req, res, next) => {
     if (Array.isArray(sale.items)) {
       for (const item of sale.items) {
         if (item.product) {
-          const product = await Product.findById(item.product);
-          if (product) {
-            product.stockQuantity += Number(item.quantity) || 0;
-            await product.save();
-          }
+          await Product.findByIdAndUpdate(item.product, { $inc: { stockQuantity: Number(item.quantity) || 0 } });
         }
       }
     }
