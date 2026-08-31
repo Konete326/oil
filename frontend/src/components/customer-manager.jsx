@@ -82,10 +82,11 @@ export function CustomerManager() {
   const loadCustomers = async (showSkeleton = true) => {
     if (showSkeleton) setLoading(true);
     try {
-      const res = await fetchCustomers({ search, customerType, status, page, limit: PAGE_SIZE });
+      const currentLimit = viewMode === "cards" ? 3 : 4;
+      const res = await fetchCustomers({ search, customerType, status, page, limit: currentLimit });
       if (res && res.success && Array.isArray(res.data)) {
         setCustomers(res.data);
-        setTotalPages(res.totalPages || 1);
+        setTotalPages(res.totalPages || Math.ceil((res.total || res.data.length) / currentLimit) || 1);
         setTotalRecords(res.total || 0);
       }
     } catch (err) {
@@ -98,7 +99,7 @@ export function CustomerManager() {
   useEffect(() => {
     loadCustomers(true);
     loadSummary();
-  }, [search, customerType, status, page]);
+  }, [search, customerType, status, page, viewMode]);
 
   useEffect(() => {
     const handleFocus = () => {
@@ -114,7 +115,7 @@ export function CustomerManager() {
       window.removeEventListener("focus", handleFocus);
       clearInterval(interval);
     };
-  }, [search, customerType, status, page]);
+  }, [search, customerType, status, page, viewMode]);
 
   const handleOpenAdd = () => {
     setSelectedCustomer(null);
@@ -247,7 +248,7 @@ export function CustomerManager() {
         <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
           <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border">
             <button
-              onClick={() => setViewMode("table")}
+              onClick={() => { setViewMode("table"); setPage(1); }}
               className={cn(
                 "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "table" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
@@ -258,7 +259,7 @@ export function CustomerManager() {
               <span className="hidden sm:inline">Table</span>
             </button>
             <button
-              onClick={() => setViewMode("cards")}
+              onClick={() => { setViewMode("cards"); setPage(1); }}
               className={cn(
                 "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "cards" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
@@ -502,64 +503,70 @@ export function CustomerManager() {
                   </tbody>
                 </table>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-2.5 sm:p-3">
-                  {customers.map((c) => {
+                <div
+                  key={`cards-page-${page}`}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-3 p-2.5 sm:p-3 animate-in fade-in slide-in-from-right-6 duration-300 fill-mode-both"
+                >
+                  {customers.map((c, idx) => {
                     const hasBalance = (c.currentBalance || 0) > 0;
                     return (
                       <div
                         key={c._id}
-                        className="rounded-lg border border-border/80 bg-card p-3 shadow-xs space-y-2 hover:border-primary/40 transition-colors"
+                        style={{ animationDelay: `${idx * 50}ms` }}
+                        className="rounded-xl border border-border/80 bg-card p-3 shadow-xs space-y-2 hover:border-primary/40 transition-all duration-200 hover:shadow-md animate-in fade-in duration-200 flex flex-col justify-between"
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <h4 className="font-semibold text-xs text-foreground truncate">{c.name}</h4>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[9.5px] font-medium px-1.5 py-0.2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                                {c.customerType || "Retail"}
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h4 className="font-semibold text-xs text-foreground truncate">{c.name}</h4>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[9.5px] font-medium px-1.5 py-0.2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                                  {c.customerType || "Retail"}
+                                </span>
+                                <span className="text-[10.5px] text-muted-foreground truncate">{c.city || "Karachi"}</span>
+                              </div>
+                            </div>
+
+                            <span
+                              className={cn(
+                                "px-1.5 py-0.5 rounded-full text-[9.5px] font-semibold shrink-0",
+                                c.status === "Active"
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                  : "bg-muted text-muted-foreground border border-border"
+                              )}
+                            >
+                              {c.status || "Active"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-md bg-muted/30 text-xs border border-border/50">
+                            <div>
+                              <span className="text-[9px] text-muted-foreground block">Khata Balance</span>
+                              <span
+                                className={cn(
+                                  "font-mono font-bold text-xs",
+                                  hasBalance ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+                                )}
+                              >
+                                Rs {(c.currentBalance || 0).toLocaleString()}
                               </span>
-                              <span className="text-[10.5px] text-muted-foreground truncate">{c.city || "Karachi"}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-muted-foreground block">Credit Limit</span>
+                              <span className="font-mono text-muted-foreground text-[11px]">
+                                Rs {(c.creditLimit || 0).toLocaleString()}
+                              </span>
                             </div>
                           </div>
 
-                          <span
-                            className={cn(
-                              "px-1.5 py-0.5 rounded-full text-[9.5px] font-semibold shrink-0",
-                              c.status === "Active"
-                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                                : "bg-muted text-muted-foreground border border-border"
-                            )}
-                          >
-                            {c.status || "Active"}
-                          </span>
+                          {c.phone && (
+                            <div className="text-[10.5px] font-mono text-muted-foreground">
+                              {c.phone}
+                            </div>
+                          )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-md bg-muted/30 text-xs border border-border/50">
-                          <div>
-                            <span className="text-[9px] text-muted-foreground block">Khata Balance</span>
-                            <span
-                              className={cn(
-                                "font-mono font-bold text-xs",
-                                hasBalance ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
-                              )}
-                            >
-                              Rs {(c.currentBalance || 0).toLocaleString()}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-[9px] text-muted-foreground block">Credit Limit</span>
-                            <span className="font-mono text-muted-foreground text-[11px]">
-                              Rs {(c.creditLimit || 0).toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-
-                        {c.phone && (
-                          <div className="text-[10.5px] font-mono text-muted-foreground">
-                            {c.phone}
-                          </div>
-                        )}
-
-                        <div className="pt-1.5 border-t border-border flex items-center justify-end gap-1 flex-wrap">
+                        <div className="pt-2 border-t border-border flex items-center justify-end gap-1 flex-wrap">
                           <Button
                             variant="outline"
                             size="sm"
