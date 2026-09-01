@@ -9,6 +9,7 @@ export function CustomerVendorSelect({
   onSelectCustomer,
   type = "customer",
   placeholder = "Search or enter name...",
+  className = "",
 }) {
   const [query, setQuery] = useState(value || "");
   const [options, setOptions] = useState([]);
@@ -64,18 +65,18 @@ export function CustomerVendorSelect({
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
-      <div className="relative">
-        <UserIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+      <div className="relative flex items-center">
+        <UserIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
         <input
           type="text"
           value={query}
           onChange={handleInputChange}
           onFocus={handleFocus}
           placeholder={placeholder}
-          className="w-full h-9 rounded-md border border-input bg-background pl-9 pr-8 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+          className={`w-full h-8 rounded-md border border-input bg-background pl-8 pr-7 text-xs focus:outline-none focus:ring-1 focus:ring-primary ${className}`}
         />
         {loading && (
-          <div className="absolute right-2.5 top-2.5 size-3.5 border-2 border-primary border-t-transparent animate-spin rounded-full" />
+          <div className="absolute right-2 top-2 size-3.5 border-2 border-primary border-t-transparent animate-spin rounded-full" />
         )}
       </div>
 

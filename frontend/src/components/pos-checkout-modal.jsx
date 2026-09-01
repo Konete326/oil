@@ -5,6 +5,7 @@ import { CustomerVendorSelect } from "@/components/ui/customer-vendor-select";
 import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, CreditCardIcon, AlertTriangleIcon, Building2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { fetchBankAccounts } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 export function PosCheckoutModal({
   isOpen,
@@ -12,16 +13,19 @@ export function PosCheckoutModal({
   cartSubtotal,
   initialDiscount = 0,
   initialPaymentMode = "Cash",
+  initialCustomerName = "Walk-in Customer",
+  initialCustomerObj = null,
+  initialBankAccountId = "",
   onConfirm,
   submitting,
 }) {
-  const [customerName, setCustomerName] = useState("Walk-in Customer");
-  const [selectedCustomerObj, setSelectedCustomerObj] = useState(null);
+  const [customerName, setCustomerName] = useState(initialCustomerName || "Walk-in Customer");
+  const [selectedCustomerObj, setSelectedCustomerObj] = useState(initialCustomerObj || null);
   const [saleType, setSaleType] = useState("Retail");
   const [discountMode, setDiscountMode] = useState("fixed");
   const [discount, setDiscount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
-  const [bankAccountId, setBankAccountId] = useState("");
+  const [bankAccountId, setBankAccountId] = useState(initialBankAccountId || "");
   const [bankAccounts, setBankAccounts] = useState([]);
   const [cashReceived, setCashReceived] = useState("");
 
@@ -31,11 +35,16 @@ export function PosCheckoutModal({
 
   useEffect(() => {
     if (isOpen) {
+      setCustomerName(initialCustomerName || "Walk-in Customer");
+      setSelectedCustomerObj(initialCustomerObj || null);
+      if (initialCustomerObj?.customerType === "Wholesale") {
+        setSaleType("Wholesale");
+      }
       fetchBankAccounts().then((res) => {
         if (res && res.data) {
           setBankAccounts(res.data);
           const def = res.data.find((a) => a.isDefault && a.isActive) || res.data[0];
-          if (def) setBankAccountId(def._id);
+          setBankAccountId(initialBankAccountId || (def ? def._id : ""));
         }
       });
       if (initialDiscount > 0) {
@@ -48,7 +57,7 @@ export function PosCheckoutModal({
         setPaymentMode(initialPaymentMode);
       }
     }
-  }, [isOpen, initialDiscount, initialPaymentMode]);
+  }, [isOpen, initialDiscount, initialPaymentMode, initialCustomerName, initialCustomerObj]);
 
   if (!isOpen) return null;
 
@@ -146,14 +155,6 @@ export function PosCheckoutModal({
                   if (cust.customerType === "Wholesale") setSaleType("Wholesale");
                 }}
               />
-              {selectedCustomerObj && (
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground px-0.5 pt-0.5 font-mono">
-                  <span>Khata: <strong className="text-foreground">Rs {selectedCustomerObj.currentBalance?.toLocaleString() || 0}</strong></span>
-                  {selectedCustomerObj.creditLimit > 0 && (
-                    <span>Limit: <strong className="text-foreground">Rs {selectedCustomerObj.creditLimit?.toLocaleString()}</strong></span>
-                  )}
-                </div>
-              )}
             </div>
             <div className="space-y-1">
               <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
@@ -162,13 +163,58 @@ export function PosCheckoutModal({
               <select
                 value={saleType}
                 onChange={(e) => setSaleType(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer font-semibold"
               >
                 <option value="Retail">Retail</option>
                 <option value="Wholesale">Wholesale</option>
               </select>
             </div>
           </div>
+
+          {selectedCustomerObj && (
+            <div className="p-2.5 rounded-xl border border-border bg-card space-y-1.5 text-xs shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-foreground flex items-center gap-1 truncate">
+                  <UserIcon className="size-3 text-primary shrink-0" />
+                  <span>{selectedCustomerObj.name}</span>
+                </span>
+                <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono font-semibold shrink-0">
+                  {selectedCustomerObj.customerType || "Customer"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/60 text-[11px]">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] text-muted-foreground block">Pichla Khata Balance:</span>
+                  <span className={cn(
+                    "font-mono font-bold text-xs",
+                    (selectedCustomerObj.currentBalance || 0) > 0 ? "text-amber-500" : "text-emerald-500"
+                  )}>
+                    Rs. {(selectedCustomerObj.currentBalance || 0).toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="space-y-0.5 text-right">
+                  <span className="text-[10px] text-muted-foreground block">Credit Limit:</span>
+                  <div className="flex items-center justify-end gap-1 font-mono text-[11px]">
+                    <span className="font-bold text-foreground">
+                      {selectedCustomerObj.creditLimit > 0 ? `Rs. ${selectedCustomerObj.creditLimit.toLocaleString()}` : "Unlimited"}
+                    </span>
+                    {selectedCustomerObj.creditLimit > 0 && (
+                      <span className={cn(
+                        "text-[9px] px-1 py-0.2 rounded font-bold uppercase",
+                        (selectedCustomerObj.currentBalance || 0) > selectedCustomerObj.creditLimit
+                          ? "bg-destructive/15 text-destructive border border-destructive/30"
+                          : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                      )}>
+                        {(selectedCustomerObj.currentBalance || 0) > selectedCustomerObj.creditLimit ? "Exceeded" : "Safe"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {isCreditBreached && (
             <div className="rounded-lg bg-amber-500/15 border border-amber-500/40 p-2 text-amber-500 text-xs flex items-start gap-1.5 animate-pulse">
@@ -192,7 +238,7 @@ export function PosCheckoutModal({
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer font-semibold"
               >
                 <option value="Cash">Cash</option>
                 <option value="Card">Card POS</option>
@@ -207,7 +253,7 @@ export function PosCheckoutModal({
                 <button
                   type="button"
                   onClick={() => { setDiscountMode(discountMode === "fixed" ? "percent" : "fixed"); }}
-                  className="text-[9.5px] text-primary hover:underline cursor-pointer"
+                  className="text-[9.5px] text-primary hover:underline cursor-pointer font-semibold"
                 >
                   {discountMode === "fixed" ? "%" : "Rs"}
                 </button>
@@ -218,70 +264,83 @@ export function PosCheckoutModal({
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
                 onValidationChange={setDiscountValid}
-                placeholder="e.g. 50"
-                className="h-8 text-xs"
+                placeholder="0"
+                className="h-8"
               />
             </div>
           </div>
 
           {(paymentMode === "Bank Transfer" || paymentMode === "Card") && (
-            <div className="space-y-1 p-2 rounded-lg bg-primary/5 border border-primary/20 animate-in fade-in">
+            <div className="space-y-1">
               <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
-                <Building2Icon className="size-3 text-primary" /> Deposit Bank Account
+                <Building2Icon className="size-3 text-muted-foreground" /> Receiving Bank Account
               </label>
               <select
                 value={bankAccountId}
                 onChange={(e) => setBankAccountId(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer font-medium"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
               >
-                {bankAccounts.length === 0 ? (
-                  <option value="">Default Business Bank Account</option>
-                ) : (
-                  bankAccounts.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.bankName} - {b.accountNumber} ({b.accountTitle})
-                    </option>
-                  ))
-                )}
+                {bankAccounts.map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.bankName} - {b.accountNumber} ({b.accountTitle})
+                  </option>
+                ))}
               </select>
             </div>
           )}
 
           {paymentMode === "Cash" && (
-            <div className="grid grid-cols-2 gap-2.5">
-              <ValidatedInput
-                label="Cash Received"
-                rule="positiveNumber"
-                type="number"
-                placeholder="e.g. 5000"
-                value={cashReceived}
-                onChange={(e) => setCashReceived(e.target.value)}
-                onValidationChange={setCashReceivedValid}
-              />
+            <div className="space-y-2 pt-1 border-t border-border/60">
               <div className="space-y-1">
-                <label className="font-medium text-muted-foreground">Change Due</label>
-                <div className="h-9 rounded-md border bg-muted/40 px-3 flex items-center font-mono font-bold text-emerald-500 text-xs">
-                  Rs {changeDue.toLocaleString()}
+                <div className="flex items-center justify-between">
+                  <label className="font-medium text-[11px] text-foreground">Cash Received</label>
+                  <button
+                    type="button"
+                    onClick={() => setCashReceived(String(grandTotal))}
+                    className="text-[10px] text-primary hover:underline cursor-pointer font-semibold"
+                  >
+                    Exact: Rs {grandTotal.toLocaleString()}
+                  </button>
                 </div>
+                <ValidatedInput
+                  rule="amount"
+                  type="number"
+                  value={cashReceived}
+                  onChange={(e) => setCashReceived(e.target.value)}
+                  onValidationChange={setCashReceivedValid}
+                  placeholder={`e.g. ${grandTotal}`}
+                  className="font-mono font-bold text-foreground h-8.5 text-sm"
+                />
               </div>
+
+              {cashReceivedNum > 0 && (
+                <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2 text-xs flex justify-between items-center">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">Change Due (Baqi Wapis):</span>
+                  <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                    Rs {changeDue.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        <div className="px-5 pb-5 flex gap-2">
-          <Button variant="outline" className="flex-1 cursor-pointer text-xs" onClick={onClose} disabled={submitting}>
+        <div className="p-3 border-t border-border bg-muted/20 flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1 cursor-pointer h-8.5 text-xs"
+            onClick={onClose}
+            disabled={submitting}
+          >
             Cancel
           </Button>
           <Button
-            className="flex-1 gap-1.5 text-xs cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="flex-1 gap-1.5 cursor-pointer h-8.5 text-xs font-bold shadow-md bg-primary text-primary-foreground"
             onClick={handleConfirm}
             disabled={submitting || !isFormValid}
           >
-            {submitting ? (
-              <><Loader2Icon className="size-3.5 animate-spin" /><span>Processing...</span></>
-            ) : (
-              <span>Complete Sale</span>
-            )}
+            {submitting ? <Loader2Icon className="size-3.5 animate-spin" /> : <ReceiptIcon className="size-3.5" />}
+            <span>Pay Rs {grandTotal.toLocaleString()}</span>
           </Button>
         </div>
       </div>

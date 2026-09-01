@@ -25,14 +25,17 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("manager");
+  const [role, setRole] = useState("cashier");
   const [status, setStatus] = useState("Active");
   const [selectedPermissions, setSelectedPermissions] = useState(["pos", "cash", "ledger"]);
   const [loading, setLoading] = useState(false);
 
   const [nameValid, setNameValid] = useState(false);
   const [emailValid, setEmailValid] = useState(false);
-  const isFormValid = nameValid && (editingUser?._id ? true : emailValid) && (editingUser?._id ? true : passwordValid);
+  const [passwordValid, setPasswordValid] = useState(false);
+
+  const isEditMode = !!(editingUser && editingUser._id);
+  const isFormValid = nameValid && (isEditMode ? true : emailValid) && (isEditMode ? true : passwordValid);
 
   useEffect(() => {
     if (editingUser) {
@@ -51,6 +54,9 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
       setRole("cashier");
       setStatus("Active");
       setSelectedPermissions(["pos", "cash", "ledger"]);
+      setNameValid(false);
+      setEmailValid(false);
+      setPasswordValid(false);
     }
   }, [editingUser, isOpen]);
 
@@ -89,7 +95,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
 
     try {
       setLoading(true);
-      if (editingUser && editingUser._id) {
+      if (isEditMode) {
         await updateUserPermissionsApi(editingUser._id, {
           name: name.trim(),
           role,
@@ -118,6 +124,14 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
     }
   };
 
+  const handleNameChange = (val) => {
+    setName(val);
+    if (!isEditMode && (!email || email.includes("@gmail.com"))) {
+      const clean = val.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (clean) setEmail(`${clean}@gmail.com`);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
       <div className="w-full max-w-3xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto">
@@ -128,7 +142,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-foreground">
-                {editingUser ? "Edit User Account & Permissions" : "Create New User Account"}
+                {isEditMode ? "Edit User Account & Permissions" : "Create Staff Software Login & Permissions"}
               </h2>
               <p className="text-[11px] text-muted-foreground">Configure profile credentials and accessible ERP modules.</p>
             </div>
@@ -152,7 +166,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   rule="name"
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   onValidationChange={setNameValid}
                   placeholder="e.g. Asif Khan"
                 />
@@ -162,16 +176,16 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   rule="email"
                   required
                   value={email}
-                  disabled={!!editingUser}
+                  disabled={isEditMode}
                   onChange={(e) => setEmail(e.target.value)}
                   onValidationChange={setEmailValid}
-                  placeholder="user@alkhaleej.com"
+                  placeholder="user@gmail.com"
                 />
               </div>
 
-              {!editingUser && (
+              {!isEditMode && (
                 <ValidatedInput
-                  label="Password"
+                  label="Login PIN / Password"
                   rule="password"
                   type="password"
                   required
@@ -188,12 +202,12 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold cursor-pointer"
+                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring font-semibold cursor-pointer"
                   >
+                    <option value="cashier">Cashier (POS & Sales Counter)</option>
+                    <option value="manager">Manager (Inventory, Ledger & Reports)</option>
+                    <option value="accountant">Accountant (Accounts & Expenses)</option>
                     <option value="admin">Admin (Full Control)</option>
-                    <option value="manager">Manager</option>
-                    <option value="cashier">Cashier</option>
-                    <option value="accountant">Accountant</option>
                   </select>
                 </div>
 
@@ -202,7 +216,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium cursor-pointer"
+                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring font-medium cursor-pointer"
                   >
                     <option value="Active">Active (Enabled)</option>
                     <option value="Inactive">Inactive (Disabled)</option>
@@ -257,9 +271,9 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="gap-1.5 cursor-pointer bg-primary text-primary-foreground font-semibold">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
-              <span>{editingUser ? "Save Permissions" : "Create User"}</span>
+              <span>{isEditMode ? "Save Permissions" : "Create Staff Account"}</span>
             </Button>
           </div>
         </form>

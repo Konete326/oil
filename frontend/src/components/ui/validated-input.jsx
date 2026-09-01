@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
+import { AlertCircleIcon, CheckCircle2Icon, EyeIcon, EyeOffIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function formatPhoneNumber(val) {
@@ -18,7 +18,7 @@ export const VALIDATION_RULES = {
   },
   password: {
     regex: /^.{6,}$/,
-    suggestion: "Invalid",
+    suggestion: "Min 6 chars",
     validMsg: "Valid",
   },
   name: {
@@ -77,6 +77,10 @@ export const ValidatedInput = React.forwardRef(
     ref
   ) => {
     const [touched, setTouched] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const isPasswordField = rule === "password" || type === "password";
+    const actualType = isPasswordField ? (showPassword ? "text" : "password") : type;
 
     const ruleConfig = VALIDATION_RULES[rule] || VALIDATION_RULES.text;
     const activeRegex = customRegex || ruleConfig.regex;
@@ -159,7 +163,7 @@ export const ValidatedInput = React.forwardRef(
         <div className="relative flex items-center">
           <Input
             ref={ref}
-            type={type}
+            type={actualType}
             value={value}
             disabled={disabled}
             placeholder={placeholder}
@@ -168,7 +172,8 @@ export const ValidatedInput = React.forwardRef(
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             className={cn(
-              "pe-8 text-xs transition-all duration-200",
+              isPasswordField ? "pe-16" : "pe-8",
+              "text-xs transition-all duration-200",
               showErrorState &&
                 "border-destructive bg-destructive/5 ring-1 ring-destructive/30 focus-visible:ring-destructive focus-visible:border-destructive",
               showValidState &&
@@ -177,15 +182,30 @@ export const ValidatedInput = React.forwardRef(
             )}
             {...props}
           />
-          {touched && (
-            <div className="absolute right-2.5 pointer-events-none flex items-center justify-center">
-              {showErrorState ? (
-                <AlertCircleIcon className="size-4 text-destructive animate-in zoom-in-50 duration-150" />
-              ) : showValidState ? (
-                <CheckCircle2Icon className="size-4 text-emerald-500 animate-in zoom-in-50 duration-150" />
-              ) : null}
-            </div>
-          )}
+
+          <div className="absolute right-2 flex items-center gap-1.5">
+            {touched && (
+              <div className="flex items-center justify-center pointer-events-none">
+                {showErrorState ? (
+                  <AlertCircleIcon className="size-3.5 text-destructive animate-in zoom-in-50 duration-150" />
+                ) : showValidState ? (
+                  <CheckCircle2Icon className="size-3.5 text-emerald-500 animate-in zoom-in-50 duration-150" />
+                ) : null}
+              </div>
+            )}
+
+            {isPasswordField && (
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer p-0.5 rounded transition-colors focus:outline-hidden"
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );

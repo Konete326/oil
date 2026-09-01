@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { fetchProducts, fetchCategories, createPosSale } from "@/lib/api";
+import { fetchProducts, fetchCategories, createPosSale, fetchBankAccounts } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PosCheckoutModal } from "@/components/pos-checkout-modal";
 import { PosReceiptModal } from "@/components/pos-receipt-modal";
+import { CustomerVendorSelect } from "@/components/ui/customer-vendor-select";
 import {
   ShoppingCartIcon,
   SearchIcon,
@@ -17,6 +18,7 @@ import {
   CreditCardIcon,
   BanknoteIcon,
   Building2Icon,
+  UserIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -32,6 +34,10 @@ export function PosCounter() {
   const [discountType, setDiscountType] = useState("fixed");
   const [discountValue, setDiscountValue] = useState("");
   const [selectedPaymentMode, setSelectedPaymentMode] = useState("Cash");
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [selectedBankId, setSelectedBankId] = useState("");
+  const [customerName, setCustomerName] = useState("Walk-in Customer");
+  const [selectedCustomerObj, setSelectedCustomerObj] = useState(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [completedSale, setCompletedSale] = useState(null);
@@ -40,9 +46,15 @@ export function PosCounter() {
 
   const loadData = async () => {
     setLoading(true);
-    const [pRes, cRes] = await Promise.all([fetchProducts(), fetchCategories()]);
+    const [pRes, cRes, bRes] = await Promise.all([fetchProducts(), fetchCategories(), fetchBankAccounts()]);
     if (pRes && pRes.success) setProducts(pRes.data);
     if (cRes && cRes.success) setCategories(cRes.data);
+    if (bRes && bRes.data) {
+      const activeBanks = bRes.data.filter((b) => b.isActive !== false);
+      setBankAccounts(activeBanks);
+      const def = activeBanks.find((b) => b.isDefault) || activeBanks[0];
+      if (def) setSelectedBankId(def._id);
+    }
     setLoading(false);
   };
 
@@ -338,8 +350,8 @@ export function PosCounter() {
     const { customerName, saleType, discount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
     try {
       const res = await createPosSale({
-        customerName,
-        customerPhone: "",
+        customerName: checkoutData.customerName || customerName,
+        customerPhone: selectedCustomerObj?.phone || "",
         saleType,
         items: cart,
         subtotal: grossSubtotal,
@@ -352,6 +364,8 @@ export function PosCounter() {
       setCompletedSale(res.data);
       setCart([]);
       setDiscountValue("");
+      setSelectedCustomerObj(null);
+      setCustomerName("Walk-in Customer");
       setIsCheckoutOpen(false);
       await loadData();
     } catch (err) {
@@ -374,24 +388,24 @@ export function PosCounter() {
   });
 
   return (
-    <div className="h-full max-h-full flex flex-col lg:overflow-hidden select-none">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:h-full flex-1 min-h-0">
-        <div className="lg:col-span-7 xl:col-span-8 flex flex-col lg:h-full space-y-1.5 min-h-0">
-          <div className="flex items-center justify-between gap-2 border-b border-border pb-1 shrink-0">
+    <div className="h-[calc(100vh-3.8rem)] max-h-[calc(100vh-3.8rem)] flex flex-col overflow-hidden select-none">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 h-full flex-1 min-h-0 overflow-hidden">
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col h-full space-y-1 min-h-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-2 border-b border-border pb-0.5 shrink-0">
             <div>
-              <h2 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
-                <ShoppingCartIcon className="size-4 text-primary" />
-                POS Billing Counter
+              <h2 className="text-xs sm:text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
+                <ShoppingCartIcon className="size-3.5 sm:size-4 text-primary" />
+                <span>POS Billing Counter</span>
               </h2>
             </div>
-            <div className="text-[10px] font-mono text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-md border border-border shrink-0">
+            <div className="text-[10px] font-mono text-muted-foreground bg-muted/40 px-2 py-0.2 rounded-md border border-border shrink-0">
               {filteredProducts.length} Items
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 p-1.5 rounded-xl border border-border bg-card shadow-xs shrink-0">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 p-1 rounded-xl border border-border bg-card shadow-2xs shrink-0">
             <div className="relative flex-1 w-full">
-              <ScanBarcodeIcon className="absolute left-2.5 top-2.5 size-3.5 text-primary animate-pulse" />
+              <ScanBarcodeIcon className="absolute left-2.5 top-2 size-3.5 text-primary animate-pulse" />
               <Input
                 ref={searchInputRef}
                 placeholder="Scan Barcode / SKU or type product name (Press Enter)..."
@@ -405,7 +419,7 @@ export function PosCounter() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="rounded-md border border-input bg-background px-2 py-1 text-xs shadow-xs cursor-pointer w-full sm:w-auto h-7.5"
+              className="rounded-md border border-input bg-background px-2 py-0.5 text-xs shadow-2xs cursor-pointer w-full sm:w-auto h-7.5"
             >
               <option value="">All Categories</option>
               {categories.map((c) => (
@@ -416,25 +430,25 @@ export function PosCounter() {
             </select>
           </div>
 
-          <div className="flex-1 overflow-y-auto max-h-[45vh] lg:max-h-none pe-1.5 rounded-xl border border-border/70 bg-muted/10 p-1.5 min-h-0">
+          <div className="flex-1 overflow-y-auto pe-1 rounded-xl border border-border/70 bg-muted/10 p-1 min-h-0">
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-32 rounded-xl border border-border bg-card p-2 space-y-1.5">
-                    <Skeleton className="h-14 w-full" />
+                  <div key={i} className="rounded-xl border border-border bg-card p-2 space-y-2">
+                    <Skeleton className="aspect-4/3 w-full rounded-lg" />
                     <Skeleton className="h-4 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                   </div>
                 ))}
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground text-xs space-y-1.5 flex flex-col items-center justify-center h-full">
-                <PackageIcon className="size-8 text-muted-foreground/40" />
+              <div className="py-8 text-center text-muted-foreground text-xs space-y-1 flex flex-col items-center justify-center h-full">
+                <PackageIcon className="size-7 text-muted-foreground/40" />
                 <p className="font-semibold text-foreground">No Products Found</p>
                 <p className="text-[10px]">Try searching a different SKU, name or category.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {filteredProducts.map((prod) => {
                   const minAlert = prod.minStockAlert !== undefined ? prod.minStockAlert : 5;
                   const isLowStock = prod.stockQuantity <= minAlert && prod.stockQuantity > 0;
@@ -447,7 +461,7 @@ export function PosCounter() {
                         searchInputRef.current?.focus();
                       }}
                       className={cn(
-                        "group relative rounded-xl border bg-card p-1.5 shadow-2xs hover:shadow-sm transition-all duration-150 flex flex-col justify-between cursor-pointer active:scale-[0.98]",
+                        "group relative rounded-xl border bg-card p-2 shadow-2xs hover:shadow-md transition-all duration-150 flex flex-col justify-between cursor-pointer active:scale-[0.98]",
                         isOutOfStock
                           ? "opacity-50 border-border"
                           : isLowStock
@@ -455,15 +469,15 @@ export function PosCounter() {
                           : "border-border/80 hover:border-primary/50"
                       )}
                     >
-                      <div className="h-16 w-full rounded-lg bg-muted/40 flex items-center justify-center overflow-hidden relative shrink-0">
+                      <div className="aspect-4/3 w-full rounded-lg bg-muted/30 dark:bg-muted/10 flex items-center justify-center overflow-hidden relative shrink-0 border border-border/40">
                         {prod.imageUrl ? (
                           <img
                             src={prod.imageUrl}
                             alt={prod.name}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            className="h-full w-full object-contain p-1 transition-transform duration-200 group-hover:scale-105"
                           />
                         ) : (
-                          <svg className="size-6 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg className="size-8 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                             <line x1="3" y1="6" x2="21" y2="6"></line>
                             <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -471,25 +485,37 @@ export function PosCounter() {
                         )}
                         <span
                           className={cn(
-                            "absolute top-1 right-1 text-[8px] font-bold px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 shadow-xs",
+                            "absolute top-1.5 right-1.5 text-[8.5px] font-bold px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 shadow-xs backdrop-blur-xs",
                             isOutOfStock
-                              ? "bg-rose-500/20 border-rose-500/40 text-rose-600 dark:text-rose-400"
+                              ? "bg-destructive/90 text-destructive-foreground border-destructive"
                               : isLowStock
-                              ? "bg-amber-500/25 border-amber-500/50 text-amber-700 dark:text-amber-300 font-extrabold animate-pulse"
-                              : "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                              ? "bg-amber-500/90 text-amber-950 dark:text-amber-100 border-amber-600 animate-pulse"
+                              : "bg-background/90 text-foreground border-border"
                           )}
                         >
-                          {isOutOfStock ? "Out of Stock" : isLowStock ? `⚠️ Only ${prod.stockQuantity} Left` : `${prod.stockQuantity} ${prod.unit || "Cans"}`}
+                          {isOutOfStock ? "Out of Stock" : `${prod.stockQuantity} ${prod.unit || "Cans"}`}
                         </span>
                       </div>
 
-                      <div className="p-1.5 flex flex-col gap-0.5 flex-1">
-                        <h4 className="font-bold text-[11px] text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-tight">
-                          {prod.name}
-                        </h4>
-                        <p className="font-mono font-bold text-xs text-primary pt-0.5">
-                          Rs {prod.sellingPrice?.toLocaleString()} <span className="text-[8.5px] font-normal text-muted-foreground">/{prod.unit}</span>
-                        </p>
+                      <div className="space-y-1 pt-1.5 flex flex-col justify-between flex-1">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <p className="font-bold text-foreground text-xs line-clamp-1 group-hover:text-primary transition-colors leading-tight">
+                            {prod.name}
+                          </p>
+                          {prod.grade && (
+                            <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-muted text-muted-foreground font-mono shrink-0">
+                              {prod.grade}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between pt-0.5 border-t border-border/40">
+                          <span className="font-bold text-xs sm:text-sm font-mono text-primary">
+                            Rs {prod.sellingPrice?.toLocaleString()}
+                          </span>
+                          <span className="text-[9.5px] text-muted-foreground font-mono truncate max-w-[45%]">
+                            {prod.sku || prod.barcode || ""}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -499,11 +525,11 @@ export function PosCounter() {
           </div>
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-4 rounded-2xl border border-border bg-card p-2 sm:p-2.5 shadow-md flex flex-col justify-between lg:h-full min-h-0">
+        <div className="lg:col-span-5 xl:col-span-4 rounded-xl border border-border bg-card p-1.5 shadow-xs flex flex-col justify-between h-full min-h-0 overflow-hidden">
           <div className="space-y-1 flex-1 flex flex-col overflow-hidden min-h-0">
             <div className="flex items-center justify-between border-b border-border pb-1 shrink-0">
               <div className="flex items-center gap-1.5">
-                <div className="p-1 rounded-lg bg-primary/10 text-primary">
+                <div className="p-1 rounded-md bg-primary/10 text-primary">
                   <ShoppingCartIcon className="size-3.5" />
                 </div>
                 <div>
@@ -524,15 +550,92 @@ export function PosCounter() {
                     setDiscountValue("");
                     searchInputRef.current?.focus();
                   }}
-                  className="text-[10px] text-destructive hover:text-destructive border-destructive/30 hover:border-destructive cursor-pointer h-5 px-1.5"
+                  className="text-[9.5px] text-destructive hover:text-destructive border-destructive/30 hover:border-destructive cursor-pointer h-4.5 px-1.5"
                 >
                   Clear Cart
                 </Button>
               )}
             </div>
 
+            <div className="p-1 rounded-lg border border-border bg-muted/20 shrink-0 space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[9.5px] font-semibold text-muted-foreground flex items-center gap-1">
+                  <UserIcon className="size-3 text-primary" />
+                  <span>Customer / Khata:</span>
+                </span>
+                {selectedCustomerObj && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCustomerObj(null);
+                      setCustomerName("Walk-in Customer");
+                    }}
+                    className="text-[9.5px] text-muted-foreground hover:text-destructive cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
+              {!selectedCustomerObj ? (
+                <CustomerVendorSelect
+                  value={customerName === "Walk-in Customer" ? "" : customerName}
+                  placeholder="Walk-in Customer (Search regular customer...)"
+                  className="h-7 text-xs"
+                  onChange={(val) => {
+                    setCustomerName(val || "Walk-in Customer");
+                  }}
+                  onSelectCustomer={(cust) => {
+                    setCustomerName(cust.name);
+                    setSelectedCustomerObj(cust);
+                    if (cust.customerType === "Wholesale") setSelectedPaymentMode("Credit / Khata");
+                  }}
+                />
+              ) : (
+                <div className="p-1.5 rounded-md border border-border bg-card space-y-0.5 text-xs shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-foreground truncate text-[11px]">{selectedCustomerObj.name}</span>
+                    <span className="text-[8.5px] px-1 py-0.2 rounded bg-primary/10 text-primary font-mono font-semibold">
+                      {selectedCustomerObj.customerType || "Regular"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5 pt-0.5 border-t border-border/60 text-[10px]">
+                    <div>
+                      <span className="text-[9px] text-muted-foreground block">Pichla Khata:</span>
+                      <span className={cn(
+                        "font-mono font-bold text-[11px]",
+                        (selectedCustomerObj.currentBalance || 0) > 0 ? "text-amber-500" : "text-emerald-500"
+                      )}>
+                        Rs. {(selectedCustomerObj.currentBalance || 0).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[9px] text-muted-foreground block">Credit Limit:</span>
+                      <div className="flex items-center justify-end gap-1 font-mono text-[10px]">
+                        <span className="font-bold text-foreground">
+                          {selectedCustomerObj.creditLimit > 0 ? `Rs. ${selectedCustomerObj.creditLimit.toLocaleString()}` : "Unlimited"}
+                        </span>
+                        {selectedCustomerObj.creditLimit > 0 && (
+                          <span className={cn(
+                            "text-[8px] px-1 py-0.2 rounded font-bold uppercase",
+                            (selectedCustomerObj.currentBalance || 0) > selectedCustomerObj.creditLimit
+                              ? "bg-destructive/15 text-destructive"
+                              : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                          )}>
+                            {(selectedCustomerObj.currentBalance || 0) > selectedCustomerObj.creditLimit ? "Exceeded" : "Safe"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {error && (
-              <div className="rounded-md bg-destructive/10 border border-destructive/30 px-2 py-0.5 text-[10px] text-destructive flex items-center justify-between gap-1 shrink-0 animate-in fade-in duration-150">
+              <div className="rounded-md bg-destructive/10 border border-destructive/30 px-1.5 py-0.5 text-[9.5px] text-destructive flex items-center justify-between gap-1 shrink-0 animate-in fade-in duration-150">
                 <div className="flex items-center gap-1 min-w-0">
                   <AlertCircleIcon className="size-3 shrink-0" />
                   <span className="truncate">{error}</span>
@@ -547,134 +650,129 @@ export function PosCounter() {
             )}
 
             {cart.length === 0 ? (
-              <div className="py-4 text-center text-muted-foreground text-xs space-y-1 flex-1 flex flex-col items-center justify-center border border-dashed border-border/80 rounded-xl my-1 min-h-0">
-                <ShoppingCartIcon className="size-6 text-muted-foreground/30" />
-                <p className="font-semibold text-foreground text-xs">Your Cart is Empty</p>
-                <p className="text-[9px] text-muted-foreground max-w-xs">Scan any product barcode or click from the catalog to start billing.</p>
+              <div className="py-4 text-center text-muted-foreground text-xs space-y-1 flex-1 flex flex-col items-center justify-center border border-dashed border-border/80 rounded-xl my-0.5 min-h-0">
+                <ShoppingCartIcon className="size-5 text-muted-foreground/30" />
+                <p className="font-semibold text-foreground text-[11px]">Your Cart is Empty</p>
+                <p className="text-[9px] text-muted-foreground max-w-xs">Scan any product barcode or click from the catalog.</p>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto space-y-1.5 pe-1 min-h-0 border border-border/60 rounded-xl bg-muted/10 p-1.5">
+              <div className="flex-1 overflow-y-auto space-y-1 pe-0.5 min-h-0 border border-border/60 rounded-xl bg-muted/10 p-1">
                 {cart.map((item, idx) => {
                   const hasDiscount = Number(item.itemDiscountValue) > 0 || item.isCustomPrice;
                   return (
                     <div
                       key={idx}
                       className={cn(
-                        "p-1.5 rounded-lg border text-xs space-y-1 shadow-2xs transition-all",
+                        "p-1 rounded-md border text-xs space-y-0.5 shadow-2xs transition-all",
                         hasDiscount
                           ? "border-emerald-500/50 bg-emerald-500/5 dark:bg-emerald-950/20"
                           : "border-border bg-card hover:bg-muted/30"
                       )}
                     >
-                    <div className="flex items-start justify-between gap-1.5">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-xs text-foreground leading-tight truncate">{item.productName}</p>
-                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[10px]">
-                          <div className="flex items-center gap-0.5">
-                            <span className="text-muted-foreground font-mono">Rate:</span>
-                            <input
-                              type="number"
-                              min="0"
-                              value={item.unitPrice}
-                              onChange={(e) => updateUnitPrice(idx, e.target.value)}
-                              className="w-13 h-4.5 px-1 font-mono font-bold text-[10px] rounded border border-input bg-background text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
-                              title="Override Rate"
-                            />
-                          </div>
-
-                          <div className="flex items-center gap-0.5">
-                            <span className="text-muted-foreground font-mono">Disc:</span>
-                            <div className="flex items-center rounded border border-input overflow-hidden bg-background">
-                              <button
-                                type="button"
-                                onClick={() => toggleItemDiscountType(idx)}
-                                className={cn(
-                                  "px-1 py-0.2 font-mono font-bold text-[9px] cursor-pointer transition-colors border-e border-input",
-                                  item.itemDiscountType === "percent"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground hover:text-foreground"
-                                )}
-                                title="Click to switch between Rs and %"
-                              >
-                                {item.itemDiscountType === "percent" ? "%" : "Rs"}
-                              </button>
+                      <div className="flex items-start justify-between gap-1">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-[11px] text-foreground leading-tight truncate">{item.productName}</p>
+                          <div className="flex flex-wrap items-center gap-1 pt-0.5 text-[9.5px]">
+                            <div className="flex items-center gap-0.5">
+                              <span className="text-muted-foreground font-mono">Rate:</span>
                               <input
                                 type="number"
                                 min="0"
-                                placeholder=""
-                                value={item.itemDiscountValue ? item.itemDiscountValue : ""}
-                                onChange={(e) => updateItemDiscountValue(idx, e.target.value)}
-                                className="w-10 h-4.5 px-1 font-mono font-semibold text-[10px] bg-transparent text-foreground focus:outline-none"
-                                title="Per-item discount"
+                                value={item.unitPrice}
+                                onChange={(e) => updateUnitPrice(idx, e.target.value)}
+                                className="w-12 h-4 px-0.5 font-mono font-bold text-[9.5px] rounded border border-input bg-background text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
+                                title="Override Rate"
                               />
                             </div>
-                          </div>
 
-                          {item.isCustomPrice && (
-                            <span className="text-[8px] px-1 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/30">
-                              Custom
+                            <div className="flex items-center gap-0.5">
+                              <span className="text-muted-foreground font-mono">Disc:</span>
+                              <div className="flex items-center rounded border border-input overflow-hidden bg-background">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleItemDiscountType(idx)}
+                                  className={cn(
+                                    "px-1 py-0.2 font-mono font-bold text-[8.5px] cursor-pointer transition-colors border-e border-input",
+                                    item.itemDiscountType === "percent"
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-muted text-muted-foreground hover:text-foreground"
+                                  )}
+                                  title="Switch Rs / %"
+                                >
+                                  {item.itemDiscountType === "percent" ? "%" : "Rs"}
+                                </button>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder=""
+                                  value={item.itemDiscountValue ? item.itemDiscountValue : ""}
+                                  onChange={(e) => updateItemDiscountValue(idx, e.target.value)}
+                                  className="w-9 h-4 px-0.5 font-mono font-semibold text-[9.5px] bg-transparent text-foreground focus:outline-none"
+                                  title="Per-item discount"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0 pt-0.5">
+                          <span className="font-mono font-bold text-[11px] text-primary block">
+                            Rs {item.subtotal?.toLocaleString()}
+                          </span>
+                          {Number(item.itemDiscountValue) > 0 && (
+                            <span className="font-mono text-[8.5px] text-emerald-600 dark:text-emerald-400 block font-semibold">
+                              (-Rs{" "}
+                              {Number(
+                                (
+                                  (item.itemDiscountType === "percent"
+                                    ? (item.unitPrice * Number(item.itemDiscountValue)) / 100
+                                    : Number(item.itemDiscountValue)) * item.quantity
+                                ).toFixed(2)
+                              ).toLocaleString()}
+                              )
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="text-right shrink-0 pt-0.5">
-                        <span className="font-mono font-bold text-xs text-primary block">
-                          Rs {item.subtotal?.toLocaleString()}
-                        </span>
-                        {Number(item.itemDiscountValue) > 0 && (
-                          <span className="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 block font-semibold">
-                            (-Rs{" "}
-                            {Number(
-                              (
-                                (item.itemDiscountType === "percent"
-                                  ? (item.unitPrice * Number(item.itemDiscountValue)) / 100
-                                  : Number(item.itemDiscountValue)) * item.quantity
-                              ).toFixed(2)
-                            ).toLocaleString()}
-                            )
-                          </span>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-0.5 border-t border-border/50">
-                      <div className="flex items-center rounded-md border border-border bg-background shadow-2xs">
+                      <div className="flex items-center justify-between pt-0.5 border-t border-border/50">
+                        <div className="flex items-center rounded border border-border bg-background shadow-2xs">
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            className="size-4.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={() => updateQuantity(idx, -1)}
+                          >
+                            <MinusIcon className="size-2" />
+                          </Button>
+                          <span className="px-1.5 font-mono font-bold text-[10px] text-foreground">{item.quantity}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            className="size-4.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={() => updateQuantity(idx, 1)}
+                          >
+                            <PlusIcon className="size-2" />
+                          </Button>
+                        </div>
+
                         <Button
                           variant="ghost"
-                          size="icon-sm"
-                          className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
-                          onClick={() => updateQuantity(idx, -1)}
+                          size="icon-xs"
+                          className="size-4.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                          onClick={() => removeFromCart(idx)}
                         >
-                          <MinusIcon className="size-2.5" />
-                        </Button>
-                        <span className="px-2 font-mono font-bold text-[11px] text-foreground">{item.quantity}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
-                          onClick={() => updateQuantity(idx, 1)}
-                        >
-                          <PlusIcon className="size-2.5" />
+                          <Trash2Icon className="size-2.5" />
                         </Button>
                       </div>
-
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="size-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                        onClick={() => removeFromCart(idx)}
-                      >
-                        <Trash2Icon className="size-2.5" />
-                      </Button>
                     </div>
-                  </div>
                   );
                 })}
               </div>
             )}
           </div>
 
-          <div className="pt-1.5 border-t border-border space-y-1.5 bg-muted/20 p-2 rounded-xl shrink-0">
+          <div className="pt-1 border-t border-border space-y-1 bg-muted/20 p-1.5 rounded-lg shrink-0">
             <div className="grid grid-cols-3 gap-1">
               {[
                 { id: "Cash", label: "Cash", icon: BanknoteIcon, color: "text-emerald-500" },
@@ -689,9 +787,9 @@ export function PosCounter() {
                     type="button"
                     onClick={() => setSelectedPaymentMode(pm.id)}
                     className={cn(
-                      "flex items-center justify-center gap-1 py-0.5 px-1 rounded-lg border text-[11px] font-semibold cursor-pointer transition-all",
+                      "flex items-center justify-center gap-1 py-0.5 px-1 h-6 rounded-md border text-[10.5px] font-semibold cursor-pointer transition-all",
                       active
-                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                        ? "bg-primary text-primary-foreground border-primary shadow-2xs"
                         : "bg-card text-muted-foreground border-border hover:bg-muted hover:text-foreground"
                     )}
                   >
@@ -702,14 +800,35 @@ export function PosCounter() {
               })}
             </div>
 
-            <div className="flex items-center justify-between gap-2 p-1 rounded-lg bg-card border border-border text-xs">
+            {selectedPaymentMode === "Bank Transfer" && (
+              <div className="flex items-center gap-1.5 p-1 rounded-md border border-blue-500/30 bg-blue-500/5 text-xs animate-in fade-in duration-150">
+                <Building2Icon className="size-3 text-blue-500 shrink-0" />
+                <select
+                  value={selectedBankId}
+                  onChange={(e) => setSelectedBankId(e.target.value)}
+                  className="w-full h-6 rounded border border-input bg-background px-1.5 text-[10.5px] font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  {bankAccounts.length > 0 ? (
+                    bankAccounts.map((b) => (
+                      <option key={b._id} value={b._id}>
+                        {b.bankName} - {b.accountNumber} ({b.accountTitle})
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">No Active Bank Account Found</option>
+                  )}
+                </select>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-1.5 p-1 rounded-md bg-card border border-border text-[10.5px]">
               <div className="flex items-center gap-1">
                 <span className="text-[9px] text-muted-foreground font-semibold">Cart Disc:</span>
-                <div className="flex items-center rounded border border-border overflow-hidden bg-muted/40 text-[9px]">
+                <div className="flex items-center rounded border border-border overflow-hidden bg-muted/40 text-[8.5px]">
                   <button
                     type="button"
                     onClick={() => setDiscountType("fixed")}
-                    className={`px-1.5 py-0.2 font-bold cursor-pointer transition-colors ${
+                    className={`px-1 py-0.2 font-bold cursor-pointer transition-colors ${
                       discountType === "fixed" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -718,7 +837,7 @@ export function PosCounter() {
                   <button
                     type="button"
                     onClick={() => setDiscountType("percentage")}
-                    className={`px-1.5 py-0.2 font-bold cursor-pointer transition-colors ${
+                    className={`px-1 py-0.2 font-bold cursor-pointer transition-colors ${
                       discountType === "percentage" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -726,38 +845,30 @@ export function PosCounter() {
                   </button>
                 </div>
               </div>
-              <div className="relative w-20">
+              <div className="relative w-16">
                 <input
                   type="number"
                   min="0"
-                  placeholder=""
+                  placeholder="0"
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
-                  className="w-full text-right font-mono font-bold text-xs h-5 px-1 rounded border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-right font-mono font-bold text-[10.5px] h-4.5 px-1 rounded border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
-            <div className="space-y-0.5 text-xs">
-              <div className="flex justify-between text-muted-foreground text-[10px]">
-                <span>Total Amount:</span>
-                <span className="font-mono font-semibold text-foreground">Rs {grossSubtotal.toLocaleString()}</span>
+            <div className="space-y-0.5 text-xs pt-0.5 border-t border-border/50">
+              <div className="flex justify-between text-muted-foreground text-[9.5px]">
+                <span>Gross: <strong className="font-mono text-foreground">Rs {grossSubtotal.toLocaleString()}</strong></span>
+                {totalDiscount > 0 && (
+                  <span className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    Disc: -Rs {totalDiscount.toLocaleString()}
+                  </span>
+                )}
               </div>
-              {itemDiscountsTotal > 0 && (
-                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium text-[10px]">
-                  <span>Item Discounts:</span>
-                  <span className="font-mono">-Rs {itemDiscountsTotal.toLocaleString()}</span>
-                </div>
-              )}
-              {cartDiscountAmount > 0 && (
-                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium text-[10px]">
-                  <span>Cart Disc ({discountType === "percentage" ? `${discountValue}%` : "Fixed"}):</span>
-                  <span className="font-mono">-Rs {cartDiscountAmount.toLocaleString()}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-xs font-bold pt-0.5 border-t border-border text-foreground">
+              <div className="flex justify-between text-xs font-bold text-foreground items-center">
                 <span>Net Payable:</span>
-                <span className="font-mono text-primary text-sm">Rs {estimatedGrandTotal.toLocaleString()}</span>
+                <span className="font-mono text-primary text-sm font-extrabold">Rs {estimatedGrandTotal.toLocaleString()}</span>
               </div>
             </div>
 
@@ -771,7 +882,7 @@ export function PosCounter() {
                 setIsCheckoutOpen(true);
               }}
               disabled={cart.length === 0}
-              className="w-full h-8 gap-1.5 font-bold text-xs cursor-pointer shadow-md bg-primary text-primary-foreground"
+              className="w-full h-7.5 gap-1.5 font-bold text-xs cursor-pointer shadow-md bg-primary text-primary-foreground"
             >
               <ReceiptIcon className="size-3.5" />
               <span>Proceed ({selectedPaymentMode})</span>
@@ -789,6 +900,9 @@ export function PosCounter() {
         cartSubtotal={grossSubtotal}
         initialDiscount={totalDiscount}
         initialPaymentMode={selectedPaymentMode}
+        initialCustomerName={customerName}
+        initialCustomerObj={selectedCustomerObj}
+        initialBankAccountId={selectedBankId}
         onConfirm={handleCheckout}
         submitting={submitting}
       />

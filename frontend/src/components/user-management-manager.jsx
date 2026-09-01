@@ -3,7 +3,6 @@ import {
   UsersIcon,
   PlusIcon,
   SearchIcon,
-  ShieldAlertIcon,
   Edit2Icon,
   Trash2Icon,
   CheckCircle2Icon,
@@ -70,7 +69,7 @@ export function UserManagementManager() {
 
     const targetUser = users.find((u) => u._id === deletingId);
     if (targetUser && targetUser.role === "admin") {
-      toast.error("Security Restriction: Admin user accounts are protected system accounts and cannot be deleted by anyone.");
+      toast.error("Security Restriction: Admin user accounts cannot be deleted.");
       setDeletingId(null);
       return;
     }
@@ -109,40 +108,24 @@ export function UserManagementManager() {
     );
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">User Management & Permissions</h1>
-          <p className="text-xs text-muted-foreground">Manage user roles, grant feature permissions, and control system access.</p>
-        </div>
-
-        <Button size="sm" onClick={handleOpenAddModal} className="gap-1.5 cursor-pointer text-xs">
-          <PlusIcon className="size-3.5" />
-          <span>Create New User</span>
-        </Button>
-      </div>
-
-      <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-500 flex items-center gap-3">
-        <LockIcon className="size-5 shrink-0" />
-        <div>
-          <strong className="font-semibold text-foreground">Admin Account Protection Active:</strong> Admin user accounts are visible only to logged-in Admins and cannot be deleted by anyone (including Admins).
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
-        <div className="relative w-full sm:w-72">
-          <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+    <div className="w-full space-y-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-card p-3 rounded-xl border border-border">
+        <div className="relative w-full sm:w-64">
+          <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search user name, email, role..."
+            placeholder="Search login name, email, role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs"
+            className="ps-8 text-xs h-8.5"
           />
         </div>
 
-        <div className="text-xs text-muted-foreground font-medium">
-          Total Users: <strong className="text-foreground font-mono">{filteredUsers.length}</strong>
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={handleOpenAddModal} className="h-8.5 text-xs gap-1.5 cursor-pointer font-semibold">
+            <PlusIcon className="size-3.5" />
+            <span>Create New User</span>
+          </Button>
         </div>
       </div>
 
@@ -163,13 +146,13 @@ export function UserManagementManager() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                    Loading users list...
+                    Loading staff logins...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                    No users found matching query.
+                    No user accounts found matching query.
                   </td>
                 </tr>
               ) : (
@@ -180,7 +163,7 @@ export function UserManagementManager() {
 
                   return (
                     <tr key={user._id} className="hover:bg-muted/30 transition-colors">
-                      <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
+                      <td className="p-2.5 ps-4 font-semibold text-foreground flex items-center gap-2">
                         <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
@@ -193,19 +176,19 @@ export function UserManagementManager() {
                           )}
                         </div>
                       </td>
-                      <td className="p-3 font-mono text-muted-foreground">{user.email}</td>
-                      <td className="p-3">
+                      <td className="p-2.5 font-mono text-muted-foreground">{user.email}</td>
+                      <td className="p-2.5">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                             isAdminUser
-                              ? "bg-primary/15 text-primary border border-primary/30"
-                              : "bg-muted text-muted-foreground border border-border"
+                              ? "bg-primary/15 text-primary border-primary/30"
+                              : "bg-muted text-muted-foreground border-border"
                           }`}
                         >
                           {user.role}
                         </span>
                       </td>
-                      <td className="p-3">
+                      <td className="p-2.5">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
                             user.status === "Active"
@@ -217,27 +200,28 @@ export function UserManagementManager() {
                           {user.status}
                         </span>
                       </td>
-                      <td className="p-3">
+                      <td className="p-2.5">
                         <span className="text-muted-foreground text-[11px]">
                           {user.permissions?.includes("all")
                             ? "Full Access (All Features)"
                             : `${user.permissions?.length || 0} Modules Granted`}
                         </span>
                       </td>
-                      <td className="p-3 pe-4 text-center">
+                      <td className="p-2.5 pe-4 text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon-xs"
                             onClick={() => handleEdit(user)}
                             className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                            title="Edit Permissions"
                           >
                             <Edit2Icon className="size-3.5" />
                           </Button>
 
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon-xs"
                             disabled={isDeleteDisabled}
                             onClick={() => {
                               if (!isDeleteDisabled) setDeletingId(user._id);
@@ -266,13 +250,17 @@ export function UserManagementManager() {
             </tbody>
           </table>
         </div>
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={Math.ceil(filteredUsers.length / PAGE_SIZE) || 1}
-          totalItems={filteredUsers.length}
-          pageSize={PAGE_SIZE}
-          onPageChange={(page) => setCurrentPage(page)}
-        />
+        {filteredUsers.length > PAGE_SIZE && (
+          <div className="p-2.5 border-t border-border bg-muted/20">
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredUsers.length / PAGE_SIZE) || 1}
+              totalItems={filteredUsers.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </div>
+        )}
       </div>
 
       <UserModal

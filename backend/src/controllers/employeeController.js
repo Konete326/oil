@@ -22,6 +22,23 @@ export const getEmployees = async (req, res, next) => {
     const total = await Employee.countDocuments(query);
     const employees = await Employee.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum);
 
+    const stats = await Employee.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalMonthlyBaseSalary: { $sum: "$baseSalary" },
+          totalOutstandingAdvance: { $sum: "$advanceBalance" },
+          totalStaff: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const summary = stats[0] || {
+      totalMonthlyBaseSalary: 0,
+      totalOutstandingAdvance: 0,
+      totalStaff: total,
+    };
+
     res.status(200).json({
       success: true,
       count: employees.length,
@@ -29,6 +46,7 @@ export const getEmployees = async (req, res, next) => {
       page: pageNum,
       pages: Math.ceil(total / limitNum) || 1,
       data: employees,
+      summary,
     });
   } catch (error) {
     next(error);

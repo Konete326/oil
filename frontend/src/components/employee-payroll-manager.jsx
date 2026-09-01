@@ -63,27 +63,37 @@ export function EmployeePayrollManager() {
   const [isAdvanceReceiptOpen, setIsAdvanceReceiptOpen] = useState(false);
   const [advanceRefreshKey, setAdvanceRefreshKey] = useState(0);
 
+  const [summary, setSummary] = useState({
+    totalMonthlyBaseSalary: 0,
+    totalOutstandingAdvance: 0,
+    totalStaff: 0,
+  });
+
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      if (activeTab === "employees") {
-        const res = await fetchEmployeesApi({ search, page: empPage, limit: PAGE_SIZE });
-        if (res?.success) {
-          setEmployees(res.data);
-          setEmpPage(res.page || 1);
-          setEmpPages(res.pages || 1);
-          setEmpTotal(res.total || 0);
+      const empRes = await fetchEmployeesApi({ search: activeTab === "employees" ? search : "", page: empPage, limit: PAGE_SIZE });
+      if (empRes?.success) {
+        if (activeTab === "employees") {
+          setEmployees(empRes.data);
+          setEmpPage(empRes.page || 1);
+          setEmpPages(empRes.pages || 1);
+          setEmpTotal(empRes.total || 0);
         }
-      } else if (activeTab === "payroll") {
-        const res = await fetchSalaryVouchersApi({ page: salPage, limit: PAGE_SIZE });
-        if (res?.success) {
-          setSalaryVouchers(res.data);
-          setSalPage(res.page || 1);
-          setSalPages(res.pages || 1);
-          setSalTotal(res.total || 0);
+        if (empRes.summary) {
+          setSummary(empRes.summary);
+        }
+      }
+      if (activeTab === "payroll") {
+        const salRes = await fetchSalaryVouchersApi({ page: salPage, limit: PAGE_SIZE });
+        if (salRes?.success) {
+          setSalaryVouchers(salRes.data);
+          setSalPage(salRes.page || 1);
+          setSalPages(salRes.pages || 1);
+          setSalTotal(salRes.total || 0);
         }
       }
     } catch (err) {
@@ -121,7 +131,7 @@ export function EmployeePayrollManager() {
     const cleanName = (emp.name || "staff").toLowerCase().replace(/[^a-z0-9]/g, "");
     setTargetStaffForLogin({
       name: emp.name,
-      email: `${cleanName}@alkhaleej.com`,
+      email: `${cleanName}@gmail.com`,
       role: "cashier",
       permissions: ["pos", "cash", "ledger"],
       status: "Active",
@@ -262,7 +272,7 @@ export function EmployeePayrollManager() {
         <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
           <span className="text-xs text-muted-foreground font-medium">Total Monthly Payroll</span>
           <div className="text-xl font-bold font-mono text-emerald-500">
-            Rs. {totalMonthlyBaseSalary.toLocaleString()}
+            Rs. {(summary.totalMonthlyBaseSalary || 0).toLocaleString()}
           </div>
           <p className="text-[11px] text-muted-foreground">Active Staff Salaries</p>
         </div>
@@ -270,7 +280,7 @@ export function EmployeePayrollManager() {
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3.5 space-y-1">
           <span className="text-xs text-muted-foreground font-medium">Total Advance Khata</span>
           <div className="text-xl font-bold font-mono text-amber-500">
-            Rs. {totalOutstandingAdvance.toLocaleString()}
+            Rs. {(summary.totalOutstandingAdvance || 0).toLocaleString()}
           </div>
           <p className="text-[11px] text-muted-foreground">Pending Advance Deductions</p>
         </div>
@@ -278,7 +288,7 @@ export function EmployeePayrollManager() {
         <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
           <span className="text-xs text-muted-foreground font-medium">Total Registered Staff</span>
           <div className="text-xl font-bold font-mono text-foreground">
-            {empTotal || employees.length} Members
+            {summary.totalStaff || empTotal || employees.length || 0} Members
           </div>
           <p className="text-[11px] text-muted-foreground">Active Profiles</p>
         </div>
