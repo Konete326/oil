@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import printLogoImg from "@/assets/print_logo.png";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
 
@@ -47,7 +48,6 @@ export function CashPrintStatementModal({
 
   const totalInflow = computedRows.reduce((sum, r) => sum + r.inflow, 0);
   const totalOutflow = computedRows.reduce((sum, r) => sum + r.outflow, 0);
-  const closingBalance = running;
   const finalBalance = running;
 
   const handlePrint = () => {
@@ -85,7 +85,7 @@ export function CashPrintStatementModal({
   const activeOperator = parsedUser?.name || cashierName;
 
   const modalContent = (
-    <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
+    <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
       <style>{`
         @media print {
           @page {
@@ -132,208 +132,200 @@ export function CashPrintStatementModal({
         }
       `}</style>
 
-      <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
-        <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+      <div className="w-full max-w-3xl max-h-[86vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
+        <div className="w-full flex items-center justify-between border-b border-border p-2.5 px-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
+          <div className="flex items-center gap-1.5 text-foreground font-semibold text-xs sm:text-sm">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
-            <span>Subsidiary Ledger for Cash Transactions (A4 Standard)</span>
+            <span>Cash Book Statement Preview</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1 text-[11px] h-7 px-2 cursor-pointer"
             >
-              <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-              <span>Export Excel</span>
+              <FileSpreadsheetIcon className="size-3 text-emerald-500" />
+              <span>Excel</span>
             </Button>
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1 text-[11px] h-7 px-2.5 cursor-pointer bg-primary text-primary-foreground font-medium"
             >
-              <PrinterIcon className="size-3.5" />
-              <span>Print A4 Document</span>
+              <PrinterIcon className="size-3" />
+              <span>Print A4</span>
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer">
-              <XIcon className="size-4" />
+            <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer size-7">
+              <XIcon className="size-3.5" />
             </Button>
           </div>
         </div>
 
-        <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
+        <div className="w-full flex-1 overflow-y-auto p-3 sm:p-4 flex flex-col items-center print:overflow-visible print:p-0">
           <div
-            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
-          dir="ltr"
-          lang="en"
-        >
-          <div className="flex justify-end text-[11px] font-medium text-black pb-1">
-            Annex 10
-          </div>
-
-          <div className="text-center pb-4">
-            <h1 className="text-sm md:text-base font-bold uppercase tracking-wider text-black">
-              CASH BOOK STATEMENT
-            </h1>
-            <p className="text-xs text-black font-extrabold uppercase">
-              {COMPANY_CONFIG.name}
-            </p>
-            <p className="text-[10px] text-gray-700 font-semibold">
-              {COMPANY_CONFIG.tagline}
-            </p>
-          </div>
-
-          <div className="border border-black mb-4 text-[11px] leading-relaxed">
-            <div className="grid grid-cols-1 divide-y divide-black">
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Branch / Location:</span>
-                <span className="font-bold uppercase text-black">Main Depot / POS Register</span>
+            className="w-full max-w-[210mm] bg-white text-black p-4 sm:p-6 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
+            dir="ltr"
+            lang="en"
+          >
+            <div className="flex items-center justify-between border-b border-black pb-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <img src={printLogoImg} alt="Logo" className="size-10 object-contain" />
+                <div className="text-left leading-tight">
+                  <h1 className="text-sm font-bold uppercase tracking-wider text-black">
+                    CASH BOOK STATEMENT
+                  </h1>
+                  <p className="text-[11px] text-black font-extrabold uppercase">
+                    {COMPANY_CONFIG.name}
+                  </p>
+                  <p className="text-[9.5px] text-gray-700 font-semibold">
+                    {COMPANY_CONFIG.tagline}
+                  </p>
+                </div>
               </div>
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Address:</span>
-                <span className="text-black">{COMPANY_CONFIG.address}</span>
-              </div>
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Cashier / Operator:</span>
-                <span className="font-semibold text-black uppercase">{activeOperator}</span>
-              </div>
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Account / Party Name:</span>
-                <span className="font-bold text-black uppercase">{partyName}</span>
-              </div>
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Contact:</span>
-                <span className="text-black">{COMPANY_CONFIG.phoneDisplay} | {COMPANY_CONFIG.mobiles}</span>
-              </div>
-              <div className="px-3 py-1 flex">
-                <span className="w-48 font-semibold text-black">Period:</span>
-                <span className="text-black">
-                  {startDate ? new Date(startDate).toLocaleDateString("en-GB") : "Start"} — {endDate ? new Date(endDate).toLocaleDateString("en-GB") : new Date().toLocaleDateString("en-GB")}
-                </span>
+              <div className="text-[10px] font-mono text-gray-800 text-right">
+                <span className="font-bold">Annex 10</span>
+                <p className="text-[9px] text-gray-600 font-sans">{COMPANY_CONFIG.email}</p>
               </div>
             </div>
-          </div>
 
-          <div className="mb-6">
-            <table className="w-full border-collapse border border-black text-[11px]">
-              <thead>
-                <tr className="border-b border-black text-center font-bold">
-                  <th rowSpan={2} className="border-r border-black p-2 w-20 text-center">
-                    Date
-                  </th>
-                  <th rowSpan={2} className="border-r border-black p-2 text-left">
-                    Description
-                  </th>
-                  <th rowSpan={2} className="border-r border-black p-2 w-20 text-center">
-                    Voucher #
-                  </th>
-                  <th colSpan={3} className="border-b border-black p-1.5 text-center">
-                    Amount (Rs)
-                  </th>
-                </tr>
-                <tr className="border-b border-black font-bold text-center">
-                  <th className="border-r border-black p-1.5 w-28 text-right">
-                    Cash In
-                  </th>
-                  <th className="border-r border-black p-1.5 w-28 text-right">
-                    Cash Out
-                  </th>
-                  <th className="p-1.5 w-28 text-right">
-                    Balance
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black">
-                {computedRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-6 text-center text-gray-500 border border-black">
-                      No cash ledger records found for this period.
-                    </td>
+            <div className="border border-black mb-2.5 text-[10px] sm:text-[10.5px]">
+              <div className="grid grid-cols-2 divide-x divide-black">
+                <div className="divide-y divide-black">
+                  <div className="px-2 py-0.5 flex items-center justify-between">
+                    <span className="font-semibold text-black">Branch / Location:</span>
+                    <span className="font-bold uppercase text-black">Main Depot / POS</span>
+                  </div>
+                  <div className="px-2 py-0.5 flex items-center justify-between">
+                    <span className="font-semibold text-black">Cashier / Operator:</span>
+                    <span className="font-semibold text-black uppercase">{activeOperator}</span>
+                  </div>
+                  <div className="px-2 py-0.5 flex items-center justify-between">
+                    <span className="font-semibold text-black">Period:</span>
+                    <span className="font-mono text-black">
+                      {startDate ? new Date(startDate).toLocaleDateString("en-GB") : "Start"} — {endDate ? new Date(endDate).toLocaleDateString("en-GB") : new Date().toLocaleDateString("en-GB")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-black">
+                  <div className="px-2 py-0.5 flex items-center justify-between">
+                    <span className="font-semibold text-black">Account / Party:</span>
+                    <span className="font-bold text-black uppercase truncate max-w-[150px]">{partyName}</span>
+                  </div>
+                  <div className="px-2 py-0.5 flex items-center justify-between">
+                    <span className="font-semibold text-black">Contact:</span>
+                    <span className="text-black font-mono">{COMPANY_CONFIG.phoneDisplay}</span>
+                  </div>
+                  <div className="px-2 py-0.5 flex items-center justify-between">
+                    <span className="font-semibold text-black">Date Printed:</span>
+                    <span className="font-mono text-black">{new Date().toLocaleDateString("en-GB")}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-3 overflow-x-auto">
+              <table className="w-full border-collapse border border-black text-[10.5px]">
+                <thead>
+                  <tr className="border-b border-black text-center font-bold">
+                    <th rowSpan={2} className="border-r border-black p-1.5 w-18 text-center">
+                      Date
+                    </th>
+                    <th rowSpan={2} className="border-r border-black p-1.5 text-left">
+                      Description
+                    </th>
+                    <th rowSpan={2} className="border-r border-black p-1.5 w-18 text-center">
+                      Voucher #
+                    </th>
+                    <th colSpan={3} className="border-b border-black p-1 text-center">
+                      Amount (Rs)
+                    </th>
                   </tr>
-                ) : (
-                  computedRows.map((row, idx) => (
-                    <tr key={idx} className="border-b border-black">
-                      <td className="border-r border-black p-1.5 text-center font-mono">
-                        {row.date.toLocaleDateString("en-GB")}
-                      </td>
-                      <td className="border-r border-black p-1.5 font-medium leading-tight">
-                        {row.particulars}
-                      </td>
-                      <td className="border-r border-black p-1.5 text-center font-mono text-[10px]">
-                        {row.reference}
-                      </td>
-                      <td className="border-r border-black p-1.5 text-right font-mono">
-                        {row.inflow > 0
-                          ? row.inflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                          : "-"}
-                      </td>
-                      <td className="border-r border-black p-1.5 text-right font-mono">
-                        {row.outflow > 0
-                          ? row.outflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                          : "-"}
-                      </td>
-                      <td className="p-1.5 text-right font-mono font-bold">
-                        {row.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <tr className="border-b border-black font-bold text-center">
+                    <th className="border-r border-black p-1 w-24 text-right">
+                      Cash In
+                    </th>
+                    <th className="border-r border-black p-1 w-24 text-right">
+                      Cash Out
+                    </th>
+                    <th className="p-1 w-24 text-right">
+                      Balance
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black font-sans">
+                  {computedRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-4 text-center text-gray-500 border border-black italic">
+                        No cash ledger records found for this period.
                       </td>
                     </tr>
-                  ))
-                )}
+                  ) : (
+                    computedRows.map((row, idx) => (
+                      <tr key={idx} className="border-b border-black">
+                        <td className="border-r border-black p-1 text-center font-mono text-[10px]">
+                          {row.date.toLocaleDateString("en-GB")}
+                        </td>
+                        <td className="border-r border-black p-1 font-medium leading-tight">
+                          {row.particulars}
+                        </td>
+                        <td className="border-r border-black p-1 text-center font-mono text-[10px]">
+                          {row.reference}
+                        </td>
+                        <td className="border-r border-black p-1 text-right font-mono text-[10.5px]">
+                          {row.inflow > 0
+                            ? row.inflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            : "-"}
+                        </td>
+                        <td className="border-r border-black p-1 text-right font-mono text-[10.5px]">
+                          {row.outflow > 0
+                            ? row.outflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            : "-"}
+                        </td>
+                        <td className="p-1 text-right font-mono font-bold text-[10.5px]">
+                          {row.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
 
-                <tr className="border-t-2 border-black font-bold bg-gray-50">
-                  <td colSpan={3} className="border-r border-black p-2 text-right uppercase">
-                    Total:
-                  </td>
-                  <td className="border-r border-black p-2 text-right font-mono">
-                    {totalInflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                  <td className="border-r border-black p-2 text-right font-mono">
-                    {totalOutflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                  <td className="p-2 text-right font-mono font-bold">
-                    {finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  <tr className="border-t-2 border-black font-bold bg-gray-50">
+                    <td colSpan={3} className="border-r border-black p-1.5 text-right uppercase">
+                      Total:
+                    </td>
+                    <td className="border-r border-black p-1.5 text-right font-mono text-[10.5px]">
+                      {totalInflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="border-r border-black p-1.5 text-right font-mono text-[10.5px]">
+                      {totalOutflow.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="p-1.5 text-right font-mono font-bold text-[10.5px]">
+                      {finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          <div className="pt-10 grid grid-cols-2 gap-12 text-xs">
-            <div className="space-y-6">
-              <p className="font-semibold text-[11px]">Prepared by:</p>
-              <div className="pt-4 border-t border-black w-4/5">
-                <p className="font-bold uppercase text-[11px]">{activeOperator}</p>
-                <p className="text-[10px] text-gray-700">Cashier Signature</p>
+            <div className="mt-4 pt-3 flex items-center justify-between text-[10px] text-gray-700 border-t border-gray-300">
+              <div>
+                <span>Prepared by: <strong>{activeOperator}</strong></span>
+              </div>
+              <div className="flex gap-6">
+                <span>Accountant Sign: ________________</span>
+                <span>Manager Sign: ________________</span>
               </div>
             </div>
 
-            <div className="space-y-6 text-right flex flex-col items-end">
-              <p className="font-semibold text-[11px]">Approved by:</p>
-              <div className="pt-4 border-t border-black w-4/5 text-right">
-                <p className="font-bold uppercase text-[11px]">AL KHALEEJ ACCOUNTS</p>
-                <p className="text-[10px] text-gray-700">Authorized Signature</p>
-              </div>
+            <div className="mt-2.5 pt-1.5 text-center text-[8.5px] text-gray-500 font-mono tracking-wider border-t border-gray-200">
+              Print by elitedevagency.com
             </div>
           </div>
         </div>
       </div>
-
-      <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
-          Close Preview
-        </Button>
-        <Button
-          size="sm"
-          onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
-        >
-          <PrinterIcon className="size-3.5" />
-          <span>Print A4 Document</span>
-        </Button>
-      </div>
     </div>
-  </div>
-);
+  );
 
-return createPortal(modalContent, document.body);
+  return createPortal(modalContent, document.body);
 }

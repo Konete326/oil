@@ -2,6 +2,7 @@ import { PosSale } from "../models/posSaleModel.js";
 import { Product } from "../models/productModel.js";
 import { Customer } from "../models/customerModel.js";
 import { CashTransaction } from "../models/cashModel.js";
+import { BankAccount } from "../models/bankAccountModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
 import { createNotificationHelper } from "./notificationController.js";
 import { connectDB } from "../config/db.js";
@@ -9,7 +10,7 @@ import { connectDB } from "../config/db.js";
 export const getPosSales = async (req, res, next) => {
   try {
     await connectDB();
-    const sales = await PosSale.find().sort({ createdAt: -1 });
+    const sales = await PosSale.find().populate("bankAccount", "bankName accountNumber").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: sales.length, data: sales });
   } catch (error) {
     next(error);
@@ -19,7 +20,7 @@ export const getPosSales = async (req, res, next) => {
 export const createPosSale = async (req, res, next) => {
   try {
     await connectDB();
-    const { customerName, customerPhone, customerId, saleType, items, subtotal, discount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
+    const { customerName, customerPhone, customerId, saleType, items, subtotal, discount, grandTotal, paymentMode, bankAccountId, bankAccountName, cashReceived, changeDue } = req.body;
     if (!items || items.length === 0 || !grandTotal) {
       res.status(400);
       throw new Error("Cart cannot be empty for POS transaction.");
@@ -55,6 +56,23 @@ export const createPosSale = async (req, res, next) => {
     const saleNumber = `POS-${nextSeq}`;
     const totalAmount = Number(grandTotal);
 
+    let resolvedBankId = bankAccountId || undefined;
+    let resolvedBankName = bankAccountName || "";
+
+    if (paymentMode === "Bank Transfer" || paymentMode === "Card") {
+      if (resolvedBankId) {
+        const bAcc = await BankAccount.findByIdAndUpdate(resolvedBankId, { $inc: { currentBalance: totalAmount } }, { new: true });
+        if (bAcc) resolvedBankName = `${bAcc.bankName} - ${bAcc.accountNumber}`;
+      } else {
+        const defAcc = (await BankAccount.findOne({ isDefault: true, isActive: true })) || (await BankAccount.findOne({ isActive: true }));
+        if (defAcc) {
+          resolvedBankId = defAcc._id;
+          resolvedBankName = `${defAcc.bankName} - ${defAcc.accountNumber}`;
+          await BankAccount.findByIdAndUpdate(defAcc._id, { $inc: { currentBalance: totalAmount } });
+        }
+      }
+    }
+
     const sale = await PosSale.create({
       saleNumber,
       customerName: customerName || "Walk-in Customer",
@@ -65,6 +83,8 @@ export const createPosSale = async (req, res, next) => {
       discount: Number(discount) || 0,
       grandTotal: totalAmount,
       paymentMode: paymentMode || "Cash",
+      bankAccount: resolvedBankId,
+      bankAccountName: resolvedBankName,
       cashReceived: Number(cashReceived) || 0,
       changeDue: Number(changeDue) || 0,
       cashierName: req.user?.name || "Admin Cashier",
@@ -73,15 +93,17 @@ export const createPosSale = async (req, res, next) => {
     if (paymentMode === "Credit / Khata" && customerName && customerName !== "Walk-in Customer") {
       const custQuery = customerId ? { _id: customerId } : { name: customerName.trim() };
       await Customer.findOneAndUpdate(custQuery, { $inc: { currentBalance: totalAmount } });
-    } else if ((paymentMode || "Cash") === "Cash") {
+    } else {
       await CashTransaction.create({
         type: "Received",
         partyName: customerName || "Walk-in Customer",
         amount: totalAmount,
         category: "POS Sale",
         referenceNo: saleNumber,
-        paymentMode: "Cash",
-        notes: `POS Counter Sale (${saleType || "Retail"})`,
+        paymentMode: paymentMode || "Cash",
+        bankAccount: resolvedBankId,
+        bankAccountName: resolvedBankName,
+        notes: `POS Counter Sale (${saleType || "Retail"})${resolvedBankName ? ` | ${resolvedBankName}` : ""}`,
       });
     }
 
@@ -117,7 +139,10 @@ export const deletePosSale = async (req, res, next) => {
 
     if (sale.paymentMode === "Credit / Khata" && sale.customerName && sale.customerName !== "Walk-in Customer") {
       await Customer.findOneAndUpdate({ name: sale.customerName }, { $inc: { currentBalance: -Number(sale.grandTotal) } });
-    } else if (sale.paymentMode === "Cash") {
+    } else if (sale.bankAccount) {
+      await BankAccount.findByIdAndUpdate(sale.bankAccount, { $inc: { currentBalance: -Number(sale.grandTotal) } });
+      await CashTransaction.findOneAndDelete({ referenceNo: sale.saleNumber });
+    } else {
       await CashTransaction.findOneAndDelete({ referenceNo: sale.saleNumber });
     }
 

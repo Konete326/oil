@@ -15,22 +15,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SupplierPaymentModal } from "@/components/supplier-payment-modal";
 import { SupplierDetailModal } from "@/components/supplier-detail-modal";
+import { SupplierModal } from "@/components/supplier-modal";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
   fetchSuppliersApi,
-  createSupplierApi,
   fetchSupplierLedgerApi,
   deleteSupplierApi,
+  deleteSupplierTransactionApi,
 } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 10;
 
 export function SupplierLedgerManager() {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("transactions");
+  const [activeTab, setActiveTab] = useState("suppliers");
   const [suppliers, setSuppliers] = useState([]);
   const [ledgerEntries, setLedgerEntries] = useState([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
@@ -43,12 +44,9 @@ export function SupplierLedgerManager() {
   const [supplierToPrint, setSupplierToPrint] = useState(null);
   const [supplierToView, setSupplierToView] = useState(null);
   const [supplierToDelete, setSupplierToDelete] = useState(null);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const [newSupplierName, setNewSupplierName] = useState("");
-  const [newSupplierPhone, setNewSupplierPhone] = useState("");
-  const [newSupplierAddress, setNewSupplierAddress] = useState("");
-  const [showAddSupplierForm, setShowAddSupplierForm] = useState(false);
+  const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
 
   useEffect(() => {
     if (location.state?.openModal) {
@@ -87,30 +85,7 @@ export function SupplierLedgerManager() {
     });
   }, [ledgerEntries, transactionTypeFilter]);
 
-  const handleAddSupplier = async (e) => {
-    e.preventDefault();
-    if (!newSupplierName.trim()) {
-      toast.error("Supplier name is required");
-      return;
-    }
 
-    try {
-      await createSupplierApi({
-        name: newSupplierName.trim(),
-        phone: newSupplierPhone,
-        address: newSupplierAddress,
-      });
-
-      toast.success("New supplier profile created!");
-      setNewSupplierName("");
-      setNewSupplierPhone("");
-      setNewSupplierAddress("");
-      setShowAddSupplierForm(false);
-      loadSupplierData();
-    } catch (err) {
-      toast.error(err.message || "Failed to add supplier");
-    }
-  };
 
   const handleDeleteSupplier = async () => {
     if (!supplierToDelete) return;
@@ -125,6 +100,21 @@ export function SupplierLedgerManager() {
       await loadSupplierData();
     } catch (err) {
       toast.error(err.message || "Failed to delete supplier");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteTransaction = async () => {
+    if (!transactionToDelete) return;
+    try {
+      setIsDeleting(true);
+      await deleteSupplierTransactionApi(transactionToDelete._id);
+      toast.success("Transaction entry deleted successfully!");
+      setTransactionToDelete(null);
+      await loadSupplierData();
+    } catch (err) {
+      toast.error(err.message || "Failed to delete transaction entry");
     } finally {
       setIsDeleting(false);
     }
@@ -188,49 +178,14 @@ export function SupplierLedgerManager() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowAddSupplierForm(!showAddSupplierForm)}
+            onClick={() => setIsSupplierModalOpen(true)}
             className="gap-1 cursor-pointer text-xs h-7.5 px-2.5"
           >
             <Building2Icon className="size-3 text-primary" />
-            <span>{showAddSupplierForm ? "Close Form" : "Add Supplier"}</span>
+            <span>Add Supplier</span>
           </Button>
         </div>
       </div>
-
-      {showAddSupplierForm && (
-        <form onSubmit={handleAddSupplier} className="p-3 bg-card rounded-xl border border-border/80 space-y-2.5 shadow-xs text-xs">
-          <h3 className="font-semibold text-xs text-foreground">Add New Supplier Profile</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <Input
-              type="text"
-              placeholder="Supplier Name *"
-              value={newSupplierName}
-              onChange={(e) => setNewSupplierName(e.target.value)}
-              className="text-xs h-7.5"
-              required
-            />
-            <Input
-              type="text"
-              placeholder="Phone Number (Optional)"
-              value={newSupplierPhone}
-              onChange={(e) => setNewSupplierPhone(e.target.value)}
-              className="text-xs h-7.5"
-            />
-            <Input
-              type="text"
-              placeholder="Office / Refinery Address (Optional)"
-              value={newSupplierAddress}
-              onChange={(e) => setNewSupplierAddress(e.target.value)}
-              className="text-xs h-7.5"
-            />
-          </div>
-          <div className="flex justify-end gap-1.5 pt-1">
-            <Button type="submit" size="sm" className="text-xs h-7.5 px-3 cursor-pointer">
-              Save Supplier
-            </Button>
-          </div>
-        </form>
-      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 p-2.5 sm:p-3 flex items-center gap-2.5 shadow-xs">
@@ -264,105 +219,46 @@ export function SupplierLedgerManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-border/60 pb-2">
-        <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-lg border border-border">
-          <button
-            onClick={() => { setActiveTab("transactions"); setCurrentPage(1); }}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
-              activeTab === "transactions"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Transactions ({filteredLedgerEntries.length})
-          </button>
-          <button
-            onClick={() => { setActiveTab("suppliers"); setCurrentPage(1); }}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
-              activeTab === "suppliers"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Suppliers ({suppliers.length})
-          </button>
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 bg-card p-2 sm:p-2.5 rounded-xl border border-border/80 shadow-xs">
+        <div className="relative flex-1 min-w-0">
+          <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder={activeTab === "transactions" ? "Search supplier name, ref no, or notes..." : "Search supplier by name, phone, address..."}
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            className="ps-8 text-xs h-7.5 w-full bg-muted/30 focus:bg-background"
+          />
         </div>
 
-        {activeTab === "transactions" && (
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1 text-xs h-7.5 px-2.5 cursor-pointer">
-            <FileSpreadsheetIcon className="size-3 text-emerald-500" />
-            <span>Export Excel</span>
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center justify-between md:justify-end gap-2 shrink-0">
+          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
+            <button
+              onClick={() => { setActiveTab("suppliers"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === "suppliers"
+                  ? "bg-background text-primary border border-border shadow-xs"
+                  : "text-muted-foreground hover:text-foreground border border-transparent"
+              }`}
+            >
+              Suppliers ({suppliers.length})
+            </button>
+            <button
+              onClick={() => { setActiveTab("transactions"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === "transactions"
+                  ? "bg-background text-primary border border-border shadow-xs"
+                  : "text-muted-foreground hover:text-foreground border border-transparent"
+              }`}
+            >
+              Transactions ({filteredLedgerEntries.length})
+            </button>
+          </div>
+        </div>
       </div>
 
       {activeTab === "transactions" ? (
         <div className="space-y-2.5">
-          <div className="bg-card p-2 sm:p-2.5 rounded-xl border border-border/80 shadow-xs">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center w-full">
-              <div className="relative col-span-12 md:col-span-8">
-                <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search supplier name, ref no, or notes..."
-                  value={search}
-                  onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                  className="ps-8 text-xs h-7.5 w-full bg-muted/30 focus:bg-background"
-                />
-              </div>
-
-              <div className="col-span-12 md:col-span-4">
-                <select
-                  value={selectedSupplierId}
-                  onChange={(e) => { setSelectedSupplierId(e.target.value); setCurrentPage(1); }}
-                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="">All Suppliers</option>
-                  {suppliers.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name} (Owed: Rs. {s.currentBalance?.toLocaleString() || 0})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {selectedSupplierObj && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-2.5 bg-muted/30 border border-border/60 rounded-lg text-xs">
-              <div className="space-y-0.5">
-                <span className="font-semibold text-xs text-foreground">{selectedSupplierObj.name}</span>
-                <p className="text-muted-foreground text-[10.5px]">
-                  {selectedSupplierObj.phone ? `Phone: ${selectedSupplierObj.phone}` : "No phone"} | {selectedSupplierObj.address || "Address not provided"}
-                </p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="text-right pe-1">
-                  <span className="text-[9.5px] text-muted-foreground uppercase font-semibold">Owed Balance:</span>
-                  <p className="font-mono font-bold text-rose-500 text-xs">Rs. {selectedSupplierObj.currentBalance?.toLocaleString() || 0}</p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSupplierToView(selectedSupplierObj)}
-                  className="gap-1 text-[11px] h-6.5 px-2 cursor-pointer"
-                >
-                  <EyeIcon className="size-3" />
-                  <span>View Details</span>
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setSupplierToDelete(selectedSupplierObj)}
-                  className="gap-1 text-[11px] h-6.5 px-2 cursor-pointer"
-                >
-                  <Trash2Icon className="size-3" />
-                  <span>Delete</span>
-                </Button>
-              </div>
-            </div>
-          )}
-
           <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs flex flex-col">
             <div className="max-h-[calc(100vh-270px)] min-h-[240px] overflow-y-auto overflow-x-auto">
               <table className="w-full text-left text-xs min-w-[700px]">
@@ -374,19 +270,20 @@ export function SupplierLedgerManager() {
                     <th className="p-2.5 h-9 font-semibold text-right">Amount (PKR)</th>
                     <th className="p-2.5 h-9 font-semibold text-right">Running Balance</th>
                     <th className="p-2.5 h-9 font-semibold">Payment Mode</th>
-                    <th className="p-2.5 pe-3.5 h-9 font-semibold text-right">Ref No / Details</th>
+                    <th className="p-2.5 h-9 font-semibold">Ref No / Details</th>
+                    <th className="p-2.5 pe-3.5 h-9 font-semibold text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="p-6 text-center text-muted-foreground text-xs">
+                      <td colSpan={8} className="p-6 text-center text-muted-foreground text-xs">
                         Loading supplier ledger transactions...
                       </td>
                     </tr>
                   ) : filteredLedgerEntries.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-6 text-center text-muted-foreground text-xs">
+                      <td colSpan={8} className="p-6 text-center text-muted-foreground text-xs">
                         No supplier ledger entries found.
                       </td>
                     </tr>
@@ -424,9 +321,34 @@ export function SupplierLedgerManager() {
                         <td className="p-2 text-right font-mono font-bold text-amber-600 dark:text-amber-400 text-xs">
                           Rs. {(Number(item.runningBalance) || 0).toLocaleString()}
                         </td>
-                        <td className="p-2 text-muted-foreground text-[11px]">{item.paymentMode || "Cash"}</td>
-                        <td className="p-2 pe-3.5 text-right text-muted-foreground text-[11px]">
+                        <td className="p-2 text-[11px]">
+                          {item.bankAccountName || (item.paymentMode && item.paymentMode.toLowerCase().includes("bank")) ? (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Bank ({item.bankAccountName ? item.bankAccountName.split("-")[0].trim() : item.bankName || "Transfer"})
+                            </span>
+                          ) : item.paymentMode === "Cheque" ? (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                              Cheque
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-muted text-muted-foreground border border-border/60">
+                              {item.paymentMode || "Cash"}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-2 text-muted-foreground text-[11px]">
                           {item.referenceNumber || item.notes || "-"}
+                        </td>
+                        <td className="p-2 pe-3.5 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setTransactionToDelete(item)}
+                            className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
+                            title="Delete Transaction Entry"
+                          >
+                            <Trash2Icon className="size-3.5" />
+                          </Button>
                         </td>
                       </tr>
                     ))
@@ -492,8 +414,20 @@ export function SupplierLedgerManager() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => setSupplierToView(sup)}
+                            onClick={() => {
+                              setSelectedSupplierId(sup._id);
+                              setIsPaymentModalOpen(true);
+                            }}
                             className="size-7 text-primary hover:bg-primary/10 cursor-pointer"
+                            title="Record Payment"
+                          >
+                            <PlusIcon className="size-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setSupplierToView(sup)}
+                            className="size-7 text-foreground/80 hover:bg-muted cursor-pointer"
                             title="View Supplier Profile & Details"
                           >
                             <EyeIcon className="size-3.5" />
@@ -541,6 +475,7 @@ export function SupplierLedgerManager() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         suppliers={suppliers}
+        defaultSupplierId={selectedSupplierId}
         onSuccess={loadSupplierData}
       />
 
@@ -576,6 +511,23 @@ export function SupplierLedgerManager() {
         message={`Are you sure you want to delete supplier "${supplierToDelete?.name}"? All associated vendor records will be permanently removed.`}
         confirmText="Yes, Delete Supplier"
         loading={isDeleting}
+      />
+
+      <ConfirmModal
+        isOpen={!!transactionToDelete}
+        onClose={() => setTransactionToDelete(null)}
+        onConfirm={handleDeleteTransaction}
+        title="Delete Transaction Entry"
+        message={`Are you sure you want to delete this ${transactionToDelete?.transactionType || "transaction"} of Rs. ${Number(transactionToDelete?.amount || 0).toLocaleString()} for "${transactionToDelete?.supplierName || "Supplier"}"? The vendor balance will be automatically adjusted.`}
+        confirmText="Yes, Delete Transaction"
+        loading={isDeleting}
+      />
+
+      <SupplierModal
+        isOpen={isSupplierModalOpen}
+        onClose={() => setIsSupplierModalOpen(false)}
+        onSaved={loadSupplierData}
+        existingSuppliers={suppliers}
       />
     </div>
   );

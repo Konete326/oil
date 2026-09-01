@@ -34,7 +34,7 @@ import {
   exportPartySummaryToExcel,
 } from "@/lib/cash-export-utils";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 4;
 
 export function CashManager() {
   const location = useLocation();
@@ -46,6 +46,7 @@ export function CashManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [paymentMode, setPaymentMode] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,6 +55,25 @@ export function CashManager() {
   const [deletingId, setDeletingId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+
+  const handleQuickDate = (type) => {
+    setDateFilter(type);
+    setCurrentPage(1);
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    if (type === "today") {
+      setStartDate(todayStr);
+      setEndDate(todayStr);
+    } else if (type === "month") {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
+      setStartDate(firstDay);
+      setEndDate(todayStr);
+    } else {
+      setStartDate("");
+      setEndDate("");
+    }
+  };
 
   useEffect(() => {
     if (location.state?.openModal) {
@@ -94,7 +114,7 @@ export function CashManager() {
 
   useEffect(() => {
     loadData();
-  }, [activeTab, startDate, endDate, selectedCategory, paymentMode]);
+  }, [activeTab, startDate, endDate, selectedCategory, paymentMode, search]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -121,13 +141,38 @@ export function CashManager() {
     }
   };
 
+  const isToday = (t) => {
+    const d = new Date(t.date || t.createdAt);
+    const now = new Date();
+    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  };
+
   const totalPaid = transactions
     .filter((t) => t.type === "Paid")
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
   const totalReceived = transactions
     .filter((t) => t.type === "Received")
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const todayReceived = transactions
+    .filter((t) => isToday(t) && t.type === "Received")
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const todayPaid = transactions
+    .filter((t) => isToday(t) && t.type === "Paid")
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const pastReceived = transactions
+    .filter((t) => !isToday(t) && t.type === "Received")
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const pastPaid = transactions
+    .filter((t) => !isToday(t) && t.type === "Paid")
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const openingCash = Math.max(0, pastReceived - pastPaid);
+  const currentDrawerCash = openingCash + todayReceived - todayPaid;
 
   const handleExportExcel = () => {
     if (activeTab === "party") {
@@ -150,160 +195,185 @@ export function CashManager() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          <Button
-            size="sm"
-            onClick={() => setIsExpenseModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 cursor-pointer text-xs h-8 px-3 font-semibold shadow-xs"
-            title="Record Daily Operational Expense (Chai, Electricity Bill, Rent)"
-          >
-            <ReceiptIcon className="size-3.5" />
-            <span>Record Expense</span>
-          </Button>
-
+        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap shrink-0">
           <Button
             size="sm"
             onClick={() => handleOpenModal("Received")}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer text-xs h-8 px-3 font-semibold shadow-xs"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1 cursor-pointer text-xs h-7.5 px-2.5 font-semibold shadow-xs"
+            title="Receive Cash (Wasool / Inflow)"
           >
             <ArrowDownLeftIcon className="size-3.5" />
-            <span>Receive Cash</span>
+            <span>Cash In</span>
           </Button>
 
           <Button
             size="sm"
             onClick={() => handleOpenModal("Paid")}
-            className="bg-rose-600 hover:bg-rose-700 text-white gap-1.5 cursor-pointer text-xs h-8 px-3 font-semibold shadow-xs"
+            className="bg-rose-600 hover:bg-rose-700 text-white gap-1 cursor-pointer text-xs h-7.5 px-2.5 font-semibold shadow-xs"
+            title="Pay Cash (Kharch / Outflow)"
           >
             <ArrowUpRightIcon className="size-3.5" />
-            <span>Pay Cash</span>
+            <span>Cash Out</span>
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => setIsExpenseModalOpen(true)}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 cursor-pointer text-xs h-7.5 px-2.5 font-semibold shadow-xs"
+            title="Record Daily Operational Expense Voucher"
+          >
+            <ReceiptIcon className="size-3.5" />
+            <span>Expense Voucher</span>
           </Button>
         </div>
       </div>
 
-      <CashStatsSummary totalReceived={totalReceived} totalPaid={totalPaid} />
+      <CashStatsSummary
+        openingCash={openingCash}
+        todayReceived={todayReceived}
+        todayPaid={todayPaid}
+        currentDrawerCash={currentDrawerCash}
+      />
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {[
-            { id: "all", label: "All Cash Book" },
-            { id: "received", label: "Cash Inflow (+)" },
-            { id: "paid", label: "Cash Outflow & Expenses (-)" },
-            { id: "party", label: "Party-wise Summary" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
+      <div className="bg-card p-2.5 rounded-xl border border-border/80 shadow-xs space-y-2">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
+          <div className="relative flex-1 min-w-0">
+            <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search party, voucher #, notes..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap border ${
-                activeTab === tab.id
-                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                  : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+              className="ps-8 text-xs h-7.5 w-full bg-muted/30 focus:bg-background"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between md:justify-end gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border">
+              <button
+                onClick={() => handleQuickDate("today")}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
+                  dateFilter === "today"
+                    ? "bg-background text-primary border border-border shadow-xs"
+                    : "text-muted-foreground hover:text-foreground border border-transparent"
+                }`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => handleQuickDate("month")}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
+                  dateFilter === "month"
+                    ? "bg-background text-primary border border-border shadow-xs"
+                    : "text-muted-foreground hover:text-foreground border border-transparent"
+                }`}
+              >
+                This Month
+              </button>
+              <button
+                onClick={() => handleQuickDate("all")}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
+                  dateFilter === "all"
+                    ? "bg-background text-primary border border-border shadow-xs"
+                    : "text-muted-foreground hover:text-foreground border border-transparent"
+                }`}
+              >
+                All Time
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={handleExportExcel}
+                className="size-7 cursor-pointer text-emerald-600 dark:text-emerald-400"
+                title="Export Excel"
+              >
+                <FileSpreadsheetIcon className="size-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setIsPrintModalOpen(true)}
+                className="size-7 cursor-pointer text-foreground"
+                title="Print Slip Statement"
+              >
+                <PrinterIcon className="size-3.5" />
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportExcel}
-            className="gap-1.5 text-xs cursor-pointer h-7.5 px-2.5"
-          >
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span className="hidden sm:inline">Excel Export</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsPrintModalOpen(true)}
-            className="gap-1.5 text-xs cursor-pointer h-7.5 px-2.5"
-          >
-            <PrinterIcon className="size-3.5" />
-            <span className="hidden sm:inline">Print Slip</span>
-          </Button>
-        </div>
-      </div>
-
-      {activeTab !== "party" && (
-        <div className="bg-card p-3 rounded-xl border border-border space-y-3 shadow-xs">
-          <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 items-center">
-            <div className="relative">
-              <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search party, voucher #, notes..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/40">
+          <div className="flex items-center gap-1 overflow-x-auto">
+            {[
+              { id: "all", label: "All Cash Book" },
+              { id: "received", label: "Cash Inflow (+)" },
+              { id: "paid", label: "Cash Outflow (-)" },
+              { id: "party", label: "Party Summary" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
                   setCurrentPage(1);
                 }}
-                className="ps-8 text-xs h-8 bg-muted/30"
-              />
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer whitespace-nowrap border ${
+                  activeTab === tab.id
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground border-border/60"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab !== "party" && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <select
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="h-7 rounded-md border border-input bg-background px-2 text-[11px] text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring max-w-[140px]"
+              >
+                <option value="">All Categories</option>
+                <option value="POS Sale">POS Sale</option>
+                <option value="Customer Payment">Customer Payment</option>
+                <option value="Supplier Payment">Supplier Payment</option>
+                <option value="Salaries & Wages">Salaries & Wages</option>
+                <option value="Utilities">Utilities & Bills</option>
+                <option value="Transport & Freight">Transport & Freight</option>
+                <option value="Rent">Shop Rent</option>
+                <option value="Maintenance & Repairs">Maintenance</option>
+                <option value="Office Petty Cash">Office Tea / Food</option>
+                <option value="Other">Other Expenses</option>
+              </select>
+
+              <select
+                value={paymentMode}
+                onChange={(e) => {
+                  setPaymentMode(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="h-7 rounded-md border border-input bg-background px-2 text-[11px] text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring max-w-[120px]"
+              >
+                <option value="">All Modes</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Online POS">Online POS</option>
+              </select>
             </div>
-
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="">All Categories & Expenses</option>
-              <option value="POS Sale">POS Sale Inflow</option>
-              <option value="Mill Payment">Mill Payment</option>
-              <option value="Customer Payment">Customer Payment</option>
-              <option value="Supplier Payment">Supplier Payment</option>
-              <option value="Salaries & Wages">Salaries & Wages</option>
-              <option value="Utilities">Utilities & Bills</option>
-              <option value="Transport & Freight">Transport & Freight</option>
-              <option value="Rent">Shop Rent</option>
-              <option value="Maintenance & Repairs">Maintenance & Repairs</option>
-              <option value="Office Petty Cash">Office Tea / Food</option>
-              <option value="Other">Other Expenses</option>
-            </select>
-
-            <select
-              value={paymentMode}
-              onChange={(e) => {
-                setPaymentMode(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="">All Payment Modes</option>
-              <option value="Cash">Cash Drawer</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Cheque">Cheque</option>
-              <option value="Online POS">Online POS</option>
-            </select>
-
-            <div className="flex items-center gap-1.5">
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="text-xs h-8 bg-muted/30"
-                title="Start Date"
-              />
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="text-xs h-8 bg-muted/30"
-                title="End Date"
-              />
-            </div>
-          </form>
+          )}
         </div>
-      )}
+      </div>
 
       {activeTab === "party" ? (
         <CashPartyReport parties={partySummaries} loading={loading} />
@@ -319,7 +389,7 @@ export function CashManager() {
                   <th className="p-2.5">Mode</th>
                   <th className="p-2.5 text-right">Inflow (Received)</th>
                   <th className="p-2.5 text-right">Outflow (Paid)</th>
-                  <th className="p-2.5 pe-3.5 text-center">Action</th>
+                  <th className="p-2.5 pe-3.5 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -355,23 +425,48 @@ export function CashManager() {
                             {t.category || "General"}
                           </span>
                         </td>
-                        <td className="p-2.5 text-muted-foreground text-[11px] font-medium">{t.paymentMode || "Cash"}</td>
+                        <td className="p-2.5 text-[10.5px]">
+                          {t.bankAccountName || (t.paymentMode && t.paymentMode.toLowerCase().includes("bank")) ? (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Bank ({t.bankAccountName ? t.bankAccountName.split("-")[0].trim() : t.bankName || "Transfer"})
+                            </span>
+                          ) : t.paymentMode === "Cheque" ? (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                              Cheque
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-muted text-muted-foreground border border-border/60">
+                              Cash Drawer
+                            </span>
+                          )}
+                        </td>
                         <td className="p-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
                           {t.type === "Received" ? `+ Rs ${t.amount.toLocaleString()}` : "—"}
                         </td>
                         <td className="p-2.5 text-right font-mono font-bold text-rose-600 dark:text-rose-400">
                           {t.type === "Paid" ? `- Rs ${t.amount.toLocaleString()}` : "—"}
                         </td>
-                        <td className="p-2.5 pe-3.5 text-center">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => setDeletingId(t._id)}
-                            className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                            title="Delete Entry"
-                          >
-                            <Trash2Icon className="size-3.5" />
-                          </Button>
+                        <td className="p-2.5 pe-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => setIsPrintModalOpen(true)}
+                              className="size-7 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+                              title="Print Slip"
+                            >
+                              <PrinterIcon className="size-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => setDeletingId(t._id)}
+                              className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
+                              title="Delete Entry"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))

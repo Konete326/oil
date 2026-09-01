@@ -21,6 +21,8 @@ const posSaleSchema = new mongoose.Schema(
     discount: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true },
     paymentMode: { type: String, enum: ["Cash", "Card", "Bank Transfer", "Credit / Khata"], default: "Cash" },
+    bankAccount: { type: mongoose.Schema.Types.ObjectId, ref: "BankAccount" },
+    bankAccountName: { type: String },
     cashReceived: { type: Number, default: 0 },
     changeDue: { type: Number, default: 0 },
     cashierName: { type: String, default: "Admin Cashier" },

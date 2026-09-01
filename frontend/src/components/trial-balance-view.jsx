@@ -29,35 +29,44 @@ export function TrialBalanceView({ accounts = [], summary = {}, loading = false 
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 sm:p-4 rounded-xl border border-border">
         <div className="flex items-center gap-2">
-          <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <ScaleIcon className="size-5" />
+          <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <ScaleIcon className="size-4.5" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-foreground">Trial Balance Sheet (Khatey Ka Tawazun)</h3>
-            <p className="text-xs text-muted-foreground">Comprehensive summary balancing all ledger accounts.</p>
+            <h3 className="font-bold text-sm text-foreground">Trial Balance Sheet</h3>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 ${
+        <div className="flex items-center gap-2">
+          <div className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 ${
             summary.isBalanced
-              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-              : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+              : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
           }`}>
             {summary.isBalanced ? <CheckCircle2Icon className="size-3.5" /> : <AlertCircleIcon className="size-3.5" />}
-            <span>{summary.isBalanced ? "Accounts Balanced" : "Balance Difference Present"}</span>
+            <span>{summary.isBalanced ? "Accounts Balanced" : "Difference Present"}</span>
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-xs cursor-pointer">
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span>Export Excel</span>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={handleExportExcel}
+            className="size-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+            title="Export to Excel"
+          >
+            <FileSpreadsheetIcon className="size-4" />
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-xs cursor-pointer">
-            <PrinterIcon className="size-3.5" />
-            <span>Print Sheet</span>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() => setIsPrintModalOpen(true)}
+            className="size-8 text-primary hover:bg-primary/10 cursor-pointer"
+            title="Print Trial Balance"
+          >
+            <PrinterIcon className="size-4" />
           </Button>
         </div>
       </div>

@@ -127,7 +127,7 @@ export function PosCounter() {
           quantity: 1,
           unitPrice: product.sellingPrice,
           itemDiscountType: "fixed",
-          itemDiscountValue: 0,
+          itemDiscountValue: "",
           subtotal: product.sellingPrice,
         },
       ]);
@@ -601,8 +601,8 @@ export function PosCounter() {
                               <input
                                 type="number"
                                 min="0"
-                                placeholder="0"
-                                value={item.itemDiscountValue ?? ""}
+                                placeholder=""
+                                value={item.itemDiscountValue ? item.itemDiscountValue : ""}
                                 onChange={(e) => updateItemDiscountValue(idx, e.target.value)}
                                 className="w-10 h-4.5 px-1 font-mono font-semibold text-[10px] bg-transparent text-foreground focus:outline-none"
                                 title="Per-item discount"
@@ -730,7 +730,7 @@ export function PosCounter() {
                 <input
                   type="number"
                   min="0"
-                  placeholder="0"
+                  placeholder=""
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
                   className="w-full text-right font-mono font-bold text-xs h-5 px-1 rounded border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"

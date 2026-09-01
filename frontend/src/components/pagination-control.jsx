@@ -11,10 +11,10 @@ export function PaginationControl({
   onPageChange,
 }) {
   const activePage = currentPage || page || 1;
-  const pageCount = totalPages || pages || 1;
+  const pageCount = Math.max(1, totalPages || pages || 1);
   const count = totalRecords !== undefined ? totalRecords : total !== undefined ? total : 0;
 
-  if (pageCount <= 1 && count <= 4) return null;
+  if (count === 0) return null;
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 px-3.5 py-2.5 bg-card border-t border-border text-xs">

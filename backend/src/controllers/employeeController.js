@@ -40,14 +40,14 @@ export const createEmployee = async (req, res, next) => {
     await connectDB();
     const { name, designation, department, phone, baseSalary, joiningDate, status } = req.body;
 
-    if (!name || !designation || !baseSalary || Number(baseSalary) <= 0) {
+    if (!name || !baseSalary || Number(baseSalary) <= 0) {
       res.status(400);
-      throw new Error("Name, designation, and a valid base salary are required.");
+      throw new Error("Name and a valid base salary are required.");
     }
 
     const employee = await Employee.create({
       name: name.trim(),
-      designation: designation.trim(),
+      designation: (designation && designation.trim()) || "Staff Member",
       department: department || "General",
       phone: phone || "",
       baseSalary: Number(baseSalary),

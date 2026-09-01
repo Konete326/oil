@@ -18,7 +18,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { fetchUsersApi, deleteUserApi } from "@/lib/api";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 4;
 
 export function UserManagementManager() {
   const [users, setUsers] = useState([]);

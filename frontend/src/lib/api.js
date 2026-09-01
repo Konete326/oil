@@ -1028,12 +1028,17 @@ export async function createPaymentEntry(data) {
       await updateSnapshots();
       return json;
     }
-  } catch (err) {}
-
-  await updateLocalSnapshotItem("ledger_entries", localItem);
-  await updateSnapshots();
-  await addOfflineOperation("ledger_entry", "create", localItem);
-  return { success: true, data: localItem };
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Failed to create payment entry");
+  } catch (err) {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await updateLocalSnapshotItem("ledger_entries", localItem);
+      await updateSnapshots();
+      await addOfflineOperation("ledger_entry", "create", localItem);
+      return { success: true, data: localItem };
+    }
+    throw err;
+  }
 }
 
 export async function fetchAgingReport() {
@@ -2496,7 +2501,7 @@ export async function fetchCustomers(params = {}) {
 
     const total = list.length;
     const page = Number(params.page) || 1;
-    const limit = Number(params.limit) || total || 10;
+    const limit = Number(params.limit) || 4;
     const totalPages = Math.ceil(total / limit) || 1;
     const paginated = list.slice((page - 1) * limit, page * limit);
 
@@ -2517,7 +2522,13 @@ export async function fetchCustomers(params = {}) {
     if (res.ok) {
       const result = await res.json();
       if (result && Array.isArray(result.data)) {
-        await saveLocalSnapshot("customers", result.data);
+        if (!params.page || Number(params.limit) >= 100) {
+          await saveLocalSnapshot("customers", result.data);
+        } else {
+          for (const item of result.data) {
+            await updateLocalSnapshotItem("customers", item);
+          }
+        }
       }
       return result;
     }
@@ -2534,9 +2545,15 @@ export async function fetchCustomers(params = {}) {
       (c.area || "").toLowerCase().includes(s)
     );
   }
+  if (params.customerType && params.customerType !== "all") {
+    list = list.filter((c) => c.customerType === params.customerType);
+  }
+  if (params.status && params.status !== "all") {
+    list = list.filter((c) => c.status === params.status);
+  }
   const total = list.length;
   const page = Number(params.page) || 1;
-  const limit = Number(params.limit) || total || 10;
+  const limit = Number(params.limit) || 4;
   const totalPages = Math.ceil(total / limit) || 1;
   const paginated = list.slice((page - 1) * limit, page * limit);
 
@@ -2544,18 +2561,49 @@ export async function fetchCustomers(params = {}) {
 }
 
 export async function fetchCustomerDetail(id) {
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    const [customers, posSales, cashTxs] = await Promise.all([
+  const buildFallbackDetail = async () => {
+    const [customers, posSales, cashTxs, ledgerEntries] = await Promise.all([
       getLocalSnapshot("customers"),
       getLocalSnapshot("pos_sales"),
       getLocalSnapshot("cash_transactions"),
+      getLocalSnapshot("ledger_entries"),
     ]);
     const foundCust = (Array.isArray(customers) ? customers : []).find((c) => (c._id || c.id) === id) || { _id: id, name: "Customer", currentBalance: 0 };
-    const cSales = (Array.isArray(posSales) ? posSales : []).filter((s) => s.customer === id || s.customer?._id === id || s.customer?.name === foundCust.name);
+    const cSales = (Array.isArray(posSales) ? posSales : []).filter((s) => s.customer === id || s.customer?._id === id || s.customer?.name === foundCust.name || s.customerName === foundCust.name);
+    const cLedger = (Array.isArray(ledgerEntries) ? ledgerEntries : []).filter((e) => e.customer === id || e.clientName === foundCust.name || e.partyName === foundCust.name);
     const totalPurchased = cSales.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
-    const totalPaid = (Array.isArray(cashTxs) ? cashTxs : [])
-      .filter((t) => t.party === foundCust.name || t.party === id)
-      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    const totalPaid = cLedger
+      .filter((e) => (e.transactionType || "").toLowerCase().includes("credit"))
+      .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+    const now = new Date();
+    const monthlyData = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+      const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+
+      const mSales = cSales
+        .filter((s) => {
+          const sDate = new Date(s.createdAt);
+          return sDate >= monthStart && sDate <= monthEnd;
+        })
+        .reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
+
+      const mPayments = cLedger
+        .filter((e) => {
+          const eDate = new Date(e.createdAt);
+          return eDate >= monthStart && eDate <= monthEnd && (e.transactionType || "").toLowerCase().includes("credit");
+        })
+        .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+      monthlyData.push({
+        month: monthKey,
+        total: mSales,
+        payments: mPayments,
+      });
+    }
 
     return {
       success: true,
@@ -2565,11 +2613,16 @@ export async function fetchCustomerDetail(id) {
         totalPurchased,
         totalPaid,
         currentBalance: Number(foundCust.currentBalance) || 0,
+        creditLimit: Number(foundCust.creditLimit) || 0,
       },
       posSales: cSales,
-      ledgerEntries: [],
-      monthlyData: [],
+      ledgerEntries: cLedger,
+      monthlyData,
     };
+  };
+
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    return await buildFallbackDetail();
   }
 
   try {
@@ -2582,31 +2635,7 @@ export async function fetchCustomerDetail(id) {
     }
   } catch (err) {}
 
-  const [customers, posSales, cashTxs] = await Promise.all([
-    getLocalSnapshot("customers"),
-    getLocalSnapshot("pos_sales"),
-    getLocalSnapshot("cash_transactions"),
-  ]);
-  const foundCust = (Array.isArray(customers) ? customers : []).find((c) => (c._id || c.id) === id) || { _id: id, name: "Customer", currentBalance: 0 };
-  const cSales = (Array.isArray(posSales) ? posSales : []).filter((s) => s.customer === id || s.customer?._id === id || s.customer?.name === foundCust.name);
-  const totalPurchased = cSales.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
-  const totalPaid = (Array.isArray(cashTxs) ? cashTxs : [])
-    .filter((t) => t.party === foundCust.name || t.party === id)
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-  return {
-    success: true,
-    customer: foundCust,
-    summary: {
-      totalOrders: cSales.length,
-      totalPurchased,
-      totalPaid,
-      currentBalance: Number(foundCust.currentBalance) || 0,
-    },
-    posSales: cSales,
-    ledgerEntries: [],
-    monthlyData: [],
-  };
+  return await buildFallbackDetail();
 }
 
 export async function createCustomerApi(payload) {
@@ -2757,6 +2786,26 @@ export async function deleteSupplierApi(id) {
   return { success: true, message: "Deleted supplier locally" };
 }
 
+export async function deleteSupplierTransactionApi(id) {
+  try {
+    const res = await fetch(`${API_URL}/suppliers/transaction/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      const data = await res.json();
+      await deleteFromLocalSnapshot("supplier_ledger_entries", id);
+      return data;
+    }
+  } catch (err) {
+    console.warn("deleteSupplierTransactionApi offline, queueing sync");
+  }
+  await deleteFromLocalSnapshot("supplier_ledger_entries", id);
+  await addOfflineOperation("supplier_ledger_delete", "delete", { _id: id });
+  return { success: true, message: "Deleted supplier transaction locally" };
+}
+
 export async function updateUserLanguageApi(preferredLanguage) {
   try {
     const res = await fetch(`${API_URL}/users/profile/language`, {
@@ -2770,6 +2819,129 @@ export async function updateUserLanguageApi(preferredLanguage) {
     return { success: false };
   }
 }
+
+export async function fetchBankAccounts() {
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const snap = await getLocalSnapshot("bank_accounts");
+    const list = Array.isArray(snap) ? snap : [];
+    const totalBankBalance = list.reduce((sum, a) => sum + (a.isActive ? Number(a.currentBalance || 0) : 0), 0);
+    const activeCount = list.filter((a) => a.isActive).length;
+    const defaultAccount = list.find((a) => a.isDefault && a.isActive) || list[0] || null;
+    return {
+      success: true,
+      data: list,
+      summary: { totalBankBalance, activeCount, defaultAccount },
+    };
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/bank-accounts`, {
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.data)) {
+        await saveLocalSnapshot("bank_accounts", data.data);
+      }
+      return data;
+    }
+  } catch (err) {
+    console.warn("fetchBankAccounts offline fallback");
+  }
+
+  const snap = await getLocalSnapshot("bank_accounts");
+  const list = Array.isArray(snap) ? snap : [];
+  const totalBankBalance = list.reduce((sum, a) => sum + (a.isActive ? Number(a.currentBalance || 0) : 0), 0);
+  const activeCount = list.filter((a) => a.isActive).length;
+  const defaultAccount = list.find((a) => a.isDefault && a.isActive) || list[0] || null;
+  return {
+    success: true,
+    data: list,
+    summary: { totalBankBalance, activeCount, defaultAccount },
+  };
+}
+
+export async function createBankAccountApi(payload) {
+  try {
+    const res = await fetch(`${API_URL}/bank-accounts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(payload),
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data) await updateLocalSnapshotItem("bank_accounts", data.data);
+      return data.data;
+    }
+  } catch (err) {
+    console.warn("createBankAccountApi offline, queueing sync");
+  }
+  const localItem = { ...payload, _id: `local_bank_${Date.now()}`, currentBalance: Number(payload.openingBalance || 0), isActive: true };
+  await updateLocalSnapshotItem("bank_accounts", localItem);
+  await addOfflineOperation("bank_account_create", "create", localItem);
+  return localItem;
+}
+
+export async function updateBankAccountApi(id, payload) {
+  try {
+    const res = await fetch(`${API_URL}/bank-accounts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(payload),
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data) await updateLocalSnapshotItem("bank_accounts", data.data);
+      return data.data;
+    }
+  } catch (err) {
+    console.warn("updateBankAccountApi offline, queueing sync");
+  }
+  const localItem = { ...payload, _id: id };
+  await updateLocalSnapshotItem("bank_accounts", localItem);
+  await addOfflineOperation("bank_account_update", "update", localItem);
+  return localItem;
+}
+
+export async function deleteBankAccountApi(id) {
+  try {
+    const res = await fetch(`${API_URL}/bank-accounts/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      const data = await res.json();
+      await deleteFromLocalSnapshot("bank_accounts", id);
+      return data;
+    }
+  } catch (err) {
+    console.warn("deleteBankAccountApi offline, queueing sync");
+  }
+  await deleteFromLocalSnapshot("bank_accounts", id);
+  await addOfflineOperation("bank_account_delete", "delete", { _id: id });
+  return { success: true, message: "Deleted bank account locally" };
+}
+
+export async function setDefaultBankAccountApi(id) {
+  try {
+    const res = await fetch(`${API_URL}/bank-accounts/${id}/default`, {
+      method: "PATCH",
+      headers: { ...getAuthHeader() },
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn("setDefaultBankAccountApi offline");
+  }
+  return { success: true };
+}
+
 
 
 

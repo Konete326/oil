@@ -28,11 +28,11 @@ export function ChallanModal({ isOpen, onClose, onSave, mills = [], products = [
       setDriverName("");
       setDriverPhone("");
       setDipMeasurementInches("");
-      setQuantityLiters("1000");
-      setOverrideRate(defaultMill?.contractRatePerLiter ? String(defaultMill.contractRatePerLiter) : "530");
+      setQuantityLiters("");
+      setOverrideRate(defaultMill?.contractRatePerLiter ? String(defaultMill.contractRatePerLiter) : "");
       setError("");
     }
-  }, [isOpen, mills, products]);
+  }, [isOpen]);
 
   const handleMillChange = (newMillId) => {
     setMillId(newMillId);
@@ -190,10 +190,15 @@ export function ChallanModal({ isOpen, onClose, onSave, mills = [], products = [
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground text-[11px]">Driver Phone (Optional)</label>
               <input
-                type="text"
+                type="tel"
                 placeholder="0300-1234567"
                 value={driverPhone}
-                onChange={(e) => setDriverPhone(e.target.value)}
+                onChange={(e) => setDriverPhone(e.target.value.replace(/[^\d+ -]/g, ""))}
+                onKeyDown={(e) => {
+                  if (!/[0-9+\- ]/.test(e.key) && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    e.preventDefault();
+                  }
+                }}
                 className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs shadow-xs text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>

@@ -2,6 +2,7 @@ import { Ledger } from "../models/ledgerModel.js";
 import { Mill } from "../models/millModel.js";
 import { Customer } from "../models/customerModel.js";
 import { CashTransaction } from "../models/cashModel.js";
+import { BankAccount } from "../models/bankAccountModel.js";
 import { connectDB } from "../config/db.js";
 
 export const getLedgerEntries = async (req, res, next) => {
@@ -12,13 +13,10 @@ export const getLedgerEntries = async (req, res, next) => {
     if (millId) query.mill = millId;
     if (customerId) query.customer = customerId;
     if (search) {
-      query.$or = [
-        { clientName: { $regex: search, $options: "i" } },
-        { partyName: { $regex: search, $options: "i" } },
-      ];
+      query.$or = [{ clientName: { $regex: search, $options: "i" } }, { partyName: { $regex: search, $options: "i" } }];
     }
 
-    const entries = await Ledger.find(query).populate("mill", "name code zone").populate("customer", "name phone city").sort({ createdAt: -1 });
+    const entries = await Ledger.find(query).populate("mill", "name code zone").populate("customer", "name phone city").populate("bankAccount", "bankName accountTitle accountNumber").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: entries.length, data: entries });
   } catch (error) {
     next(error);
@@ -28,7 +26,7 @@ export const getLedgerEntries = async (req, res, next) => {
 export const createPaymentEntry = async (req, res, next) => {
   try {
     await connectDB();
-    const { millId, customerId, clientName, amount, paymentMode, referenceNumber, notes, dueDate } = req.body;
+    const { millId, customerId, clientName, amount, paymentMode, bankAccountId, bankAccountName, referenceNumber, notes, dueDate } = req.body;
 
     if ((!millId && !customerId && !clientName) || !amount || Number(amount) <= 0) {
       res.status(400);
@@ -58,6 +56,23 @@ export const createPaymentEntry = async (req, res, next) => {
       }
     }
 
+    let resolvedBankId = bankAccountId || undefined;
+    let resolvedBankName = bankAccountName || "";
+
+    if (paymentMode && paymentMode !== "Cash") {
+      if (resolvedBankId) {
+        const bAcc = await BankAccount.findByIdAndUpdate(resolvedBankId, { $inc: { currentBalance: Number(amount) } }, { new: true });
+        if (bAcc) resolvedBankName = `${bAcc.bankName} - ${bAcc.accountNumber}`;
+      } else {
+        const defAcc = await BankAccount.findOne({ isDefault: true, isActive: true }) || await BankAccount.findOne({ isActive: true });
+        if (defAcc) {
+          resolvedBankId = defAcc._id;
+          resolvedBankName = `${defAcc.bankName} - ${defAcc.accountNumber}`;
+          await BankAccount.findByIdAndUpdate(defAcc._id, { $inc: { currentBalance: Number(amount) } });
+        }
+      }
+    }
+
     const entry = await Ledger.create({
       clientType: targetMill ? "Textile Mill" : targetCustomer ? "Retail Customer" : "General Customer",
       mill: targetMill ? targetMill._id : undefined,
@@ -67,23 +82,25 @@ export const createPaymentEntry = async (req, res, next) => {
       transactionType: "Credit (Payment Received)",
       amount: Number(amount),
       paymentMode: paymentMode || "Cash",
+      bankAccount: resolvedBankId,
+      bankAccountName: resolvedBankName,
       referenceNumber: referenceNumber || `REC-${Date.now().toString().slice(-6)}`,
       runningBalance: updatedBalance,
       notes,
       dueDate: dueDate || undefined,
     });
 
-    if ((paymentMode || "Cash") === "Cash") {
-      await CashTransaction.create({
-        type: "Received",
-        partyName: targetClientName,
-        amount: Number(amount),
-        category: targetMill ? "Mill Payment" : "Customer Payment",
-        referenceNo: entry.referenceNumber,
-        paymentMode: "Cash",
-        notes: notes || `Payment received from ${targetClientName}`,
-      });
-    }
+    await CashTransaction.create({
+      type: "Received",
+      partyName: targetClientName,
+      amount: Number(amount),
+      category: targetMill ? "Mill Payment" : "Customer Payment",
+      referenceNo: entry.referenceNumber,
+      paymentMode: paymentMode || "Cash",
+      bankAccount: resolvedBankId,
+      bankAccountName: resolvedBankName,
+      notes: notes || `Payment received from ${targetClientName}`,
+    });
 
     res.status(201).json({ success: true, data: entry });
   } catch (error) {

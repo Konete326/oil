@@ -32,6 +32,15 @@ const cashTransactionSchema = new mongoose.Schema(
       default: "Cash",
       trim: true,
     },
+    bankAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BankAccount",
+    },
+    bankAccountName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     transactionDate: {
       type: Date,
       default: Date.now,

@@ -9,6 +9,7 @@ import {
   getSupplierById,
   updateSupplier,
   deleteSupplier,
+  deleteSupplierTransaction,
 } from "../controllers/supplierCrudController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -17,6 +18,7 @@ const router = express.Router();
 router.route("/").get(protect, getSuppliers).post(protect, createSupplier);
 router.post("/payment", protect, createSupplierPayment);
 router.get("/ledger/:supplierId?", protect, getSupplierLedger);
+router.delete("/transaction/:id", protect, deleteSupplierTransaction);
 router
   .route("/:id")
   .get(protect, getSupplierById)

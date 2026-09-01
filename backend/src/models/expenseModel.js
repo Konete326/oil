@@ -30,6 +30,14 @@ const expenseSchema = new mongoose.Schema(
       type: String,
       default: "Cash",
     },
+    bankAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BankAccount",
+    },
+    bankAccountName: {
+      type: String,
+      default: "",
+    },
     voucherNumber: {
       type: String,
       default: "",

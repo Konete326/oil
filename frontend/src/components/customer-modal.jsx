@@ -37,29 +37,47 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
   }, [customer, isOpen]);
 
   useEffect(() => {
-    const rawDigits = phone.replace(/\D/g, "");
-    if (rawDigits.length >= 10 && Array.isArray(existingCustomers) && existingCustomers.length > 0) {
-      const match = existingCustomers.find(
+    if (!Array.isArray(existingCustomers) || existingCustomers.length === 0) {
+      setDuplicateWarning(null);
+      return;
+    }
+
+    const trimmedName = name.trim().toLowerCase();
+    if (trimmedName) {
+      const nameMatch = existingCustomers.find(
         (c) =>
-          (!customer || c._id !== customer._id) &&
+          (!customer || (c._id !== customer._id && c.id !== customer.id)) &&
+          (c.name || "").trim().toLowerCase() === trimmedName
+      );
+      if (nameMatch) {
+        setDuplicateWarning(`A customer with the name "${nameMatch.name}" already exists.`);
+        return;
+      }
+    }
+
+    const rawDigits = phone.replace(/\D/g, "");
+    if (rawDigits.length >= 10) {
+      const phoneMatch = existingCustomers.find(
+        (c) =>
+          (!customer || (c._id !== customer._id && c.id !== customer.id)) &&
           (c.phone || "").replace(/\D/g, "") === rawDigits
       );
-      if (match) {
-        setDuplicateWarning(`Yeh phone number pehle se "${match.name}" ke paas register hai.`);
-      } else {
-        setDuplicateWarning(null);
+      if (phoneMatch) {
+        setDuplicateWarning(`This phone number is already registered with "${phoneMatch.name}".`);
+        return;
       }
-    } else {
-      setDuplicateWarning(null);
     }
-  }, [phone, customer, existingCustomers]);
+
+    setDuplicateWarning(null);
+  }, [name, phone, customer, existingCustomers]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !name.trim()) {
-      toast.error("Customer Name is required.");
+    if (!name || !name.trim() || duplicateWarning) {
+      if (duplicateWarning) toast.error(duplicateWarning);
+      else toast.error("Customer Name is required.");
       return;
     }
     setSubmitting(true);
@@ -77,18 +95,17 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
         notes: "",
       };
 
+      const notifySaved = onSaved || onSuccess;
       if (customer) {
         const res = await updateCustomerApi(customer._id, payload);
         const savedData = res?.data || { ...customer, ...payload };
         toast.success("Customer profile updated successfully!");
-        if (typeof onSuccess === "function") onSuccess(savedData, true);
-        if (typeof onSaved === "function") onSaved(savedData, true);
+        if (typeof notifySaved === "function") notifySaved(savedData, true);
       } else {
         const res = await createCustomerApi(payload);
         const savedData = res?.data || { ...payload, _id: `cust_${Date.now()}` };
         toast.success("New Customer profile created successfully!");
-        if (typeof onSuccess === "function") onSuccess(savedData, false);
-        if (typeof onSaved === "function") onSaved(savedData, false);
+        if (typeof notifySaved === "function") notifySaved(savedData, false);
       }
       onClose();
     } catch (err) {
@@ -130,14 +147,20 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
             <div className="space-y-1">
               <label className="font-medium text-foreground text-[11px]">Phone Number (Optional)</label>
               <Input
+                type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value.replace(/[^\d+ -]/g, ""))}
+                onKeyDown={(e) => {
+                  if (!/[0-9+\- ]/.test(e.key) && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    e.preventDefault();
+                  }
+                }}
                 placeholder="0300-1234567"
-                className="h-8.5 text-xs bg-muted/20 focus:bg-background"
+                className="h-8.5 text-xs bg-muted/20 focus:bg-background font-mono"
               />
             </div>
             <div className="space-y-1">
-              <label className="font-medium text-foreground text-[11px]">Customer Type</label>
+              <label className="font-medium text-foreground text-[11px]">Customer Type (Optional)</label>
               <select
                 value={customerType}
                 onChange={(e) => setCustomerType(e.target.value)}
@@ -160,7 +183,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div className="space-y-1">
               <label className="font-medium text-foreground text-[11px]">
-                {customer ? "Current Balance (Rs)" : "Opening Balance (Optional)"}
+                {customer ? "Current Balance (Optional)" : "Opening Balance (Optional)"}
               </label>
               <Input
                 type="number"
@@ -168,7 +191,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
                 step="any"
                 value={openingBalance}
                 onChange={(e) => setOpeningBalance(e.target.value)}
-                placeholder="0"
+                placeholder="e.g. 5000"
                 className="h-8.5 text-xs bg-muted/20 focus:bg-background font-mono"
               />
             </div>
@@ -180,7 +203,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
                 step="any"
                 value={creditLimit}
                 onChange={(e) => setCreditLimit(e.target.value)}
-                placeholder="0"
+                placeholder="e.g. 100000"
                 className="h-8.5 text-xs bg-muted/20 focus:bg-background font-mono"
               />
             </div>
@@ -198,14 +221,14 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
 
           {customer && (
             <div className="space-y-1 pt-0.5">
-              <label className="font-medium text-foreground text-[11px]">Account Status</label>
+              <label className="font-medium text-foreground text-[11px]">Account Status (Optional)</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
               >
-                <option value="Active">Active (Chalu)</option>
-                <option value="Inactive">Inactive (Band)</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
               </select>
             </div>
           )}
@@ -214,7 +237,11 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, onSaved, e
             <Button variant="outline" type="button" onClick={onClose} disabled={submitting} className="cursor-pointer text-xs h-8">
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting || !name.trim()} className="cursor-pointer text-xs font-semibold h-8 px-4 bg-primary text-primary-foreground">
+            <Button
+              type="submit"
+              disabled={submitting || !name.trim() || !!duplicateWarning}
+              className="cursor-pointer text-xs font-semibold h-8 px-4 bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {submitting ? (
                 <><Loader2Icon className="size-3.5 animate-spin" /><span>Saving...</span></>
               ) : (

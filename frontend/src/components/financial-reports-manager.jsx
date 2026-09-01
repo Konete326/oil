@@ -35,41 +35,42 @@ export function FinancialReportsManager() {
 
   return (
     <div className="w-full space-y-4 p-3 md:p-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <CalculatorIcon className="size-5.5 text-primary" />
-            <span>Profit & Financial Reports</span>
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Real-time profit & loss margin calculations, balance sheet accounts, and party ledger statements.
-          </p>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="size-8.5 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <CalculatorIcon className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground leading-none">
+              Profit & Financial Reports
+            </h1>
+          </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-2 border-b border-border/60 pb-2 overflow-x-auto min-w-0">
-        {[
-          { id: "profitLoss", label: "Nafa / Nuqsan (Profit & Loss Statement)", icon: CalculatorIcon },
-          { id: "trialBalance", label: "Dukan Ki Kul Value (Trial Balance Sheet)", icon: ScaleIcon },
-          { id: "partyLedger", label: "Party Khata Report (Ledger Summary)", icon: BookOpenIcon },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isSelected = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap border ${
-                isSelected
-                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                  : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
-              }`}
-            >
-              <Icon className="size-3.5" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+        <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/60 overflow-x-auto min-w-0">
+          {[
+            { id: "profitLoss", label: "Profit & Loss Statement", icon: CalculatorIcon },
+            { id: "trialBalance", label: "Trial Balance Sheet", icon: ScaleIcon },
+            { id: "partyLedger", label: "Party Ledger Summary", icon: BookOpenIcon },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap border ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground border-transparent"
+                }`}
+              >
+                <Icon className="size-3.5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {activeTab === "profitLoss" && (

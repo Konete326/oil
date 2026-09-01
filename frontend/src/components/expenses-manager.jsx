@@ -122,12 +122,12 @@ export function ExpensesManager() {
           <p className="text-[11px] text-muted-foreground mt-0.5">Track daily, monthly, and category-wise business operational expenses.</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <Button
             type="button"
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 cursor-pointer text-xs h-7.5 px-3 flex-1 sm:flex-none"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 cursor-pointer text-xs h-7.5 px-3 font-semibold shadow-xs"
           >
             <PlusIcon className="size-3.5" />
             <span>Record Expense</span>
@@ -136,27 +136,27 @@ export function ExpensesManager() {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="icon-sm"
             onClick={handleExportExcel}
-            className="gap-1 text-xs h-7.5 px-2.5 cursor-pointer"
+            className="size-7 text-emerald-600 dark:text-emerald-400 cursor-pointer"
+            title="Export Excel"
           >
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span>Export Excel</span>
+            <FileSpreadsheetIcon className="size-3.5" />
           </Button>
 
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="icon-sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               setIsPrintModalOpen(true);
             }}
-            className="gap-1 text-xs h-7.5 px-2.5 cursor-pointer"
+            className="size-7 cursor-pointer text-foreground"
+            title="Print A4 Statement"
           >
-            <PrinterIcon className="size-3.5 text-primary" />
-            <span>Print A4</span>
+            <PrinterIcon className="size-3.5" />
           </Button>
         </div>
       </div>
@@ -271,7 +271,7 @@ export function ExpensesManager() {
                 <th className="p-3">Category</th>
                 <th className="p-3 text-right">Amount (PKR)</th>
                 <th className="p-3">Payment Mode</th>
-                <th className="p-3 pe-4 text-center">Action</th>
+                <th className="p-3 pe-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -303,16 +303,46 @@ export function ExpensesManager() {
                     <td className="p-3 text-right font-mono font-bold text-destructive">
                       Rs. {exp.amount.toLocaleString()}
                     </td>
-                    <td className="p-3 text-muted-foreground">{exp.paymentMode || "Cash"}</td>
-                    <td className="p-3 pe-4 text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeletingId(exp._id)}
-                        className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                      >
-                        <Trash2Icon className="size-3.5" />
-                      </Button>
+                    <td className="p-3 text-[10.5px]">
+                      {exp.bankAccountName || (exp.paymentMode && exp.paymentMode.toLowerCase().includes("bank")) ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          Bank ({exp.bankAccountName ? exp.bankAccountName.split("-")[0].trim() : exp.bankName || "Transfer"})
+                        </span>
+                      ) : exp.paymentMode === "Cheque" ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                          Cheque
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-muted text-muted-foreground border border-border/60">
+                          Cash Drawer
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 pe-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => {
+                            setIsPrintModalOpen(true);
+                          }}
+                          className="size-7 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+                          title="Print Statement"
+                        >
+                          <PrinterIcon className="size-3.5" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setDeletingId(exp._id)}
+                          className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
+                          title="Delete Voucher"
+                        >
+                          <Trash2Icon className="size-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))

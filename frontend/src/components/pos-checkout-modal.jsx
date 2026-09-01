@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { CustomerVendorSelect } from "@/components/ui/customer-vendor-select";
-import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, CreditCardIcon, AlertTriangleIcon } from "lucide-react";
+import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, CreditCardIcon, AlertTriangleIcon, Building2Icon } from "lucide-react";
 import { toast } from "sonner";
+import { fetchBankAccounts } from "@/lib/api";
 
 export function PosCheckoutModal({
   isOpen,
@@ -18,8 +19,10 @@ export function PosCheckoutModal({
   const [selectedCustomerObj, setSelectedCustomerObj] = useState(null);
   const [saleType, setSaleType] = useState("Retail");
   const [discountMode, setDiscountMode] = useState("fixed");
-  const [discount, setDiscount] = useState("0");
+  const [discount, setDiscount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
+  const [bankAccountId, setBankAccountId] = useState("");
+  const [bankAccounts, setBankAccounts] = useState([]);
   const [cashReceived, setCashReceived] = useState("");
 
   const [customerValid, setCustomerValid] = useState(true);
@@ -28,11 +31,18 @@ export function PosCheckoutModal({
 
   useEffect(() => {
     if (isOpen) {
+      fetchBankAccounts().then((res) => {
+        if (res && res.data) {
+          setBankAccounts(res.data);
+          const def = res.data.find((a) => a.isDefault && a.isActive) || res.data[0];
+          if (def) setBankAccountId(def._id);
+        }
+      });
       if (initialDiscount > 0) {
         setDiscount(String(initialDiscount));
         setDiscountMode("fixed");
       } else {
-        setDiscount("0");
+        setDiscount("");
       }
       if (initialPaymentMode) {
         setPaymentMode(initialPaymentMode);
@@ -62,7 +72,20 @@ export function PosCheckoutModal({
       toast.error("Cash received is less than the Grand Total.");
       return;
     }
-    onConfirm({ customerName, saleType, discount: discountNum, grandTotal, paymentMode, cashReceived: cashReceivedNum, changeDue });
+    const selectedBank = bankAccounts.find((b) => b._id === bankAccountId);
+    const bankAccountName = selectedBank ? `${selectedBank.bankName} - ${selectedBank.accountNumber}` : "";
+
+    onConfirm({
+      customerName,
+      saleType,
+      discount: discountNum,
+      grandTotal,
+      paymentMode,
+      bankAccountId: (paymentMode === "Bank Transfer" || paymentMode === "Card") ? bankAccountId : undefined,
+      bankAccountName: (paymentMode === "Bank Transfer" || paymentMode === "Card") ? bankAccountName : undefined,
+      cashReceived: cashReceivedNum,
+      changeDue,
+    });
   };
 
   return (
@@ -195,11 +218,34 @@ export function PosCheckoutModal({
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
                 onValidationChange={setDiscountValid}
-                placeholder="0"
+                placeholder="e.g. 50"
                 className="h-8 text-xs"
               />
             </div>
           </div>
+
+          {(paymentMode === "Bank Transfer" || paymentMode === "Card") && (
+            <div className="space-y-1 p-2 rounded-lg bg-primary/5 border border-primary/20 animate-in fade-in">
+              <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
+                <Building2Icon className="size-3 text-primary" /> Deposit Bank Account
+              </label>
+              <select
+                value={bankAccountId}
+                onChange={(e) => setBankAccountId(e.target.value)}
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer font-medium"
+              >
+                {bankAccounts.length === 0 ? (
+                  <option value="">Default Business Bank Account</option>
+                ) : (
+                  bankAccounts.map((b) => (
+                    <option key={b._id} value={b._id}>
+                      {b.bankName} - {b.accountNumber} ({b.accountTitle})
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+          )}
 
           {paymentMode === "Cash" && (
             <div className="grid grid-cols-2 gap-2.5">

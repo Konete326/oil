@@ -1,5 +1,6 @@
 import { Supplier } from "../models/supplierModel.js";
 import { SupplierLedger } from "../models/supplierLedgerModel.js";
+import { BankAccount } from "../models/bankAccountModel.js";
 import { connectDB } from "../config/db.js";
 
 export const getSupplierById = async (req, res, next) => {
@@ -66,6 +67,39 @@ export const deleteSupplier = async (req, res, next) => {
 
     await Supplier.findByIdAndDelete(id);
     res.status(200).json({ success: true, message: "Supplier deleted successfully." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSupplierTransaction = async (req, res, next) => {
+  try {
+    await connectDB();
+    const { id } = req.params;
+    const entry = await SupplierLedger.findById(id);
+
+    if (!entry) {
+      res.status(404);
+      throw new Error("Supplier transaction record not found.");
+    }
+
+    if (entry.supplier) {
+      const isPayment = entry.transactionType?.toLowerCase().includes("payment");
+      const isPurchase = entry.transactionType?.toLowerCase().includes("purchase");
+      const amt = Number(entry.amount) || 0;
+
+      if (isPayment) {
+        await Supplier.findByIdAndUpdate(entry.supplier, { $inc: { currentBalance: amt } });
+        if (entry.bankAccount) {
+          await BankAccount.findByIdAndUpdate(entry.bankAccount, { $inc: { currentBalance: amt } });
+        }
+      } else if (isPurchase) {
+        await Supplier.findByIdAndUpdate(entry.supplier, { $inc: { currentBalance: -amt } });
+      }
+    }
+
+    await SupplierLedger.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: "Transaction deleted successfully." });
   } catch (error) {
     next(error);
   }

@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { XIcon, PrinterIcon, CheckCircle2Icon } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import printLogoImg from "@/assets/print_logo.png";
 import { numberToWords } from "@/lib/number-to-words";
 import { COMPANY_CONFIG } from "@/lib/company-config";
 
@@ -111,7 +111,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
           <div className="border-b-2 border-black pb-3 mb-3 print:pb-2 print:mb-2">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <img src={logoImg} alt="Al Khaleej Logo" className="size-12 object-contain" />
+                <img src={printLogoImg} alt="Al Khaleej Logo" className="size-12 object-contain" />
                 <div>
                   <div className="flex items-baseline gap-2">
                     <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
@@ -259,6 +259,10 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-3 pt-2 text-center text-[8.5px] text-gray-500 font-mono tracking-wider border-t border-gray-200">
+              Print by elitedevagency.com
             </div>
           </div>
         </div>

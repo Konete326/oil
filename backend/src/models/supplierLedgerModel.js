@@ -24,6 +24,14 @@ const supplierLedgerSchema = new mongoose.Schema(
       type: String,
       default: "Cash",
     },
+    bankAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BankAccount",
+    },
+    bankAccountName: {
+      type: String,
+      default: "",
+    },
     referenceNumber: {
       type: String,
       default: "",

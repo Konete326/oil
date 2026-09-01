@@ -51,7 +51,7 @@ export function MillModal({ isOpen, onClose, onSave, editingMill, initialData, m
   const [isCustomPerson, setIsCustomPerson] = useState(false);
   const [phone, setPhone] = useState("");
   const [contractRatePerLiter, setContractRatePerLiter] = useState("");
-  const [creditLimit, setCreditLimit] = useState("500000");
+  const [creditLimit, setCreditLimit] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,7 +82,7 @@ export function MillModal({ isOpen, onClose, onSave, editingMill, initialData, m
       setContactPerson(currentMill.contactPerson === "-" ? "" : (currentMill.contactPerson || ""));
       setPhone(currentMill.phone === "-" ? "" : (currentMill.phone || ""));
       setContractRatePerLiter(currentMill.contractRatePerLiter !== undefined ? String(currentMill.contractRatePerLiter) : "");
-      setCreditLimit(currentMill.creditLimit !== undefined ? String(currentMill.creditLimit) : "500000");
+      setCreditLimit(currentMill.creditLimit ? String(currentMill.creditLimit) : "");
       setAddress(currentMill.address || "");
       setIsCustomMill(true);
       setIsCustomPerson(true);
@@ -94,7 +94,7 @@ export function MillModal({ isOpen, onClose, onSave, editingMill, initialData, m
       setContactPerson(DEFAULT_CONTACT_ROLES[0]);
       setPhone("");
       setContractRatePerLiter("");
-      setCreditLimit("500000");
+      setCreditLimit("");
       setAddress("");
       setSelectedCustomerId("");
       setIsCustomMill(false);
@@ -345,10 +345,15 @@ export function MillModal({ isOpen, onClose, onSave, editingMill, initialData, m
             <div className="space-y-1">
               <label className="font-medium text-muted-foreground text-[11px]">Phone (Optional)</label>
               <input
-                type="text"
+                type="tel"
                 placeholder="0300-1234567"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value.replace(/[^\d+ -]/g, ""))}
+                onKeyDown={(e) => {
+                  if (!/[0-9+\- ]/.test(e.key) && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                    e.preventDefault();
+                  }
+                }}
                 className="w-full h-8.5 rounded-md border border-input bg-background px-3 text-xs text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>

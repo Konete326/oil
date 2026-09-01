@@ -10,6 +10,8 @@ const ledgerSchema = new mongoose.Schema(
     transactionType: { type: String, required: true },
     amount: { type: Number, required: true },
     paymentMode: { type: String, default: "Cash" },
+    bankAccount: { type: mongoose.Schema.Types.ObjectId, ref: "BankAccount" },
+    bankAccountName: { type: String },
     referenceNumber: { type: String },
     runningBalance: { type: Number, default: 0 },
     notes: { type: String },

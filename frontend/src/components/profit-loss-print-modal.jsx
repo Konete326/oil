@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import printLogoImg from "@/assets/print_logo.png";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
 
@@ -159,19 +160,22 @@ export function ProfitLossPrintModal({
             lang="en"
           >
             <div className="flex justify-between items-start pb-2 border-b-2 border-black mb-3">
-              <div>
-                <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
-                  Statement of Profit and Loss (Income Statement)
-                </h1>
-                <p className="font-bold text-xs text-black uppercase">
-                  {COMPANY_CONFIG.name}
-                </p>
-                <p className="text-[10px] text-gray-700 font-medium">
-                  Accounting Period ({period.toUpperCase()}): {periodLabel}
-                </p>
-                <p className="text-[10px] text-gray-600">
-                  {COMPANY_CONFIG.address} | {COMPANY_CONFIG.mobiles}
-                </p>
+              <div className="flex items-center gap-3">
+                <img src={printLogoImg} alt="Al Khaleej Logo" className="size-12 object-contain" />
+                <div>
+                  <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                    Statement of Profit and Loss (Income Statement)
+                  </h1>
+                  <p className="font-bold text-xs text-black uppercase">
+                    {COMPANY_CONFIG.name}
+                  </p>
+                  <p className="text-[10px] text-gray-700 font-medium">
+                    Accounting Period ({period.toUpperCase()}): {periodLabel}
+                  </p>
+                  <p className="text-[10px] text-gray-600">
+                    {COMPANY_CONFIG.address} | {COMPANY_CONFIG.mobiles}
+                  </p>
+                </div>
               </div>
               <div className="text-right text-[11px] font-semibold text-gray-700">
                 <p className="font-bold text-black uppercase">{COMPANY_CONFIG.proprietor}</p>
@@ -326,6 +330,10 @@ export function ProfitLossPrintModal({
               <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
                 Approved by: {COMPANY_CONFIG.proprietor}
               </div>
+            </div>
+
+            <div className="mt-3 pt-2 text-center text-[8.5px] text-gray-500 font-mono tracking-wider border-t border-gray-200">
+              Print by elitedevagency.com
             </div>
           </div>
         </div>

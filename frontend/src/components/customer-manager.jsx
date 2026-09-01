@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   fetchCustomers,
   fetchCustomerDetail,
@@ -21,6 +21,11 @@ import {
   RefreshCwIcon,
   LayoutGridIcon,
   ListIcon,
+  PencilIcon,
+  Trash2Icon,
+  EyeIcon,
+  PrinterIcon,
+  Loader2Icon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -166,6 +171,8 @@ export function CustomerManager() {
         clientName: targetName,
         amount: pAmt,
         paymentMode: paymentData.paymentMode || "Cash",
+        bankAccountId: paymentData.bankAccountId,
+        bankAccountName: paymentData.bankAccountName,
         referenceNumber: paymentData.referenceNumber,
         notes: paymentData.notes || `Khata payment received from ${targetName}`,
       });
@@ -203,7 +210,13 @@ export function CustomerManager() {
       if (isEdit) {
         setCustomers((prev) => prev.map((c) => (c._id === savedCustomer._id ? { ...c, ...savedCustomer } : c)));
       } else {
-        setCustomers((prev) => [savedCustomer, ...prev.slice(0, PAGE_SIZE - 1)]);
+        setCustomers((prev) => {
+          if (prev.some((c) => c._id === savedCustomer._id || (savedCustomer.name && c.name?.toLowerCase() === savedCustomer.name?.toLowerCase()))) {
+            return prev.map((c) => (c._id === savedCustomer._id ? { ...c, ...savedCustomer } : c));
+          }
+          const currentLimit = viewMode === "cards" ? 3 : 4;
+          return [savedCustomer, ...prev.filter((c) => c._id !== savedCustomer._id)].slice(0, currentLimit);
+        });
         setTotalRecords((prev) => prev + 1);
       }
     }
@@ -339,18 +352,18 @@ export function CustomerManager() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-card p-2 sm:p-2.5 rounded-xl border border-border/80 shadow-xs">
-        <div className="relative w-full sm:w-72">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-card p-2 sm:p-2.5 rounded-xl border border-border/80 shadow-xs">
+        <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by name, phone, city..."
-            className="pl-8 text-xs h-7.5 bg-muted/30 focus:bg-background"
+            className="w-full pl-8 text-xs h-7.5 bg-muted/30 focus:bg-background"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <FilterIcon className="size-3 text-primary" />
             <span>Filters:</span>
@@ -450,56 +463,60 @@ export function CustomerManager() {
                           </td>
 
                           <td className="py-2 px-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
+                            <div className="flex items-center justify-end gap-1">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleOpenPayment(c)}
-                                className="h-6.5 text-[11px] font-semibold px-2.5 cursor-pointer bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
-                                title="Receive Payment for this Customer"
+                                className="h-7 text-[11px] font-semibold px-2.5 cursor-pointer bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                                title="Receive Payment"
                               >
                                 <span>Receive Payment</span>
                               </Button>
 
                               <Button
                                 variant="outline"
-                                size="sm"
+                                size="icon"
                                 onClick={() => handleOpenPrint(c)}
                                 disabled={loadingPrintId === c._id}
-                                className="h-6.5 text-[11px] px-2 cursor-pointer text-muted-foreground hover:text-foreground"
+                                className="size-7 cursor-pointer text-muted-foreground hover:text-foreground"
                                 title="Print A4 Statement"
                               >
-                                <span>Statement</span>
+                                {loadingPrintId === c._id ? (
+                                  <Loader2Icon className="size-3.5 animate-spin" />
+                                ) : (
+                                  <PrinterIcon className="size-3.5" />
+                                )}
                               </Button>
 
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 onClick={() => handleOpenDetail(c._id)}
-                                className="h-6.5 text-[11px] px-1.5 text-primary hover:bg-primary/10 cursor-pointer"
-                                title="View Khata Ledger"
+                                className="size-7 text-primary hover:bg-primary/10 cursor-pointer"
+                                title="View Customer Details & Ledger"
                               >
-                                <span>Ledger</span>
+                                <EyeIcon className="size-3.5" />
                               </Button>
 
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 onClick={() => handleOpenEdit(c)}
-                                className="h-6.5 text-[11px] px-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
+                                className="size-7 text-muted-foreground hover:bg-muted cursor-pointer"
                                 title="Edit Customer"
                               >
-                                <span>Edit</span>
+                                <PencilIcon className="size-3.5" />
                               </Button>
 
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 onClick={() => setDeleteTarget(c)}
-                                className="h-6.5 text-[11px] px-1.5 text-destructive hover:bg-destructive/10 cursor-pointer"
+                                className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
                                 title="Delete Customer"
                               >
-                                <span>Delete</span>
+                                <Trash2Icon className="size-3.5" />
                               </Button>
                             </div>
                           </td>
@@ -572,49 +589,59 @@ export function CustomerManager() {
                           )}
                         </div>
 
-                        <div className="pt-2 border-t border-border flex items-center justify-end gap-1 flex-wrap">
+                        <div className="pt-2 border-t border-border flex items-center justify-between gap-1">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleOpenPayment(c)}
-                            className="h-6.5 text-[10.5px] font-semibold px-2 cursor-pointer bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                            className="h-7 text-[10.5px] font-semibold px-2.5 cursor-pointer bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
                           >
                             <span>Receive Payment</span>
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenPrint(c)}
-                            disabled={loadingPrintId === c._id}
-                            className="h-6.5 text-[10.5px] px-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                            title="Print A4 Customer Statement"
-                          >
-                            <span>Statement</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenDetail(c._id)}
-                            className="h-6.5 text-[10.5px] px-1.5 text-primary hover:bg-primary/10 cursor-pointer"
-                          >
-                            <span>Ledger</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEdit(c)}
-                            className="h-6.5 text-[10.5px] px-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
-                          >
-                            <span>Edit</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteTarget(c)}
-                            className="h-6.5 text-[10.5px] px-1.5 text-destructive hover:bg-destructive/10 cursor-pointer"
-                          >
-                            <span>Delete</span>
-                          </Button>
+
+                          <div className="flex items-center gap-0.5">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleOpenPrint(c)}
+                              disabled={loadingPrintId === c._id}
+                              className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                              title="Print A4 Customer Statement"
+                            >
+                              {loadingPrintId === c._id ? (
+                                <Loader2Icon className="size-3.5 animate-spin" />
+                              ) : (
+                                <PrinterIcon className="size-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenDetail(c._id)}
+                              className="size-7 text-primary hover:bg-primary/10 cursor-pointer"
+                              title="View Customer Details & Ledger"
+                            >
+                              <EyeIcon className="size-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenEdit(c)}
+                              className="size-7 text-muted-foreground hover:bg-muted cursor-pointer"
+                              title="Edit Customer"
+                            >
+                              <PencilIcon className="size-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeleteTarget(c)}
+                              className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
+                              title="Delete Customer"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     );
@@ -652,13 +679,16 @@ export function CustomerManager() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onSave={handleSaveCustomerPayment}
-        mills={paymentTargetCustomer ? [{ _id: paymentTargetCustomer._id, name: paymentTargetCustomer.name, currentBalance: paymentTargetCustomer.currentBalance }] : []}
+        mills={useMemo(() => (paymentTargetCustomer ? [{ _id: paymentTargetCustomer._id, name: paymentTargetCustomer.name, currentBalance: paymentTargetCustomer.currentBalance }] : []), [paymentTargetCustomer])}
       />
 
       <CustomerPrintStatement
         isOpen={isPrintDirectOpen}
         onClose={() => setIsPrintDirectOpen(false)}
         customer={printDirectCustomer}
+        summary={printDirectData?.summary}
+        posSales={printDirectData?.posSales || []}
+        ledgerEntries={printDirectData?.ledgerEntries || []}
         data={printDirectData}
       />
 

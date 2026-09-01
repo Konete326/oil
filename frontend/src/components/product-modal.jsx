@@ -88,7 +88,7 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
   const [sellingPrice, setSellingPrice] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
   const [unit, setUnit] = useState("Cans");
-  const [minStockAlert, setMinStockAlert] = useState("5");
+  const [minStockAlert, setMinStockAlert] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -140,9 +140,9 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
       setPackagingType(initialData.packagingType || "Medium Can 4L");
       setCostPrice(initialData.costPrice !== undefined ? String(initialData.costPrice) : "");
       setSellingPrice(initialData.sellingPrice !== undefined ? String(initialData.sellingPrice) : "");
-      setStockQuantity(initialData.stockQuantity !== undefined ? String(initialData.stockQuantity) : "0");
+      setStockQuantity(initialData.stockQuantity !== undefined ? String(initialData.stockQuantity) : "");
       setUnit(initialData.unit || "Cans");
-      setMinStockAlert(initialData.minStockAlert !== undefined ? String(initialData.minStockAlert) : "5");
+      setMinStockAlert(initialData.minStockAlert !== undefined ? String(initialData.minStockAlert) : "");
       setImageUrl(initialData.imageUrl || "");
       setImagePreview(initialData.imageUrl || "");
     } else {
@@ -155,9 +155,9 @@ export function ProductModal({ isOpen, onClose, onSave, categories = [], initial
       setPackagingType("Medium Can 4L");
       setCostPrice("");
       setSellingPrice("");
-      setStockQuantity("0");
+      setStockQuantity("");
       setUnit("Cans");
-      setMinStockAlert("5");
+      setMinStockAlert("");
       setImageUrl("");
       setImagePreview("");
     }

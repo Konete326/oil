@@ -28,6 +28,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import systemLogRoutes from "./routes/systemLogRoutes.js";
 import dataResetRoutes from "./routes/dataResetRoutes.js";
 import syncRoutes from "./routes/syncRoutes.js";
+import bankAccountRoutes from "./routes/bankAccountRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -41,24 +42,16 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(morgan("dev"));
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      callback(null, true);
-    },
+    origin: (origin, callback) => callback(null, true),
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
-
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
@@ -67,17 +60,6 @@ app.get("/", (req, res) => {
     message: "Al Khaleej Lubricants Management System API is Running",
     status: "Active",
     timestamp: new Date(),
-    endpoints: {
-      health: "/api/health",
-      auth: "/api/auth",
-      dashboard: "/api/dashboard",
-      categories: "/api/categories",
-      products: "/api/products",
-      mills: "/api/mills",
-      challans: "/api/challans",
-      pos: "/api/pos/sales",
-      ledger: "/api/ledger",
-    },
   });
 });
 
@@ -109,6 +91,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/system-logs", systemLogRoutes);
 app.use("/api/data-reset", dataResetRoutes);
 app.use("/api/sync", syncRoutes);
+app.use("/api/bank-accounts", bankAccountRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

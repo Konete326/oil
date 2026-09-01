@@ -11,6 +11,7 @@ import { SystemLog } from "../models/systemLogModel.js";
 import { Ledger } from "../models/ledgerModel.js";
 import { SupplierLedger } from "../models/supplierLedgerModel.js";
 import { Employee } from "../models/employeeModel.js";
+import { BankAccount } from "../models/bankAccountModel.js";
 import { connectDB } from "../config/db.js";
 
 export const getHydrateData = async (req, res) => {
@@ -31,6 +32,7 @@ export const getHydrateData = async (req, res) => {
       ledgerEntries,
       supplierLedgerEntries,
       employees,
+      bankAccounts,
     ] = await Promise.all([
       Product.find().sort({ createdAt: -1 }).lean(),
       Category.find().sort({ createdAt: -1 }).lean(),
@@ -45,6 +47,7 @@ export const getHydrateData = async (req, res) => {
       Ledger.find().sort({ createdAt: -1 }).limit(300).lean(),
       SupplierLedger.find().sort({ createdAt: -1 }).limit(300).lean(),
       Employee.find().sort({ createdAt: -1 }).lean(),
+      BankAccount.find().sort({ isDefault: -1, createdAt: -1 }).lean(),
     ]);
 
     res.status(200).json({
@@ -64,6 +67,7 @@ export const getHydrateData = async (req, res) => {
         ledgerEntries: ledgerEntries || [],
         supplierLedgerEntries: supplierLedgerEntries || [],
         employees: employees || [],
+        bankAccounts: bankAccounts || [],
       },
     });
   } catch (error) {

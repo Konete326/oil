@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
-import { SearchIcon, PrinterIcon, HandCoinsIcon, FileSpreadsheetIcon, RefreshCwIcon, CalendarIcon } from "lucide-react";
+import { SearchIcon, PrinterIcon, HandCoinsIcon, FileSpreadsheetIcon, RefreshCwIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { fetchEmployeeAdvancesApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
-export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
+const PAGE_SIZE = 4;
+
+export function AdvanceHistoryTable({ onPrintVoucher, onOpenAdvance, refreshTrigger }) {
   const [advances, setAdvances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const loadAdvances = async () => {
     try {
@@ -27,6 +31,10 @@ export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
     loadAdvances();
   }, [refreshTrigger]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
   const filteredAdvances = advances.filter((adv) => {
     if (!search) return true;
     const s = search.toLowerCase().trim();
@@ -37,6 +45,8 @@ export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
   });
 
   const totalAdvancePaid = filteredAdvances.reduce((sum, a) => sum + (Number(a.amount) || 0), 0);
+  const totalPages = Math.max(1, Math.ceil(filteredAdvances.length / PAGE_SIZE));
+  const paginatedAdvances = filteredAdvances.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleExport = () => {
     const data = filteredAdvances.map((adv, idx) => ({
@@ -53,15 +63,15 @@ export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-muted/20 p-3 rounded-xl border border-border">
-        <div className="flex items-center gap-2">
-          <div className="size-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
-            <HandCoinsIcon className="size-4" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border">
+        <div className="flex items-center gap-2.5">
+          <div className="size-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold shrink-0">
+            <HandCoinsIcon className="size-4.5" />
           </div>
           <div>
-            <h3 className="font-bold text-xs text-foreground">Advance Cash Payment History</h3>
-            <p className="text-[10px] text-muted-foreground">
-              Total Logged: <span className="font-mono font-bold text-amber-500">Rs. {totalAdvancePaid.toLocaleString()}</span> ({filteredAdvances.length} Vouchers)
+            <h3 className="font-bold text-xs sm:text-sm text-foreground">Staff Advance Cash Logs</h3>
+            <p className="text-[11px] text-muted-foreground">
+              Total Disbursed: <span className="font-mono font-bold text-amber-500">Rs. {totalAdvancePaid.toLocaleString()}</span> ({filteredAdvances.length} Vouchers)
             </p>
           </div>
         </div>
@@ -78,12 +88,34 @@ export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
             />
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleExport} className="h-8 gap-1 text-xs cursor-pointer">
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span>Excel</span>
+          {onOpenAdvance && (
+            <Button
+              size="sm"
+              onClick={() => onOpenAdvance("")}
+              className="h-8 gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white cursor-pointer"
+            >
+              <PlusIcon className="size-3.5" />
+              <span>Give Advance</span>
+            </Button>
+          )}
+
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={handleExport}
+            className="size-8 text-emerald-600 hover:bg-emerald-500/10 cursor-pointer shrink-0"
+            title="Export Excel"
+          >
+            <FileSpreadsheetIcon className="size-4" />
           </Button>
 
-          <Button variant="ghost" size="icon-sm" onClick={loadAdvances} className="h-8 w-8 cursor-pointer">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={loadAdvances}
+            className="size-8 cursor-pointer shrink-0"
+            title="Refresh"
+          >
             <RefreshCwIcon className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
@@ -117,7 +149,7 @@ export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
                   </td>
                 </tr>
               ) : (
-                filteredAdvances.map((adv) => {
+                paginatedAdvances.map((adv) => {
                   const staffName = (adv.partyName || adv.party || "Employee").replace("Advance Salary: ", "");
                   const txDate = new Date(adv.transactionDate || adv.createdAt);
                   return (
@@ -170,6 +202,18 @@ export function AdvanceHistoryTable({ onPrintVoucher, refreshTrigger }) {
             </tbody>
           </table>
         </div>
+
+        {filteredAdvances.length > PAGE_SIZE && (
+          <div className="p-2.5 border-t border-border bg-muted/20">
+            <PaginationBar
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              totalItems={filteredAdvances.length}
+              pageSize={PAGE_SIZE}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

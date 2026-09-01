@@ -102,10 +102,26 @@ export const ValidatedInput = React.forwardRef(
       if (props.onBlur) props.onBlur(e);
     };
 
+    const handleKeyDown = (e) => {
+      if (rule === "amount" || rule === "positiveNumber") {
+        if (["e", "E", "+", "-"].includes(e.key)) {
+          e.preventDefault();
+        }
+      }
+      if (props.onKeyDown) props.onKeyDown(e);
+    };
+
     const handleChange = (e) => {
       let finalVal = e.target.value;
       if (rule === "phone") {
         finalVal = formatPhoneNumber(finalVal);
+        e.target.value = finalVal;
+      } else if (rule === "amount" || rule === "positiveNumber") {
+        finalVal = finalVal.replace(/[^0-9.]/g, "");
+        const parts = finalVal.split(".");
+        if (parts.length > 2) {
+          finalVal = parts[0] + "." + parts.slice(1).join("");
+        }
         e.target.value = finalVal;
       }
       if (!touched && finalVal.length > 0) {
@@ -150,6 +166,7 @@ export const ValidatedInput = React.forwardRef(
             maxLength={effectiveMaxLength}
             onChange={handleChange}
             onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
             className={cn(
               "pe-8 text-xs transition-all duration-200",
               showErrorState &&

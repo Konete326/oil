@@ -9,9 +9,8 @@ import {
   ReceiptIcon,
   Trash2Icon,
   Edit2Icon,
-  CheckCircle2Icon,
-  XCircleIcon,
-  HistoryIcon,
+  UsersIcon,
+  ShieldCheckIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,9 @@ import { AdvanceModal } from "@/components/advance-modal";
 import { AdvanceReceiptModal } from "@/components/advance-receipt-modal";
 import { AdvanceHistoryTable } from "@/components/advance-history-table";
 import { PayslipModal } from "@/components/payslip-modal";
-import { PaginationControl } from "@/components/pagination-control";
+import { UserModal } from "@/components/user-modal";
+import { StaffPayrollPrintModal } from "@/components/staff-payroll-print-modal";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { UserManagementManager } from "@/components/user-management-manager";
 import {
@@ -30,6 +31,8 @@ import {
   fetchSalaryVouchersApi,
 } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
+
+const PAGE_SIZE = 4;
 
 export function EmployeePayrollManager() {
   const [activeTab, setActiveTab] = useState("employees");
@@ -51,6 +54,10 @@ export function EmployeePayrollManager() {
   const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);
   const [selectedAdvanceEmpId, setSelectedAdvanceEmpId] = useState("");
   const [isPayslipModalOpen, setIsPayslipModalOpen] = useState(false);
+  const [selectedPayslipEmpId, setSelectedPayslipEmpId] = useState("");
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [targetStaffForLogin, setTargetStaffForLogin] = useState(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const [currentVoucher, setCurrentVoucher] = useState(null);
   const [isAdvanceReceiptOpen, setIsAdvanceReceiptOpen] = useState(false);
@@ -62,8 +69,8 @@ export function EmployeePayrollManager() {
   const loadData = async () => {
     try {
       setLoading(true);
-      if (activeTab === "employees" || activeTab === "advance") {
-        const res = await fetchEmployeesApi({ search, page: empPage, limit: 10 });
+      if (activeTab === "employees") {
+        const res = await fetchEmployeesApi({ search, page: empPage, limit: PAGE_SIZE });
         if (res?.success) {
           setEmployees(res.data);
           setEmpPage(res.page || 1);
@@ -71,7 +78,7 @@ export function EmployeePayrollManager() {
           setEmpTotal(res.total || 0);
         }
       } else if (activeTab === "payroll") {
-        const res = await fetchSalaryVouchersApi({ page: salPage, limit: 10 });
+        const res = await fetchSalaryVouchersApi({ page: salPage, limit: PAGE_SIZE });
         if (res?.success) {
           setSalaryVouchers(res.data);
           setSalPage(res.page || 1);
@@ -103,6 +110,23 @@ export function EmployeePayrollManager() {
   const handleOpenAdvance = (empId = "") => {
     setSelectedAdvanceEmpId(empId);
     setIsAdvanceModalOpen(true);
+  };
+
+  const handleOpenPayslip = (empId = "") => {
+    setSelectedPayslipEmpId(empId);
+    setIsPayslipModalOpen(true);
+  };
+
+  const handleGrantSoftwareAccess = (emp) => {
+    const cleanName = (emp.name || "staff").toLowerCase().replace(/[^a-z0-9]/g, "");
+    setTargetStaffForLogin({
+      name: emp.name,
+      email: `${cleanName}@alkhaleej.com`,
+      role: "cashier",
+      permissions: ["pos", "cash", "ledger"],
+      status: "Active",
+    });
+    setIsUserModalOpen(true);
   };
 
   const handleAdvanceSuccess = ({ employeeId, amount, updatedEmployee, voucher }) => {
@@ -194,219 +218,119 @@ export function EmployeePayrollManager() {
   };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Employee Payroll & Staff Management</h1>
-          <p className="text-xs text-muted-foreground">Manage staff directory, advance salary khata, and monthly payslip vouchers.</p>
+    <div className="w-full space-y-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="size-8.5 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <BriefcaseIcon className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground leading-none">
+              Employee Payroll & Staff Management
+            </h1>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => setIsPayslipModalOpen(true)}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
-          >
-            <ReceiptIcon className="size-3.5" />
-            <span>Generate Payslip</span>
-          </Button>
-
-          <Button
-            size="sm"
-            onClick={() => handleOpenAdvance("")}
-            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
-          >
-            <HandCoinsIcon className="size-3.5" />
-            <span>Record Advance Cash</span>
-          </Button>
-
-          <Button size="sm" onClick={handleOpenAddEmployee} className="gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none">
-            <PlusIcon className="size-3.5" />
-            <span>Add Employee</span>
-          </Button>
+        <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/60 overflow-x-auto min-w-0">
+          {[
+            { id: "employees", label: "Staff Directory", icon: UsersIcon },
+            { id: "advance", label: "Advance Khata", icon: HandCoinsIcon },
+            { id: "payroll", label: "Monthly Payslips", icon: ReceiptIcon },
+            { id: "users", label: "Staff Logins", icon: ShieldCheckIcon },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap border ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground border-transparent"
+                }`}
+              >
+                <Icon className="size-3.5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Monthly Base Payroll</span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
+          <span className="text-xs text-muted-foreground font-medium">Total Monthly Payroll</span>
           <div className="text-xl font-bold font-mono text-emerald-500">
             Rs. {totalMonthlyBaseSalary.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Combined Active Base Salaries</p>
+          <p className="text-[11px] text-muted-foreground">Active Staff Salaries</p>
         </div>
 
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Outstanding Advance Khata</span>
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3.5 space-y-1">
+          <span className="text-xs text-muted-foreground font-medium">Total Advance Khata</span>
           <div className="text-xl font-bold font-mono text-amber-500">
             Rs. {totalOutstandingAdvance.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Pending Advance Deductions Owed</p>
+          <p className="text-[11px] text-muted-foreground">Pending Advance Deductions</p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-4 space-y-1">
+        <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
           <span className="text-xs text-muted-foreground font-medium">Total Registered Staff</span>
           <div className="text-xl font-bold font-mono text-foreground">
-            {empTotal || employees.length}
+            {empTotal || employees.length} Members
           </div>
-          <p className="text-[11px] text-muted-foreground">Active & Inactive Employee Profiles</p>
+          <p className="text-[11px] text-muted-foreground">Active Profiles</p>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
-        <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-xs">
-          {[
-            { id: "employees", label: "Staff Directory" },
-            { id: "advance", label: "Advance Salary Khata" },
-            { id: "payroll", label: "Monthly Payslips & History" },
-            { id: "users", label: "Cashier & Staff Logins" },
-          ].map((btn) => (
-            <button
-              key={btn.id}
-              onClick={() => setActiveTab(btn.id)}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
-                activeTab === btn.id
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {btn.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 text-xs w-full sm:w-auto">
-          {activeTab !== "payroll" && (
-            <div className="relative w-full sm:w-56">
-              <SearchIcon className="absolute left-3 top-2.5 size-3.5 text-muted-foreground" />
+      {activeTab === "employees" && (
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-card p-3 rounded-xl border border-border">
+            <div className="relative w-full sm:w-64">
+              <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search staff name..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="ps-8 text-xs"
+                className="ps-8 text-xs h-8.5"
               />
             </div>
-          )}
 
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-xs cursor-pointer">
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span>Export Excel</span>
-          </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleOpenAddEmployee}
+                className="h-8.5 text-xs gap-1.5 cursor-pointer"
+              >
+                <PlusIcon className="size-3.5" />
+                <span>Add Employee</span>
+              </Button>
 
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs cursor-pointer">
-            <PrinterIcon className="size-3.5" />
-            <span>Print Report</span>
-          </Button>
-        </div>
-      </div>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={handleExportExcel}
+                className="size-8.5 text-emerald-600 hover:bg-emerald-500/10 cursor-pointer shrink-0"
+                title="Export to Excel"
+              >
+                <FileSpreadsheetIcon className="size-4" />
+              </Button>
 
-      {activeTab === "employees" && (
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
-                <tr>
-                  <th className="p-3 ps-4">Employee Name</th>
-                  <th className="p-3">Designation</th>
-                  <th className="p-3">Department</th>
-                  <th className="p-3">Phone</th>
-                  <th className="p-3 text-right">Monthly Base Salary (PKR)</th>
-                  <th className="p-3 text-right">Outstanding Advance</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3 pe-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {loading ? (
-                  <tr>
-                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
-                      Loading employee directory...
-                    </td>
-                  </tr>
-                ) : employees.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
-                      No employee profiles found.
-                    </td>
-                  </tr>
-                ) : (
-                  employees.map((emp) => (
-                    <tr key={emp._id} className="hover:bg-muted/30 transition-colors">
-                      <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
-                        <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                          {emp.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span>{emp.name}</span>
-                      </td>
-                      <td className="p-3 font-medium text-foreground">{emp.designation}</td>
-                      <td className="p-3 text-muted-foreground">{emp.department}</td>
-                      <td className="p-3 font-mono text-muted-foreground">{emp.phone || "-"}</td>
-                      <td className="p-3 text-right font-mono font-bold text-emerald-500">
-                        Rs. {emp.baseSalary.toLocaleString()}
-                      </td>
-                      <td className="p-3 text-right font-mono font-bold text-amber-500">
-                        Rs. {(emp.advanceBalance || 0).toLocaleString()}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                            emp.status === "Active"
-                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                              : "bg-destructive/10 text-destructive border-destructive/20"
-                          }`}
-                        >
-                          {emp.status === "Active" ? <CheckCircle2Icon className="size-3" /> : <XCircleIcon className="size-3" />}
-                          {emp.status}
-                        </span>
-                      </td>
-                      <td className="p-3 pe-4 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditEmployee(emp)}
-                            className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                          >
-                            <Edit2Icon className="size-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setDeletingId(emp._id)}
-                            className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                          >
-                            <Trash2Icon className="size-3.5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setIsPrintModalOpen(true)}
+                className="size-8.5 text-primary hover:bg-primary/10 cursor-pointer shrink-0"
+                title="Print Statement"
+              >
+                <PrinterIcon className="size-4" />
+              </Button>
+            </div>
           </div>
 
-          <PaginationControl
-            page={empPage}
-            pages={empPages}
-            total={empTotal}
-            onPageChange={(p) => setEmpPage(p)}
-          />
-        </div>
-      )}
-
-      {activeTab === "advance" && (
-        <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-            <div className="p-4 border-b border-border bg-muted/30 font-semibold text-xs text-foreground flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <HandCoinsIcon className="size-4 text-amber-500" />
-                <span>Active Staff Advance Balances (Khata Summary)</span>
-              </div>
-              <span className="text-muted-foreground text-[11px]">Click "Give Advance" to pre-select employee</span>
-            </div>
-
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
@@ -414,123 +338,248 @@ export function EmployeePayrollManager() {
                     <th className="p-3 ps-4">Employee Name</th>
                     <th className="p-3">Designation</th>
                     <th className="p-3">Department</th>
+                    <th className="p-3">Phone</th>
                     <th className="p-3 text-right">Monthly Base Salary (PKR)</th>
-                    <th className="p-3 text-right">Outstanding Advance Balance (PKR)</th>
-                    <th className="p-3 pe-4 text-center">Action</th>
+                    <th className="p-3 text-right">Outstanding Advance</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 pe-4 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {employees.map((emp) => {
-                    const empId = emp._id || emp.id;
-                    return (
-                      <tr key={empId} className="hover:bg-muted/30 transition-colors">
-                        <td className="p-3 ps-4 font-semibold text-foreground">{emp.name}</td>
-                        <td className="p-3 text-muted-foreground">{emp.designation}</td>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                        Loading employee directory...
+                      </td>
+                    </tr>
+                  ) : employees.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                        No employee profiles found.
+                      </td>
+                    </tr>
+                  ) : (
+                    employees.map((emp) => (
+                      <tr key={emp._id} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
+                          <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                            {emp.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span>{emp.name}</span>
+                        </td>
+                        <td className="p-3 font-medium text-foreground">{emp.designation}</td>
                         <td className="p-3 text-muted-foreground">{emp.department}</td>
-                        <td className="p-3 text-right font-mono font-bold text-foreground">
+                        <td className="p-3 font-mono text-muted-foreground">{emp.phone || "-"}</td>
+                        <td className="p-3 text-right font-mono font-bold text-emerald-500">
                           Rs. {emp.baseSalary.toLocaleString()}
                         </td>
                         <td className="p-3 text-right font-mono font-bold text-amber-500">
                           Rs. {(emp.advanceBalance || 0).toLocaleString()}
                         </td>
-                        <td className="p-3 pe-4 text-center">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleOpenAdvance(empId)}
-                            className="gap-1 text-xs cursor-pointer text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
+                        <td className="p-3">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                              emp.status === "Active"
+                                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                : "bg-destructive/10 text-destructive border-destructive/20"
+                            }`}
                           >
-                            <HandCoinsIcon className="size-3.5" />
-                            <span>Give Advance</span>
-                          </Button>
+                            {emp.status}
+                          </span>
+                        </td>
+                        <td className="p-2.5 pe-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenPayslip(emp._id || emp.id)}
+                              className="px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                              title="Generate Monthly Payslip for this Staff"
+                            >
+                              <ReceiptIcon className="size-3" />
+                              <span>Pay</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAdvance(emp._id || emp.id)}
+                              className="px-2 py-1 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20 flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                              title="Give Cash Advance to this Staff"
+                            >
+                              <HandCoinsIcon className="size-3" />
+                              <span>Advance</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleGrantSoftwareAccess(emp)}
+                              className="px-2 py-1 rounded-md text-[11px] font-semibold bg-primary/10 text-primary border border-primary/25 hover:bg-primary/20 flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                              title="Grant Software Access & Permissions for this Staff"
+                            >
+                              <ShieldCheckIcon className="size-3" />
+                              <span>Access</span>
+                            </button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              onClick={() => handleEditEmployee(emp)}
+                              className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                              title="Edit Employee Profile"
+                            >
+                              <Edit2Icon className="size-3.5" />
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              onClick={() => setDeletingId(emp._id)}
+                              className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
+                              title="Delete Profile"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
-                    );
-                  })}
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
 
-            <PaginationControl
-              page={empPage}
-              pages={empPages}
-              total={empTotal}
-              onPageChange={(p) => setEmpPage(p)}
-            />
+            {empTotal > PAGE_SIZE && (
+              <div className="p-2.5 border-t border-border bg-muted/20">
+                <PaginationBar
+                  currentPage={empPage}
+                  totalPages={empPages}
+                  onPageChange={setEmpPage}
+                  totalItems={empTotal}
+                  pageSize={PAGE_SIZE}
+                />
+              </div>
+            )}
           </div>
-
-          <AdvanceHistoryTable
-            onPrintVoucher={handlePrintVoucher}
-            refreshTrigger={advanceRefreshKey}
-          />
         </div>
       )}
 
+      {activeTab === "advance" && (
+        <AdvanceHistoryTable
+          onPrintVoucher={handlePrintVoucher}
+          onOpenAdvance={handleOpenAdvance}
+          refreshTrigger={advanceRefreshKey}
+        />
+      )}
+
       {activeTab === "payroll" && (
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
-                <tr>
-                  <th className="p-3 ps-4">Date</th>
-                  <th className="p-3">Voucher No</th>
-                  <th className="p-3">Employee Name</th>
-                  <th className="p-3">Salary Month</th>
-                  <th className="p-3 text-right">Base Salary (PKR)</th>
-                  <th className="p-3 text-right">Bonus (PKR)</th>
-                  <th className="p-3 text-right">Advance Deducted</th>
-                  <th className="p-3 text-right">Net Paid (PKR)</th>
-                  <th className="p-3 pe-4">Payment Mode</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {loading ? (
-                  <tr>
-                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
-                      Loading salary vouchers...
-                    </td>
-                  </tr>
-                ) : salaryVouchers.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
-                      No monthly salary vouchers recorded yet.
-                    </td>
-                  </tr>
-                ) : (
-                  salaryVouchers.map((v) => (
-                    <tr key={v._id} className="hover:bg-muted/30 transition-colors">
-                      <td className="p-3 ps-4 text-muted-foreground text-[11px]">
-                        {new Date(v.paymentDate).toLocaleDateString()}
-                      </td>
-                      <td className="p-3 font-mono text-muted-foreground">{v.voucherNumber}</td>
-                      <td className="p-3 font-semibold text-foreground">{v.employeeName}</td>
-                      <td className="p-3 font-medium text-foreground">{v.monthYear}</td>
-                      <td className="p-3 text-right font-mono text-muted-foreground">
-                        Rs. {v.baseSalary.toLocaleString()}
-                      </td>
-                      <td className="p-3 text-right font-mono text-emerald-500">
-                        {v.bonus > 0 ? `+Rs. ${v.bonus.toLocaleString()}` : "-"}
-                      </td>
-                      <td className="p-3 text-right font-mono text-amber-500">
-                        {v.advanceDeducted > 0 ? `-Rs. ${v.advanceDeducted.toLocaleString()}` : "-"}
-                      </td>
-                      <td className="p-3 text-right font-mono font-bold text-primary">
-                        Rs. {v.netSalaryPaid.toLocaleString()}
-                      </td>
-                      <td className="p-3 pe-4 text-muted-foreground">{v.paymentMode || "Cash"}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-card p-3 rounded-xl border border-border">
+            <div>
+              <h3 className="font-bold text-xs sm:text-sm text-foreground">Monthly Salary Vouchers Register</h3>
+              <p className="text-[11px] text-muted-foreground">Historical records of all disbursed monthly payslips.</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => setIsPayslipModalOpen(true)}
+                className="h-8.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer"
+              >
+                <ReceiptIcon className="size-3.5" />
+                <span>Generate Payslip</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={handleExportExcel}
+                className="size-8.5 text-emerald-600 hover:bg-emerald-500/10 cursor-pointer shrink-0"
+                title="Export to Excel"
+              >
+                <FileSpreadsheetIcon className="size-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setIsPrintModalOpen(true)}
+                className="size-8.5 text-primary hover:bg-primary/10 cursor-pointer shrink-0"
+                title="Print Statement"
+              >
+                <PrinterIcon className="size-4" />
+              </Button>
+            </div>
           </div>
 
-          <PaginationControl
-            page={salPage}
-            pages={salPages}
-            total={salTotal}
-            onPageChange={(p) => setSalPage(p)}
-          />
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="p-3 ps-4">Date</th>
+                    <th className="p-3">Voucher No</th>
+                    <th className="p-3">Employee Name</th>
+                    <th className="p-3">Salary Month</th>
+                    <th className="p-3 text-right">Base Salary (PKR)</th>
+                    <th className="p-3 text-right">Bonus (PKR)</th>
+                    <th className="p-3 text-right">Advance Deducted</th>
+                    <th className="p-3 text-right">Net Paid (PKR)</th>
+                    <th className="p-3 pe-4">Payment Mode</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                        Loading salary vouchers...
+                      </td>
+                    </tr>
+                  ) : salaryVouchers.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                        No monthly salary vouchers recorded yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    salaryVouchers.map((v) => (
+                      <tr key={v._id} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-3 ps-4 text-muted-foreground text-[11px]">
+                          {new Date(v.paymentDate).toLocaleDateString()}
+                        </td>
+                        <td className="p-3 font-mono text-muted-foreground">{v.voucherNumber}</td>
+                        <td className="p-3 font-semibold text-foreground">{v.employeeName}</td>
+                        <td className="p-3 font-medium text-foreground">{v.monthYear}</td>
+                        <td className="p-3 text-right font-mono text-muted-foreground">
+                          Rs. {v.baseSalary.toLocaleString()}
+                        </td>
+                        <td className="p-3 text-right font-mono text-emerald-500">
+                          {v.bonus > 0 ? `+Rs. ${v.bonus.toLocaleString()}` : "-"}
+                        </td>
+                        <td className="p-3 text-right font-mono text-amber-500">
+                          {v.advanceDeducted > 0 ? `-Rs. ${v.advanceDeducted.toLocaleString()}` : "-"}
+                        </td>
+                        <td className="p-3 text-right font-mono font-bold text-primary">
+                          Rs. {v.netSalaryPaid.toLocaleString()}
+                        </td>
+                        <td className="p-3 pe-4 text-muted-foreground">{v.paymentMode || "Cash"}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {salTotal > PAGE_SIZE && (
+              <div className="p-2.5 border-t border-border bg-muted/20">
+                <PaginationBar
+                  currentPage={salPage}
+                  totalPages={salPages}
+                  onPageChange={setSalPage}
+                  totalItems={salTotal}
+                  pageSize={PAGE_SIZE}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -563,7 +612,26 @@ export function EmployeePayrollManager() {
         isOpen={isPayslipModalOpen}
         onClose={() => setIsPayslipModalOpen(false)}
         employees={employees}
+        preselectedEmployeeId={selectedPayslipEmpId}
         onSuccess={loadData}
+      />
+
+      <StaffPayrollPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        activeTab={activeTab}
+        employees={employees}
+        salaryVouchers={salaryVouchers}
+      />
+
+      <UserModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        editingUser={targetStaffForLogin}
+        onSuccess={() => {
+          loadData();
+          toast.success("Staff software login & access permissions configured!");
+        }}
       />
 
       <ConfirmModal

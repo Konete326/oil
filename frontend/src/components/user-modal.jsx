@@ -32,23 +32,23 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
 
   const [nameValid, setNameValid] = useState(false);
   const [emailValid, setEmailValid] = useState(false);
-  const [passwordValid, setPasswordValid] = useState(false);
-
-  const isFormValid = nameValid && (editingUser || emailValid) && (editingUser || passwordValid);
+  const isFormValid = nameValid && (editingUser?._id ? true : emailValid) && (editingUser?._id ? true : passwordValid);
 
   useEffect(() => {
     if (editingUser) {
       setName(editingUser.name || "");
       setEmail(editingUser.email || "");
       setPassword("");
-      setRole(editingUser.role || "manager");
+      setRole(editingUser.role || "cashier");
       setStatus(editingUser.status || "Active");
-      setSelectedPermissions(editingUser.permissions || ["all"]);
+      setSelectedPermissions(editingUser.permissions || ["pos", "cash", "ledger"]);
+      if (editingUser.name) setNameValid(true);
+      if (editingUser.email) setEmailValid(true);
     } else {
       setName("");
       setEmail("");
       setPassword("");
-      setRole("manager");
+      setRole("cashier");
       setStatus("Active");
       setSelectedPermissions(["pos", "cash", "ledger"]);
     }
@@ -89,7 +89,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
 
     try {
       setLoading(true);
-      if (editingUser) {
+      if (editingUser && editingUser._id) {
         await updateUserPermissionsApi(editingUser._id, {
           name: name.trim(),
           role,
@@ -106,7 +106,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
           permissions: selectedPermissions,
           status,
         });
-        toast.success("New user account created successfully!");
+        toast.success(`Software login account created for ${name}!`);
       }
 
       onSuccess?.();

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { XIcon, PlusIcon, Loader2Icon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { XIcon, PlusIcon, Loader2Icon, Building2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
-import { createExpenseApi } from "@/lib/api";
+import { createExpenseApi, fetchBankAccounts } from "@/lib/api";
 
 const EXPENSE_CATEGORIES = [
   "Salaries & Wages",
@@ -23,12 +23,36 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
   const [category, setCategory] = useState("Salaries & Wages");
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
+  const [bankAccountId, setBankAccountId] = useState("");
+  const [bankAccounts, setBankAccounts] = useState([]);
   const [voucherNumber, setVoucherNumber] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
 
   const [titleValid, setTitleValid] = useState(false);
   const [amountValid, setAmountValid] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchBankAccounts().then((res) => {
+        if (res && res.data) {
+          setBankAccounts(res.data);
+          const def = res.data.find((a) => a.isDefault && a.isActive) || res.data[0];
+          if (def) setBankAccountId(def._id);
+        }
+      });
+    }
+  }, [isOpen]);
+
+  const handlePaymentModeChange = (mode) => {
+    setPaymentMode(mode);
+    if (mode !== "Cash") {
+      const defaultBank = bankAccounts.find((b) => b.isDefault && b.isActive) || bankAccounts.find((b) => b.isActive) || bankAccounts[0];
+      if (defaultBank) {
+        setBankAccountId(defaultBank._id);
+      }
+    }
+  };
 
   const isFormValid = titleValid && amountValid;
 
@@ -40,11 +64,16 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
 
     try {
       setLoading(true);
+      const selectedBank = bankAccounts.find((b) => b._id === bankAccountId);
+      const bankAccountName = selectedBank ? `${selectedBank.bankName} - ${selectedBank.accountNumber}` : "";
+
       await createExpenseApi({
         title: title.trim(),
         category,
         amount: Number(amount),
         paymentMode,
+        bankAccountId: paymentMode !== "Cash" ? bankAccountId : undefined,
+        bankAccountName: paymentMode !== "Cash" ? bankAccountName : undefined,
         voucherNumber: voucherNumber.trim() || `EXP-${Date.now().toString().slice(-6)}`,
         expenseDate,
       });
@@ -99,7 +128,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold"
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring font-semibold"
               >
                 {EXPENSE_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -114,7 +143,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
               rule="amount"
               required
               type="number"
-              placeholder="0.00"
+              placeholder="e.g. 5000"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               onValidationChange={setAmountValid}
@@ -127,8 +156,8 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
               <label className="font-medium text-foreground">Payment Mode</label>
               <select
                 value={paymentMode}
-                onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                onChange={(e) => handlePaymentModeChange(e.target.value)}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
               >
                 {PAYMENT_MODES.map((mode) => (
                   <option key={mode} value={mode}>
@@ -144,20 +173,30 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
                 type="date"
                 value={expenseDate}
                 onChange={(e) => setExpenseDate(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
           </div>
 
-          <ValidatedInput
-            label="Voucher / Slip Reference No."
-            rule="text"
-            required={false}
-            placeholder="Auto-generated if left blank"
-            value={voucherNumber}
-            onChange={(e) => setVoucherNumber(e.target.value)}
-            className="font-mono"
-          />
+          {paymentMode !== "Cash" && (
+            <div className="space-y-1 p-2 rounded-lg bg-primary/5 border border-primary/20 animate-in fade-in">
+              <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
+                <Building2Icon className="size-3 text-primary" />
+                <span>Pay from Company Bank Account</span>
+              </label>
+              <select
+                value={bankAccountId}
+                onChange={(e) => setBankAccountId(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2 text-xs cursor-pointer font-medium"
+              >
+                {bankAccounts.map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.bankName} - {b.accountNumber} ({b.accountTitle})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>

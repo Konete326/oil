@@ -63,7 +63,7 @@ function getNetworkSpeedName() {
 
 function getLiveNetworkDetails() {
   if (typeof navigator === "undefined" || !navigator.onLine) {
-    return { status: "offline", label: "Offline Mode", downlinkMbps: 0, rttMs: 0 };
+    return { status: "offline", label: "Offline", speedText: "Offline", downlinkMbps: 0, rttMs: 0 };
   }
   const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   if (conn) {
@@ -76,10 +76,11 @@ function getLiveNetworkDetails() {
       effectiveType: type,
       downlinkMbps: Number(downlink.toFixed(1)),
       rttMs: Math.round(rtt),
-      label: `${speedStr} (${type} · ${Math.round(rtt)}ms)`,
+      label: speedStr,
+      speedText: speedStr,
     };
   }
-  return { status: "online", effectiveType: "4G", downlinkMbps: 25.0, rttMs: 25, label: "25.0 Mbps (4G · 25ms)" };
+  return { status: "online", effectiveType: "4G", downlinkMbps: 25.0, rttMs: 25, label: "25.0 Mbps", speedText: "25.0 Mbps" };
 }
 
 export function SyncProvider({ children }) {

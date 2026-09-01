@@ -6,6 +6,7 @@ import { SystemLogsTab } from "@/components/system-logs-tab";
 import { DataMaintenanceTab } from "@/components/data-maintenance-tab";
 import { AuditTrailManager } from "@/components/audit-trail-manager";
 import { LanguageSelector } from "@/components/language-selector";
+import { BankAccountsTab } from "@/components/bank-accounts-tab";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useSync } from "@/context/sync-context";
 import {
@@ -20,6 +21,7 @@ import {
   WifiOff,
   RefreshCw,
   HardDrive,
+  Landmark,
 } from "lucide-react";
 
 export function SettingsManager({ user }) {
@@ -129,6 +131,14 @@ export function SettingsManager({ user }) {
           <Globe className="size-3.5" /> Language & Translation
         </Button>
         <Button
+          variant={activeTab === "bank-accounts" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setActiveTab("bank-accounts")}
+          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+        >
+          <Landmark className="size-3.5 text-primary" /> Company Bank Accounts
+        </Button>
+        <Button
           variant={activeTab === "sync" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("sync")}
@@ -166,6 +176,10 @@ export function SettingsManager({ user }) {
 
       {activeTab === "language" && (
         <LanguageSelector variant="full-settings" />
+      )}
+
+      {activeTab === "bank-accounts" && (
+        <BankAccountsTab />
       )}
 
       {activeTab === "sync" && (

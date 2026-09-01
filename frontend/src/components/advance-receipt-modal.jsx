@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { XIcon, PrinterIcon, CheckCircle2Icon, HandCoinsIcon } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import printLogoImg from "@/assets/print_logo.png";
 import { numberToWords } from "@/lib/number-to-words";
 import { COMPANY_CONFIG } from "@/lib/company-config";
 
@@ -99,7 +99,7 @@ export function AdvanceReceiptModal({ isOpen, onClose, voucher }) {
             <div className="border-b-2 border-black pb-3 mb-3">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex items-center gap-2.5">
-                  <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
+                  <img src={printLogoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
                   <div>
                     <div className="flex items-baseline gap-1.5">
                       <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
@@ -178,6 +178,10 @@ export function AdvanceReceiptModal({ isOpen, onClose, voucher }) {
                   Authorized Sign / Cashier
                 </div>
               </div>
+            </div>
+
+            <div className="mt-3 pt-2 text-center text-[8.5px] text-gray-500 font-mono tracking-wider border-t border-gray-200">
+              Print by elitedevagency.com
             </div>
           </div>
         </div>

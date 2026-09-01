@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { XIcon, WalletIcon, Loader2Icon, ArrowRightIcon } from "lucide-react";
+import { XIcon, WalletIcon, Loader2Icon, Building2Icon } from "lucide-react";
+import { fetchBankAccounts } from "@/lib/api";
 
 export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
   const [millId, setMillId] = useState("");
   const [clientName, setClientName] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
+  const [bankAccountId, setBankAccountId] = useState("");
+  const [bankAccounts, setBankAccounts] = useState([]);
   const [referenceNumber, setReferenceNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,14 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
 
   useEffect(() => {
     if (isOpen) {
-      const first = mills[0];
+      fetchBankAccounts().then((res) => {
+        if (res && res.data) {
+          setBankAccounts(res.data);
+          const def = res.data.find((a) => a.isDefault && a.isActive) || res.data[0];
+          if (def) setBankAccountId(def._id);
+        }
+      });
+      const first = Array.isArray(mills) && mills.length > 0 ? mills[0] : null;
       setMillId(first?._id || "");
       setClientName(first?.name || "");
       setAmount("");
@@ -31,18 +41,19 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
       setNotes("");
       setError("");
     }
-  }, [isOpen, mills]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (selectedMill) {
       setClientName(selectedMill.name);
     }
-  }, [millId, selectedMill]);
+  }, [millId]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!amount || Number(amount) <= 0) {
       setError("Please enter a valid payment amount greater than 0.");
       return;
@@ -52,11 +63,16 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
     setError("");
 
     try {
+      const selectedBank = bankAccounts.find((b) => b._id === bankAccountId);
+      const bankAccountName = selectedBank ? `${selectedBank.bankName} - ${selectedBank.accountNumber}` : "";
+
       await onSave({
         millId: millId || undefined,
         clientName: selectedMill ? selectedMill.name : (clientName.trim() || "Walk-in Client"),
         amount: Number(amount),
         paymentMode,
+        bankAccountId: paymentMode !== "Cash" ? bankAccountId : undefined,
+        bankAccountName: paymentMode !== "Cash" ? bankAccountName : undefined,
         referenceNumber: referenceNumber.trim(),
         notes: notes.trim(),
       });
@@ -74,7 +90,7 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-emerald-500/5 shrink-0">
           <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
             <WalletIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Receive Khata Payment</span>
+            <span>Receive Payment</span>
           </h3>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer size-7" disabled={loading}>
             <XIcon className="size-3.5" />
@@ -94,11 +110,11 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
               <select
                 value={millId}
                 onChange={(e) => setMillId(e.target.value)}
-                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-xs"
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-emerald-500 shadow-xs"
               >
                 {mills.map((m) => (
                   <option key={m._id} value={m._id}>
-                    {m.name} (Khata Baqaya: Rs {(m.currentBalance || 0).toLocaleString()})
+                    {m.name} (Balance: Rs {(m.currentBalance || 0).toLocaleString()})
                   </option>
                 ))}
               </select>
@@ -151,9 +167,9 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-xs"
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-emerald-500 shadow-xs"
               >
-                <option value="Cash">Cash (Naqad)</option>
+                <option value="Cash">Cash</option>
                 <option value="Bank Transfer">Bank Transfer / Online</option>
                 <option value="Cheque">Cheque</option>
                 <option value="Pay Order">Pay Order / Slip</option>
@@ -161,29 +177,53 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
             </div>
           </div>
 
+          {paymentMode !== "Cash" && (
+            <div className="space-y-1 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 animate-in fade-in">
+              <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
+                <Building2Icon className="size-3 text-emerald-600 dark:text-emerald-400" />
+                <span>Deposit into Company Bank Account</span>
+              </label>
+              <select
+                value={bankAccountId}
+                onChange={(e) => setBankAccountId(e.target.value)}
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2 text-xs cursor-pointer font-medium"
+              >
+                {bankAccounts.length === 0 ? (
+                  <option value="">Default Business Bank Account</option>
+                ) : (
+                  bankAccounts.map((b) => (
+                    <option key={b._id} value={b._id}>
+                      {b.bankName} - {b.accountNumber} ({b.accountTitle})
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+          )}
+
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 space-y-2">
             <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <span>Live Khata Balance Calculator</span>
+              <span>Balance Calculation</span>
               <span className="text-[10px] font-normal text-muted-foreground">Auto-Calculated</span>
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center pt-1">
               <div className="p-2 rounded-lg bg-background border border-border/80 shadow-2xs">
-                <span className="text-[9.5px] text-muted-foreground uppercase block">Purana Khata</span>
+                <span className="text-[9.5px] text-muted-foreground uppercase block">Previous Balance</span>
                 <span className="font-mono font-bold text-xs text-foreground">
                   Rs {previousBalance.toLocaleString()}
                 </span>
               </div>
 
               <div className="p-2 rounded-lg bg-background border border-emerald-500/30 shadow-2xs">
-                <span className="text-[9.5px] text-emerald-600 dark:text-emerald-400 uppercase block font-semibold">Payment</span>
+                <span className="text-[9.5px] text-emerald-600 dark:text-emerald-400 uppercase block font-semibold">Payment Amount</span>
                 <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
-                  - Rs {paidAmount.toLocaleString()}
+                  Rs {paidAmount.toLocaleString()}
                 </span>
               </div>
 
               <div className="p-2 rounded-lg bg-background border border-border/80 shadow-2xs">
-                <span className="text-[9.5px] text-muted-foreground uppercase block font-medium">Naya Baqaya</span>
+                <span className="text-[9.5px] text-muted-foreground uppercase block font-medium">New Balance</span>
                 <span className={`font-mono font-bold text-xs ${
                   newRemainingBalance === 0 && !isAdvance
                     ? "text-emerald-600 dark:text-emerald-400"
@@ -191,19 +231,17 @@ export function PaymentModal({ isOpen, onClose, onSave, mills = [] }) {
                     ? "text-blue-600 dark:text-blue-400"
                     : "text-amber-600 dark:text-amber-400"
                 }`}>
-                  {isAdvance ? `+ Rs ${advanceAmount.toLocaleString()} (Adv)` : `Rs ${newRemainingBalance.toLocaleString()}`}
+                  {isAdvance ? `Rs 0 (Advance: Rs ${advanceAmount.toLocaleString()})` : `Rs ${newRemainingBalance.toLocaleString()}`}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-1.5 text-[10.5px] font-mono text-muted-foreground pt-1 border-t border-emerald-500/20">
-              <span>Rs {previousBalance.toLocaleString()}</span>
-              <span>-</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Rs {paidAmount.toLocaleString()}</span>
-              <span>=</span>
-              <span className="font-bold text-foreground">
-                {isAdvance ? `Rs 0 (Advance: Rs ${advanceAmount.toLocaleString()})` : `Rs ${newRemainingBalance.toLocaleString()}`}
-              </span>
+            <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground pt-1 border-t border-emerald-500/20 px-1">
+              <span>Previous: <strong className="text-foreground">Rs {previousBalance.toLocaleString()}</strong></span>
+              <span>•</span>
+              <span>Paid: <strong className="text-emerald-600 dark:text-emerald-400">Rs {paidAmount.toLocaleString()}</strong></span>
+              <span>•</span>
+              <span>Remaining: <strong className="text-foreground">{isAdvance ? "Rs 0 (Adv)" : `Rs ${newRemainingBalance.toLocaleString()}`}</strong></span>
             </div>
           </div>
 

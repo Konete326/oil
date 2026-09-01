@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import printLogoImg from "@/assets/print_logo.png";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { COMPANY_CONFIG } from "@/lib/company-config";
 
@@ -156,21 +157,24 @@ export function ExpensePrintStatementModal({
             lang="en"
           >
             <div className="flex justify-between items-start border-b border-black pb-3 mb-3">
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
-                    {COMPANY_CONFIG.name}
-                  </h1>
+              <div className="flex items-center gap-3">
+                <img src={printLogoImg} alt="Al Khaleej Logo" className="size-12 object-contain" />
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
+                      {COMPANY_CONFIG.name}
+                    </h1>
+                  </div>
+                  <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
+                    EXPENSES STATEMENT
+                  </p>
+                  <p className="text-[10px] text-gray-700 font-medium">
+                    {COMPANY_CONFIG.address}
+                  </p>
+                  <p className="text-[10px] text-gray-600">
+                    {COMPANY_CONFIG.phoneDisplay} | {COMPANY_CONFIG.mobiles}
+                  </p>
                 </div>
-                <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
-                  EXPENSES STATEMENT
-                </p>
-                <p className="text-[10px] text-gray-700 font-medium">
-                  {COMPANY_CONFIG.address}
-                </p>
-                <p className="text-[10px] text-gray-600">
-                  {COMPANY_CONFIG.phoneDisplay} | {COMPANY_CONFIG.mobiles}
-                </p>
               </div>
 
               <div className="text-right space-y-1">
@@ -283,6 +287,10 @@ export function ExpensePrintStatementModal({
                   <p className="text-gray-700">Approved By</p>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-3 pt-2 text-center text-[8.5px] text-gray-500 font-mono tracking-wider border-t border-gray-200">
+              Print by elitedevagency.com
             </div>
           </div>
         </div>
