@@ -8,7 +8,7 @@ import { Supplier } from "../models/supplierModel.js";
 import { SupplierLedger } from "../models/supplierLedgerModel.js";
 import { CashTransaction } from "../models/cashModel.js";
 import { Expense } from "../models/expenseModel.js";
-import { SalaryVoucher } from "../models/salaryVoucherModel.js";
+import { EmployeeAdvance } from "../models/employeeAdvanceModel.js";
 import { Employee } from "../models/employeeModel.js";
 import { AuditLog } from "../models/auditModel.js";
 import { Notification } from "../models/notificationModel.js";
@@ -36,7 +36,7 @@ export const eraseAllData = async (req, res, next) => {
       Product.deleteMany({}), PosSale.deleteMany({}),
       Mill.deleteMany({}), Challan.deleteMany({}),
       Ledger.deleteMany({}), Supplier.deleteMany({}), SupplierLedger.deleteMany({}),
-      CashTransaction.deleteMany({}), Expense.deleteMany({}), SalaryVoucher.deleteMany({}),
+      CashTransaction.deleteMany({}), Expense.deleteMany({}), EmployeeAdvance.deleteMany({}),
       Employee.deleteMany({}), AuditLog.deleteMany({}), Notification.deleteMany({}),
       SystemLog.deleteMany({})
     ]);
@@ -91,7 +91,7 @@ export const eraseModuleData = async (req, res, next) => {
         deletedMessage = "All Expense Vouchers erased.";
         break;
       case "payroll":
-        await Promise.all([SalaryVoucher.deleteMany({}), Employee.deleteMany({})]);
+        await Promise.all([EmployeeAdvance.deleteMany({}), Employee.deleteMany({})]);
         deletedMessage = "All Employee Payroll & Advance records erased.";
         break;
       case "textile":

@@ -2140,58 +2140,6 @@ export async function deleteEmployeeAdvanceApi(id) {
   }
 }
 
-export async function fetchSalaryVouchersApi(params = {}) {
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    const cached = await getLocalSnapshot("salary_vouchers");
-    const list = Array.isArray(cached) ? cached : [];
-    return { success: true, count: list.length, total: list.length, page: 1, pages: 1, data: list };
-  }
-
-  try {
-    const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_URL}/salaries?${query}`, {
-      headers: { ...getAuthHeader() },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json && Array.isArray(json.data)) {
-        await saveLocalSnapshot("salary_vouchers", json.data);
-      }
-      return json;
-    }
-  } catch (err) {}
-
-  const cached = await getLocalSnapshot("salary_vouchers");
-  const list = Array.isArray(cached) ? cached : [];
-  return { success: true, count: list.length, total: list.length, page: 1, pages: 1, data: list };
-}
-
-export async function generateSalaryVoucherApi(payload) {
-  const localItem = { ...payload, _id: `vchr_${Date.now()}`, createdAt: new Date().toISOString() };
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    await updateLocalSnapshotItem("salary_vouchers", localItem);
-    await addOfflineOperation("salary_voucher_entry", "create", localItem);
-    return { success: true, data: localItem };
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/salaries`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json.data) await updateLocalSnapshotItem("salary_vouchers", json.data);
-      return json;
-    }
-  } catch (err) {}
-
-  await updateLocalSnapshotItem("salary_vouchers", localItem);
-  await addOfflineOperation("salary_voucher_entry", "create", localItem);
-  return { success: true, data: localItem };
-}
-
 export async function fetchNotificationsApi() {
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
   if (typeof navigator !== "undefined" && !navigator.onLine) {
