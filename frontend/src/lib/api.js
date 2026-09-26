@@ -1951,7 +1951,7 @@ export async function fetchEmployeesApi(params = {}) {
     let list = Array.isArray(cached) ? [...cached] : [];
     if (params.search) {
       const s = params.search.toLowerCase().trim();
-      list = list.filter((e) => (e.name || "").toLowerCase().includes(s) || (e.designation || "").toLowerCase().includes(s) || (e.department || "").toLowerCase().includes(s));
+      list = list.filter((e) => (e.name || "").toLowerCase().includes(s) || (e.designation || "").toLowerCase().includes(s));
     }
     const page = Number(params.page) || 1;
     const limit = Number(params.limit) || 10;
@@ -1979,7 +1979,7 @@ export async function fetchEmployeesApi(params = {}) {
   let list = Array.isArray(cached) ? [...cached] : [];
   if (params.search) {
     const s = params.search.toLowerCase().trim();
-    list = list.filter((e) => (e.name || "").toLowerCase().includes(s) || (e.designation || "").toLowerCase().includes(s) || (e.department || "").toLowerCase().includes(s));
+    list = list.filter((e) => (e.name || "").toLowerCase().includes(s) || (e.designation || "").toLowerCase().includes(s));
   }
   const page = Number(params.page) || 1;
   const limit = Number(params.limit) || 10;
