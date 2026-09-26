@@ -1,38 +1,9 @@
 import { Notification } from "../models/notificationModel.js";
-import { Product } from "../models/productModel.js";
-
-export const checkLowStockAlerts = async () => {
-  try {
-    const lowStockProducts = await Product.find({
-      $expr: { $lte: ["$stockQuantity", "$minStockAlert"] },
-    });
-    for (const prod of lowStockProducts) {
-      const existing = await Notification.findOne({
-        type: "stock",
-        "metadata.productId": prod._id,
-        createdAt: { $gte: new Date(Date.now() - 12 * 3600 * 1000) },
-      });
-      if (!existing) {
-        await Notification.create({
-          title: "Low Stock Warning",
-          message: `${prod.name} (SKU: ${prod.sku}) low stock: ${prod.stockQuantity} ${prod.unit} remaining (Limit: ${prod.minStockAlert}).`,
-          type: "stock",
-          userName: "System",
-          targetRoles: ["admin", "manager", "cashier"],
-          metadata: { productId: prod._id, currentStock: prod.stockQuantity },
-        });
-      }
-    }
-  } catch (err) {
-    console.error("Low stock check error:", err.message);
-  }
-};
 
 export const getNotifications = async (req, res, next) => {
   try {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     await Notification.deleteMany({ createdAt: { $lt: thirtyDaysAgo } });
-    await checkLowStockAlerts();
 
     const role = req.user?.role || "admin";
     const filter = role === "admin" ? { createdAt: { $gte: thirtyDaysAgo } } : { targetRoles: { $in: [role] }, createdAt: { $gte: thirtyDaysAgo } };

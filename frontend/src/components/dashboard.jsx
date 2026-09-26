@@ -25,13 +25,19 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const loadDashboard = () => {
     fetchDashboardData().then((res) => {
       if (res && res.success) {
         setData(res.data);
       }
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    loadDashboard();
+    window.addEventListener("refresh-dashboard", loadDashboard);
+    return () => window.removeEventListener("refresh-dashboard", loadDashboard);
   }, []);
 
   const kpis = data?.kpis || [

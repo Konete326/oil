@@ -9,8 +9,6 @@ const ALL_AVAILABLE_PERMISSIONS = [
   { id: "all", label: "Full System Access (All Modules)" },
   { id: "pos", label: "POS Counter & Sales" },
   { id: "products", label: "Products & Stock Inventory" },
-  { id: "categories", label: "Categories Management" },
-  { id: "textile", label: "Textile Mills & DC Gate Pass" },
   { id: "ledger", label: "Customer Ledger & Khata" },
   { id: "cash", label: "Cash Transactions Register" },
   { id: "sales-purchases", label: "Sales & Purchase Reports" },

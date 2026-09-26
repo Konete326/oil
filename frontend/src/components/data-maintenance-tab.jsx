@@ -19,7 +19,7 @@ export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerErase
     {
       key: "products",
       name: "Inventory & Stock",
-      desc: "All products & categories",
+      desc: "All products & inventory stock",
       icon: <Boxes className="size-4 text-amber-500" />,
       btnLabel: "Erase Stock",
     },

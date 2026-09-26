@@ -2,7 +2,7 @@ import { Product } from "../models/productModel.js";
 
 export const getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find().populate("category", "name code").sort({ createdAt: -1 });
+    const products = await Product.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: products.length, data: products });
   } catch (error) {
     next(error);
@@ -14,44 +14,58 @@ export const createProduct = async (req, res, next) => {
     const {
       name,
       sku,
-      category,
-      subcategoryName,
       brand,
-      grade,
-      viscosity,
       packagingType,
       costPrice,
       sellingPrice,
       stockQuantity,
       unit,
-      minStockAlert,
       description,
+      imageUrl,
     } = req.body;
 
-    if (!name || !sku || !category || !brand || costPrice === undefined || sellingPrice === undefined) {
+    if (!name || costPrice === undefined) {
       res.status(400);
-      throw new Error("Name, SKU, Category, Brand, Cost Price, and Selling Price are required");
+      throw new Error("Name and Cost Price are required");
+    }
+    if (Number(sellingPrice) > 0 && Number(sellingPrice) < Number(costPrice)) {
+      res.status(400);
+      throw new Error(`Loss detected: Selling rate (Rs ${sellingPrice}) cannot be lower than purchase rate (Rs ${costPrice}).`);
+    }
+
+    let finalSku = sku ? String(sku).trim().toUpperCase() : "";
+    if (!finalSku) {
+      const count = await Product.countDocuments();
+      let candidate = `LUB-${count + 1001}`;
+      while (await Product.exists({ sku: candidate })) {
+        candidate = `LUB-${Math.floor(1000 + Math.random() * 9000)}`;
+      }
+      finalSku = candidate;
+    }
+
+    const existingProduct = await Product.findOne({ sku: finalSku });
+    if (existingProduct) {
+      let cand = `LUB-${Math.floor(1000 + Math.random() * 9000)}`;
+      while (await Product.exists({ sku: cand })) {
+        cand = `LUB-${Math.floor(1000 + Math.random() * 9000)}`;
+      }
+      finalSku = cand;
     }
 
     const product = await Product.create({
       name,
-      sku,
-      category,
-      subcategoryName,
-      brand,
-      grade,
-      viscosity,
-      packagingType,
-      costPrice,
-      sellingPrice,
-      stockQuantity: stockQuantity || 0,
+      sku: finalSku,
+      brand: brand || "",
+      packagingType: packagingType || "Liter",
+      costPrice: Number(costPrice) || 0,
+      sellingPrice: Number(sellingPrice) || 0,
+      stockQuantity: Number(stockQuantity) || 0,
       unit: unit || "Liters",
-      minStockAlert: minStockAlert || 10,
       description,
+      imageUrl: imageUrl || "",
     });
 
-    const populated = await Product.findById(product._id).populate("category", "name code");
-    res.status(201).json({ success: true, data: populated });
+    res.status(201).json({ success: true, data: product });
   } catch (error) {
     next(error);
   }
@@ -65,15 +79,22 @@ export const updateProduct = async (req, res, next) => {
       throw new Error("Product not found");
     }
 
-    if (req.body.category && typeof req.body.category === "object" && req.body.category._id) {
-      req.body.category = req.body.category._id;
+    delete req.body.category;
+    delete req.body.subcategoryName;
+    delete req.body.viscosity;
+    delete req.body.minStockAlert;
+
+    const finalCost = req.body.costPrice !== undefined ? Number(req.body.costPrice) : product.costPrice;
+    const finalSelling = req.body.sellingPrice !== undefined ? Number(req.body.sellingPrice) : product.sellingPrice;
+    if (finalSelling > 0 && finalSelling < finalCost) {
+      res.status(400);
+      throw new Error(`Loss detected: Selling rate (Rs ${finalSelling}) cannot be lower than purchase rate (Rs ${finalCost}).`);
     }
 
     Object.assign(product, req.body);
     await product.save();
 
-    const populated = await Product.findById(product._id).populate("category", "name code");
-    res.status(200).json({ success: true, data: populated });
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
     next(error);
   }

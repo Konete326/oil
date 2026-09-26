@@ -1,9 +1,7 @@
 import {
   LayoutGridIcon,
-  FolderTreeIcon,
   PackageIcon,
   RefreshCwIcon,
-  FactoryIcon,
   ShoppingCartIcon,
   HistoryIcon,
   BookOpenIcon,
@@ -37,18 +35,6 @@ export const navGroups = [
         title: "Inventory & Stock",
         path: "/products",
         icon: <BoxesIcon />,
-        subItems: [
-          {
-            title: "Products & Stock",
-            path: "/products",
-            icon: <PackageIcon />,
-          },
-          {
-            title: "Categories",
-            path: "/categories",
-            icon: <FolderTreeIcon />,
-          },
-        ],
       },
       {
         title: "POS Counter Sales",
@@ -66,11 +52,6 @@ export const navGroups = [
             icon: <HistoryIcon />,
           },
         ],
-      },
-      {
-        title: "Textile Mills & DC",
-        path: "/textile",
-        icon: <FactoryIcon />,
       },
       {
         title: "Khatas & Ledgers",

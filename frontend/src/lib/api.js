@@ -26,7 +26,6 @@ export async function fetchHydrationDataApi() {
       const result = await res.json();
       if (result && result.success && result.data) {
         await bulkSaveSnapshots({
-          categories: result.data.categories || [],
           products: result.data.products || [],
           customers: result.data.customers || [],
           suppliers: result.data.suppliers || [],
@@ -239,8 +238,7 @@ export async function fetchDashboardData() {
   const stockValuation = pList.reduce((sum, p) => sum + ((Number(p.stockQuantity) || 0) * (Number(p.costPrice) || Number(p.sellingPrice) || 0)), 0);
   const stockSellingValuation = pList.reduce((sum, p) => sum + ((Number(p.stockQuantity) || 0) * (Number(p.sellingPrice) || 0)), 0);
   const totalStockUnits = pList.reduce((sum, p) => sum + (Number(p.stockQuantity) || 0), 0);
-  const inStockCount = pList.filter((p) => (Number(p.stockQuantity) || 0) > (Number(p.minStockAlert) || 5)).length;
-  const lowStockCount = pList.filter((p) => (Number(p.stockQuantity) || 0) <= (Number(p.minStockAlert) || 5) && (Number(p.stockQuantity) || 0) > 0).length;
+  const inStockCount = pList.filter((p) => (Number(p.stockQuantity) || 0) > 0).length;
   const outOfStockCount = pList.filter((p) => (Number(p.stockQuantity) || 0) === 0).length;
 
   const customerReceivable = custList.reduce((sum, c) => sum + (Number(c.currentBalance) || 0), 0);
@@ -270,7 +268,7 @@ export async function fetchDashboardData() {
       totalUnits: totalStockUnits,
       totalProducts: pList.length,
       inStock: inStockCount,
-      lowStock: lowStockCount,
+      lowStock: 0,
       outOfStock: outOfStockCount,
     },
     receivablesSummary: {
@@ -297,7 +295,7 @@ export async function fetchDashboardData() {
       stats: [
         { label: "Total Sales Revenue", value: `Rs. ${todaySalesTotal.toLocaleString()}`, delta: 0 },
         { label: "Products in Catalog", value: `${pList.length} Items`, delta: 0 },
-        { label: "Active Textile Mills", value: `${millList.length} Mills`, delta: 0 },
+        { label: "Active Customers", value: `${(cList || []).length} Accounts`, delta: 0 },
         { label: "Operational Expenses", value: `Rs. ${expList.reduce((s, e) => s + (Number(e.amount) || 0), 0).toLocaleString()}`, delta: 0 },
       ],
       invoices: [],
@@ -309,22 +307,7 @@ export async function fetchDashboardData() {
 }
 
 export async function fetchCategories() {
-  try {
-    const res = await fetch(`${API_URL}/categories`, {
-      headers: { ...getAuthHeader() },
-    });
-    if (res.ok) {
-      const result = await res.json();
-      if (result && Array.isArray(result.data)) {
-        await saveLocalSnapshot("categories", result.data);
-      }
-      return result;
-    }
-  } catch (err) {
-    console.warn("Category API error, using IndexedDB snapshot", err);
-  }
-  const cached = await getLocalSnapshot("categories");
-  return { success: true, data: Array.isArray(cached) ? cached : [] };
+  return { success: true, data: [] };
 }
 
 export async function createCategory(data) {
@@ -2131,6 +2114,32 @@ export async function recordEmployeeAdvanceApi(payload) {
   return { success: true, data: localItem };
 }
 
+export async function fetchEmployeeAdvanceLedgerApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/employees/advance/ledger?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("fetchEmployeeAdvanceLedgerApi error", err);
+    return { success: false, data: [], summary: { totalGiven: 0, totalDeducted: 0, currentBalance: 0 } };
+  }
+}
+
+export async function deleteEmployeeAdvanceApi(id) {
+  try {
+    const res = await fetch(`${API_URL}/employees/advance/${id}`, {
+      method: "DELETE",
+      headers: { ...getAuthHeader() },
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("deleteEmployeeAdvanceApi error", err);
+    return { success: false, message: "Network error" };
+  }
+}
+
 export async function fetchSalaryVouchersApi(params = {}) {
   if (typeof navigator !== "undefined" && !navigator.onLine) {
     const cached = await getLocalSnapshot("salary_vouchers");
@@ -2703,6 +2712,59 @@ export async function updateUserLanguageApi(preferredLanguage) {
     return { success: false };
   }
 }
+
+export async function fetchCurrentShiftStatusApi() {
+  try {
+    const res = await fetch(`${API_URL}/shop-shift/status`, {
+      headers: { ...getAuthHeader() },
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("fetchCurrentShiftStatusApi error", err);
+    return { success: false, data: null };
+  }
+}
+
+export async function closeShopShiftApi(payload = {}) {
+  try {
+    const res = await fetch(`${API_URL}/shop-shift/close`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("closeShopShiftApi error", err);
+    return { success: false, message: "Network error while closing shop" };
+  }
+}
+
+export async function fetchShiftHistoryApi() {
+  try {
+    const res = await fetch(`${API_URL}/shop-shift/history`, {
+      headers: { ...getAuthHeader() },
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("fetchShiftHistoryApi error", err);
+    return { success: false, data: [] };
+  }
+}
+
+export async function fetchMasterPlatformReportApi(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/master-report/overview?${query}`, {
+      headers: { ...getAuthHeader() },
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("fetchMasterPlatformReportApi error", err);
+    return { success: false, data: null };
+  }
+}
+
+
 
 
 

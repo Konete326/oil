@@ -115,7 +115,7 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
             </div>
 
             <div className="space-y-1">
-              <label className="font-medium text-foreground">Product / Oil Grade *</label>
+              <label className="font-medium text-foreground">Product *</label>
               <select
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
@@ -125,7 +125,7 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
                 <option value="" disabled>Select Oil Product</option>
                 {products.map((p) => (
                   <option key={p._id} value={p._id}>
-                    {p.name} ({p.brand}) — Grade: {p.grade || "N/A"}
+                    {p.name} {p.sku ? `(${p.sku})` : ""}
                   </option>
                 ))}
               </select>

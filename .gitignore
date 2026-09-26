@@ -6,6 +6,8 @@ backend/node_modules/
 # build outputs
 frontend/dist/
 frontend/build/
+frontend/dev-dist/
+dev-dist/
 
 # environment & logs
 

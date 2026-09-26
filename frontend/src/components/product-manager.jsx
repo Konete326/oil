@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import {
   fetchProducts,
-  fetchCategories,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -27,7 +26,6 @@ import {
   Trash2 as Trash2Icon,
   Package as PackageIcon,
   Search as SearchIcon,
-  ShieldAlert as ShieldAlertIcon,
   ScanBarcode as ScanBarcodeIcon,
   LayoutGrid as LayoutGridIcon,
   List as ListIcon,
@@ -44,10 +42,8 @@ export function ProductManager() {
     typeof window !== "undefined" && window.innerWidth < 768 ? "cards" : "table"
   );
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [stockStatus, setStockStatus] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,9 +62,8 @@ export function ProductManager() {
   const loadData = async (showSkeleton = true) => {
     if (showSkeleton) setLoading(true);
     try {
-      const [pRes, cRes] = await Promise.all([fetchProducts(), fetchCategories()]);
+      const pRes = await fetchProducts();
       if (pRes && pRes.success && Array.isArray(pRes.data)) setProducts(pRes.data);
-      if (cRes && cRes.success && Array.isArray(cRes.data)) setCategories(cRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -82,17 +77,6 @@ export function ProductManager() {
 
   const handleSave = async (formData) => {
     try {
-      const selectedCatObj = categories.find(
-        (c) => c._id === (typeof formData.category === "object" ? formData.category?._id : formData.category)
-      );
-      const cleanData = {
-        ...formData,
-        category:
-          typeof formData.category === "object" && formData.category?._id
-            ? formData.category._id
-            : formData.category,
-      };
-
       setIsModalOpen(false);
       const isEditing = !!editingProduct;
       const targetId = editingProduct?._id;
@@ -101,13 +85,12 @@ export function ProductManager() {
       if (isEditing) {
         const optimisticProd = {
           ...editingProduct,
-          ...cleanData,
-          category: selectedCatObj || editingProduct.category,
+          ...formData,
           updatedAt: new Date().toISOString(),
         };
         setProducts((prev) => prev.map((p) => (p._id === targetId ? optimisticProd : p)));
 
-        const res = await updateProduct(targetId, cleanData);
+        const res = await updateProduct(targetId, formData);
         if (res && res.data) {
           setProducts((prev) => prev.map((p) => (p._id === targetId ? res.data : p)));
         }
@@ -116,14 +99,13 @@ export function ProductManager() {
         const tempId = `prod_${Date.now()}`;
         const optimisticProd = {
           _id: tempId,
-          ...cleanData,
-          category: selectedCatObj || { _id: cleanData.category, name: "General" },
+          ...formData,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
         setProducts((prev) => [optimisticProd, ...prev]);
 
-        const res = await createProduct(cleanData);
+        const res = await createProduct(formData);
         if (res && res.data) {
           setProducts((prev) => [res.data, ...prev.filter((p) => p._id !== tempId && p._id !== res.data._id)]);
         }
@@ -167,17 +149,13 @@ export function ProductManager() {
           !term ||
           (p.name && p.name.toLowerCase().includes(term)) ||
           (p.sku && p.sku.toLowerCase().includes(term)) ||
-          (p.brand && p.brand.toLowerCase().includes(term)) ||
-          (p.grade && p.grade.toLowerCase().includes(term));
-
-        const matchesCat = !selectedCategory || (p.category?._id || p.category) === selectedCategory;
+          (p.brand && p.brand.toLowerCase().includes(term));
 
         let matchesStock = true;
-        if (stockStatus === "inStock") matchesStock = p.stockQuantity > p.minStockAlert;
-        else if (stockStatus === "lowStock") matchesStock = p.stockQuantity <= p.minStockAlert && p.stockQuantity > 0;
+        if (stockStatus === "inStock") matchesStock = p.stockQuantity > 0;
         else if (stockStatus === "outOfStock") matchesStock = p.stockQuantity === 0;
 
-        return matchesSearch && matchesCat && matchesStock;
+        return matchesSearch && matchesStock;
       })
       .sort((a, b) => {
         if (sortBy === "name") return (a.name || "").localeCompare(b.name || "");
@@ -187,7 +165,7 @@ export function ProductManager() {
         if (sortBy === "stockHigh") return (b.stockQuantity || 0) - (a.stockQuantity || 0);
         return 0;
       });
-  }, [products, search, selectedCategory, stockStatus, sortBy]);
+  }, [products, search, stockStatus, sortBy]);
 
   const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE) || 1;
   const paginatedProducts = useMemo(() => {
@@ -203,7 +181,7 @@ export function ProductManager() {
             <span>Oil Products & Inventory</span>
           </h2>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Manage oil stock, master drums, grades, selling rates, and barcode stickers.
+            Manage oil products, purchase rates, stock in liters, and barcode stickers.
           </p>
         </div>
 
@@ -255,7 +233,7 @@ export function ProductManager() {
           <div className="relative col-span-12 md:col-span-4">
             <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search by name, SKU, brand, grade..."
+              placeholder="Search by name, SKU..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -276,12 +254,11 @@ export function ProductManager() {
             >
               <option value="all">All Stock Status</option>
               <option value="inStock">In Stock Only</option>
-              <option value="lowStock">Low Stock Alert</option>
               <option value="outOfStock">Out of Stock</option>
             </select>
           </div>
 
-          <div className="col-span-12 sm:col-span-4 md:col-span-3">
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -292,24 +269,6 @@ export function ProductManager() {
               <option value="priceHigh">Sort: Price (High to Low)</option>
               <option value="stockLow">Sort: Stock (Low to High)</option>
               <option value="stockHigh">Sort: Stock (High to Low)</option>
-            </select>
-          </div>
-
-          <div className="col-span-12 sm:col-span-4 md:col-span-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
             </select>
           </div>
         </div>
@@ -336,18 +295,15 @@ export function ProductManager() {
                   <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                     <TableRow className="border-b border-border/80">
                       <TableHead className="w-[110px] text-xs h-9">SKU</TableHead>
-                      <TableHead className="text-xs h-9">Product Name & Brand</TableHead>
-                      <TableHead className="text-xs h-9">Category / Subcategory</TableHead>
-                      <TableHead className="text-xs h-9">Packaging & Grade</TableHead>
-                      <TableHead className="text-right text-xs h-9">Cost Rate</TableHead>
-                      <TableHead className="text-right text-xs h-9">Selling Rate</TableHead>
-                      <TableHead className="text-center text-xs h-9">Stock Level</TableHead>
+                      <TableHead className="text-xs h-9">Product Name</TableHead>
+                      <TableHead className="text-right text-xs h-9">Kharid Rate (Cost / L)</TableHead>
+                      <TableHead className="text-center text-xs h-9">Stock in Liters</TableHead>
                       <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedProducts.map((prod) => {
-                      const isLowStock = prod.stockQuantity <= prod.minStockAlert;
+                      const isOutOfStock = (prod.stockQuantity || 0) === 0;
                       return (
                         <TableRow key={prod._id} className="hover:bg-muted/20 border-b border-border/40">
                           <TableCell className="font-mono text-[11px] font-semibold text-primary py-2.5">
@@ -363,55 +319,28 @@ export function ProductManager() {
                                 />
                               ) : (
                                 <div className="size-8 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-[10px] shrink-0 font-mono">
-                                  {prod.brand ? prod.brand.slice(0, 2).toUpperCase() : "OL"}
+                                  {prod.name ? prod.name.slice(0, 2).toUpperCase() : "OL"}
                                 </div>
                               )}
-                              <div className="space-y-0.5 min-w-0">
+                              <div className="min-w-0">
                                 <p className="font-semibold text-xs text-foreground truncate">{prod.name}</p>
-                                <p className="text-[10px] text-muted-foreground truncate">Brand: {prod.brand}</p>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="py-2.5">
-                            <div className="space-y-0.5">
-                              <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[10.5px] font-medium text-primary">
-                                {prod.category?.name || "Uncategorized"}
-                              </span>
-                              {prod.subcategoryName && (
-                                <p className="text-[10px] text-muted-foreground">{prod.subcategoryName}</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-2.5">
-                            <div className="space-y-0.5 text-xs">
-                              <p className="font-medium text-[11px] text-foreground">{prod.packagingType}</p>
-                              {prod.grade && (
-                                <p className="text-[10px] text-muted-foreground font-mono">
-                                  Grade: {prod.grade}
-                                </p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums text-xs py-2.5 text-muted-foreground">
-                            Rs {prod.costPrice?.toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums text-xs font-bold text-foreground py-2.5">
-                            Rs {prod.sellingPrice?.toLocaleString()}
+                          <TableCell className="text-right tabular-nums text-xs py-2.5 font-bold text-foreground">
+                            Rs {prod.costPrice?.toLocaleString()} / L
                           </TableCell>
                           <TableCell className="text-center py-2.5">
-                            <div
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-medium border"
-                              style={{
-                                backgroundColor: isLowStock ? "rgba(244, 63, 94, 0.1)" : "rgba(16, 185, 129, 0.1)",
-                                borderColor: isLowStock ? "rgba(244, 63, 94, 0.3)" : "rgba(16, 185, 129, 0.3)",
-                                color: isLowStock ? "#f43f5e" : "#10b981",
-                              }}
+                            <span
+                              className={cn(
+                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold border font-mono",
+                                isOutOfStock
+                                  ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400"
+                                  : "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                              )}
                             >
-                              {isLowStock && <ShieldAlertIcon className="size-3" />}
-                              <span>
-                                {prod.stockQuantity} {prod.unit}
-                              </span>
-                            </div>
+                              {prod.stockQuantity} Liters
+                            </span>
                           </TableCell>
                           <TableCell className="text-right py-2.5 pe-4">
                             <div className="flex items-center justify-end gap-1">
@@ -455,8 +384,7 @@ export function ProductManager() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-2.5 sm:p-3">
                   {paginatedProducts.map((prod) => {
-                    const isLowStock = prod.stockQuantity <= prod.minStockAlert;
-                    const isOutOfStock = prod.stockQuantity === 0;
+                    const isOutOfStock = (prod.stockQuantity || 0) === 0;
                     const profitPerUnit = (prod.sellingPrice || 0) - (prod.costPrice || 0);
 
                     return (
@@ -474,60 +402,38 @@ export function ProductManager() {
                               />
                             ) : (
                               <div className="size-9 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
-                                {prod.brand ? prod.brand.slice(0, 2).toUpperCase() : "OL"}
+                                {prod.name ? prod.name.slice(0, 2).toUpperCase() : "OL"}
                               </div>
                             )}
                             <div className="min-w-0">
                               <h4 className="font-semibold text-xs text-foreground truncate">{prod.name}</h4>
-                              <p className="text-[10px] text-muted-foreground truncate">
-                                Brand: <strong className="text-foreground">{prod.brand}</strong> • SKU:{" "}
-                                <span className="font-mono text-primary font-semibold">{prod.sku}</span>
+                              <p className="text-[10px] text-muted-foreground truncate font-mono">
+                                SKU: <span className="text-primary font-semibold">{prod.sku}</span>
                               </p>
                             </div>
                           </div>
 
                           <span
                             className={cn(
-                              "px-1.5 py-0.5 rounded-full text-[9.5px] font-bold shrink-0",
+                              "px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 font-mono",
                               isOutOfStock
                                 ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
-                                : isLowStock
-                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                                 : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                             )}
                           >
-                            {isOutOfStock
-                              ? "Out of Stock"
-                              : isLowStock
-                              ? `${prod.stockQuantity} Left`
-                              : `${prod.stockQuantity} In Stock`}
+                            {isOutOfStock ? "Out of Stock" : `${prod.stockQuantity} Liters`}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-md bg-muted/30 text-xs border border-border/50">
+                        <div className="p-2 rounded-md bg-muted/30 text-xs border border-border/50 flex items-center justify-between">
                           <div>
-                            <span className="text-[9px] text-muted-foreground block">Selling Rate</span>
+                            <span className="text-[9px] text-muted-foreground block font-medium">Kharid Rate</span>
                             <span className="font-mono font-bold text-foreground text-xs">
-                              Rs {prod.sellingPrice?.toLocaleString()}
+                              Rs {prod.costPrice?.toLocaleString() || 0} / L
                             </span>
                           </div>
-                          <div>
-                            <span className="text-[9px] text-muted-foreground block">Cost Rate</span>
-                            <span className="font-mono text-muted-foreground text-[11px]">
-                              Rs {prod.costPrice?.toLocaleString() || 0}
-                            </span>
-                            {profitPerUnit > 0 && (
-                              <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold block">
-                                +Rs {profitPerUnit.toLocaleString()} profit
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground">
-                          <span className="truncate">
-                            {prod.category?.name || "General"} • {prod.packagingType}{" "}
-                            {prod.grade ? `(${prod.grade})` : ""}
+                          <span className="text-[10px] text-muted-foreground font-mono bg-background px-2 py-0.5 rounded border border-border">
+                            Unit: Liters
                           </span>
                         </div>
 
@@ -587,8 +493,8 @@ export function ProductManager() {
           setEditingProduct(null);
         }}
         onSave={handleSave}
-        categories={categories}
         initialData={editingProduct}
+        existingProducts={products}
       />
 
       <BarcodeStickerModal

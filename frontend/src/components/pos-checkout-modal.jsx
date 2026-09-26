@@ -9,6 +9,7 @@ export function PosCheckoutModal({
   isOpen,
   onClose,
   cartSubtotal,
+  cartCostTotal = 0,
   initialDiscount = 0,
   initialPaymentMode = "Cash",
   onConfirm,
@@ -53,11 +54,16 @@ export function PosCheckoutModal({
   const currentBal = selectedCustomerObj?.currentBalance || 0;
   const credLimit = selectedCustomerObj?.creditLimit || 0;
   const isCreditBreached = credLimit > 0 && (currentBal + (paymentMode === "Credit / Khata" ? grandTotal : 0) > credLimit);
+  const isLossSale = cartCostTotal > 0 && grandTotal < cartCostTotal;
 
-  const isFormValid = customerValid && discountValid && cashReceivedValid;
+  const isFormValid = customerValid && discountValid && cashReceivedValid && !isLossSale;
 
   const handleConfirm = () => {
     if (!isFormValid) return;
+    if (isLossSale) {
+      toast.error(`Loss Prevention: Grand Total (Rs ${grandTotal.toLocaleString()}) Kharid Cost (Rs ${cartCostTotal.toLocaleString()}) se kam nahi ho sakta!`);
+      return;
+    }
     if (paymentMode === "Cash" && cashReceivedNum > 0 && cashReceivedNum < grandTotal) {
       toast.error("Cash received is less than the Grand Total.");
       return;
@@ -156,6 +162,18 @@ export function PosCheckoutModal({
                 </div>
                 <div className="leading-tight opacity-90">
                   Khata (Rs {currentBal.toLocaleString()}) breaches limit of Rs {credLimit.toLocaleString()}!
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isLossSale && (
+            <div className="rounded-lg bg-destructive/15 border border-destructive/40 p-2 text-destructive text-xs flex items-start gap-1.5 animate-pulse">
+              <AlertTriangleIcon className="size-3.5 shrink-0 mt-0.5" />
+              <div className="space-y-0.5 text-[10.5px]">
+                <div className="font-bold">⚠️ Loss Detected (Checkout Blocked)</div>
+                <div className="leading-tight">
+                  Grand Total (Rs {grandTotal.toLocaleString()}) kul kharid cost (Rs {cartCostTotal.toLocaleString()}) se kam hai. Sale allow nahi hai.
                 </div>
               </div>
             </div>

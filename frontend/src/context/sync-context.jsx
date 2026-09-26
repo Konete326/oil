@@ -7,7 +7,6 @@ import {
 } from "@/lib/offline-db";
 import {
   fetchHydrationDataApi,
-  fetchCategories,
   fetchProducts,
   fetchCustomers,
   fetchExpensesApi,
@@ -110,7 +109,6 @@ export function SyncProvider({ children }) {
       const data = await fetchHydrationDataApi();
       if (!data) {
         await Promise.allSettled([
-          fetchCategories(),
           fetchProducts(),
           fetchCustomers(),
           fetchSuppliersApi(),

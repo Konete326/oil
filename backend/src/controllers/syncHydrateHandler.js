@@ -1,5 +1,4 @@
 import { Product } from "../models/productModel.js";
-import { Category } from "../models/categoryModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Supplier } from "../models/supplierModel.js";
 import { Mill } from "../models/millModel.js";
@@ -17,7 +16,6 @@ export const getHydrateData = async (req, res) => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const [
       products,
-      categories,
       customers,
       suppliers,
       mills,
@@ -31,7 +29,6 @@ export const getHydrateData = async (req, res) => {
       employees,
     ] = await Promise.all([
       Product.find().sort({ createdAt: -1 }).lean(),
-      Category.find().sort({ createdAt: -1 }).lean(),
       Customer.find().sort({ createdAt: -1 }).lean(),
       Supplier.find().sort({ createdAt: -1 }).lean(),
       Mill.find().sort({ createdAt: -1 }).lean(),
@@ -50,7 +47,6 @@ export const getHydrateData = async (req, res) => {
       timestamp: new Date(),
       data: {
         products: products || [],
-        categories: categories || [],
         customers: customers || [],
         suppliers: suppliers || [],
         mills: mills || [],

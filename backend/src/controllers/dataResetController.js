@@ -1,6 +1,5 @@
 import { User } from "../models/userModel.js";
 import { Product } from "../models/productModel.js";
-import { Category } from "../models/categoryModel.js";
 import { PosSale } from "../models/posSaleModel.js";
 import { Mill } from "../models/millModel.js";
 import { Challan } from "../models/challanModel.js";
@@ -34,7 +33,7 @@ export const eraseAllData = async (req, res, next) => {
       throw new Error("Invalid admin password. Data reset aborted.");
     }
     await Promise.all([
-      Product.deleteMany({}), Category.deleteMany({}), PosSale.deleteMany({}),
+      Product.deleteMany({}), PosSale.deleteMany({}),
       Mill.deleteMany({}), Challan.deleteMany({}),
       Ledger.deleteMany({}), Supplier.deleteMany({}), SupplierLedger.deleteMany({}),
       CashTransaction.deleteMany({}), Expense.deleteMany({}), SalaryVoucher.deleteMany({}),
@@ -72,8 +71,8 @@ export const eraseModuleData = async (req, res, next) => {
     let deletedMessage = "";
     switch (moduleKey) {
       case "products":
-        await Promise.all([Product.deleteMany({}), Category.deleteMany({})]);
-        deletedMessage = "All Products & Categories stock data erased.";
+        await Product.deleteMany({});
+        deletedMessage = "All Products stock data erased.";
         break;
       case "sales":
         await Promise.all([PosSale.deleteMany({}), Challan.deleteMany({})]);

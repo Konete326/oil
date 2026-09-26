@@ -97,7 +97,7 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
           {product.name}
         </h4>
         <p className="text-[9px] font-medium text-neutral-600 truncate">
-          {product.brand} {product.grade ? `· ${product.grade}` : ""} · {product.packagingType}
+          {product.packagingType || "Standard"}
         </p>
       </div>
 

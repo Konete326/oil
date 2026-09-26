@@ -6,7 +6,6 @@ import morgan from "morgan";
 import { connectDB } from "./config/db.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import mediaRoutes from "./routes/mediaRoutes.js";
-import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import millRoutes from "./routes/millRoutes.js";
@@ -28,6 +27,8 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import systemLogRoutes from "./routes/systemLogRoutes.js";
 import dataResetRoutes from "./routes/dataResetRoutes.js";
 import syncRoutes from "./routes/syncRoutes.js";
+import shopShiftRoutes from "./routes/shopShiftRoutes.js";
+import masterReportRoutes from "./routes/masterReportRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -71,7 +72,6 @@ app.get("/", (req, res) => {
       health: "/api/health",
       auth: "/api/auth",
       dashboard: "/api/dashboard",
-      categories: "/api/categories",
       products: "/api/products",
       mills: "/api/mills",
       challans: "/api/challans",
@@ -88,7 +88,6 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/media", mediaRoutes);
-app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/mills", millRoutes);
 app.use("/api/challans", challanRoutes);
@@ -109,6 +108,8 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/system-logs", systemLogRoutes);
 app.use("/api/data-reset", dataResetRoutes);
 app.use("/api/sync", syncRoutes);
+app.use("/api/shop-shift", shopShiftRoutes);
+app.use("/api/master-report", masterReportRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

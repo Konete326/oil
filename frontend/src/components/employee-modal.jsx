@@ -5,12 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { createEmployeeApi, updateEmployeeApi } from "@/lib/api";
 
-const DEPARTMENTS = ["Plant Operations", "Warehouse & Store", "Sales & Marketing", "Finance & Accounts", "General"];
-
 export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSuccess }) {
   const [name, setName] = useState("");
   const [designation, setDesignation] = useState("");
-  const [department, setDepartment] = useState("Plant Operations");
   const [phone, setPhone] = useState("");
   const [baseSalary, setBaseSalary] = useState("");
   const [status, setStatus] = useState("Active");
@@ -26,14 +23,12 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
     if (editingEmployee) {
       setName(editingEmployee.name || "");
       setDesignation(editingEmployee.designation || "");
-      setDepartment(editingEmployee.department || "Plant Operations");
       setPhone(editingEmployee.phone || "");
       setBaseSalary(String(editingEmployee.baseSalary || ""));
       setStatus(editingEmployee.status || "Active");
     } else {
       setName("");
       setDesignation("");
-      setDepartment("Plant Operations");
       setPhone("");
       setBaseSalary("");
       setStatus("Active");
@@ -52,7 +47,6 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
         await updateEmployeeApi(editingEmployee._id, {
           name: name.trim(),
           designation: designation.trim(),
-          department,
           phone,
           baseSalary: Number(baseSalary),
           status,
@@ -62,7 +56,6 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
         await createEmployeeApi({
           name: name.trim(),
           designation: designation.trim(),
-          department,
           phone,
           baseSalary: Number(baseSalary),
           status,
@@ -116,23 +109,6 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
               onValidationChange={setDesignationValid}
             />
 
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Department</label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
             <ValidatedInput
               label="Phone Number"
               rule="phone"
@@ -142,7 +118,9 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
               onChange={(e) => setPhone(e.target.value)}
               className="font-mono"
             />
+          </div>
 
+          <div className="grid grid-cols-2 gap-3">
             <ValidatedInput
               label="Monthly Base Salary (PKR)"
               rule="amount"
@@ -154,18 +132,18 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
               onValidationChange={setSalaryValid}
               className="font-mono font-bold text-emerald-500"
             />
-          </div>
 
-          <div className="space-y-1">
-            <label className="font-medium text-foreground">Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+            <div className="space-y-1">
+              <label className="font-medium text-foreground">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">

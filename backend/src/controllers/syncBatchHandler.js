@@ -4,7 +4,6 @@ import { CashTransaction } from "../models/cashModel.js";
 import { Expense } from "../models/expenseModel.js";
 import { Product } from "../models/productModel.js";
 import { Customer } from "../models/customerModel.js";
-import { Category } from "../models/categoryModel.js";
 import { Supplier } from "../models/supplierModel.js";
 import { Mill } from "../models/millModel.js";
 import { Challan } from "../models/challanModel.js";
@@ -33,7 +32,7 @@ async function syncUpsert(Model, query, payload, targetId) {
 async function handleDelete(type, targetId) {
   if (type === "system_log_clear") return await SystemLog.deleteMany({});
   if (!targetId || !mongoose.isValidObjectId(targetId)) return;
-  const models = { product: Product, category: Category, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger, employee: Employee };
+  const models = { product: Product, customer: Customer, expense: Expense, cash: CashTransaction, pos_sale: PosSale, supplier: Supplier, mill: Mill, challan: Challan, system_log: SystemLog, ledger: Ledger, supplier_ledger: SupplierLedger, employee: Employee };
   const key = Object.keys(models).find((k) => type.startsWith(k));
   if (key && models[key]) await models[key].findByIdAndDelete(targetId);
 }
@@ -65,7 +64,6 @@ async function processSingleItem(item) {
     if (logDate >= sevenDaysAgo) await SystemLog.create(cleaned);
   } else if (type === "customer_entry") await syncUpsert(Customer, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "product_entry") await syncUpsert(Product, payload.name ? { name: payload.name } : null, payload, targetId);
-  else if (type === "category_entry") await syncUpsert(Category, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "supplier_entry") await syncUpsert(Supplier, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "mill_entry") await syncUpsert(Mill, payload.name ? { name: payload.name } : null, payload, targetId);
   else if (type === "employee_entry") await syncUpsert(Employee, payload.name ? { name: payload.name } : null, payload, targetId);

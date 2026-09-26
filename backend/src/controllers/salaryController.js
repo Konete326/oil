@@ -1,5 +1,6 @@
 import { SalaryVoucher } from "../models/salaryVoucherModel.js";
 import { Employee } from "../models/employeeModel.js";
+import { EmployeeAdvance } from "../models/employeeAdvanceModel.js";
 import { CashTransaction } from "../models/cashModel.js";
 import { connectDB } from "../config/db.js";
 import { logActivity } from "./auditController.js";
@@ -56,12 +57,24 @@ export const generateSalaryVoucher = async (req, res, next) => {
 
     const netSalaryPaid = Math.max(baseAmt + bonusAmt - advDedAmt - othDedAmt, 0);
 
+    const voucherNumber = `PAY-${Date.now().toString().slice(-6)}`;
+
     if (advDedAmt > 0) {
       employee.advanceBalance = Math.max(employee.advanceBalance - advDedAmt, 0);
       await employee.save();
+      await EmployeeAdvance.create({
+        employee: employee._id,
+        employeeName: employee.name,
+        type: "Salary Deduction",
+        amount: advDedAmt,
+        runningBalance: employee.advanceBalance,
+        paymentMode: paymentMode || "Cash",
+        voucherNumber,
+        date: new Date(),
+        notes: `Advance deduction for ${monthYear} salary voucher`,
+        recordedBy: req.user?.name || "Admin",
+      });
     }
-
-    const voucherNumber = `PAY-${Date.now().toString().slice(-6)}`;
 
     const voucher = await SalaryVoucher.create({
       employee: employee._id,

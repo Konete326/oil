@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { fetchProducts, fetchCategories, createPosSale } from "@/lib/api";
+import { fetchProducts, createPosSale } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PosCheckoutModal } from "@/components/pos-checkout-modal";
@@ -24,10 +24,8 @@ import { cn } from "@/lib/utils";
 
 export function PosCounter() {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [cart, setCart] = useState([]);
   const [discountType, setDiscountType] = useState("fixed");
   const [discountValue, setDiscountValue] = useState("");
@@ -40,9 +38,8 @@ export function PosCounter() {
 
   const loadData = async () => {
     setLoading(true);
-    const [pRes, cRes] = await Promise.all([fetchProducts(), fetchCategories()]);
+    const pRes = await fetchProducts();
     if (pRes && pRes.success) setProducts(pRes.data);
-    if (cRes && cRes.success) setCategories(cRes.data);
     setLoading(false);
   };
 
@@ -93,17 +90,20 @@ export function PosCounter() {
         setError(`Insufficient stock for ${product.name}.`);
         return;
       }
+      const defaultUnitPrice = product.sellingPrice > 0 ? product.sellingPrice : (product.costPrice || 0);
       setCart([
         ...cart,
         {
           product: product._id,
           productName: product.name,
-          unitType: product.packagingType || product.unit || "Cans",
+          sku: product.sku,
+          unitType: "Liters",
           quantity: 1,
-          unitPrice: product.sellingPrice,
+          costPrice: Number(product.costPrice) || 0,
+          unitPrice: Number(defaultUnitPrice) || 0,
           itemDiscountType: "fixed",
           itemDiscountValue: 0,
-          subtotal: product.sellingPrice,
+          subtotal: Number(defaultUnitPrice) || 0,
         },
       ]);
       setError("");
@@ -237,11 +237,12 @@ export function PosCounter() {
   };
 
   const updateUnitPrice = (index, newPrice) => {
-    const p = Math.max(0, Number(newPrice) || 0);
+    const p = newPrice === "" ? "" : Math.max(0, Number(newPrice) || 0);
     const updatedCart = [...cart];
     const item = updatedCart[index];
+    const effectivePrice = p === "" ? 0 : p;
     const newSubtotal = calculateItemSubtotal(
-      p,
+      effectivePrice,
       item.quantity,
       item.itemDiscountType || "fixed",
       item.itemDiscountValue || 0
@@ -251,6 +252,16 @@ export function PosCounter() {
       unitPrice: p,
       subtotal: newSubtotal,
       isCustomPrice: true,
+    };
+    setCart(updatedCart);
+  };
+
+  const updateCostPrice = (index, newCost) => {
+    const c = newCost === "" ? "" : Math.max(0, Number(newCost) || 0);
+    const updatedCart = [...cart];
+    updatedCart[index] = {
+      ...updatedCart[index],
+      costPrice: c,
     };
     setCart(updatedCart);
   };
@@ -307,16 +318,35 @@ export function PosCounter() {
   const totalDiscount = Number((itemDiscountsTotal + cartDiscountAmount).toFixed(2));
   const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const estimatedGrandTotal = Math.max(0, Number((itemsNetSubtotal - cartDiscountAmount).toFixed(2)));
+  const totalCartCost = cart.reduce((sum, item) => sum + ((Number(item.costPrice) || 0) * (Number(item.quantity) || 1)), 0);
+  const totalCartProfit = Math.max(0, estimatedGrandTotal - totalCartCost);
+  const hasLossItem = cart.some((item) => Number(item.unitPrice) < Number(item.costPrice));
 
   const handleCheckout = async (checkoutData) => {
     setSubmitting(true);
     const { customerName, saleType, discount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
     try {
+      const sanitizedItems = cart.map((it) => ({
+        ...it,
+        unitPrice: Number(it.unitPrice) || 0,
+        costPrice: Number(it.costPrice) || 0,
+      }));
+      const anyLoss = sanitizedItems.some((it) => it.unitPrice < it.costPrice);
+      if (anyLoss) {
+        toast.error("Loss detected: Selling rate kharid rate se kam nahi ho sakti.");
+        setError("Loss detected: Selling rate kharid rate se kam nahi ho sakti.");
+        return;
+      }
+      if (Number(grandTotal) < totalCartCost) {
+        toast.error("Loss detected: Grand Total kul kharid cost se kam nahi ho sakta.");
+        setError("Loss detected: Grand Total kul kharid cost se kam nahi ho sakta.");
+        return;
+      }
       const res = await createPosSale({
         customerName,
         customerPhone: "",
         saleType,
-        items: cart,
+        items: sanitizedItems,
         subtotal: grossSubtotal,
         discount,
         grandTotal,
@@ -337,15 +367,12 @@ export function PosCounter() {
   };
 
   const filteredProducts = products.filter((p) => {
-    const matchesSearch =
+    return (
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.sku.toLowerCase().includes(search.toLowerCase()) ||
       p.brand.toLowerCase().includes(search.toLowerCase()) ||
-      (p.grade && p.grade.toLowerCase().includes(search.toLowerCase()));
-
-    const matchesCat = !selectedCategory || (p.category?._id || p.category) === selectedCategory;
-
-    return matchesSearch && matchesCat;
+      (p.grade && p.grade.toLowerCase().includes(search.toLowerCase()))
+    );
   });
 
   return (
@@ -364,7 +391,7 @@ export function PosCounter() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 p-1.5 rounded-xl border border-border bg-card shadow-xs shrink-0">
+          <div className="flex items-center gap-1.5 p-1.5 rounded-xl border border-border bg-card shadow-xs shrink-0">
             <div className="relative flex-1 w-full">
               <ScanBarcodeIcon className="absolute left-2.5 top-2.5 size-3.5 text-primary animate-pulse" />
               <Input
@@ -376,19 +403,6 @@ export function PosCounter() {
                 className="ps-8 text-xs h-7.5 bg-muted/20 border-primary/40 focus-visible:ring-primary focus-visible:border-primary font-medium"
               />
             </div>
-
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="rounded-md border border-input bg-background px-2 py-1 text-xs shadow-xs cursor-pointer w-full sm:w-auto h-7.5"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="flex-1 overflow-y-auto max-h-[45vh] lg:max-h-none pe-1.5 rounded-xl border border-border/70 bg-muted/10 p-1.5 min-h-0">
@@ -406,12 +420,12 @@ export function PosCounter() {
               <div className="py-12 text-center text-muted-foreground text-xs space-y-1.5 flex flex-col items-center justify-center h-full">
                 <PackageIcon className="size-8 text-muted-foreground/40" />
                 <p className="font-semibold text-foreground">No Products Found</p>
-                <p className="text-[10px]">Try searching a different SKU, name or category.</p>
+                <p className="text-[10px]">Try searching a different SKU or name.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5">
                 {filteredProducts.map((prod) => {
-                  const isLowStock = prod.stockQuantity <= 5;
+                  const isOutOfStock = (prod.stockQuantity || 0) <= 0;
                   return (
                     <div
                       key={prod._id}
@@ -421,7 +435,7 @@ export function PosCounter() {
                       }}
                       className={cn(
                         "group relative rounded-xl border bg-card p-1.5 shadow-2xs hover:shadow-sm transition-all duration-150 flex flex-col justify-between cursor-pointer active:scale-[0.98]",
-                        prod.stockQuantity <= 0
+                        isOutOfStock
                           ? "opacity-50 border-border"
                           : "border-border/80 hover:border-primary/50"
                       )}
@@ -441,13 +455,14 @@ export function PosCounter() {
                           </svg>
                         )}
                         <span
-                          className={`absolute top-1 right-1 text-[8px] font-semibold px-1.5 py-0.2 rounded-md border ${
-                            isLowStock
-                              ? "bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                          className={cn(
+                            "absolute top-1 right-1 text-[8px] font-semibold px-1.5 py-0.2 rounded-md border",
+                            isOutOfStock
+                              ? "bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400"
                               : "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                          }`}
+                          )}
                         >
-                          {prod.stockQuantity} {prod.unit || "Cans"}
+                          {prod.stockQuantity} Liters
                         </span>
                       </div>
 
@@ -455,8 +470,8 @@ export function PosCounter() {
                         <h4 className="font-bold text-[11px] text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-tight">
                           {prod.name}
                         </h4>
-                        <p className="font-mono font-bold text-xs text-primary pt-0.5">
-                          Rs {prod.sellingPrice?.toLocaleString()} <span className="text-[8.5px] font-normal text-muted-foreground">/{prod.unit}</span>
+                        <p className="font-mono font-bold text-xs text-foreground pt-0.5">
+                          Kharid: <span className="text-primary font-bold">Rs {prod.costPrice?.toLocaleString() || 0}</span> <span className="text-[8.5px] font-normal text-muted-foreground">/L</span>
                         </p>
                       </div>
                     </div>
@@ -523,119 +538,150 @@ export function PosCounter() {
             ) : (
               <div className="flex-1 overflow-y-auto space-y-1.5 pe-1 min-h-0 border border-border/60 rounded-xl bg-muted/10 p-1.5">
                 {cart.map((item, idx) => {
+                  const isLoss = Number(item.unitPrice) < Number(item.costPrice);
                   const hasDiscount = Number(item.itemDiscountValue) > 0 || item.isCustomPrice;
+                  const itemProfit = Math.max(0, (Number(item.unitPrice) - Number(item.costPrice)) * item.quantity);
+                  const itemLoss = isLoss ? (Number(item.costPrice) - Number(item.unitPrice)) * item.quantity : 0;
+
                   return (
                     <div
                       key={idx}
                       className={cn(
-                        "p-1.5 rounded-lg border text-xs space-y-1 shadow-2xs transition-all",
-                        hasDiscount
+                        "p-2.5 rounded-xl border text-xs space-y-2 shadow-2xs transition-all",
+                        isLoss
+                          ? "border-destructive bg-destructive/10 ring-1 ring-destructive/40"
+                          : hasDiscount
                           ? "border-emerald-500/50 bg-emerald-500/5 dark:bg-emerald-950/20"
                           : "border-border bg-card hover:bg-muted/30"
                       )}
                     >
-                    <div className="flex items-start justify-between gap-1.5">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-xs text-foreground leading-tight truncate">{item.productName}</p>
-                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[10px]">
-                          <div className="flex items-center gap-0.5">
-                            <span className="text-muted-foreground font-mono">Rate:</span>
-                            <input
-                              type="number"
-                              min="0"
-                              value={item.unitPrice}
-                              onChange={(e) => updateUnitPrice(idx, e.target.value)}
-                              className="w-13 h-4.5 px-1 font-mono font-bold text-[10px] rounded border border-input bg-background text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
-                              title="Override Rate"
-                            />
+                      <div className="flex items-start justify-between gap-1.5">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-xs sm:text-sm text-foreground leading-tight truncate">{item.productName}</p>
+                          <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                            SKU: {item.sku || "N/A"} · {item.quantity} Liters
                           </div>
+                        </div>
 
-                          <div className="flex items-center gap-0.5">
-                            <span className="text-muted-foreground font-mono">Disc:</span>
-                            <div className="flex items-center rounded border border-input overflow-hidden bg-background">
-                              <button
-                                type="button"
-                                onClick={() => toggleItemDiscountType(idx)}
-                                className={cn(
-                                  "px-1 py-0.2 font-mono font-bold text-[9px] cursor-pointer transition-colors border-e border-input",
-                                  item.itemDiscountType === "percent"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground hover:text-foreground"
-                                )}
-                                title="Click to switch between Rs and %"
-                              >
-                                {item.itemDiscountType === "percent" ? "%" : "Rs"}
-                              </button>
-                              <input
-                                type="number"
-                                min="0"
-                                placeholder="0"
-                                value={item.itemDiscountValue ?? ""}
-                                onChange={(e) => updateItemDiscountValue(idx, e.target.value)}
-                                className="w-10 h-4.5 px-1 font-mono font-semibold text-[10px] bg-transparent text-foreground focus:outline-none"
-                                title="Per-item discount"
-                              />
-                            </div>
-                          </div>
-
-                          {item.isCustomPrice && (
-                            <span className="text-[8px] px-1 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/30">
-                              Custom
+                        <div className="text-right shrink-0">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-primary block">
+                            Rs. {item.subtotal?.toLocaleString()}
+                          </span>
+                          {isLoss ? (
+                            <span className="font-mono text-[10px] text-destructive block font-bold">
+                              Loss: -Rs. {itemLoss.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
+                              +Rs. {itemProfit.toLocaleString()} profit
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="text-right shrink-0 pt-0.5">
-                        <span className="font-mono font-bold text-xs text-primary block">
-                          Rs {item.subtotal?.toLocaleString()}
+
+                      <div className="grid grid-cols-2 gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/80">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                            <span>Kharid (Cost):</span>
+                            <span className="text-[10px] font-mono text-muted-foreground/80">/ L</span>
+                          </div>
+                          <div className="relative flex items-center">
+                            <span className="absolute left-2 text-xs font-mono font-semibold text-muted-foreground pointer-events-none select-none">
+                              Rs
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={item.costPrice ?? ""}
+                              onChange={(e) => updateCostPrice(idx, e.target.value)}
+                              className="w-full h-7.5 ps-7 pe-1.5 font-mono font-bold text-xs rounded-md border border-input bg-background text-foreground focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all shadow-2xs"
+                              placeholder="0"
+                              title="Editable Kharid (Purchase / Cost Price) per Liter"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <div className="flex items-center justify-between text-[11px] font-semibold">
+                            <span className={isLoss ? "text-destructive font-bold" : "text-primary"}>
+                              Farokht (Sale):
+                            </span>
+                            <span className="text-[10px] font-mono text-muted-foreground/80">/ L</span>
+                          </div>
+                          <div className="relative flex items-center">
+                            <span className="absolute left-2 text-xs font-mono font-semibold text-muted-foreground pointer-events-none select-none">
+                              Rs
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={item.unitPrice ?? ""}
+                              onChange={(e) => updateUnitPrice(idx, e.target.value)}
+                              className={cn(
+                                "w-full h-7.5 ps-7 pe-1.5 font-mono font-bold text-xs rounded-md border bg-background focus:ring-1 focus:outline-none transition-all shadow-2xs",
+                                isLoss
+                                  ? "border-destructive text-destructive font-black focus:ring-destructive"
+                                  : "border-input text-foreground focus:ring-primary focus:border-primary"
+                              )}
+                              placeholder="0"
+                              title="Editable Farokht (Selling Rate) per Liter"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between px-1 text-[11px]">
+                        <span className="text-muted-foreground">
+                          Profit Margin:{" "}
+                          <strong className={Number(item.unitPrice) - Number(item.costPrice) >= 0 ? "text-emerald-600 dark:text-emerald-400 font-mono font-bold" : "text-destructive font-mono font-bold"}>
+                            {Number(item.unitPrice) - Number(item.costPrice) >= 0 ? "+" : ""}Rs. {(Number(item.unitPrice) - Number(item.costPrice)).toLocaleString()} / L
+                          </strong>
                         </span>
-                        {Number(item.itemDiscountValue) > 0 && (
-                          <span className="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 block font-semibold">
-                            (-Rs{" "}
-                            {Number(
-                              (
-                                (item.itemDiscountType === "percent"
-                                  ? (item.unitPrice * Number(item.itemDiscountValue)) / 100
-                                  : Number(item.itemDiscountValue)) * item.quantity
-                              ).toFixed(2)
-                            ).toLocaleString()}
-                            )
+                        {Number(item.costPrice) > 0 && (
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            ({Number(item.unitPrice) - Number(item.costPrice) >= 0 ? "+" : ""}{Math.round(((Number(item.unitPrice) - Number(item.costPrice)) / Number(item.costPrice)) * 100)}%)
                           </span>
                         )}
                       </div>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-0.5 border-t border-border/50">
-                      <div className="flex items-center rounded-md border border-border bg-background shadow-2xs">
+                      {isLoss && (
+                        <div className="p-1.5 rounded-lg bg-destructive/20 border border-destructive/40 text-destructive text-[10px] font-bold flex items-center gap-1.5">
+                          <AlertCircleIcon className="size-3.5 shrink-0" />
+                          <span>Loss Warning: Farokht rate (Rs {item.unitPrice}) kharid rate (Rs {item.costPrice}) se kam hai!</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-1 border-t border-border/50 text-[10px]">
+                        <div className="flex items-center rounded-md border border-border bg-background shadow-2xs">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={() => updateQuantity(idx, -1)}
+                          >
+                            <MinusIcon className="size-2.5" />
+                          </Button>
+                          <span className="px-2 font-mono font-bold text-[10px] text-foreground">{item.quantity} L</span>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={() => updateQuantity(idx, 1)}
+                          >
+                            <PlusIcon className="size-2.5" />
+                          </Button>
+                        </div>
+
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
-                          onClick={() => updateQuantity(idx, -1)}
+                          className="size-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                          onClick={() => removeFromCart(idx)}
                         >
-                          <MinusIcon className="size-2.5" />
-                        </Button>
-                        <span className="px-2 font-mono font-bold text-[11px] text-foreground">{item.quantity}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
-                          onClick={() => updateQuantity(idx, 1)}
-                        >
-                          <PlusIcon className="size-2.5" />
+                          <Trash2Icon className="size-2.5" />
                         </Button>
                       </div>
-
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="size-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                        onClick={() => removeFromCart(idx)}
-                      >
-                        <Trash2Icon className="size-2.5" />
-                      </Button>
                     </div>
-                  </div>
                   );
                 })}
               </div>
@@ -708,7 +754,11 @@ export function PosCounter() {
 
             <div className="space-y-0.5 text-xs">
               <div className="flex justify-between text-muted-foreground text-[10px]">
-                <span>Total Amount:</span>
+                <span>Total Kharid Cost:</span>
+                <span className="font-mono font-semibold text-foreground">Rs {totalCartCost.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground text-[10px]">
+                <span>Total Farokht Amount:</span>
                 <span className="font-mono font-semibold text-foreground">Rs {grossSubtotal.toLocaleString()}</span>
               </div>
               {itemDiscountsTotal > 0 && (
@@ -727,7 +777,20 @@ export function PosCounter() {
                 <span>Net Payable:</span>
                 <span className="font-mono text-primary text-sm">Rs {estimatedGrandTotal.toLocaleString()}</span>
               </div>
+              <div className="flex justify-between text-[11px] font-bold pt-0.5 text-foreground">
+                <span>Estimated Profit:</span>
+                <span className={cn("font-mono font-bold", hasLossItem ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}>
+                  {hasLossItem ? "Loss Warning" : `+Rs ${totalCartProfit.toLocaleString()}`}
+                </span>
+              </div>
             </div>
+
+            {hasLossItem && (
+              <div className="p-1.5 rounded-lg bg-destructive/15 border border-destructive/40 text-destructive text-[10px] font-bold flex items-center gap-1.5">
+                <AlertCircleIcon className="size-3.5 shrink-0" />
+                <span>Nuksan Warning: Farokht rate kharid se kam hai! Checkout blocked.</span>
+              </div>
+            )}
 
             <Button
               onClick={() => {
@@ -735,14 +798,23 @@ export function PosCounter() {
                   setError("Add at least 1 product to proceed.");
                   return;
                 }
+                if (hasLossItem) {
+                  setError("Loss detected! Farokht rate kharid rate se kam hai. Sale submit nahi ho sakti.");
+                  return;
+                }
                 setError("");
                 setIsCheckoutOpen(true);
               }}
-              disabled={cart.length === 0}
-              className="w-full h-8 gap-1.5 font-bold text-xs cursor-pointer shadow-md bg-primary text-primary-foreground"
+              disabled={cart.length === 0 || hasLossItem}
+              className={cn(
+                "w-full h-8 gap-1.5 font-bold text-xs cursor-pointer shadow-md",
+                hasLossItem
+                  ? "bg-destructive text-destructive-foreground opacity-60 cursor-not-allowed"
+                  : "bg-primary text-primary-foreground"
+              )}
             >
               <ReceiptIcon className="size-3.5" />
-              <span>Proceed ({selectedPaymentMode})</span>
+              <span>{hasLossItem ? "🚫 Checkout Blocked (Loss Warning)" : `Proceed (${selectedPaymentMode})`}</span>
             </Button>
           </div>
         </div>
@@ -755,6 +827,7 @@ export function PosCounter() {
           searchInputRef.current?.focus();
         }}
         cartSubtotal={grossSubtotal}
+        cartCostTotal={totalCartCost}
         initialDiscount={totalDiscount}
         initialPaymentMode={selectedPaymentMode}
         onConfirm={handleCheckout}

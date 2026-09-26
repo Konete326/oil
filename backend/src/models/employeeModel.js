@@ -14,7 +14,7 @@ const employeeSchema = new mongoose.Schema(
     },
     department: {
       type: String,
-      default: "General",
+      default: "",
       trim: true,
     },
     phone: {

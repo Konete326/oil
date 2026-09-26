@@ -6,6 +6,7 @@ const posSaleItemSchema = new mongoose.Schema({
   sku: { type: String },
   unitType: { type: String, default: "Liters" },
   quantity: { type: Number, required: true, min: 1 },
+  costPrice: { type: Number, default: 0 },
   unitPrice: { type: Number, required: true },
   subtotal: { type: Number, required: true },
 });
@@ -20,10 +21,14 @@ const posSaleSchema = new mongoose.Schema(
     subtotal: { type: Number, required: true },
     discount: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true },
+    totalCost: { type: Number, default: 0 },
+    totalProfit: { type: Number, default: 0 },
     paymentMode: { type: String, enum: ["Cash", "Card", "Bank Transfer", "Credit / Khata"], default: "Cash" },
     cashReceived: { type: Number, default: 0 },
     changeDue: { type: Number, default: 0 },
     cashierName: { type: String, default: "Admin Cashier" },
+    shiftDate: { type: String },
+    isNextDayShift: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

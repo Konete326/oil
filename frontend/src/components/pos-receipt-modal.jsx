@@ -181,8 +181,8 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                 <tr className="bg-gray-200 text-black border-b border-black font-bold uppercase text-[11px]">
                   <th className="py-2 px-3 w-12 text-center border-r border-black">#</th>
                   <th className="py-2 px-3 border-r border-black">PRODUCT / ITEM</th>
-                  <th className="py-2 px-3 text-center border-r border-black w-24">QUANTITY</th>
-                  <th className="py-2 px-3 text-right border-r border-black w-28">RATE (RS)</th>
+                  <th className="py-2 px-3 text-center border-r border-black w-24">QTY (LITERS)</th>
+                  <th className="py-2 px-3 text-right border-r border-black w-28">RATE / L (RS)</th>
                   <th className="py-2 px-3 text-right w-32">TOTAL (RS)</th>
                 </tr>
               </thead>
@@ -193,10 +193,10 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                       {idx + 1}
                     </td>
                     <td className="py-2 px-3 font-bold text-black uppercase border-r border-black">
-                      {item.productName} {item.unitType ? `(${item.unitType})` : ""}
+                      {item.productName}
                     </td>
                     <td className="py-2 px-3 text-center font-bold font-mono border-r border-black">
-                      {item.quantity}
+                      {item.quantity} L
                     </td>
                     <td className="py-2 px-3 text-right font-mono border-r border-black">
                       {Number(item.unitPrice).toFixed(2)}
@@ -211,7 +211,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                     TOTAL
                   </td>
                   <td className="py-2.5 px-3 text-center font-mono border-r border-black text-black">
-                    {totalQuantityLiters}
+                    {totalQuantityLiters} L
                   </td>
                   <td className="py-2.5 px-3 border-r border-black"></td>
                   <td className="py-2.5 px-3 text-right font-mono text-sm text-black">

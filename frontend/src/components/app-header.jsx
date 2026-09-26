@@ -19,7 +19,9 @@ import {
   fetchPosSales,
   fetchMills,
   fetchSuppliersApi,
+  fetchCurrentShiftStatusApi,
 } from "@/lib/api";
+import { ShopClosingModal } from "@/components/shop-closing-modal";
 import {
   SearchIcon,
   BellIcon,
@@ -33,6 +35,8 @@ import {
   TruckIcon,
   ChevronDownIcon,
   ShieldAlertIcon,
+  StoreIcon,
+  FileSpreadsheetIcon,
 } from "lucide-react";
 
 export function AppHeader({ user, onLogout }) {
@@ -45,6 +49,19 @@ export function AppHeader({ user, onLogout }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
+  const [isShopModalOpen, setIsShopModalOpen] = useState(false);
+  const [shiftStatus, setShiftStatus] = useState(null);
+
+  const refreshShiftStatus = async () => {
+    const res = await fetchCurrentShiftStatusApi();
+    if (res?.success && res.data) setShiftStatus(res.data);
+  };
+
+  useEffect(() => {
+    refreshShiftStatus();
+    const interval = setInterval(refreshShiftStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const searchRef = useRef(null);
   const quickActionRef = useRef(null);
@@ -136,7 +153,7 @@ export function AppHeader({ user, onLogout }) {
               results.push({
                 id: `prod-${p._id}`,
                 title: p.name,
-                subtitle: `SKU: ${p.sku} | Brand: ${p.brand} | Stock: ${p.stockQuantity}`,
+                subtitle: `SKU: ${p.sku} | Stock: ${p.stockQuantity}`,
                 category: "Products & Stock",
                 path: "/products",
                 icon: <PackageIcon className="size-4 text-primary" />,
@@ -284,6 +301,13 @@ export function AppHeader({ user, onLogout }) {
       perm: "ledger",
       icon: <BookOpenIcon className="size-3.5 text-amber-500" />,
     },
+    {
+      label: "Master Platform Report",
+      path: "/financial-reports",
+      state: null,
+      perm: "financial-reports",
+      icon: <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />,
+    },
   ].filter((a) => hasPermission(a.perm));
 
   return (
@@ -403,6 +427,35 @@ export function AppHeader({ user, onLogout }) {
           </div>
         )}
 
+        <Button
+          size="sm"
+          variant={shiftStatus?.isClosed ? "outline" : "default"}
+          onClick={() => setIsShopModalOpen(true)}
+          className={cn(
+            "gap-1.5 h-9 px-2.5 text-xs font-semibold shadow-xs cursor-pointer transition-all",
+            shiftStatus?.isClosed
+              ? "border-border text-muted-foreground bg-muted/40 hover:bg-muted"
+              : "bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
+          )}
+          title={shiftStatus?.isClosed ? "Shop is closed" : "Manual Shop Closing (Z-Report)"}
+        >
+          <span className="relative flex h-2 w-2">
+            {!shiftStatus?.isClosed && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            )}
+            <span
+              className={cn(
+                "relative inline-flex rounded-full h-2 w-2",
+                shiftStatus?.isClosed ? "bg-muted-foreground" : "bg-emerald-400"
+              )}
+            />
+          </span>
+          <StoreIcon className="size-3.5" />
+          <span className="hidden md:inline font-mono">
+            {shiftStatus?.isClosed ? "Shop Closed" : "Shop Close"}
+          </span>
+        </Button>
+
         <SyncStatusBadge />
         <LanguageSelector />
 
@@ -426,6 +479,15 @@ export function AppHeader({ user, onLogout }) {
         />
         <NavUser user={user} onLogout={onLogout} />
       </div>
+
+      <ShopClosingModal
+        isOpen={isShopModalOpen}
+        onClose={() => setIsShopModalOpen(false)}
+        onSuccess={() => {
+          refreshShiftStatus();
+          window.dispatchEvent(new CustomEvent("refresh-dashboard"));
+        }}
+      />
     </header>
   );
 }

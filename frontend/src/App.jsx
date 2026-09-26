@@ -4,9 +4,7 @@ import { getCurrentUserApi, refreshTokenApi, logoutUserApi, fetchHydrationDataAp
 import { AppShell } from "@/components/app-shell";
 import { ToastNotificationProvider } from "@/components/toast-notification-provider";
 import { Dashboard } from "@/components/dashboard";
-import { CategoryManager } from "@/components/category-manager";
 import { ProductManager } from "@/components/product-manager";
-import { TextileManager } from "@/components/textile-manager";
 import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
 import { CustomerManager } from "@/components/customer-manager";
@@ -135,11 +133,11 @@ export default function App() {
                     <AppShell user={user} onLogout={handleLogout}>
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
-                        <Route path="/categories" element={<CategoryManager />} />
+                        <Route path="/categories" element={<Navigate to="/products" replace />} />
                         <Route path="/products" element={<ProductManager />} />
                         <Route path="/pos" element={<PosCounter />} />
                         <Route path="/pos/history" element={<PosHistory />} />
-                        <Route path="/textile" element={<TextileManager />} />
+                        <Route path="/textile" element={<Navigate to="/pos" replace />} />
                         <Route path="/customers" element={<CustomerManager />} />
                         <Route path="/ledger" element={<LedgerManager />} />
                         <Route path="/cash" element={<CashManager />} />
