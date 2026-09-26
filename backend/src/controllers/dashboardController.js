@@ -3,7 +3,6 @@ import { Product } from "../models/productModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Expense } from "../models/expenseModel.js";
 import { AuditLog } from "../models/auditModel.js";
-import { CashTransaction } from "../models/cashModel.js";
 import { ShopShift } from "../models/shopShiftModel.js";
 
 export const getDashboardData = async (req, res, next) => {
@@ -13,13 +12,12 @@ export const getDashboardData = async (req, res, next) => {
     const todayStr = now.toISOString().split("T")[0];
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [posSales, products, customers, expenses, auditLogs, cashTxs, closedShift] = await Promise.all([
+    const [posSales, products, customers, expenses, auditLogs, closedShift] = await Promise.all([
       PosSale.find().sort({ createdAt: -1 }),
       Product.find(),
       Customer.find(),
       Expense.find(),
       AuditLog.find().sort({ timestamp: -1 }).limit(10),
-      CashTransaction.find(),
       ShopShift.findOne({ shiftDate: todayStr, isClosed: true }),
     ]);
 
@@ -50,8 +48,6 @@ export const getDashboardData = async (req, res, next) => {
     const totalCustomerReceivable = customers.reduce((sum, c) => sum + (c.currentBalance || 0), 0);
     const pendingCustomersCount = customers.filter((c) => (c.currentBalance || 0) > 0).length;
 
-    const todayReceived = cashTxs.filter((c) => c.type === "Received" && new Date(c.transactionDate || c.createdAt).toISOString().split("T")[0] === todayStr).reduce((sum, c) => sum + (c.amount || 0), 0);
-    const todayPaid = cashTxs.filter((c) => c.type === "Paid" && new Date(c.transactionDate || c.createdAt).toISOString().split("T")[0] === todayStr).reduce((sum, c) => sum + (c.amount || 0), 0);
     const monthlySales = posSales.filter((s) => new Date(s.createdAt) >= firstDayOfMonth).reduce((sum, s) => sum + (s.grandTotal || 0), 0);
 
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -93,10 +89,10 @@ export const getDashboardData = async (req, res, next) => {
           receivablesSummary: { totalReceivable: totalCustomerReceivable, formattedTotal: `Rs. ${totalCustomerReceivable.toLocaleString()}`, customerReceivable: totalCustomerReceivable, millReceivable: 0, pendingParties: pendingCustomersCount },
         },
         kpis: [
-          { id: "cash-received", label: "Total Cash Received Today", value: `Rs. ${todayReceived.toLocaleString()}`, type: "green" },
-          { id: "cash-paid", label: "Total Cash Paid Today", value: `Rs. ${todayPaid.toLocaleString()}`, type: "red" },
-          { id: "net-sales", label: "Net Sales Of This Month", value: `Rs. ${monthlySales.toLocaleString()}`, type: "blue" },
-          { id: "receivables", label: "Total Customer Receivables", value: `Rs. ${totalCustomerReceivable.toLocaleString()}`, type: "orange" },
+          { id: "stock-liters", label: "Total Stock in Hand", value: `${totalStockLiters.toLocaleString()} L`, subtext: `${inStockCount} Products in Stock`, type: "green" },
+          { id: "stock-val", label: "Total Stock Valuation", value: `Rs. ${stockValuation.toLocaleString()}`, subtext: "Inventory Asset Value", type: "blue" },
+          { id: "net-sales", label: "Net Sales Of This Month", value: `Rs. ${monthlySales.toLocaleString()}`, subtext: "Monthly POS Volume", type: "purple" },
+          { id: "receivables", label: "Customer Receivables", value: `Rs. ${totalCustomerReceivable.toLocaleString()}`, subtext: `${pendingCustomersCount} Pending Accounts`, type: "orange" },
         ],
         stats: [
           { label: "Total Sales Revenue", value: `Rs. ${totalRevenue.toLocaleString()}`, delta: totalRevenue > 0 ? 12.5 : 0 },

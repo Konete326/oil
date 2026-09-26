@@ -10,11 +10,10 @@ import { NetRevenueChart } from "@/components/net-revenue-chart";
 import { DashboardStats } from "@/components/stats";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowDownLeftIcon,
-  ArrowUpRightIcon,
+  DropletIcon,
+  LayersIcon,
   TrendingUpIcon,
-  WalletIcon,
-  PlusIcon,
+  WalletCardsIcon,
   ShoppingCartIcon,
   ReceiptIcon,
   PackageIcon,
@@ -41,17 +40,17 @@ export function Dashboard() {
   }, []);
 
   const kpis = data?.kpis || [
-    { label: "Total Cash Received Today", value: "Rs. 0", type: "green" },
-    { label: "Total Cash Paid Today", value: "Rs. 0", type: "red" },
-    { label: "Net Sales Of This Month", value: "Rs. 0", type: "blue" },
-    { label: "Total Receivable Balance", value: "Rs. 0", type: "orange" },
+    { label: "Total Stock in Hand", value: "0 L", subtext: "Active Stock in Liters", type: "green" },
+    { label: "Total Stock Valuation", value: "Rs. 0", subtext: "Asset value at cost", type: "blue" },
+    { label: "Net Sales Of This Month", value: "Rs. 0", subtext: "Monthly Volume", type: "purple" },
+    { label: "Customer Receivables", value: "Rs. 0", subtext: "Pending Khata Accounts", type: "orange" },
   ];
 
   return (
     <div className="w-full space-y-6">
       <div className="border-b border-border pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
-        <p className="text-xs text-muted-foreground">Real-time KPI overview, daily cash inflow/outflow, and financial metrics.</p>
+        <p className="text-xs text-muted-foreground">Real-time KPI overview, oil inventory stock status, and sales metrics.</p>
       </div>
 
       <DashboardHeroCards heroCards={data?.heroCards} loading={loading} />
@@ -60,24 +59,24 @@ export function Dashboard() {
         {kpis.map((kpi, index) => {
           let cardStyle = "border-emerald-500/30 bg-emerald-500/10 text-emerald-500";
           let figureStyle = "text-emerald-500";
-          let Icon = ArrowDownLeftIcon;
+          let Icon = DropletIcon;
 
-          if (kpi.type === "red" || index === 1) {
-            cardStyle = "border-rose-500/30 bg-rose-500/10 text-rose-500";
-            figureStyle = "text-rose-500";
-            Icon = ArrowUpRightIcon;
-          } else if (kpi.type === "blue" || index === 2) {
+          if (kpi.type === "blue" || index === 1) {
             cardStyle = "border-blue-500/30 bg-blue-500/10 text-blue-500";
             figureStyle = "text-blue-500";
+            Icon = LayersIcon;
+          } else if (kpi.type === "purple" || index === 2) {
+            cardStyle = "border-indigo-500/30 bg-indigo-500/10 text-indigo-500";
+            figureStyle = "text-indigo-500";
             Icon = TrendingUpIcon;
           } else if (kpi.type === "orange" || index === 3) {
             cardStyle = "border-amber-500/30 bg-amber-500/10 text-amber-500";
             figureStyle = "text-amber-500";
-            Icon = WalletIcon;
+            Icon = WalletCardsIcon;
           }
 
           return (
-            <div key={kpi.label || index} className={`rounded-xl border p-4 shadow-sm bg-card transition-all space-y-2`}>
+            <div key={kpi.label || index} className="rounded-xl border p-4 shadow-xs bg-card transition-all space-y-2 hover:border-border/80">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
                 <div className={`p-2 rounded-lg border ${cardStyle}`}>
@@ -85,10 +84,10 @@ export function Dashboard() {
                 </div>
               </div>
               <div>
-                <p className={`text-3xl font-extrabold tabular-nums tracking-tight ${figureStyle}`}>
+                <p className={`text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight ${figureStyle}`}>
                   {kpi.value}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-1 font-medium">Real-time Metrics</p>
+                <p className="text-[11px] text-muted-foreground mt-1 font-medium">{kpi.subtext || "Real-time Metrics"}</p>
               </div>
             </div>
           );
