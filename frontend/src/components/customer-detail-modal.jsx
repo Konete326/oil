@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { CloudLoader } from "@/components/ui/cloud-loader";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal";
-import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon } from "lucide-react";
+import { CustomerTrialSheetModal } from "@/components/customer-trial-sheet-modal";
+import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export function CustomerDetailModal({ isOpen, onClose, customerId }) {
@@ -13,6 +14,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
   const [error, setError] = useState("");
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [isDiaryOpen, setIsDiaryOpen] = useState(false);
+  const [isTrialSheetOpen, setIsTrialSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("sales");
 
   useEffect(() => {
@@ -63,14 +65,25 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-auto">
+            <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+              <Button
+                onClick={() => setIsTrialSheetOpen(true)}
+                size="sm"
+                variant="outline"
+                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+                title="Customer Individual Trial Balance Sheet"
+              >
+                <ScaleIcon className="size-3.5 text-amber-600" />
+                <span>Trial Sheet (PDF)</span>
+              </Button>
+
               <Button
                 onClick={() => setIsDiaryOpen(true)}
                 size="sm"
                 variant="outline"
-                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+                className="gap-1.5 cursor-pointer text-xs font-bold border-border hover:bg-muted"
               >
-                <BookOpenIcon className="size-3.5 text-amber-600" />
+                <BookOpenIcon className="size-3.5 text-primary" />
                 <span>کھاتہ ڈائری</span>
               </Button>
 
@@ -299,6 +312,14 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
               fetchCustomerDetail(customerId).then(setData).catch(() => {});
             }
           }}
+        />
+      )}
+
+      {customer && (
+        <CustomerTrialSheetModal
+          isOpen={isTrialSheetOpen}
+          onClose={() => setIsTrialSheetOpen(false)}
+          customer={customer}
         />
       )}
     </>

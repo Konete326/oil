@@ -3,6 +3,7 @@ import { fetchSupplierDetailApi, fetchSupplierLedgerApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { CloudLoader } from "@/components/ui/cloud-loader";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
+import { SupplierTrialSheetModal } from "@/components/supplier-trial-sheet-modal";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import {
   XIcon,
@@ -16,6 +17,7 @@ import {
   ArrowUpRightIcon,
   ArrowDownLeftIcon,
   ClockIcon,
+  ScaleIcon,
 } from "lucide-react";
 
 export function SupplierDetailModal({ isOpen, onClose, supplier }) {
@@ -23,6 +25,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
   const [ledgerEntries, setLedgerEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
+  const [isTrialSheetOpen, setIsTrialSheetOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && supplier?._id) {
@@ -100,6 +103,17 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+              <Button
+                onClick={() => setIsTrialSheetOpen(true)}
+                size="sm"
+                variant="outline"
+                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+                title="Supplier Individual Trial Balance Sheet"
+              >
+                <ScaleIcon className="size-3.5 text-amber-600" />
+                <span>Trial Sheet (PDF)</span>
+              </Button>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -249,6 +263,14 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
             openingBalance: 0,
           }}
           ledgerEntries={ledgerEntries}
+        />
+      )}
+
+      {currentSup && (
+        <SupplierTrialSheetModal
+          isOpen={isTrialSheetOpen}
+          onClose={() => setIsTrialSheetOpen(false)}
+          supplier={currentSup}
         />
       )}
     </>

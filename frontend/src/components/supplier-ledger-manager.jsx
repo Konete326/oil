@@ -505,6 +505,15 @@ export function SupplierLedgerManager() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
+                            onClick={() => setSelectedSupplierForTrial(sup)}
+                            className="size-7 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                            title="Supplier Individual Trial Balance Sheet (PDF)"
+                          >
+                            <ScaleIcon className="size-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => setSupplierToView(sup)}
                             className="size-7 text-primary hover:bg-primary/10 cursor-pointer"
                             title="View Supplier Profile & Details"

@@ -442,10 +442,11 @@ export function TrialBalanceView({
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedCustomerForTrial(c)}
-                            className="h-7 text-[11px] gap-1 px-2.5 cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                            className="h-7 text-[11px] gap-1 px-2.5 cursor-pointer hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-medium"
+                            title="Customer Individual Trial Balance Sheet & PDF Print"
                           >
-                            <EyeIcon className="size-3 text-primary" />
-                            <span>Trial Sheet Dekhein</span>
+                            <ScaleIcon className="size-3 text-amber-600" />
+                            <span>Trial Sheet (PDF)</span>
                           </Button>
                         </td>
                       </tr>
@@ -624,10 +625,11 @@ export function TrialBalanceView({
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedSupplierForTrial(s)}
-                            className="h-7 text-[11px] gap-1 px-2.5 cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                            className="h-7 text-[11px] gap-1 px-2.5 cursor-pointer hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-medium"
+                            title="Supplier Individual Trial Balance Sheet & PDF Print"
                           >
-                            <EyeIcon className="size-3 text-primary" />
-                            <span>Trial Sheet Dekhein</span>
+                            <ScaleIcon className="size-3 text-amber-600" />
+                            <span>Trial Sheet (PDF)</span>
                           </Button>
                         </td>
                       </tr>
