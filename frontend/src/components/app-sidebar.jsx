@@ -2,7 +2,7 @@
 
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LogoIcon } from "@/components/logo";
+import softwareLogoImg from "@/assets/logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -31,13 +31,20 @@ export function AppSidebar() {
       collapsible="icon"
       variant="sidebar"
     >
-      <SidebarHeader className="h-14 justify-center border-b px-2">
-        <SidebarMenuButton asChild tooltip="Al Khaleej Lubricants">
-          <Link to="/" className="cursor-pointer">
-            <span data-slot="icon" className="flex items-center shrink-0"><LogoIcon /></span>
-            <span data-slot="label" className="font-medium text-foreground!">Al Khaleej Lubricants</span>
-          </Link>
-        </SidebarMenuButton>
+      <SidebarHeader className="h-16 justify-center border-b px-2.5">
+        <Link to="/" className="flex items-center gap-2.5 overflow-hidden group/logo cursor-pointer py-1">
+          <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 p-1 border border-primary/20 shadow-2xs group-hover/logo:scale-105 transition-transform">
+            <img src={softwareLogoImg} alt="Elite Dev Logo" className="size-full object-contain" />
+          </div>
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <span className="font-bold text-sm text-foreground tracking-tight block truncate">
+              Al Khaleej Lubricants
+            </span>
+            <span className="text-[10px] text-muted-foreground font-medium block truncate">
+              by Elite Dev
+            </span>
+          </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>
