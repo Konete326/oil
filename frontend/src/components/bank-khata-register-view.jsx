@@ -6,7 +6,9 @@ import {
   PrinterIcon,
   FileSpreadsheetIcon,
   SearchIcon,
-  CalendarIcon,
+  Edit2Icon,
+  LandmarkIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,28 +28,57 @@ import {
   fetchEmployeeAdvanceLedgerApi,
 } from "@/lib/api";
 import * as XLSX from "xlsx";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 12;
 
-const DEFAULT_BANKS = [
-  "HBL",
-  "Meezan Bank",
-  "Bank Alfalah",
-  "MCB Bank",
-  "Allied Bank (ABL)",
-  "UBL",
-  "Cash in Hand (Tijori)",
+const INITIAL_ACCOUNTS = [
+  {
+    id: "acc_hbl_01",
+    bankName: "HBL (Habib Bank Limited)",
+    accountTitle: "Al Khaleej Lubricants (Primary Current)",
+    accountNumber: "0192-8374619-01",
+    branchName: "Auto Market Branch",
+    accountType: "Current",
+    openingBalance: 0,
+    notes: "Main account for lubricant supplier bills",
+  },
+  {
+    id: "acc_meezan_01",
+    bankName: "Meezan Bank",
+    accountTitle: "Al Khaleej Sales & Collections",
+    accountNumber: "0293-8475618-02",
+    branchName: "Commercial Branch",
+    accountType: "Current",
+    openingBalance: 0,
+    notes: "Customer bank payments and recoveries",
+  },
+  {
+    id: "acc_cash_01",
+    bankName: "Cash in Hand (Tijori / Counter)",
+    accountTitle: "Shop Drawer Cash",
+    accountNumber: "CASH-TIJORI-01",
+    branchName: "Main Shop",
+    accountType: "Tijori / Cash",
+    openingBalance: 0,
+    notes: "Physical cash in register",
+  },
 ];
 
 export function BankKhataRegisterView() {
-  const [selectedBank, setSelectedBank] = useState("HBL");
-  const [customBanks, setCustomBanks] = useState(() => {
+  const [accounts, setAccounts] = useState(() => {
     try {
-      const stored = localStorage.getItem("custom_bank_accounts");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
+      const stored = localStorage.getItem("bank_accounts_v2");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_ACCOUNTS;
+  });
+
+  const [selectedAccountId, setSelectedAccountId] = useState(() => {
+    return accounts[0]?.id || "acc_hbl_01";
   });
 
   const [loading, setLoading] = useState(true);
@@ -64,15 +95,17 @@ export function BankKhataRegisterView() {
 
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
   const [entryModalType, setEntryModalType] = useState("Received");
-  const [isAddBankModalOpen, setIsAddBankModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState(null);
   const [entrySaving, setEntrySaving] = useState(false);
 
   const [entryToDelete, setEntryToDelete] = useState(null);
+  const [accountToDelete, setAccountToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const allBankOptions = useMemo(() => {
-    return Array.from(new Set([...DEFAULT_BANKS, ...customBanks]));
-  }, [customBanks]);
+  const activeAccount = useMemo(() => {
+    return accounts.find((acc) => acc.id === selectedAccountId) || accounts[0] || INITIAL_ACCOUNTS[0];
+  }, [accounts, selectedAccountId]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -101,38 +134,84 @@ export function BankKhataRegisterView() {
     loadAllData();
   }, []);
 
-  const handleAddBank = (bankName) => {
-    if (!allBankOptions.includes(bankName)) {
-      const updated = [...customBanks, bankName];
-      setCustomBanks(updated);
-      localStorage.setItem("custom_bank_accounts", JSON.stringify(updated));
-      setSelectedBank(bankName);
-      toast.success(`Bank account "${bankName}" added!`);
+  const handleSaveAccount = (accountData) => {
+    let updated;
+    const exists = accounts.some((a) => a.id === accountData.id);
+    if (exists) {
+      updated = accounts.map((a) => (a.id === accountData.id ? accountData : a));
+      toast.success(`Account "${accountData.accountTitle}" updated successfully!`);
     } else {
-      setSelectedBank(bankName);
+      updated = [...accounts, accountData];
+      setSelectedAccountId(accountData.id);
+      toast.success(`Account "${accountData.accountTitle}" added successfully!`);
     }
+    setAccounts(updated);
+    localStorage.setItem("bank_accounts_v2", JSON.stringify(updated));
+    setEditingAccount(null);
   };
 
-  const ledgerEntries = useMemo(() => {
-    const isCashAccount = selectedBank.toLowerCase().includes("cash") || selectedBank.toLowerCase().includes("tijori");
-    const currentBankKey = selectedBank.toLowerCase();
+  const handleDeleteAccountConfirm = () => {
+    if (!accountToDelete) return;
+    const updated = accounts.filter((a) => a.id !== accountToDelete.id);
+    setAccounts(updated);
+    localStorage.setItem("bank_accounts_v2", JSON.stringify(updated));
+    if (selectedAccountId === accountToDelete.id) {
+      setSelectedAccountId(updated[0]?.id || "acc_hbl_01");
+    }
+    toast.success(`Account "${accountToDelete.accountTitle}" removed`);
+    setAccountToDelete(null);
+  };
+
+  const computeLedgerForAccount = (acc) => {
+    if (!acc) return [];
+    const isCashAccount =
+      acc.accountType === "Tijori / Cash" ||
+      acc.bankName.toLowerCase().includes("cash") ||
+      acc.bankName.toLowerCase().includes("tijori");
+
+    const accTitleKey = (acc.accountTitle || "").toLowerCase();
+    const accNumKey = (acc.accountNumber || "").toLowerCase();
+    const accBankKey = (acc.bankName || "").toLowerCase().split(" ")[0];
 
     const result = [];
+
+    if (acc.openingBalance && acc.openingBalance > 0) {
+      result.push({
+        id: `open-${acc.id}`,
+        date: "2024-01-01",
+        tafseel: "Opening Balance",
+        reason: "Initial Account Balance Setup",
+        folio: "OPEN-01",
+        jama: acc.openingBalance,
+        naam: 0,
+        notes: "Account Opening Balance",
+        sourceType: "Initial",
+        rawId: null,
+        isDeletable: false,
+      });
+    }
 
     cashTxList.forEach((tx) => {
       const mode = (tx.paymentMode || "").toLowerCase();
       const notes = (tx.notes || "").toLowerCase();
       const party = (tx.partyName || "").toLowerCase();
 
-      const matchesBank =
-        isCashAccount
-          ? mode === "cash"
-          : mode.includes("bank") ||
-            mode.includes("cheque") ||
-            notes.includes(currentBankKey) ||
-            party.includes(currentBankKey);
+      let matches = false;
+      if (tx.accountId) {
+        matches = tx.accountId === acc.id;
+      } else if (isCashAccount) {
+        matches = mode === "cash" && !notes.includes("bank");
+      } else {
+        matches =
+          notes.includes(accNumKey) ||
+          notes.includes(accTitleKey) ||
+          notes.includes(accBankKey) ||
+          party.includes(accBankKey) ||
+          mode.includes("bank") ||
+          mode.includes("cheque");
+      }
 
-      if (matchesBank) {
+      if (matches) {
         result.push({
           id: `cash-${tx._id}`,
           date: tx.transactionDate || tx.createdAt,
@@ -161,7 +240,7 @@ export function BankKhataRegisterView() {
           id: `sale-${sale._id}`,
           date: sale.createdAt,
           tafseel: `${sale.customerName || "Walk-in Customer"} (Counter Sale)`,
-          reason: `POS Bill #${sale.saleNumber} - Farokht Maal`,
+          reason: `POS Bill #${sale.saleNumber}`,
           folio: sale.saleNumber,
           jama: Number(sale.grandTotal) || 0,
           naam: 0,
@@ -175,7 +254,7 @@ export function BankKhataRegisterView() {
     purchasesList.forEach((pur) => {
       const status = (pur.paymentStatus || "").toLowerCase();
       const isPaid = status === "paid" || status.includes("bank");
-      if (isPaid) {
+      if (isPaid && !isCashAccount) {
         result.push({
           id: `pur-${pur._id}`,
           date: pur.date || pur.createdAt,
@@ -241,7 +320,22 @@ export function BankKhataRegisterView() {
         balance: runningBalance,
       };
     });
-  }, [selectedBank, cashTxList, salesList, purchasesList, expensesList, advancesList]);
+  };
+
+  const accountBalances = useMemo(() => {
+    const map = {};
+    accounts.forEach((acc) => {
+      const entries = computeLedgerForAccount(acc);
+      const j = entries.reduce((s, e) => s + (e.jama || 0), 0);
+      const n = entries.reduce((s, e) => s + (e.naam || 0), 0);
+      map[acc.id] = j - n;
+    });
+    return map;
+  }, [accounts, cashTxList, salesList, purchasesList, expensesList, advancesList]);
+
+  const ledgerEntries = useMemo(() => {
+    return computeLedgerForAccount(activeAccount);
+  }, [activeAccount, cashTxList, salesList, purchasesList, expensesList, advancesList]);
 
   const filteredEntries = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -295,8 +389,8 @@ export function BankKhataRegisterView() {
       await createCashTransactionApi(payload);
       toast.success(
         payload.type === "Received"
-          ? `Rs ${payload.amount.toLocaleString()} deposited into ${selectedBank} account!`
-          : `Rs ${payload.amount.toLocaleString()} withdrawn from ${selectedBank} account!`
+          ? `Rs ${payload.amount.toLocaleString()} deposited into ${activeAccount.accountTitle}!`
+          : `Rs ${payload.amount.toLocaleString()} withdrawn from ${activeAccount.accountTitle}!`
       );
       setIsEntryModalOpen(false);
       loadAllData();
@@ -312,7 +406,7 @@ export function BankKhataRegisterView() {
     try {
       setDeleting(true);
       await deleteCashTransactionApi(entryToDelete);
-      toast.success("Bank transaction deleted successfully!");
+      toast.success("Transaction deleted successfully!");
       setEntryToDelete(null);
       loadAllData();
     } catch (err) {
@@ -337,8 +431,11 @@ export function BankKhataRegisterView() {
 
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, `Khata_${selectedBank}`);
-    XLSX.writeFile(workbook, `Bank_Khata_${selectedBank}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, `Khata_${activeAccount.bankName.slice(0, 15)}`);
+    XLSX.writeFile(
+      workbook,
+      `Khata_${activeAccount.accountTitle.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
     toast.success("Bank register exported to Excel successfully!");
   };
 
@@ -348,33 +445,116 @@ export function BankKhataRegisterView() {
 
   return (
     <div className="space-y-3.5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-card px-2.5 py-1 rounded-lg border border-border shadow-2xs">
-            <span className="text-xs text-muted-foreground font-medium">Account:</span>
-            <select
-              value={selectedBank}
-              onChange={(e) => {
-                setSelectedBank(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-6.5 text-xs font-semibold rounded bg-background px-1.5 text-foreground border border-input cursor-pointer focus:outline-none"
-            >
-              {allBankOptions.map((bank) => (
-                <option key={bank} value={bank}>
-                  {bank}
-                </option>
-              ))}
-            </select>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsAddBankModalOpen(true)}
-              className="h-6.5 text-[11px] px-1.5 text-primary hover:bg-primary/10 cursor-pointer gap-1"
-            >
-              <PlusIcon className="size-3" />
-              <span>New</span>
-            </Button>
+      <div className="bg-card p-2.5 rounded-xl border border-border shadow-2xs space-y-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <LandmarkIcon className="size-4 text-primary" />
+            <span className="text-xs font-bold text-foreground">Bank & Cash Accounts:</span>
+            <span className="text-[11px] text-muted-foreground">Select an account to view its ledger and live balance</span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setEditingAccount(null);
+              setIsAccountModalOpen(true);
+            }}
+            className="h-7 text-xs px-2.5 gap-1.5 text-primary cursor-pointer hover:bg-primary/10"
+          >
+            <PlusIcon className="size-3.5" />
+            <span>Add Bank Account</span>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {accounts.map((acc) => {
+            const isSelected = acc.id === selectedAccountId;
+            const bal = accountBalances[acc.id] ?? 0;
+            return (
+              <div
+                key={acc.id}
+                onClick={() => {
+                  setSelectedAccountId(acc.id);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-2.5 relative group",
+                  isSelected
+                    ? "bg-primary/10 border-primary/40 shadow-xs ring-1 ring-primary/30"
+                    : "bg-background hover:bg-muted/40 border-border/80"
+                )}
+              >
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-bold text-foreground truncate">{acc.accountTitle}</span>
+                    <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-muted font-semibold text-muted-foreground">
+                      {acc.accountType}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-mono truncate">
+                    {acc.bankName} • {acc.accountNumber}
+                  </p>
+                  <div className="flex items-center gap-1 pt-0.5">
+                    <span className="text-[10px] text-muted-foreground">Balance:</span>
+                    <span
+                      className={cn(
+                        "text-xs font-mono font-bold",
+                        bal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                      )}
+                    >
+                      Rs {bal.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingAccount(acc);
+                      setIsAccountModalOpen(true);
+                    }}
+                    title="Edit Account Details"
+                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Edit2Icon className="size-3" />
+                  </button>
+                  {accounts.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAccountToDelete(acc);
+                      }}
+                      title="Delete Account"
+                      className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive cursor-pointer"
+                    >
+                      <Trash2Icon className="size-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-0.5">
+        <div className="flex items-center gap-2">
+          <div className="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+            <LandmarkIcon className="size-3.5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+              <span>{activeAccount.accountTitle}</span>
+              <span className="text-xs font-mono font-normal text-muted-foreground">
+                ({activeAccount.accountNumber})
+              </span>
+            </h2>
+            <p className="text-[10.5px] text-muted-foreground">
+              {activeAccount.bankName} {activeAccount.branchName ? `• ${activeAccount.branchName}` : ""}
+            </p>
           </div>
         </div>
 
@@ -432,7 +612,7 @@ export function BankKhataRegisterView() {
         totalNaam={totalNaam}
         todayNaam={todayNaam}
         entriesCount={ledgerEntries.length}
-        selectedBank={selectedBank}
+        activeAccount={activeAccount}
       />
 
       <div className="rounded-xl border border-border bg-card p-2 shadow-2xs">
@@ -446,7 +626,7 @@ export function BankKhataRegisterView() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8 text-xs h-7.5 bg-background focus:bg-background"
+              className="ps-8 text-xs h-7.5 bg-background"
             />
           </div>
 
@@ -509,22 +689,26 @@ export function BankKhataRegisterView() {
           setEntryModalType("Received");
           setIsEntryModalOpen(true);
         }}
-        selectedBank={selectedBank}
+        selectedBank={activeAccount.accountTitle}
       />
 
       <BankEntryModal
         isOpen={isEntryModalOpen}
         onClose={() => setIsEntryModalOpen(false)}
         type={entryModalType}
-        selectedBank={selectedBank}
+        activeAccount={activeAccount}
         onSave={handleSaveEntry}
         loading={entrySaving}
       />
 
       <BankAccountModal
-        isOpen={isAddBankModalOpen}
-        onClose={() => setIsAddBankModalOpen(false)}
-        onAddBank={handleAddBank}
+        isOpen={isAccountModalOpen}
+        onClose={() => {
+          setIsAccountModalOpen(false);
+          setEditingAccount(null);
+        }}
+        onSaveAccount={handleSaveAccount}
+        editingAccount={editingAccount}
       />
 
       <ConfirmModal
@@ -534,6 +718,14 @@ export function BankKhataRegisterView() {
         loading={deleting}
         title="Delete Bank Entry"
         message="Are you sure you want to delete this manual bank entry? This action cannot be undone."
+      />
+
+      <ConfirmModal
+        isOpen={!!accountToDelete}
+        onClose={() => setAccountToDelete(null)}
+        onConfirm={handleDeleteAccountConfirm}
+        title="Delete Account"
+        message={`Are you sure you want to delete "${accountToDelete?.accountTitle}"?`}
       />
     </div>
   );

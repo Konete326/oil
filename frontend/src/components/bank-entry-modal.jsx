@@ -1,20 +1,32 @@
 import { useState, useEffect } from "react";
-import { ArrowDownLeftIcon, ArrowUpRightIcon, XIcon, Loader2Icon } from "lucide-react";
+import { ArrowDownLeftIcon, ArrowUpRightIcon, XIcon, Loader2Icon, LandmarkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+
+const TRANSACTION_CATEGORIES = [
+  "Oil Supplier Payment",
+  "Customer Payment",
+  "Shop Expense",
+  "Cash Deposit / Tijori Transfer",
+  "Staff Salary / Advance",
+  "Bank Charges",
+  "Inter-Account Transfer",
+  "Other / General",
+];
 
 export function BankEntryModal({
   isOpen,
   onClose,
   type = "Received",
-  selectedBank = "HBL",
+  activeAccount = null,
   onSave,
   loading = false,
 }) {
   const [party, setParty] = useState("");
   const [amount, setAmount] = useState("");
   const [ref, setRef] = useState("");
+  const [category, setCategory] = useState("Oil Supplier Payment");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
 
@@ -25,10 +37,11 @@ export function BankEntryModal({
       setParty("");
       setAmount("");
       setRef("");
+      setCategory(isDeposit ? "Customer Payment" : "Oil Supplier Payment");
       setDate(new Date().toISOString().slice(0, 10));
       setNotes("");
     }
-  }, [isOpen]);
+  }, [isOpen, isDeposit]);
 
   if (!isOpen) return null;
 
@@ -36,15 +49,20 @@ export function BankEntryModal({
     e.preventDefault();
     if (!party.trim() || !amount || Number(amount) <= 0) return;
 
+    const accountIdentifier = activeAccount
+      ? `${activeAccount.bankName} - ${activeAccount.accountTitle} (${activeAccount.accountNumber})`
+      : "Default Bank";
+
     onSave({
       type,
       partyName: party.trim(),
       amount: Number(amount),
-      category: "Bank Transfer",
+      category,
       paymentMode: "Bank Transfer",
       referenceNo: ref.trim() || `CHQ-${Date.now().toString().slice(-5)}`,
       transactionDate: date,
-      notes: `Bank: ${selectedBank} | ${notes.trim()}`,
+      notes: `[A/C: ${accountIdentifier}] ${notes.trim()}`,
+      accountId: activeAccount?.id,
     });
   };
 
@@ -63,10 +81,10 @@ export function BankEntryModal({
             </div>
             <div>
               <h3 className="font-bold text-sm text-foreground">
-                {isDeposit ? `Record Deposit (Jama) - ${selectedBank}` : `Record Withdrawal (Naam) - ${selectedBank}`}
+                {isDeposit ? "Record Deposit (Jama / Inflow)" : "Record Withdrawal (Naam / Outflow)"}
               </h3>
               <p className="text-[11px] text-muted-foreground">
-                {isDeposit ? "Deposit funds into bank account" : "Withdraw or pay funds from bank account"}
+                {activeAccount?.bankName} — {activeAccount?.accountTitle} ({activeAccount?.accountNumber})
               </p>
             </div>
           </div>
@@ -80,14 +98,29 @@ export function BankEntryModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+          <div className="p-2 rounded-lg bg-muted/40 border border-border/80 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <LandmarkIcon className="size-4 text-primary" />
+              <div>
+                <span className="font-bold text-foreground block">{activeAccount?.bankName}</span>
+                <span className="text-[10.5px] text-muted-foreground">
+                  Title: {activeAccount?.accountTitle} | A/C: {activeAccount?.accountNumber}
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold">
+              {activeAccount?.accountType || "Current"}
+            </span>
+          </div>
+
           <div className="space-y-1">
             <label className="font-semibold text-foreground">
-              {isDeposit ? "Source / Party / Customer *" : "Payee / Supplier / Particulars *"}
+              {isDeposit ? "Received From (Customer / Client / Source) *" : "Paid To (Supplier / Payee / Particulars) *"}
             </label>
             <Input
               required
               autoFocus
-              placeholder={isDeposit ? "e.g. Al-Madina Mills, Cash Deposit, Client Transfer" : "e.g. Shell Pakistan, Rent, Vendor Transfer"}
+              placeholder={isDeposit ? "e.g. Malik Auto Workshop, Cash Deposit" : "e.g. Shell Lubricants Distributor, Caltex Oil"}
               value={party}
               onChange={(e) => setParty(e.target.value)}
               className="h-8 text-xs"
@@ -109,9 +142,9 @@ export function BankEntryModal({
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-foreground">Cheque / Ref No.</label>
+              <label className="font-semibold text-foreground">Cheque / Slip / Ref #</label>
               <Input
-                placeholder="e.g. CHQ-90182 or Ref #"
+                placeholder="e.g. CHQ-90182 or IBFT-1029"
                 value={ref}
                 onChange={(e) => setRef(e.target.value)}
                 className="h-8 text-xs font-mono"
@@ -119,21 +152,38 @@ export function BankEntryModal({
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="font-semibold text-foreground">Date *</label>
-            <Input
-              type="date"
-              required
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="h-8 text-xs"
-            />
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="space-y-1">
+              <label className="font-semibold text-foreground">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                {TRANSACTION_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold text-foreground">Date *</label>
+              <Input
+                type="date"
+                required
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="h-8 text-xs"
+              />
+            </div>
           </div>
 
           <div className="space-y-1">
-            <label className="font-semibold text-foreground">Description / Notes</label>
+            <label className="font-semibold text-foreground">Particulars / Details / Notes</label>
             <Input
-              placeholder="e.g. Online bank transfer from Karachi branch..."
+              placeholder="e.g. 200L Drum supply invoice #4829 payment..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="h-8 text-xs"
@@ -161,7 +211,7 @@ export function BankEntryModal({
               )}
             >
               {loading && <Loader2Icon className="size-3 animate-spin" />}
-              <span>{isDeposit ? "Save Deposit" : "Save Withdrawal"}</span>
+              <span>{isDeposit ? "Record Deposit" : "Record Withdrawal"}</span>
             </Button>
           </div>
         </form>
