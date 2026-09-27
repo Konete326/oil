@@ -1,4 +1,14 @@
 import { cn } from "@/lib/utils";
+import softwareLogoImg from "@/assets/logo.png";
+
+export const SoftwareLogo = ({ className = "size-6", ...props }) => (
+  <img
+    src={softwareLogoImg}
+    alt="Software Logo"
+    className={cn("shrink-0 object-contain", className)}
+    {...props}
+  />
+);
 
 export const OilDropLogo = ({ className = "size-6", ...props }) => (
   <svg
@@ -56,13 +66,13 @@ export const PrintOilDropLogo = ({ className = "size-8", monochrome = false, ...
   </svg>
 );
 
-export const LogoIcon = ({ className, ...props }) => (
-  <OilDropLogo className={className} {...props} />
+export const LogoIcon = ({ className = "size-6", ...props }) => (
+  <SoftwareLogo className={className} {...props} />
 );
 
 export const Logo = ({ className, ...props }) => (
   <div className={cn("flex items-center gap-2", className)} {...props}>
-    <OilDropLogo className="size-6" />
+    <SoftwareLogo className="size-6" />
     <span className="font-bold text-lg text-foreground tracking-tight">Al Khaleej Lubricants</span>
   </div>
 );

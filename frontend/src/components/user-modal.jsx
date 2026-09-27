@@ -11,7 +11,7 @@ const ALL_AVAILABLE_PERMISSIONS = [
   { id: "products", label: "Products & Stock Inventory" },
   { id: "ledger", label: "Customer Ledger & Khata" },
   { id: "cash", label: "Cash Transactions Register" },
-  { id: "sales-purchases", label: "Sales & Purchase Reports" },
+  { id: "pos-history", label: "POS History & Reconciliation" },
   { id: "profit-loss", label: "Profit & Loss Calculator" },
   { id: "supplier-ledger", label: "Supplier / Refinery Ledger" },
   { id: "financial-reports", label: "Trial Balance & Reports" },

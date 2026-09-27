@@ -83,11 +83,6 @@ export const navGroups = [
             icon: <Building2Icon />,
           },
           {
-            title: "Sales & Purchases",
-            path: "/sales-purchases",
-            icon: <TrendingUpIcon />,
-          },
-          {
             title: "Profit & Loss Margin",
             path: "/profit-loss",
             icon: <CalculatorIcon />,

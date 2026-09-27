@@ -1,16 +1,43 @@
-import { useState } from "react";
-import { SearchIcon, ArrowUpRightIcon, ArrowDownLeftIcon } from "lucide-react";
+import { useState, useMemo } from "react";
+import { SearchIcon, ArrowUpRightIcon, ArrowDownLeftIcon, UsersIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export function CashPartyReport({ partySummaries = [], loading = false }) {
   const [search, setSearch] = useState("");
 
-  const filteredParties = partySummaries.filter((p) =>
-    p.partyName.toLowerCase().includes(search.toLowerCase())
-  );
+  const safeParties = useMemo(() => {
+    if (!Array.isArray(partySummaries)) return [];
+    return partySummaries.map((p) => {
+      const name = String(p.partyName || p.party || p.name || "Unknown Party").trim();
+      const totalPaid = Number(p.totalPaid || (p.type === "Paid" ? p.amount : 0)) || 0;
+      const totalReceived = Number(p.totalReceived || (p.type === "Received" ? p.amount : 0)) || 0;
+      const net = p.netBalance !== undefined ? Number(p.netBalance) : totalReceived - totalPaid;
+      return {
+        ...p,
+        partyName: name,
+        totalPaid,
+        totalReceived,
+        netBalance: net,
+        paidCount: Number(p.paidCount) || 0,
+        receivedCount: Number(p.receivedCount) || 0,
+        lastTransactionDate: p.lastTransactionDate || p.createdAt || p.date || null,
+      };
+    });
+  }, [partySummaries]);
 
-  const grandPaid = filteredParties.reduce((sum, p) => sum + (p.totalPaid || 0), 0);
-  const grandReceived = filteredParties.reduce((sum, p) => sum + (p.totalReceived || 0), 0);
+  const filteredParties = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return safeParties;
+    return safeParties.filter((p) => (p.partyName || "").toLowerCase().includes(q));
+  }, [safeParties, search]);
+
+  const grandPaid = useMemo(() => {
+    return filteredParties.reduce((sum, p) => sum + (p.totalPaid || 0), 0);
+  }, [filteredParties]);
+
+  const grandReceived = useMemo(() => {
+    return filteredParties.reduce((sum, p) => sum + (p.totalReceived || 0), 0);
+  }, [filteredParties]);
 
   return (
     <div className="space-y-3">
@@ -19,7 +46,7 @@ export function CashPartyReport({ partySummaries = [], loading = false }) {
           <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search party report..."
+            placeholder="Search party name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="ps-8 text-xs h-7.5 bg-background"
@@ -43,7 +70,7 @@ export function CashPartyReport({ partySummaries = [], loading = false }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase text-[10.5px] font-semibold tracking-wider">
               <tr>
-                <th className="p-2.5 ps-3.5">Party / Customer Name</th>
+                <th className="p-2.5 ps-3.5">Party / Account Title</th>
                 <th className="p-2.5 text-right">Total Paid (Out)</th>
                 <th className="p-2.5 text-right">Total Received (In)</th>
                 <th className="p-2.5 text-right">Net Flow</th>
@@ -65,11 +92,11 @@ export function CashPartyReport({ partySummaries = [], loading = false }) {
                   </td>
                 </tr>
               ) : (
-                filteredParties.map((party) => (
-                  <tr key={party.partyName} className="hover:bg-muted/20 transition-colors">
+                filteredParties.map((party, idx) => (
+                  <tr key={party.partyName || idx} className="hover:bg-muted/20 transition-colors">
                     <td className="p-2.5 ps-3.5 font-semibold text-foreground flex items-center gap-2">
                       <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[11px] shrink-0 border border-primary/20">
-                        {party.partyName.charAt(0).toUpperCase()}
+                        {party.partyName ? party.partyName.charAt(0).toUpperCase() : <UsersIcon className="size-3" />}
                       </div>
                       <span>{party.partyName}</span>
                     </td>

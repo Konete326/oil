@@ -436,10 +436,10 @@ export function AppHeader({ user, onLogout }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-3 flex-1 justify-end min-w-0">
-        <div ref={searchRef} className="relative flex-1 min-w-[140px] sm:min-w-[220px] md:min-w-[320px] max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-end min-w-0">
+        <div ref={searchRef} className="relative flex-1 min-w-[180px] max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
           <div className="relative flex items-center">
-            <SearchIcon className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+            <SearchIcon className="absolute left-3.5 size-4 text-muted-foreground pointer-events-none" />
             <Input
               ref={inputRef}
               type="text"
@@ -450,7 +450,7 @@ export function AppHeader({ user, onLogout }) {
                 if (searchQuery.trim().length > 0 || searchResults.length > 0) setIsSearchOpen(true);
               }}
               onKeyDown={handleKeyDown}
-              className="ps-9 pe-16 text-xs h-9.5 w-full bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/80 rounded-xl transition-all shadow-2xs focus-visible:ring-1 focus-visible:ring-primary"
+              className="ps-10 pe-16 text-xs h-10 w-full bg-muted/30 hover:bg-muted/50 focus:bg-background border-border/80 rounded-xl transition-all shadow-2xs focus-visible:ring-1 focus-visible:ring-primary"
             />
             <div className="absolute right-2.5 flex items-center gap-1">
               {searchQuery ? (

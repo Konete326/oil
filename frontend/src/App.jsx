@@ -10,7 +10,6 @@ import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
 import { CustomerManager } from "@/components/customer-manager";
 import { CashManager } from "@/components/cash-manager";
-import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
 import { ProfitLossWidget } from "@/components/profit-loss-widget";
 import { SupplierLedgerManager } from "@/components/supplier-ledger-manager";
 import { FinancialReportsManager } from "@/components/financial-reports-manager";
@@ -139,7 +138,7 @@ export default function App() {
                         <Route path="/customers" element={<CustomerManager />} />
                         <Route path="/ledger" element={<Navigate to="/customers" replace />} />
                         <Route path="/cash" element={<CashManager />} />
-                        <Route path="/sales-purchases" element={<SalesPurchaseManager />} />
+                        <Route path="/sales-purchases" element={<Navigate to="/pos/history" replace />} />
                         <Route path="/profit-loss" element={<ProfitLossWidget />} />
                         <Route path="/supplier-ledger" element={<SupplierLedgerManager />} />
                         <Route path="/financial-reports" element={<FinancialReportsManager />} />

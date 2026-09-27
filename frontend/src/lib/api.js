@@ -1069,23 +1069,51 @@ export async function fetchPartyCashSummaryApi() {
     if (res.ok) {
       return await res.json();
     }
-  } catch (err) {
-    console.warn("Party cash summary API error, using local snapshot");
-  }
+  } catch (err) {}
 
-  const [customers, mills, suppliers] = await Promise.all([
+  const [cashTxs, customers, suppliers] = await Promise.all([
+    getLocalSnapshot("cash_transactions"),
     getLocalSnapshot("customers"),
-    getLocalSnapshot("mills"),
     getLocalSnapshot("suppliers"),
   ]);
 
-  const summary = [
-    ...(Array.isArray(customers) ? customers.map((c) => ({ party: c.name, type: "customer", balance: c.currentBalance || 0 })) : []),
-    ...(Array.isArray(mills) ? mills.map((m) => ({ party: m.name, type: "mill", balance: m.currentBalance || 0 })) : []),
-    ...(Array.isArray(suppliers) ? suppliers.map((s) => ({ party: s.name, type: "supplier", balance: s.currentBalance || 0 })) : []),
-  ];
+  const txList = Array.isArray(cashTxs) ? cashTxs : [];
+  const map = new Map();
 
-  return { success: true, data: summary };
+  txList.forEach((tx) => {
+    const pName = String(tx.partyName || tx.party || "").trim();
+    if (!pName) return;
+    if (!map.has(pName)) {
+      map.set(pName, {
+        partyName: pName,
+        totalPaid: 0,
+        totalReceived: 0,
+        paidCount: 0,
+        receivedCount: 0,
+        lastTransactionDate: null,
+      });
+    }
+    const item = map.get(pName);
+    const amt = Number(tx.amount) || 0;
+    if (tx.type === "Paid") {
+      item.totalPaid += amt;
+      item.paidCount += 1;
+    } else {
+      item.totalReceived += amt;
+      item.receivedCount += 1;
+    }
+    const d = tx.transactionDate || tx.createdAt;
+    if (d && (!item.lastTransactionDate || new Date(d) > new Date(item.lastTransactionDate))) {
+      item.lastTransactionDate = d;
+    }
+  });
+
+  const summary = Array.from(map.values()).map((p) => ({
+    ...p,
+    netBalance: p.totalReceived - p.totalPaid,
+  }));
+
+  return { success: true, count: summary.length, data: summary };
 }
 
 export async function deleteCashTransactionApi(id) {
