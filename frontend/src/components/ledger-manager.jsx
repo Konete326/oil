@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { fetchMills, fetchLedgerEntries, createPaymentEntry, fetchAgingReport } from "@/lib/api";
+import { fetchCustomers, fetchLedgerEntries, createPaymentEntry, fetchAgingReport } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,7 +49,7 @@ export function LedgerManager() {
   const loadData = async () => {
     setLoading(true);
     const [mRes, lRes, aRes] = await Promise.all([
-      fetchMills(),
+      fetchCustomers(),
       fetchLedgerEntries(selectedMill),
       fetchAgingReport(),
     ]);
@@ -105,7 +105,7 @@ export function LedgerManager() {
             Client Ledger & Khata (Accounts Receivable)
           </h2>
           <p className="text-xs text-muted-foreground">
-            Debit/Credit ledger statements, payment receipts, and aging reports per Textile Mill client.
+            Debit/Credit ledger statements, payment receipts, and aging reports per customer account.
           </p>
         </div>
 
@@ -196,7 +196,7 @@ export function LedgerManager() {
                   onChange={(e) => { setSelectedMill(e.target.value); setCurrentPage(1); }}
                   className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 >
-                  <option value="">All Clients</option>
+                  <option value="">All Customer Accounts</option>
                   {mills.map((m) => (
                     <option key={m._id} value={m._id}>
                       {m.name}
@@ -291,15 +291,15 @@ export function LedgerManager() {
           <div className="p-8 text-center space-y-2">
             <ClockIcon className="size-8 mx-auto text-muted-foreground/60" />
             <p className="text-sm font-medium text-foreground">No Clients in Aging Report</p>
-            <p className="text-xs text-muted-foreground">Register Textile Mill clients to view aging analysis.</p>
+            <p className="text-xs text-muted-foreground">Register customer accounts to view aging analysis.</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
-                <TableHead>Mill Code</TableHead>
-                <TableHead>Textile Mill Name</TableHead>
-                <TableHead>Industrial Zone</TableHead>
+                <TableHead>Customer Code</TableHead>
+                <TableHead>Customer Name</TableHead>
+                <TableHead>Phone / Area</TableHead>
                 <TableHead className="text-center">Days Since Activity</TableHead>
                 <TableHead className="text-center">Aging Category</TableHead>
                 <TableHead className="text-right">Credit Limit</TableHead>

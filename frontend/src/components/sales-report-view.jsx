@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SearchIcon, ShoppingCartIcon, FactoryIcon, CalendarIcon, ArrowUpRightIcon, ReceiptIcon } from "lucide-react";
+import { SearchIcon, ShoppingCartIcon, CalendarIcon, ArrowUpRightIcon, ReceiptIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PaginationBar } from "@/components/ui/pagination-bar";
@@ -92,7 +92,7 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-medium">Total Sales Revenue ({period.toUpperCase()})</span>
@@ -114,17 +114,6 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
           </div>
           <p className="text-[11px] text-muted-foreground">{salesData.posSales?.length || 0} Counter Receipts</p>
         </div>
-
-        <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground font-medium">Textile Mill DC Sales</span>
-            <FactoryIcon className="size-4 text-sky-500" />
-          </div>
-          <div className="text-xl font-bold font-mono text-sky-500">
-            Rs. {(summary.challanSalesTotal || 0).toLocaleString()}
-          </div>
-          <p className="text-[11px] text-muted-foreground">{salesData.challans?.length || 0} Delivery Challans</p>
-        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
@@ -135,7 +124,7 @@ export function SalesReportView({ period = "monthly", setPeriod, salesData = { p
                 <th className="p-3 ps-4">Date</th>
                 <th className="p-3">Sale Channel</th>
                 <th className="p-3">Ref / Invoice No</th>
-                <th className="p-3">Customer / Mill Name</th>
+                <th className="p-3">Customer Name</th>
                 <th className="p-3 text-right">Amount (PKR)</th>
                 <th className="p-3">Payment Mode</th>
                 <th className="p-3 text-center">Status</th>

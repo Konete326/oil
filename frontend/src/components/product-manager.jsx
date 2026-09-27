@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   fetchProducts,
   createProduct,
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { ProductModal } from "@/components/product-modal";
 import { BarcodeStickerModal } from "@/components/barcode-sticker-modal";
+import { StockRegisterModal } from "@/components/stock-register-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
@@ -29,6 +30,7 @@ import {
   ScanBarcode as ScanBarcodeIcon,
   LayoutGrid as LayoutGridIcon,
   List as ListIcon,
+  BookOpen as BookOpenIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -37,6 +39,7 @@ import { cn } from "@/lib/utils";
 const PAGE_SIZE = 10;
 
 export function ProductManager() {
+  const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState(() =>
     typeof window !== "undefined" && window.innerWidth < 768 ? "cards" : "table"
@@ -51,6 +54,8 @@ export function ProductManager() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [confirmDeleteProd, setConfirmDeleteProd] = useState(null);
   const [barcodeProduct, setBarcodeProduct] = useState(null);
+  const [isStockRegisterOpen, setIsStockRegisterOpen] = useState(false);
+  const [selectedRegisterProduct, setSelectedRegisterProduct] = useState(null);
 
   useEffect(() => {
     if (location.state?.openModal) {
@@ -148,8 +153,7 @@ export function ProductManager() {
         const matchesSearch =
           !term ||
           (p.name && p.name.toLowerCase().includes(term)) ||
-          (p.sku && p.sku.toLowerCase().includes(term)) ||
-          (p.brand && p.brand.toLowerCase().includes(term));
+          (p.sku && p.sku.toLowerCase().includes(term));
 
         let matchesStock = true;
         if (stockStatus === "inStock") matchesStock = p.stockQuantity > 0;
@@ -159,8 +163,8 @@ export function ProductManager() {
       })
       .sort((a, b) => {
         if (sortBy === "name") return (a.name || "").localeCompare(b.name || "");
-        if (sortBy === "priceLow") return (a.sellingPrice || 0) - (b.sellingPrice || 0);
-        if (sortBy === "priceHigh") return (b.sellingPrice || 0) - (a.sellingPrice || 0);
+        if (sortBy === "priceLow") return (a.costPrice || 0) - (b.costPrice || 0);
+        if (sortBy === "priceHigh") return (b.costPrice || 0) - (a.costPrice || 0);
         if (sortBy === "stockLow") return (a.stockQuantity || 0) - (b.stockQuantity || 0);
         if (sortBy === "stockHigh") return (b.stockQuantity || 0) - (a.stockQuantity || 0);
         return 0;
@@ -216,6 +220,16 @@ export function ProductManager() {
           </div>
 
           <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/stock-register")}
+            className="h-7.5 gap-1.5 text-xs px-3 border-border hover:bg-muted text-foreground transition-colors cursor-pointer"
+          >
+            <BookOpenIcon className="size-3.5 text-muted-foreground" />
+            <span>Stock Register</span>
+          </Button>
+
+          <Button
             onClick={() => {
               setEditingProduct(null);
               setIsModalOpen(true);
@@ -233,7 +247,7 @@ export function ProductManager() {
           <div className="relative col-span-12 md:col-span-4">
             <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search by name, SKU..."
+              placeholder="Search oil products by name..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -294,7 +308,6 @@ export function ProductManager() {
                 <Table className="min-w-[760px]">
                   <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                     <TableRow className="border-b border-border/80">
-                      <TableHead className="w-[110px] text-xs h-9">SKU</TableHead>
                       <TableHead className="text-xs h-9">Product Name</TableHead>
                       <TableHead className="text-right text-xs h-9">Kharid Rate (Cost / L)</TableHead>
                       <TableHead className="text-center text-xs h-9">Stock in Liters</TableHead>
@@ -306,9 +319,6 @@ export function ProductManager() {
                       const isOutOfStock = (prod.stockQuantity || 0) === 0;
                       return (
                         <TableRow key={prod._id} className="hover:bg-muted/20 border-b border-border/40">
-                          <TableCell className="font-mono text-[11px] font-semibold text-primary py-2.5">
-                            {prod.sku}
-                          </TableCell>
                           <TableCell className="py-2.5">
                             <div className="flex items-center gap-2.5">
                               {prod.imageUrl ? (
@@ -344,6 +354,18 @@ export function ProductManager() {
                           </TableCell>
                           <TableCell className="text-right py-2.5 pe-4">
                             <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="size-7 text-muted-foreground hover:text-emerald-600 cursor-pointer"
+                                title="Stock (Inward & Outward) Register Dekhein"
+                                onClick={() => {
+                                  setSelectedRegisterProduct(prod);
+                                  setIsStockRegisterOpen(true);
+                                }}
+                              >
+                                <BookOpenIcon className="size-3.5" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
@@ -385,7 +407,6 @@ export function ProductManager() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-2.5 sm:p-3">
                   {paginatedProducts.map((prod) => {
                     const isOutOfStock = (prod.stockQuantity || 0) === 0;
-                    const profitPerUnit = (prod.sellingPrice || 0) - (prod.costPrice || 0);
 
                     return (
                       <div
@@ -407,9 +428,6 @@ export function ProductManager() {
                             )}
                             <div className="min-w-0">
                               <h4 className="font-semibold text-xs text-foreground truncate">{prod.name}</h4>
-                              <p className="text-[10px] text-muted-foreground truncate font-mono">
-                                SKU: <span className="text-primary font-semibold">{prod.sku}</span>
-                              </p>
                             </div>
                           </div>
 
@@ -438,6 +456,18 @@ export function ProductManager() {
                         </div>
 
                         <div className="pt-1.5 border-t border-border flex items-center justify-end gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedRegisterProduct(prod);
+                              setIsStockRegisterOpen(true);
+                            }}
+                            className="h-6.5 text-[11px] gap-1 px-2 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                          >
+                            <BookOpenIcon className="size-3 text-emerald-600" />
+                            <span>Register</span>
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
@@ -509,6 +539,17 @@ export function ProductManager() {
         onConfirm={() => handleDelete(confirmDeleteProd._id)}
         title="Delete Oil Product"
         message={`Are you sure you want to delete "${confirmDeleteProd?.name}" (SKU: ${confirmDeleteProd?.sku})? This action cannot be undone.`}
+      />
+
+      <StockRegisterModal
+        isOpen={isStockRegisterOpen}
+        onClose={() => {
+          setIsStockRegisterOpen(false);
+          setSelectedRegisterProduct(null);
+        }}
+        initialProduct={selectedRegisterProduct}
+        products={products}
+        onStockUpdated={() => loadData(false)}
       />
     </div>
   );

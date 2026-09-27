@@ -4,7 +4,6 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     sku: { type: String, required: true, unique: true },
-    brand: { type: String, default: "" },
     packagingType: {
       type: String,
       default: "Liter",

@@ -1,12 +1,14 @@
 import { PosSale } from "../models/posSaleModel.js";
 import { Expense } from "../models/expenseModel.js";
 import { CashTransaction } from "../models/cashModel.js";
+import { Product } from "../models/productModel.js";
 
 export const calculateShiftMetrics = async (todayStr, closedAt = null) => {
-  const [allSales, allExpenses, cashTxs] = await Promise.all([
+  const [allSales, allExpenses, cashTxs, allProducts] = await Promise.all([
     PosSale.find().sort({ createdAt: -1 }),
     Expense.find(),
     CashTransaction.find(),
+    Product.find(),
   ]);
 
   const sales = allSales.filter((s) => {
@@ -49,6 +51,21 @@ export const calculateShiftMetrics = async (todayStr, closedAt = null) => {
 
   const netCashInDrawer = cashSales + todayCashIn - todayCashOut - totalExpenses;
 
+  const totalStockRemainingLiters = (allProducts || []).reduce(
+    (sum, p) => sum + (Number(p.stockQuantity) || 0),
+    0
+  );
+  const totalStockValuation = (allProducts || []).reduce(
+    (sum, p) =>
+      sum +
+      (Number(p.stockQuantity) || 0) *
+        (Number(p.costPrice) || Number(p.sellingPrice) || 0),
+    0
+  );
+  const inStockItemsCount = (allProducts || []).filter(
+    (p) => (Number(p.stockQuantity) || 0) > 0
+  ).length;
+
   return {
     totalSales,
     totalCost,
@@ -60,5 +77,8 @@ export const calculateShiftMetrics = async (todayStr, closedAt = null) => {
     creditSales,
     ordersCount: sales.length,
     netCashInDrawer,
+    totalStockRemainingLiters,
+    totalStockValuation,
+    inStockItemsCount,
   };
 };

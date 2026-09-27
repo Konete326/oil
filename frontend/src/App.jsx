@@ -5,6 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { ToastNotificationProvider } from "@/components/toast-notification-provider";
 import { Dashboard } from "@/components/dashboard";
 import { ProductManager } from "@/components/product-manager";
+import { StockRegisterPage } from "@/components/stock-register-page";
 import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
 import { CustomerManager } from "@/components/customer-manager";
@@ -14,7 +15,6 @@ import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
 import { ProfitLossWidget } from "@/components/profit-loss-widget";
 import { SupplierLedgerManager } from "@/components/supplier-ledger-manager";
 import { FinancialReportsManager } from "@/components/financial-reports-manager";
-import { ExpensesManager } from "@/components/expenses-manager";
 import { EmployeePayrollManager } from "@/components/employee-payroll-manager";
 import { UserManagementManager } from "@/components/user-management-manager";
 import { AuditTrailManager } from "@/components/audit-trail-manager";
@@ -133,11 +133,10 @@ export default function App() {
                     <AppShell user={user} onLogout={handleLogout}>
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
-                        <Route path="/categories" element={<Navigate to="/products" replace />} />
                         <Route path="/products" element={<ProductManager />} />
+                        <Route path="/stock-register" element={<StockRegisterPage />} />
                         <Route path="/pos" element={<PosCounter />} />
                         <Route path="/pos/history" element={<PosHistory />} />
-                        <Route path="/textile" element={<Navigate to="/pos" replace />} />
                         <Route path="/customers" element={<CustomerManager />} />
                         <Route path="/ledger" element={<LedgerManager />} />
                         <Route path="/cash" element={<CashManager />} />
@@ -145,7 +144,7 @@ export default function App() {
                         <Route path="/profit-loss" element={<ProfitLossWidget />} />
                         <Route path="/supplier-ledger" element={<SupplierLedgerManager />} />
                         <Route path="/financial-reports" element={<FinancialReportsManager />} />
-                        <Route path="/expenses" element={<ExpensesManager />} />
+                        <Route path="/expenses" element={<Navigate to="/pos/history?tab=expenses" replace />} />
                         <Route path="/payroll" element={<EmployeePayrollManager />} />
                         <Route path="/users" element={<UserManagementManager />} />
                         <Route path="/audit-trail" element={<AuditTrailManager />} />

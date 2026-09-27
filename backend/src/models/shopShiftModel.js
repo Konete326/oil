@@ -17,6 +17,8 @@ const shopShiftSchema = new mongoose.Schema(
     cashSales: { type: Number, default: 0 },
     creditSales: { type: Number, default: 0 },
     ordersCount: { type: Number, default: 0 },
+    totalStockRemainingLiters: { type: Number, default: 0 },
+    totalStockValuation: { type: Number, default: 0 },
     notes: { type: String, default: "" },
   },
   { timestamps: true }

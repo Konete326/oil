@@ -20,6 +20,7 @@ import {
   UsersIcon,
   BellIcon,
   SettingsIcon,
+  Building2Icon,
 } from "lucide-react";
 
 export const navGroups = [
@@ -35,6 +36,18 @@ export const navGroups = [
         title: "Inventory & Stock",
         path: "/products",
         icon: <BoxesIcon />,
+        subItems: [
+          {
+            title: "Products Inventory",
+            path: "/products",
+            icon: <BoxesIcon />,
+          },
+          {
+            title: "Stock (In/Out) Register",
+            path: "/stock-register",
+            icon: <BookOpenIcon />,
+          },
+        ],
       },
       {
         title: "POS Counter Sales",
@@ -47,7 +60,7 @@ export const navGroups = [
             icon: <ShoppingCartIcon />,
           },
           {
-            title: "POS Sales History",
+            title: "POS History & Expenses",
             path: "/pos/history",
             icon: <HistoryIcon />,
           },
@@ -74,8 +87,15 @@ export const navGroups = [
             icon: <TruckIcon />,
           },
           {
+            title: "Bank Khatay (HBL / Accounts)",
+            path: "/cash",
+            state: { tab: "bank" },
+            icon: <Building2Icon />,
+          },
+          {
             title: "Cash Transactions",
             path: "/cash",
+            state: { tab: "all" },
             icon: <BanknoteIcon />,
           },
           {
@@ -92,11 +112,6 @@ export const navGroups = [
             title: "Financial Reports",
             path: "/financial-reports",
             icon: <ScaleIcon />,
-          },
-          {
-            title: "Expenses Management",
-            path: "/expenses",
-            icon: <ReceiptIcon />,
           },
         ],
       },

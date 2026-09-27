@@ -11,7 +11,7 @@ import {
   Banknote,
   Receipt,
   UserCheck,
-  Factory,
+  Users,
 } from "lucide-react";
 
 export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerEraseModuleModal }) {
@@ -59,11 +59,11 @@ export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerErase
       btnLabel: "Erase Payroll",
     },
     {
-      key: "textile",
-      name: "Textile Mills",
-      desc: "Textile mill profiles & rates",
-      icon: <Factory className="size-4 text-teal-500" />,
-      btnLabel: "Erase Mills",
+      key: "customers",
+      name: "Customers & Accounts",
+      desc: "Customer profiles & credit khatas",
+      icon: <Users className="size-4 text-teal-500" />,
+      btnLabel: "Erase Customers",
     },
   ];
 

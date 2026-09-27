@@ -1,17 +1,472 @@
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { XIcon, PrinterIcon, SendIcon, CheckCircle2Icon } from "lucide-react";
+import {
+  XIcon,
+  PrinterIcon,
+  SendIcon,
+  CheckCircle2Icon,
+  CreditCardIcon,
+} from "lucide-react";
 import logoImg from "@/assets/logo.png";
-import { numberToWords } from "@/lib/number-to-words";
+import { cn } from "@/lib/utils";
+
+function getProcessedItems(sale) {
+  const grandTotal = Number(sale.grandTotal || sale.totalAmount || 0);
+  const rawItems = sale.items || [
+    {
+      productName: sale.productName || "MINERAL LUBRICANT OIL",
+      unitType: sale.unitType || "4L",
+      quantity: sale.quantityLiters || sale.quantity || 1,
+      unitPrice: sale.overrideRate || sale.unitPrice || grandTotal,
+      subtotal: grandTotal,
+    },
+  ];
+
+  return rawItems.map((item) => {
+    let packing = item.packing || item.unitType || "";
+    const qty = Number(item.quantity) || 1;
+    let qtyDisplay = String(qty);
+
+    if (qty < 1) {
+      qtyDisplay = `${Math.round(qty * 1000)} ML`;
+      if (!packing || packing === "Ltr") packing = "ML";
+    } else if (qty % 1 !== 0) {
+      qtyDisplay = `${qty}L (${Math.round(qty * 1000)} ML)`;
+      if (!packing) packing = "Ltr";
+    } else if (!packing) {
+      const match = (item.productName || "").match(/(\d+\s*(?:L|Ltr|Liter|Litre|KG|Can|Drum))/i);
+      packing = match ? match[1].toUpperCase() : "Ltr";
+    }
+
+    const rate = Number(item.unitPrice || item.sellingPrice || item.price || 0) || (item.subtotal ? Math.round(item.subtotal / qty) : 0);
+    const amount = Number(item.subtotal || item.totalPrice) || (qty * rate) || 0;
+    return {
+      qty: qtyDisplay,
+      packing,
+      name: item.productName || "Lubricant Product",
+      rate,
+      amount,
+    };
+  });
+}
+
+function CashMemoBody({ sale, copyLabel = "" }) {
+  const isCredit =
+    Boolean(sale.isCredit) ||
+    (sale.paymentMode || "").toLowerCase().includes("credit") ||
+    (sale.paymentMode || "").toLowerCase().includes("khata");
+
+  const grandTotal = Number(sale.grandTotal || sale.totalAmount || 0);
+  const cashReceived = Number(sale.cashReceived || (isCredit ? 0 : grandTotal));
+  const balanceDue = Math.max(0, grandTotal - cashReceived);
+
+  const items = getProcessedItems(sale);
+  const minRows = 8;
+  const emptyRowsCount = Math.max(0, minRows - items.length);
+
+  const memoNumber = sale.saleNumber || sale.challanNumber || "7741";
+  const memoDate = new Date(sale.createdAt || Date.now()).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return (
+    <div className="w-full bg-white text-slate-900 border-2 border-slate-900 rounded-lg p-4 sm:p-5 flex flex-col justify-between font-sans text-xs relative select-none leading-normal">
+      {copyLabel && (
+        <span className="absolute top-2 right-2 text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 border border-slate-400 rounded text-slate-600 bg-slate-50">
+          {copyLabel}
+        </span>
+      )}
+
+      <div>
+        <div className="text-center pb-1">
+          <span className="text-[11px] font-bold tracking-wider uppercase border-b border-slate-700 pb-0.5 px-3">
+            Bill / Cash Memo
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 pt-1 pb-3 border-b-2 border-slate-900">
+          <div className="flex items-center gap-2.5">
+            <div className="size-11 rounded-full border border-slate-900 p-0.5 flex items-center justify-center shrink-0 overflow-hidden bg-white">
+              <img src={logoImg} alt="Al Khaleej" className="size-full object-contain" />
+            </div>
+            <div>
+              <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-950 uppercase leading-none font-mono">
+                AL KHALEEJ LUBRICANTS
+              </h1>
+              <p className="text-[10px] font-bold text-slate-700 tracking-wide mt-0.5">
+                Deals in: Industrial, Automotive Lubricants & Greases
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right text-[9.5px] leading-tight text-slate-800">
+            <p className="font-semibold">Shop No. 23, Near Fatima Jinnah Girls College,</p>
+            <p>Nishter Road, Garden, Karachi.</p>
+            <p className="font-mono pt-0.5 font-bold">
+              Ph: 32256267 | Mob: 0300-2205541, 0334-2878851
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-12 gap-y-1.5 gap-x-2 py-2.5 text-xs border-b border-slate-800">
+          <div className="col-span-8 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">No.</span>
+            <span className="font-mono font-black text-sm text-slate-950 px-1 border-b border-slate-400 flex-1">
+              {memoNumber}
+            </span>
+          </div>
+
+          <div className="col-span-4 flex items-baseline gap-1.5 justify-end">
+            <span className="font-bold text-slate-900 shrink-0">Date:</span>
+            <span className="font-mono font-bold text-slate-950 border-b border-slate-400 px-1 text-right min-w-[80px]">
+              {memoDate}
+            </span>
+          </div>
+
+          <div className="col-span-12 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">M/s.</span>
+            <span className="font-bold text-slate-950 text-xs border-b border-slate-400 px-1 flex-1 uppercase">
+              {sale.customerName || sale.millName || "Walk-in Customer"}
+            </span>
+          </div>
+
+          <div className="col-span-8 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">Address:</span>
+            <span className="text-slate-800 text-[11px] border-b border-slate-400 px-1 flex-1 truncate">
+              {sale.customerAddress || sale.customerPhone || "Karachi, Pakistan"}
+            </span>
+          </div>
+
+          <div className="col-span-4 flex items-baseline gap-1.5 justify-end">
+            <span className="font-bold text-slate-900 shrink-0">V.No.</span>
+            <span className="font-mono text-slate-900 text-[11px] border-b border-slate-400 px-1 text-right min-w-[70px]">
+              {sale.vehicleNumber || sale.referenceNo || "-"}
+            </span>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <table className="w-full text-xs border-collapse border border-slate-900">
+            <thead>
+              <tr className="border-b-2 border-slate-900 bg-slate-100 text-slate-950 font-bold">
+                <th className="border-r border-slate-900 py-1 px-1.5 text-center w-[10%]">Qty.</th>
+                <th className="border-r border-slate-900 py-1 px-1.5 text-center w-[15%]">Packing</th>
+                <th className="border-r border-slate-900 py-1 px-2 text-left w-[45%]">Description</th>
+                <th className="border-r border-slate-900 py-1 px-1.5 text-right w-[15%]">Rate</th>
+                <th className="py-1 px-2 text-right w-[15%]">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((row, i) => (
+                <tr key={i} className="border-b border-slate-300">
+                  <td className="border-r border-slate-900 py-1 px-1.5 text-center font-mono font-semibold">
+                    {row.qty}
+                  </td>
+                  <td className="border-r border-slate-900 py-1 px-1.5 text-center font-medium text-[11px]">
+                    {row.packing}
+                  </td>
+                  <td className="border-r border-slate-900 py-1 px-2 font-bold text-slate-950">
+                    {row.name}
+                  </td>
+                  <td className="border-r border-slate-900 py-1 px-1.5 text-right font-mono font-medium">
+                    {row.rate.toLocaleString()}
+                  </td>
+                  <td className="py-1 px-2 text-right font-mono font-bold text-slate-950">
+                    {row.amount.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+
+              {Array.from({ length: emptyRowsCount }).map((_, i) => (
+                <tr key={`empty-${i}`} className="border-b border-slate-200 h-6">
+                  <td className="border-r border-slate-900 py-1"></td>
+                  <td className="border-r border-slate-900 py-1"></td>
+                  <td className="border-r border-slate-900 py-1"></td>
+                  <td className="border-r border-slate-900 py-1"></td>
+                  <td className="py-1"></td>
+                </tr>
+              ))}
+
+              <tr className="border-t-2 border-slate-900 bg-slate-50 font-black">
+                <td colSpan={4} className="border-r border-slate-900 py-1.5 px-3 text-right text-xs uppercase tracking-wider font-mono">
+                  Total (PKR)
+                </td>
+                <td className="py-1.5 px-2 text-right font-mono text-sm text-slate-950">
+                  Rs {grandTotal.toLocaleString()}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-2.5 pt-2 border-t border-dashed border-slate-400 flex items-center justify-between text-[11px]">
+          <div>
+            {isCredit ? (
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold uppercase px-2 py-0.5 bg-amber-100 border border-amber-400 text-amber-900 rounded text-[10px]">
+                  UDHAR / CREDIT (ادھار کھاتہ)
+                </span>
+                {cashReceived > 0 && (
+                  <span className="font-mono text-slate-700">
+                    Wasooli: Rs {cashReceived.toLocaleString()} | Baqaya: <strong>Rs {balanceDue.toLocaleString()}</strong>
+                  </span>
+                )}
+                {cashReceived === 0 && (
+                  <span className="font-mono font-bold text-red-700">
+                    Kul Baqaya: Rs {grandTotal.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span className="font-extrabold uppercase px-2 py-0.5 bg-emerald-100 border border-emerald-400 text-emerald-900 rounded text-[10px]">
+                CASH PAID (نقد وصولی مکمل)
+              </span>
+            )}
+          </div>
+
+          <div className="font-mono text-[10px] text-slate-600">
+            Terms: Goods once sold will not be returned or exchanged.
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-6 flex items-end justify-between border-t border-slate-900 mt-3">
+        <div className="flex items-center gap-2 text-[9px] font-bold text-slate-600 uppercase tracking-wider">
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Shell</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Caltex</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">PSO</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Total</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Castrol</span>
+        </div>
+
+        <div className="text-right">
+          <p className="text-[10px] font-bold uppercase text-slate-900">
+            For: AL KHALEEJ LUBRICANTS
+          </p>
+          <div className="w-40 border-b border-slate-800 mt-6 ml-auto"></div>
+          <p className="text-[9px] text-slate-600 pt-0.5">Authorized Signature</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CreditMemoBody({ sale, copyLabel = "" }) {
+  const grandTotal = Number(sale.grandTotal || sale.totalAmount || 0);
+  const cashReceived = Number(sale.cashReceived || 0);
+  const balanceDue = Math.max(0, grandTotal - cashReceived);
+
+  const items = getProcessedItems(sale);
+  const minRows = 8;
+  const emptyRowsCount = Math.max(0, minRows - items.length);
+
+  const memoNumber = sale.saleNumber || sale.challanNumber || "3546";
+  const memoDate = new Date(sale.createdAt || Date.now()).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return (
+    <div className="w-full bg-white text-slate-900 border-2 border-red-700 rounded-lg p-4 sm:p-5 flex flex-col justify-between font-sans text-xs relative select-none leading-normal">
+      {copyLabel && (
+        <span className="absolute top-2 right-2 text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 border border-red-400 rounded text-red-700 bg-red-50">
+          {copyLabel}
+        </span>
+      )}
+
+      <div>
+        <div className="text-center pb-1">
+          <span className="text-[12px] font-black tracking-wider uppercase text-red-700 border-b-2 border-red-600 pb-0.5 px-4 font-mono">
+            Credit Memo
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 pt-1 pb-3 border-b-2 border-red-700">
+          <div className="flex items-center gap-2.5">
+            <div className="size-11 rounded-full border-2 border-red-700 p-0.5 flex items-center justify-center shrink-0 overflow-hidden bg-white">
+              <img src={logoImg} alt="Al Khaleej" className="size-full object-contain" />
+            </div>
+            <div>
+              <h1 className="text-base sm:text-lg font-black tracking-tight text-red-700 uppercase leading-none font-mono">
+                AL KHALEEJ LUBRICANTS
+              </h1>
+              <p className="text-[9.5px] font-bold text-slate-800 tracking-wide mt-0.5">
+                Deals in National & International Brands of Industrial, Automotive Oils & Greases
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right text-[9.5px] leading-tight text-slate-800">
+            <div className="flex items-center justify-end gap-1 pb-0.5 font-bold text-[9px] text-red-800">
+              <span className="px-1 border border-red-300 rounded">Rhino</span>
+              <span className="px-1 border border-red-300 rounded">Euro</span>
+              <span className="px-1 border border-red-300 rounded">Boss</span>
+            </div>
+            <p className="font-semibold">Shop No. 23, Near Fatima Jinnah Girls College,</p>
+            <p>Nishter Road, Garden, Karachi.</p>
+            <p className="font-mono pt-0.5 font-bold text-red-700">
+              Cell: 0300-2205541, 0334-2878851
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-12 gap-y-1.5 gap-x-2 py-2.5 text-xs border-b border-red-300">
+          <div className="col-span-4 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">No.</span>
+            <span className="font-mono font-black text-sm text-red-700 px-1 border-b border-red-300 flex-1">
+              {memoNumber}
+            </span>
+          </div>
+
+          <div className="col-span-4 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">Vehicle No.</span>
+            <span className="font-mono text-slate-900 text-[11px] border-b border-red-300 px-1 flex-1">
+              {sale.vehicleNumber || sale.referenceNo || "-"}
+            </span>
+          </div>
+
+          <div className="col-span-4 flex items-baseline gap-1.5 justify-end">
+            <span className="font-bold text-slate-900 shrink-0">Date:</span>
+            <span className="font-mono font-bold text-slate-950 border-b border-red-300 px-1 text-right min-w-[80px]">
+              {memoDate}
+            </span>
+          </div>
+
+          <div className="col-span-12 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">M/s.</span>
+            <span className="font-bold text-slate-950 text-xs border-b border-red-300 px-1 flex-1 uppercase">
+              {sale.customerName || sale.millName || "Credit Customer"}
+            </span>
+          </div>
+
+          <div className="col-span-12 flex items-baseline gap-1.5">
+            <span className="font-bold text-slate-900 shrink-0">Address:</span>
+            <span className="text-slate-800 text-[11px] border-b border-red-300 px-1 flex-1 truncate">
+              {sale.customerAddress || sale.customerPhone || "Karachi, Pakistan"}
+            </span>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <table className="w-full text-xs border-collapse border border-red-700">
+            <thead>
+              <tr className="bg-red-700 text-white font-bold border-b border-red-800">
+                <th className="border-r border-red-600 py-1.5 px-1.5 text-center w-[10%]">Qty.</th>
+                <th className="border-r border-red-600 py-1.5 px-1.5 text-center w-[15%]">Packing</th>
+                <th className="border-r border-red-600 py-1.5 px-2 text-left w-[45%]">Description</th>
+                <th className="border-r border-red-600 py-1.5 px-1.5 text-right w-[15%]">Rate</th>
+                <th className="py-1.5 px-2 text-right w-[15%]">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((row, i) => (
+                <tr key={i} className="border-b border-red-200">
+                  <td className="border-r border-red-300 py-1 px-1.5 text-center font-mono font-semibold">
+                    {row.qty}
+                  </td>
+                  <td className="border-r border-red-300 py-1 px-1.5 text-center font-medium text-[11px]">
+                    {row.packing}
+                  </td>
+                  <td className="border-r border-red-300 py-1 px-2 font-bold text-slate-950">
+                    {row.name}
+                  </td>
+                  <td className="border-r border-red-300 py-1 px-1.5 text-right font-mono font-medium">
+                    {row.rate.toLocaleString()}
+                  </td>
+                  <td className="py-1 px-2 text-right font-mono font-bold text-slate-950">
+                    {row.amount.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+
+              {Array.from({ length: emptyRowsCount }).map((_, i) => (
+                <tr key={`empty-${i}`} className="border-b border-red-100 h-6">
+                  <td className="border-r border-red-300 py-1"></td>
+                  <td className="border-r border-red-300 py-1"></td>
+                  <td className="border-r border-red-300 py-1"></td>
+                  <td className="border-r border-red-300 py-1"></td>
+                  <td className="py-1"></td>
+                </tr>
+              ))}
+
+              <tr className="border-t-2 border-red-700 bg-red-50 font-black">
+                <td colSpan={4} className="border-r border-red-700 py-1.5 px-3 text-right text-xs uppercase tracking-wider font-mono text-red-700">
+                  Total
+                </td>
+                <td className="py-1.5 px-2 text-right font-mono text-sm text-red-700">
+                  Rs {grandTotal.toLocaleString()}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-2.5 pt-2 border-t border-dashed border-red-300 flex items-center justify-between text-[11px]">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold uppercase px-2 py-0.5 bg-red-100 border border-red-400 text-red-900 rounded text-[10px]">
+              UDHAR / CREDIT (ادھار کھاتہ)
+            </span>
+            {cashReceived > 0 ? (
+              <span className="font-mono text-slate-700">
+                Wasooli: Rs {cashReceived.toLocaleString()} | Baqaya: <strong className="text-red-700">Rs {balanceDue.toLocaleString()}</strong>
+              </span>
+            ) : (
+              <span className="font-mono font-bold text-red-700">
+                Kul Baqaya: Rs {grandTotal.toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          <div className="font-mono text-[10px] text-slate-600">
+            Yeh maal ba-taur udhar customer ke hawale kiya gaya hai.
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-6 flex items-end justify-between border-t border-red-700 mt-4">
+        <div className="flex items-center gap-2 text-[9px] font-bold text-slate-600 uppercase tracking-wider">
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Shell</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Caltex</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">PSO</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Total</span>
+          <span className="px-1.5 py-0.5 border border-slate-300 rounded">Castrol</span>
+        </div>
+
+        <div className="text-right">
+          <p className="text-[11px] font-bold text-red-700 italic font-serif">
+            Signature:
+          </p>
+          <div className="w-44 border-b-2 border-red-700 mt-5 ml-auto"></div>
+          <p className="text-[9px] text-slate-600 pt-0.5">Customer / Receiver Signature</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function PosReceiptModal({ isOpen, onClose, sale }) {
+  const isSaleCredit = Boolean(
+    sale?.isCredit ||
+    (sale?.paymentMode || "").toLowerCase().includes("credit") ||
+    (sale?.paymentMode || "").toLowerCase().includes("khata")
+  );
+
+  const [memoType, setMemoType] = useState(() => (isSaleCredit ? "credit" : "cash"));
+  const [printLayout, setPrintLayout] = useState("single");
+
   if (!isOpen || !sale || typeof window === "undefined") return null;
+
+  const grandTotal = Number(sale.grandTotal || sale.totalAmount || 0);
 
   const handlePrint = () => {
     const orig = document.title;
-    const invNo = (sale.saleNumber || sale.challanNumber || "INV-001").replace(/[^a-zA-Z0-9-_]/g, "_");
+    const invNo = (sale.saleNumber || sale.challanNumber || "3546").replace(/[^a-zA-Z0-9-_]/g, "_");
     const client = (sale.customerName || sale.millName || "Customer").replace(/[^a-zA-Z0-9-_]/g, "_");
-    document.title = `Al_Khaleej_Invoice_${invNo}_${client}`;
+    document.title = `${memoType === "credit" ? "CreditMemo" : "CashMemo"}_${invNo}_${client}`;
     window.print();
     const restore = () => {
       document.title = orig;
@@ -21,32 +476,36 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
     setTimeout(restore, 2000);
   };
 
-  const grandTotal = sale.grandTotal || sale.totalAmount || 0;
-  const items = sale.items || [
-    {
-      productName: sale.productName || "MINERAL LUBRICANT OIL",
-      unitType: sale.unitType || "Liters",
-      quantity: sale.quantityLiters || sale.quantity || 1,
-      unitPrice: sale.overrideRate || sale.unitPrice || grandTotal,
-      subtotal: grandTotal,
-      hsCode: "2710.19.31",
-    },
-  ];
-
-  const totalQuantityLiters = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-
   const handleShareWhatsApp = () => {
-    const text = `*AL KHALEEJ LUBRICANTS*\n*PROFORMA / SALES INVOICE*\n*Invoice No:* ${sale.saleNumber || sale.challanNumber || "INV-001"}\n*Consignee / Buyer:* ${sale.customerName || sale.millName || "Client"}\n*Date:* ${new Date(sale.createdAt || Date.now()).toLocaleDateString()}\n*Total Liters / Qty:* ${totalQuantityLiters}\n*Grand Total:* Rs ${grandTotal.toLocaleString()}\n*Amount in Words:* ${numberToWords(grandTotal)}\nThank you for your business!`;
+    const invNo = sale.saleNumber || sale.challanNumber || "3546";
+    const client = sale.customerName || sale.millName || "Customer";
+    const dateStr = new Date(sale.createdAt || Date.now()).toLocaleDateString("en-GB");
+
+    const text =
+      `*AL KHALEEJ LUBRICANTS*\n` +
+      `*${memoType === "credit" ? "CREDIT MEMO (ادھار میمو)" : "BILL / CASH MEMO (کیش میمو)"}*\n` +
+      `*Memo No:* ${invNo}\n` +
+      `*Customer (M/s):* ${client}\n` +
+      `*Date:* ${dateStr}\n` +
+      `------------------------------------\n` +
+      (sale.items || [])
+        .map((it) => `• ${it.quantity}x ${it.productName} = Rs ${(it.subtotal || it.quantity * it.unitPrice || 0).toLocaleString()}`)
+        .join("\n") +
+      `\n------------------------------------\n` +
+      `*Total Amount:* Rs ${grandTotal.toLocaleString()}\n` +
+      `*Status:* ${memoType === "credit" ? "UDHAR / CREDIT (ادھار)" : "CASH PAID (نقد)"}\n` +
+      `Shop No. 23, Nishter Road, Karachi | Ph: 0300-2205541`;
+
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const modalContent = (
-    <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
+    <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto">
       <style>{`
         @media print {
           @page {
             size: A4 portrait;
-            margin: 4mm 6mm;
+            margin: 8mm;
           }
           html, body {
             background: white !important;
@@ -70,17 +529,6 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
             border: none !important;
             box-shadow: none !important;
           }
-          .a4-sheet {
-            display: block !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-            background: white !important;
-            color: black !important;
-          }
           .print\\:hidden,
           [class*="print:hidden"] {
             display: none !important;
@@ -88,195 +536,134 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
         }
       `}</style>
 
-      <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:p-0 print:block print:bg-white">
-        <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-            <CheckCircle2Icon className="size-4 text-emerald-500" />
-            <span>Proforma & Commercial Invoice (A4 Standard)</span>
+      <div className="w-full max-w-2xl max-h-[94vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:p-0 print:block print:bg-white">
+        
+        <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0 gap-2 flex-wrap">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
+            {memoType === "credit" ? (
+              <CreditCardIcon className="size-4 text-red-600" />
+            ) : (
+              <CheckCircle2Icon className="size-4 text-emerald-500" />
+            )}
+            <span>{memoType === "credit" ? "Credit Memo (Red Pad)" : "Cash Memo (Black Pad)"}</span>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-[11px]">
+              <button
+                type="button"
+                onClick={() => setMemoType("cash")}
+                className={cn(
+                  "px-2 py-1 rounded font-semibold cursor-pointer transition-colors",
+                  memoType === "cash" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+                )}
+                title="Bill / Cash Memo (Black/Blue Pad)"
+              >
+                Cash Memo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMemoType("credit")}
+                className={cn(
+                  "px-2 py-1 rounded font-bold cursor-pointer transition-colors",
+                  memoType === "credit" ? "bg-red-700 text-white shadow-2xs" : "text-red-600 hover:text-red-700"
+                )}
+                title="Credit Memo (Red Pad for Udhar)"
+              >
+                Credit Memo (ادھار)
+              </button>
+            </div>
+
+            <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-[11px]">
+              <button
+                type="button"
+                onClick={() => setPrintLayout("single")}
+                className={cn(
+                  "px-2 py-1 rounded font-semibold cursor-pointer transition-colors",
+                  printLayout === "single" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+                )}
+                title="Single Pad Copy"
+              >
+                Single
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintLayout("duplicate")}
+                className={cn(
+                  "px-2 py-1 rounded font-semibold cursor-pointer transition-colors",
+                  printLayout === "duplicate" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+                )}
+                title="Customer Copy + Office Copy on 1 A4 Page"
+              >
+                Duplicate (2-in-1)
+              </button>
+            </div>
+
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white h-7.5"
             >
-              <SendIcon className="size-3.5" />
-              <span>Share WhatsApp</span>
+              <SendIcon className="size-3" />
+              <span>WhatsApp</span>
             </Button>
+
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className={cn(
+                "gap-1.5 text-xs cursor-pointer text-white font-semibold h-7.5",
+                memoType === "credit" ? "bg-red-700 hover:bg-red-800" : "bg-primary hover:bg-primary/90 text-primary-foreground"
+              )}
             >
-              <PrinterIcon className="size-3.5" />
-              <span>Print A4 Invoice</span>
+              <PrinterIcon className="size-3" />
+              <span>Print Memo</span>
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer">
+
+            <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer size-7.5">
               <XIcon className="size-4" />
             </Button>
           </div>
         </div>
 
-        <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0 print:m-0">
-          <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 print:m-0 a4-sheet relative notranslate" dir="ltr" lang="en">
+        <div className="w-full flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col items-center print:overflow-visible print:p-0 print:m-0 space-y-4">
+          {memoType === "credit" ? (
+            <CreditMemoBody sale={sale} copyLabel={printLayout === "duplicate" ? "Original / Customer Copy" : ""} />
+          ) : (
+            <CashMemoBody sale={sale} copyLabel={printLayout === "duplicate" ? "Original / Customer Copy" : ""} />
+          )}
 
-          <div className="text-center space-y-1 pb-3 print:pb-2 print:pt-0">
-            <div className="flex items-center justify-center gap-3">
-              <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
-              <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
-                AL KHALEEJ LUBRICANTS
-              </h1>
-            </div>
-            <p className="text-[11px] text-gray-700 font-medium">
-              PLOT NO. 44/B, SECTOR 15, KORANGI INDUSTRIAL AREA, KARACHI, PAKISTAN.
-            </p>
-            <p className="text-[10px] text-gray-600">
-              TEL: (021) 35091244, 35091245, FAX: (021) 35091246
-            </p>
-          </div>
-
-          <div className="text-center py-2 mb-4">
-            <span className="font-black text-sm tracking-wider uppercase underline underline-offset-4 decoration-2">
-              SALES INVOICE
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-800">
-                CUSTOMER / BUYER:
-              </p>
-              <p className="font-bold text-sm text-black uppercase">
-                {sale.customerName || sale.millName || "DIRECT CUSTOMER"}
-              </p>
-              <p className="text-[11px] text-gray-700 leading-tight">
-                {sale.customerAddress || sale.deliveryAddress || "Plot No-03, Main Road, Industrial Area, Karachi."}
-              </p>
-              {sale.customerPhone && (
-                <p className="text-[11px] text-gray-800 font-medium">
-                  Phone: {sale.customerPhone}
-                </p>
-              )}
-            </div>
-
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-right font-mono">
-              <p className="text-xs font-bold text-black">
-                INVOICE #: {sale.saleNumber || sale.challanNumber || "INV-001"}
-              </p>
-              <p className="text-[11px] text-gray-800">
-                DATE: {new Date(sale.createdAt || Date.now()).toLocaleDateString("en-GB")}
-              </p>
-              <p className="text-[10px] text-gray-700 font-sans">
-                PAYMENT: <strong className="text-black uppercase">{sale.paymentMode || "CASH"}</strong>
-              </p>
-              <p className="text-[10px] text-gray-700 font-sans">
-                TOTAL QUANTITY: <strong>{totalQuantityLiters} UNITS / LTR</strong>
-              </p>
-            </div>
-          </div>
-
-          <div className="mb-4 overflow-hidden border border-black">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-gray-200 text-black border-b border-black font-bold uppercase text-[11px]">
-                  <th className="py-2 px-3 w-12 text-center border-r border-black">#</th>
-                  <th className="py-2 px-3 border-r border-black">PRODUCT / ITEM</th>
-                  <th className="py-2 px-3 text-center border-r border-black w-24">QTY (LITERS)</th>
-                  <th className="py-2 px-3 text-right border-r border-black w-28">RATE / L (RS)</th>
-                  <th className="py-2 px-3 text-right w-32">TOTAL (RS)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black font-sans">
-                {items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-black">
-                    <td className="py-2 px-3 text-center font-bold border-r border-black font-mono">
-                      {idx + 1}
-                    </td>
-                    <td className="py-2 px-3 font-bold text-black uppercase border-r border-black">
-                      {item.productName}
-                    </td>
-                    <td className="py-2 px-3 text-center font-bold font-mono border-r border-black">
-                      {item.quantity} L
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono border-r border-black">
-                      {Number(item.unitPrice).toFixed(2)}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-black">
-                      {Number(item.subtotal || item.quantity * item.unitPrice).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="bg-gray-100 font-bold border-t-2 border-black">
-                  <td colSpan={2} className="py-2.5 px-3 text-right uppercase tracking-wider border-r border-black">
-                    TOTAL
-                  </td>
-                  <td className="py-2.5 px-3 text-center font-mono border-r border-black text-black">
-                    {totalQuantityLiters} L
-                  </td>
-                  <td className="py-2.5 px-3 border-r border-black"></td>
-                  <td className="py-2.5 px-3 text-right font-mono text-sm text-black">
-                    Rs {Number(grandTotal).toFixed(2)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-6 font-mono text-[11px] font-semibold text-black">
-            <span>Amount in Words: </span>
-            <span className="font-bold underline decoration-1">{numberToWords(grandTotal)}</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 pt-2 items-end">
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-[10px] font-mono leading-relaxed">
-              <p className="font-bold text-[11px] text-black">Bank Account Details:</p>
-              <p>Account Title: <strong>AL KHALEEJ LUBRICANTS</strong></p>
-              <p>Account #: 0109-900-104-1</p>
-              <p>Bank: Meezan Bank Ltd / Korangi Branch</p>
-            </div>
-
-            <div className="space-y-12 text-right">
-              <div className="flex justify-between items-end gap-4">
-                <div className="text-center">
-                  <div className="size-16 rounded-full border-2 border-dashed border-gray-700 flex flex-col items-center justify-center p-1 text-[8px] font-bold text-gray-800 uppercase tracking-tighter transform -rotate-12 mx-auto mb-1">
-                    <span>AL KHALEEJ</span>
-                    <span className="text-[6px]">LUBRICANTS</span>
-                    <span>OFFICIAL</span>
-                  </div>
-                  <div className="border-t border-black pt-1 w-36 text-center font-bold text-[9px] uppercase">
-                    <p>AL KHALEEJ LUBRICANTS</p>
-                    <p className="text-[8px] text-gray-600">SALES DEPARTMENT</p>
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <div className="h-14"></div>
-                  <div className="border-t border-black pt-1 w-44 text-center font-bold text-[9px] uppercase">
-                    Customer Signature
-                  </div>
-                </div>
+          {printLayout === "duplicate" && (
+            <>
+              <div className="w-full border-t-2 border-dashed border-slate-400 my-2 text-center relative print:block">
+                <span className="bg-white px-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest relative -top-2">
+                  ✂ Cut Here / Perforated Line
+                </span>
               </div>
-            </div>
-          </div>
+              {memoType === "credit" ? (
+                <CreditMemoBody sale={sale} copyLabel="Office / Shop Copy" />
+              ) : (
+                <CashMemoBody sale={sale} copyLabel="Office / Shop Copy" />
+              )}
+            </>
+          )}
         </div>
-      </div>
 
-      <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
-          Close Preview
-        </Button>
-        <Button
-          size="sm"
-          onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
-        >
-          <PrinterIcon className="size-3.5" />
-          <span>Print A4 Invoice</span>
-        </Button>
+        <div className="w-full flex items-center justify-between p-3 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0 text-xs text-muted-foreground">
+          <span className="text-[11px] font-mono">
+            {memoType === "credit"
+              ? "Red Credit Memo format: Exactly matches Al Khaleej red booklet for Udhar sales."
+              : "Black Bill / Cash Memo format: Matches physical booklet for retail cash sales."}
+          </span>
+          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs h-7">
+            Close
+          </Button>
+        </div>
+
       </div>
     </div>
-  </div>
-);
+  );
 
-return createPortal(modalContent, document.body);
+  return createPortal(modalContent, document.body);
 }

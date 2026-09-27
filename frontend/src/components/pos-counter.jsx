@@ -55,7 +55,7 @@ export function PosCounter() {
 
   const calculateItemSubtotal = (unitPrice, qty, discType, discVal) => {
     const price = Math.max(0, Number(unitPrice) || 0);
-    const quantity = Math.max(1, Number(qty) || 1);
+    const quantity = Math.max(0, Number(qty) || 0);
     const rawDisc = Math.max(0, Number(discVal) || 0);
     const discPerUnit = discType === "percent" ? (price * rawDisc) / 100 : rawDisc;
     const effectiveUnitPrice = Math.max(0, price - discPerUnit);
@@ -66,11 +66,11 @@ export function PosCounter() {
     const existingIndex = cart.findIndex((item) => item.product === product._id);
     if (existingIndex > -1) {
       const existingItem = cart[existingIndex];
-      if (existingItem.quantity + 1 > product.stockQuantity) {
+      const newQty = Number(((Number(existingItem.quantity) || 0) + 1).toFixed(2));
+      if (newQty > product.stockQuantity) {
         setError(`Insufficient stock for ${product.name}. Max: ${product.stockQuantity}`);
         return;
       }
-      const newQty = existingItem.quantity + 1;
       const newSubtotal = calculateItemSubtotal(
         existingItem.unitPrice,
         newQty,
@@ -86,7 +86,7 @@ export function PosCounter() {
       setCart(updatedCart);
       setError("");
     } else {
-      if (product.stockQuantity < 1) {
+      if ((Number(product.stockQuantity) || 0) <= 0) {
         setError(`Insufficient stock for ${product.name}.`);
         return;
       }
@@ -208,7 +208,7 @@ export function PosCounter() {
   const updateQuantity = (index, delta) => {
     const item = cart[index];
     const product = products.find((p) => p._id === item.product);
-    const newQty = item.quantity + delta;
+    const newQty = Number((Math.max(0, (Number(item.quantity) || 0) + delta)).toFixed(2));
 
     if (newQty <= 0) {
       removeFromCart(index);
@@ -217,6 +217,40 @@ export function PosCounter() {
 
     if (product && newQty > product.stockQuantity) {
       setError(`Cannot add more than ${product.stockQuantity} for ${product.name}`);
+      return;
+    }
+
+    const newSubtotal = calculateItemSubtotal(
+      item.unitPrice,
+      newQty,
+      item.itemDiscountType || "fixed",
+      item.itemDiscountValue || 0
+    );
+    const updatedCart = [...cart];
+    updatedCart[index] = {
+      ...item,
+      quantity: newQty,
+      subtotal: newSubtotal,
+    };
+    setCart(updatedCart);
+    setError("");
+  };
+
+  const setDirectQuantity = (index, val) => {
+    const item = cart[index];
+    const product = products.find((p) => p._id === item.product);
+    if (val === "" || val === null) {
+      const updatedCart = [...cart];
+      updatedCart[index] = { ...item, quantity: "" };
+      setCart(updatedCart);
+      return;
+    }
+
+    const newQty = Number(Number(val).toFixed(2));
+    if (newQty < 0) return;
+
+    if (product && newQty > product.stockQuantity) {
+      setError(`Stock limit: Only ${product.stockQuantity} Liters available for ${product.name}`);
       return;
     }
 
@@ -333,13 +367,13 @@ export function PosCounter() {
       }));
       const anyLoss = sanitizedItems.some((it) => it.unitPrice < it.costPrice);
       if (anyLoss) {
-        toast.error("Loss detected: Selling rate kharid rate se kam nahi ho sakti.");
-        setError("Loss detected: Selling rate kharid rate se kam nahi ho sakti.");
+        toast.error("Loss detected: Selling price cannot be lower than cost price.");
+        setError("Loss detected: Selling price cannot be lower than cost price.");
         return;
       }
       if (Number(grandTotal) < totalCartCost) {
-        toast.error("Loss detected: Grand Total kul kharid cost se kam nahi ho sakta.");
-        setError("Loss detected: Grand Total kul kharid cost se kam nahi ho sakta.");
+        toast.error("Loss detected: Grand Total cannot be lower than total cost price.");
+        setError("Loss detected: Grand Total cannot be lower than total cost price.");
         return;
       }
       const res = await createPosSale({
@@ -355,6 +389,9 @@ export function PosCounter() {
         changeDue,
       });
       setCompletedSale(res.data);
+      if (res?.data?.isNextDayShift) {
+        toast.info("Shift is closed — this sale has been recorded under Next Day Shift.");
+      }
       setCart([]);
       setDiscountValue("");
       setIsCheckoutOpen(false);
@@ -369,9 +406,7 @@ export function PosCounter() {
   const filteredProducts = products.filter((p) => {
     return (
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase()) ||
-      (p.grade && p.grade.toLowerCase().includes(search.toLowerCase()))
+      p.sku.toLowerCase().includes(search.toLowerCase())
     );
   });
 
@@ -651,34 +686,87 @@ export function PosCounter() {
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between pt-1 border-t border-border/50 text-[10px]">
-                        <div className="flex items-center rounded-md border border-border bg-background shadow-2xs">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
-                            onClick={() => updateQuantity(idx, -1)}
-                          >
-                            <MinusIcon className="size-2.5" />
-                          </Button>
-                          <span className="px-2 font-mono font-bold text-[10px] text-foreground">{item.quantity} L</span>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="size-5 text-muted-foreground hover:text-foreground cursor-pointer"
-                            onClick={() => updateQuantity(idx, 1)}
-                          >
-                            <PlusIcon className="size-2.5" />
-                          </Button>
+                      <div className="flex items-center justify-between pt-1.5 border-t border-border/50 text-[10px] gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="flex items-center rounded-md border border-border bg-background shadow-2xs">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                              onClick={() => updateQuantity(idx, -0.5)}
+                              title="- 0.5 L"
+                            >
+                              <MinusIcon className="size-3" />
+                            </Button>
+
+                            <div className="flex items-center px-1">
+                              <input
+                                type="number"
+                                step="any"
+                                min="0.01"
+                                value={item.quantity ?? ""}
+                                onChange={(e) => setDirectQuantity(idx, e.target.value)}
+                                className="w-14 h-6 text-center font-mono font-bold text-xs bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
+                                placeholder="Qty"
+                                title="Decimal quantity (e.g. 1.5, 0.75, 0.5 L)"
+                              />
+                              <span className="text-[10px] font-mono text-muted-foreground font-semibold pr-1">L</span>
+                            </div>
+
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                              onClick={() => updateQuantity(idx, 0.5)}
+                              title="+ 0.5 L (500 ML)"
+                            >
+                              <PlusIcon className="size-3" />
+                            </Button>
+                          </div>
+
+                          <div className="flex items-center gap-1 text-[9px] font-mono flex-wrap">
+                            {[
+                              { val: 0.25, label: "250ml" },
+                              { val: 0.5, label: "500ml" },
+                              { val: 0.75, label: "750ml" },
+                              { val: 1, label: "1L" },
+                              { val: 1.5, label: "1.5L" },
+                              { val: 4, label: "4L" },
+                            ].map((preset) => (
+                              <button
+                                key={preset.val}
+                                type="button"
+                                onClick={() => setDirectQuantity(idx, preset.val)}
+                                className={cn(
+                                  "px-1.5 py-0.5 rounded border cursor-pointer transition-colors",
+                                  Number(item.quantity) === preset.val
+                                    ? "bg-primary text-primary-foreground border-primary font-bold shadow-2xs"
+                                    : "bg-muted/40 text-muted-foreground hover:text-foreground border-border/80 hover:bg-muted"
+                                )}
+                                title={`Set ${preset.label}`}
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+
+                            {Number(item.quantity) > 0 && (Number(item.quantity) < 1 || Number(item.quantity) % 1 !== 0) && (
+                              <span className="text-[9.5px] font-mono px-1 py-0.2 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30">
+                                {Number(item.quantity) < 1
+                                  ? `${Math.round(Number(item.quantity) * 1000)} ML`
+                                  : `${Math.round(Number(item.quantity) * 1000)} ML`}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="size-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                          className="size-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
                           onClick={() => removeFromCart(idx)}
+                          title="Remove item"
                         >
-                          <Trash2Icon className="size-2.5" />
+                          <Trash2Icon className="size-3" />
                         </Button>
                       </div>
                     </div>
@@ -788,7 +876,7 @@ export function PosCounter() {
             {hasLossItem && (
               <div className="p-1.5 rounded-lg bg-destructive/15 border border-destructive/40 text-destructive text-[10px] font-bold flex items-center gap-1.5">
                 <AlertCircleIcon className="size-3.5 shrink-0" />
-                <span>Nuksan Warning: Farokht rate kharid se kam hai! Checkout blocked.</span>
+                <span>Loss Warning: Selling price is lower than cost price! Checkout blocked.</span>
               </div>
             )}
 
@@ -799,7 +887,7 @@ export function PosCounter() {
                   return;
                 }
                 if (hasLossItem) {
-                  setError("Loss detected! Farokht rate kharid rate se kam hai. Sale submit nahi ho sakti.");
+                  setError("Loss detected! Selling price cannot be lower than cost price.");
                   return;
                 }
                 setError("");

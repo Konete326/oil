@@ -18,9 +18,21 @@ const EXPENSE_CATEGORIES = [
 
 const PAYMENT_MODES = ["Cash", "Bank Transfer", "Cheque", "Online POS"];
 
+function detectCategory(val) {
+  const t = (val || "").toLowerCase();
+  if (t.includes("salary") || t.includes("tankhwah") || t.includes("wage") || t.includes("staff")) return "Salaries & Wages";
+  if (t.includes("bill") || t.includes("bijli") || t.includes("electric") || t.includes("gas") || t.includes("water") || t.includes("internet")) return "Utilities";
+  if (t.includes("rent") || t.includes("kiraya")) return "Rent";
+  if (t.includes("petrol") || t.includes("diesel") || t.includes("freight") || t.includes("transport") || t.includes("carriage") || t.includes("mazdoori")) return "Transport & Freight";
+  if (t.includes("repair") || t.includes("maintenance") || t.includes("service")) return "Maintenance & Repairs";
+  if (t.includes("tea") || t.includes("chai") || t.includes("khana") || t.includes("lunch") || t.includes("petty")) return "Office Petty Cash";
+  if (t.includes("tax") || t.includes("license") || t.includes("fee")) return "Official Fees & Licenses";
+  return "Other";
+}
+
 export function ExpenseModal({ isOpen, onClose, onSuccess }) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Salaries & Wages");
+  const [category, setCategory] = useState("Other");
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [voucherNumber, setVoucherNumber] = useState("");
@@ -62,7 +74,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
 
   const resetForm = () => {
     setTitle("");
-    setCategory("Salaries & Wages");
+    setCategory("Other");
     setAmount("");
     setPaymentMode("Cash");
     setVoucherNumber("");
@@ -89,38 +101,24 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
             required
             placeholder="e.g. Shop Electricity Bill or Office Tea/Lunch"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setCategory(detectCategory(e.target.value));
+            }}
             onValidationChange={setTitleValid}
           />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Expense Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold"
-              >
-                {EXPENSE_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <ValidatedInput
-              label="Amount (PKR)"
-              rule="amount"
-              required
-              type="number"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              onValidationChange={setAmountValid}
-              className="font-mono font-bold"
-            />
-          </div>
+          <ValidatedInput
+            label="Amount (PKR)"
+            rule="amount"
+            required
+            type="number"
+            placeholder="0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            onValidationChange={setAmountValid}
+            className="font-mono font-bold text-sm"
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -148,16 +146,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
               />
             </div>
           </div>
-
-          <ValidatedInput
-            label="Voucher / Slip Reference No."
-            rule="text"
-            required={false}
-            placeholder="Auto-generated if left blank"
-            value={voucherNumber}
-            onChange={(e) => setVoucherNumber(e.target.value)}
-            className="font-mono"
-          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>

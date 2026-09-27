@@ -17,7 +17,7 @@ import {
   fetchCashTransactionsApi,
   fetchExpensesApi,
   fetchPosSales,
-  fetchMills,
+  fetchCustomers,
   fetchSuppliersApi,
   fetchCurrentShiftStatusApi,
 } from "@/lib/api";
@@ -120,7 +120,7 @@ export function AppHeader({ user, onLogout }) {
         moduleKeys.push("cash");
       }
       if (hasPermission("ledger")) {
-        fetchTasks.push(fetchMills());
+        fetchTasks.push(fetchCustomers({ search: query }));
         moduleKeys.push("ledger");
       }
       if (hasPermission("supplier-ledger")) {
@@ -145,15 +145,14 @@ export function AppHeader({ user, onLogout }) {
             .filter(
               (p) =>
                 p.name?.toLowerCase().includes(q) ||
-                p.sku?.toLowerCase().includes(q) ||
-                p.brand?.toLowerCase().includes(q)
+                p.sku?.toLowerCase().includes(q)
             )
             .slice(0, 3)
             .forEach((p) => {
               results.push({
                 id: `prod-${p._id}`,
                 title: p.name,
-                subtitle: `SKU: ${p.sku} | Stock: ${p.stockQuantity}`,
+                subtitle: `Stock: ${p.stockQuantity} Liters`,
                 category: "Products & Stock",
                 path: "/products",
                 icon: <PackageIcon className="size-4 text-primary" />,
@@ -199,18 +198,17 @@ export function AppHeader({ user, onLogout }) {
         } else if (modKey === "ledger") {
           res.data
             .filter(
-              (m) =>
-                m.name?.toLowerCase().includes(q) ||
-                m.code?.toLowerCase().includes(q) ||
-                m.zone?.toLowerCase().includes(q)
+              (c) =>
+                c.name?.toLowerCase().includes(q) ||
+                c.phone?.toLowerCase().includes(q)
             )
             .slice(0, 3)
-            .forEach((m) => {
+            .forEach((c) => {
               results.push({
-                id: `mill-${m._id}`,
-                title: m.name,
-                subtitle: `Mill Code: ${m.code} | Balance: Rs ${m.currentBalance?.toLocaleString()}`,
-                category: "Client Ledger (Mills)",
+                id: `cust-${c._id}`,
+                title: c.name,
+                subtitle: `Balance: Rs ${Number(c.currentBalance || 0).toLocaleString()}`,
+                category: "Customer Ledger",
                 path: "/ledger",
                 icon: <BookOpenIcon className="size-4 text-amber-500" />,
               });
@@ -243,7 +241,7 @@ export function AppHeader({ user, onLogout }) {
                 title: e.title,
                 subtitle: `Voucher: ${e.voucherNumber} | Amount: Rs ${e.amount?.toLocaleString()}`,
                 category: "Expenses & Akhrajaat",
-                path: "/expenses",
+                path: "/pos/history?tab=expenses",
                 icon: <ReceiptIcon className="size-4 text-destructive" />,
               });
             });
@@ -275,9 +273,9 @@ export function AppHeader({ user, onLogout }) {
     },
     {
       label: "Record Expense Voucher",
-      path: "/expenses",
-      state: { openModal: true },
-      perm: "expenses",
+      path: "/pos/history",
+      state: { openExpenseModal: true },
+      perm: "pos",
       icon: <ReceiptIcon className="size-3.5 text-destructive" />,
     },
     {
@@ -429,29 +427,29 @@ export function AppHeader({ user, onLogout }) {
 
         <Button
           size="sm"
-          variant={shiftStatus?.isClosed ? "outline" : "default"}
+          variant="outline"
           onClick={() => setIsShopModalOpen(true)}
           className={cn(
-            "gap-1.5 h-9 px-2.5 text-xs font-semibold shadow-xs cursor-pointer transition-all",
+            "gap-2 h-9 px-3 text-xs font-medium rounded-lg border transition-all cursor-pointer shadow-2xs",
             shiftStatus?.isClosed
-              ? "border-border text-muted-foreground bg-muted/40 hover:bg-muted"
-              : "bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
+              ? "border-border/80 bg-muted/40 text-muted-foreground hover:bg-muted"
+              : "border-border/80 bg-background/60 hover:bg-muted/70 text-foreground"
           )}
           title={shiftStatus?.isClosed ? "Shop is closed" : "Manual Shop Closing (Z-Report)"}
         >
           <span className="relative flex h-2 w-2">
             {!shiftStatus?.isClosed && (
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500/70" />
             )}
             <span
               className={cn(
                 "relative inline-flex rounded-full h-2 w-2",
-                shiftStatus?.isClosed ? "bg-muted-foreground" : "bg-emerald-400"
+                shiftStatus?.isClosed ? "bg-muted-foreground/60" : "bg-emerald-500"
               )}
             />
           </span>
-          <StoreIcon className="size-3.5" />
-          <span className="hidden md:inline font-mono">
+          <StoreIcon className="size-3.5 text-muted-foreground" />
+          <span className="hidden md:inline font-medium">
             {shiftStatus?.isClosed ? "Shop Closed" : "Shop Close"}
           </span>
         </Button>

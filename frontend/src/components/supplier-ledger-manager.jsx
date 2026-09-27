@@ -9,7 +9,9 @@ import {
   Trash2Icon,
   Building2Icon,
   EyeIcon,
+  ScaleIcon,
 } from "lucide-react";
+import { SupplierTrialSheetModal } from "@/components/supplier-trial-sheet-modal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +40,7 @@ export function SupplierLedgerManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [selectedSupplierForTrial, setSelectedSupplierForTrial] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [supplierToPrint, setSupplierToPrint] = useState(null);
@@ -344,6 +347,16 @@ export function SupplierLedgerManager() {
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => setSelectedSupplierForTrial(selectedSupplierObj)}
+                  className="gap-1 text-[11px] h-6.5 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                  title="Supplier Individual Trial Balance Sheet"
+                >
+                  <ScaleIcon className="size-3" />
+                  <span>Trial Sheet</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setSupplierToView(selectedSupplierObj)}
                   className="gap-1 text-[11px] h-6.5 px-2 cursor-pointer"
                 >
@@ -567,6 +580,12 @@ export function SupplierLedgerManager() {
           ledgerEntries={filteredLedgerEntries}
         />
       )}
+
+      <SupplierTrialSheetModal
+        isOpen={Boolean(selectedSupplierForTrial)}
+        onClose={() => setSelectedSupplierForTrial(null)}
+        supplier={selectedSupplierForTrial}
+      />
 
       <ConfirmModal
         isOpen={!!supplierToDelete}

@@ -5,7 +5,7 @@ const posSaleItemSchema = new mongoose.Schema({
   productName: { type: String, required: true },
   sku: { type: String },
   unitType: { type: String, default: "Liters" },
-  quantity: { type: Number, required: true, min: 1 },
+  quantity: { type: Number, required: true, min: 0.01 },
   costPrice: { type: Number, default: 0 },
   unitPrice: { type: Number, required: true },
   subtotal: { type: Number, required: true },

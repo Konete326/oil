@@ -3,7 +3,8 @@ import { fetchCustomerDetail } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { CloudLoader } from "@/components/ui/cloud-loader";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
-import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon } from "lucide-react";
+import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal";
+import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export function CustomerDetailModal({ isOpen, onClose, customerId }) {
@@ -11,6 +12,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isPrintOpen, setIsPrintOpen] = useState(false);
+  const [isDiaryOpen, setIsDiaryOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("sales");
 
   useEffect(() => {
@@ -62,6 +64,16 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
+              <Button
+                onClick={() => setIsDiaryOpen(true)}
+                size="sm"
+                variant="outline"
+                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+              >
+                <BookOpenIcon className="size-3.5 text-amber-600" />
+                <span>کھاتہ ڈائری</span>
+              </Button>
+
               <Button
                 onClick={() => setIsPrintOpen(true)}
                 size="sm"
@@ -273,6 +285,20 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
           summary={summary}
           posSales={posSales}
           ledgerEntries={ledgerEntries}
+        />
+      )}
+
+      {isDiaryOpen && (
+        <CustomerUdharDiaryModal
+          isOpen={isDiaryOpen}
+          onClose={() => setIsDiaryOpen(false)}
+          customerName={customer?.name}
+          salesHistory={posSales}
+          onSuccess={() => {
+            if (customerId) {
+              fetchCustomerDetail(customerId).then(setData).catch(() => {});
+            }
+          }}
         />
       )}
     </>

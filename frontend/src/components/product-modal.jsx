@@ -8,9 +8,7 @@ import {
   ImageIcon,
   Loader2Icon,
   LayersIcon,
-  ScanBarcode as ScanBarcodeIcon,
   DropletIcon,
-  AlertCircle as AlertCircleIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,7 +48,6 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
   const [costPrice, setCostPrice] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
@@ -67,7 +64,6 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
       setName(initialData.name || "");
       setSku(initialData.sku || generateUniqueSku(existingProducts));
       setCostPrice(initialData.costPrice !== undefined ? String(initialData.costPrice) : "");
-      setSellingPrice(initialData.sellingPrice !== undefined && initialData.sellingPrice > 0 ? String(initialData.sellingPrice) : "");
       setStockQuantity(initialData.stockQuantity !== undefined ? String(initialData.stockQuantity) : "0");
       setImageUrl(initialData.imageUrl || "");
       setImagePreview(initialData.imageUrl || "");
@@ -75,7 +71,6 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
       setName("");
       setSku(generateUniqueSku(existingProducts));
       setCostPrice("");
-      setSellingPrice("");
       setStockQuantity("0");
       setImageUrl("");
       setImagePreview("");
@@ -85,9 +80,7 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
   if (!isOpen) return null;
 
   const costNum = Number(costPrice) || 0;
-  const sellingNum = sellingPrice === "" ? 0 : Number(sellingPrice) || 0;
-  const isSellingLessThanCost = sellingNum > 0 && sellingNum < costNum;
-  const isFormValid = name.trim().length > 0 && sku.trim().length > 0 && costNum > 0 && !isSellingLessThanCost;
+  const isFormValid = name.trim().length > 0 && sku.trim().length > 0 && costNum > 0;
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -120,10 +113,6 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSellingLessThanCost) {
-      toast.error(`Loss Prevention: Farokht rate (Rs ${sellingNum}) kharid rate (Rs ${costNum}) se kam nahi ho sakti.`);
-      return;
-    }
     if (!isFormValid) {
       toast.error("Please enter a valid Product Name and Kharid Rate (Cost).");
       return;
@@ -136,7 +125,7 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
         packagingType: "Liter",
         unit: "Liters",
         costPrice: costNum,
-        sellingPrice: sellingNum,
+        sellingPrice: initialData?.sellingPrice || 0,
         stockQuantity: Number(stockQuantity) || 0,
         imageUrl,
       });
@@ -169,28 +158,6 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs overflow-y-auto flex-1">
-          <div className="flex items-center justify-between p-3 rounded-xl border border-primary/25 bg-primary/5 shadow-2xs">
-            <div className="flex items-center gap-2.5">
-              <div className="size-8 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold shrink-0">
-                <ScanBarcodeIcon className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Product SKU Code</span>
-                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                    Auto-Generated · Read Only
-                  </span>
-                </div>
-                <p className="font-mono text-base font-black tracking-widest text-primary leading-tight">
-                  {sku}
-                </p>
-              </div>
-            </div>
-            <div className="text-right hidden sm:block shrink-0">
-              <span className="text-[10px] text-muted-foreground block font-medium">Barcode Key</span>
-              <span className="font-mono text-xs text-foreground font-bold tracking-wider">*{sku}*</span>
-            </div>
-          </div>
 
           <div className="space-y-1">
             <ValidatedInput
@@ -204,22 +171,17 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
             />
           </div>
 
-          <div className="p-3 rounded-xl border border-border bg-muted/20 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="size-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold">
-                <DropletIcon className="size-4" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground text-xs">Standard Packaging & Measurement</p>
-                <p className="text-[10px] text-muted-foreground">Entire system standard is locked strictly to Liters (L).</p>
-              </div>
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-lg border border-border/70 bg-muted/20 text-xs">
+            <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
+              <DropletIcon className="size-3.5 text-blue-500" />
+              <span>Unit:</span>
             </div>
-            <span className="font-mono font-bold text-xs px-2.5 py-1 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
-              Unit: Liters (L)
+            <span className="font-mono font-bold text-foreground text-[11px] bg-background px-2 py-0.5 rounded border border-border/60">
+              Liters (L)
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <ValidatedInput
               label="Kharid Rate (Cost) Rs/L *"
               rule="positiveNumber"
@@ -231,24 +193,6 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
               onValidationChange={setCostValid}
               className="font-mono font-bold text-foreground"
             />
-
-            <div className="space-y-1">
-              <label className="font-semibold text-foreground text-[11px] block">
-                Farokht Rate (Sale) Rs/L
-              </label>
-              <input
-                type="number"
-                min={costNum || 0}
-                placeholder={costNum > 0 ? `Min Rs ${costNum}` : "e.g. 950"}
-                value={sellingPrice}
-                onChange={(e) => setSellingPrice(e.target.value)}
-                className={`w-full h-9 rounded-md border px-3 text-xs font-mono font-bold bg-background focus:outline-none focus:ring-1 ${
-                  isSellingLessThanCost
-                    ? "border-destructive text-destructive focus:ring-destructive"
-                    : "border-input text-foreground focus:ring-primary"
-                }`}
-              />
-            </div>
 
             <ValidatedInput
               label="Current Stock (Liters)"
@@ -262,16 +206,9 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
             />
           </div>
 
-          {isSellingLessThanCost && (
-            <div className="p-2.5 rounded-xl border border-destructive/40 bg-destructive/15 text-destructive flex items-center gap-2 text-xs font-semibold animate-pulse">
-              <AlertCircleIcon className="size-4 shrink-0" />
-              <span>Nuksan Alert: Farokht rate (Rs {sellingNum}) kharid rate (Rs {costNum}) se kam nahi ho sakti! Sale allow nahi hogi.</span>
-            </div>
-          )}
-
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card">
             <div className="text-[11px] text-muted-foreground">
-              Rates can also be dynamically adjusted directly at POS counter during each customer transaction.
+              Farokht rate (Selling Price) direct POS counter par sale ke waqt tay hogi.
             </div>
 
             <div className="flex items-center gap-2">

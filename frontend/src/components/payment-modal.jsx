@@ -82,13 +82,13 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="space-y-1">
-            <label className="font-medium text-foreground">Select Textile Mill / Client (Optional)</label>
+            <label className="font-medium text-foreground">Select Customer Account (Optional)</label>
             <select
               value={millId}
               onChange={(e) => setMillId(e.target.value)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
             >
-              <option value="">Manual Client / Walk-in Khata...</option>
+              <option value="">Walk-in Khata / General Customer...</option>
               {mills.map((m) => (
                 <option key={m._id} value={m._id}>
                   {m.name} (Current Outstanding: Rs {m.currentBalance?.toLocaleString()})
@@ -99,10 +99,10 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
 
           {!millId && (
             <ValidatedInput
-              label="Client Name (Optional)"
+              label="Customer Name (Optional)"
               rule="text"
               required={false}
-              placeholder="e.g. SITE Weaving Division / Walk-in"
+              placeholder="e.g. Walk-in Customer / Account Name"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               onValidationChange={setClientNameValid}

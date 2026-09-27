@@ -62,8 +62,8 @@ export function DashboardHeroCards({ heroCards, loading }) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className={cn("size-2.5 rounded-full", todaySales.isClosed ? "bg-muted-foreground" : todaySales.isShiftActive ? "bg-emerald-500 animate-pulse" : "bg-amber-500")} />
-              <span className={cn("text-xs font-bold uppercase tracking-wider", todaySales.isClosed ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400")}>
-                {todaySales.isClosed ? "Shop Closed (Shift Ended)" : "Today's Sales (10 AM - 6 PM)"}
+              <span className={cn("text-xs font-bold uppercase tracking-wider", todaySales.isClosed && !todaySales.periodTitle ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400")}>
+                {todaySales.periodTitle || (todaySales.isClosed ? "Shop Closed (Shift Ended)" : "Today's Sales (10 AM - 6 PM)")}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">

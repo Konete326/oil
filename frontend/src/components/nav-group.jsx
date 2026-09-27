@@ -51,7 +51,7 @@ export function NavGroup({ label, items }) {
 												{item.subItems?.map((subItem) => (
 													<SidebarMenuSubItem key={subItem.title}>
 														<SidebarMenuSubButton asChild isActive={location.pathname === subItem.path}>
-															<Link to={subItem.path} className="cursor-pointer">
+															<Link to={subItem.path} state={subItem.state} className="cursor-pointer">
 																<span data-slot="icon" className="notranslate flex items-center shrink-0" translate="no">{subItem.icon}</span>
 																<span data-slot="label">{t(subItem.title)}</span>
 															</Link>
@@ -63,7 +63,7 @@ export function NavGroup({ label, items }) {
 									</>
 								) : (
 									<SidebarMenuButton asChild isActive={isActive} className="cursor-pointer" tooltip={t(item.title)}>
-										<Link to={item.path} className="cursor-pointer">
+										<Link to={item.path} state={item.state} className="cursor-pointer">
 											<span data-slot="icon" className="notranslate flex items-center shrink-0" translate="no">{item.icon}</span>
 											<span data-slot="label">{t(item.title)}</span>
 										</Link>

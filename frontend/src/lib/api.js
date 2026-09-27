@@ -195,9 +195,11 @@ export async function getCurrentUserApi() {
   return null;
 }
 
-export async function fetchDashboardData() {
+export async function fetchDashboardData(params = {}) {
   try {
-    const res = await fetch(`${API_URL}/dashboard`, {
+    const qs = new URLSearchParams(params).toString();
+    const url = qs ? `${API_URL}/dashboard?${qs}` : `${API_URL}/dashboard`;
+    const res = await fetch(url, {
       headers: { ...getAuthHeader() },
     });
     if (res.ok) {
@@ -305,122 +307,6 @@ export async function fetchDashboardData() {
     },
   };
 }
-
-export async function fetchCategories() {
-  return { success: true, data: [] };
-}
-
-export async function createCategory(data) {
-  try {
-    const res = await fetch(`${API_URL}/categories`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json.data) await updateLocalSnapshotItem("categories", json.data);
-      return json;
-    }
-  } catch (err) {
-    console.warn("createCategory offline, queueing sync");
-  }
-  const localItem = { ...data, _id: `cat_${Date.now()}` };
-  await updateLocalSnapshotItem("categories", localItem);
-  await addOfflineOperation("category_entry", "create", localItem);
-  return { success: true, data: localItem };
-}
-
-export async function updateCategory(id, data) {
-  try {
-    const res = await fetch(`${API_URL}/categories/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json.data) await updateLocalSnapshotItem("categories", json.data);
-      return json;
-    }
-  } catch (err) {
-    console.warn("updateCategory offline, queueing sync");
-  }
-  const localItem = { ...data, _id: id };
-  await updateLocalSnapshotItem("categories", localItem);
-  await addOfflineOperation("category_entry", "update", localItem);
-  return { success: true, data: localItem };
-}
-
-export async function deleteCategory(id) {
-  try {
-    const res = await fetch(`${API_URL}/categories/${id}`, {
-      method: "DELETE",
-      headers: { ...getAuthHeader() },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      await deleteFromLocalSnapshot("categories", id);
-      return json;
-    }
-  } catch (err) {
-    console.warn("deleteCategory offline, queueing sync");
-  }
-  await deleteFromLocalSnapshot("categories", id);
-  await addOfflineOperation("category_delete", "delete", { _id: id });
-  return { success: true, message: "Deleted locally" };
-}
-
-export async function addSubcategory(categoryId, data) {
-  try {
-    const res = await fetch(`${API_URL}/categories/${categoryId}/subcategories`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      return json;
-    }
-  } catch (err) {
-    console.warn("addSubcategory offline, updating local snapshot");
-  }
-
-  const cached = (await getLocalSnapshot("categories")) || [];
-  const cat = cached.find((c) => (c._id || c.id) === categoryId);
-  const newSub = { ...data, _id: `sub_${Date.now()}` };
-  if (cat) {
-    if (!Array.isArray(cat.subcategories)) cat.subcategories = [];
-    cat.subcategories.push(newSub);
-    await saveLocalSnapshot("categories", cached);
-  }
-  await addOfflineOperation("category_entry", "update", cat || { _id: categoryId });
-  return { success: true, data: newSub };
-}
-
-export async function deleteSubcategory(categoryId, subId) {
-  try {
-    const res = await fetch(`${API_URL}/categories/${categoryId}/subcategories/${subId}`, {
-      method: "DELETE",
-      headers: { ...getAuthHeader() },
-    });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (err) {
-    console.warn("deleteSubcategory offline, updating local snapshot");
-  }
-
-  const cached = (await getLocalSnapshot("categories")) || [];
-  const cat = cached.find((c) => (c._id || c.id) === categoryId);
-  if (cat && Array.isArray(cat.subcategories)) {
-    cat.subcategories = cat.subcategories.filter((s) => (s._id || s.id) !== subId);
-    await saveLocalSnapshot("categories", cached);
-  }
-  await addOfflineOperation("category_entry", "update", cat || { _id: categoryId });
-  return { success: true, message: "Deleted subcategory locally" };
-}
-
 export async function fetchProducts() {
   try {
     const res = await fetch(`${API_URL}/products`, {
@@ -803,6 +689,36 @@ export async function deletePosSaleApi(id, options = {}) {
   return { success: true, message: "Deleted POS sale locally" };
 }
 
+export async function updatePosSaleApi(id, updates = {}) {
+  try {
+    const res = await fetch(`${API_URL}/pos/sales/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(updates),
+    });
+    handleAuthResponse(res);
+    if (res.ok) {
+      const data = await res.json();
+      await updateLocalSnapshotItem("pos_sales", data.data || data);
+      return data;
+    }
+  } catch (err) {
+    console.warn("updatePosSaleApi error", err);
+  }
+
+  const cachedSales = await getLocalSnapshot("pos_sales");
+  if (Array.isArray(cachedSales)) {
+    const idx = cachedSales.findIndex((s) => (s._id || s.id) === id);
+    if (idx >= 0) {
+      const updated = { ...cachedSales[idx], ...updates, updatedAt: new Date().toISOString() };
+      cachedSales[idx] = updated;
+      await saveLocalSnapshot("pos_sales", cachedSales);
+      return { success: true, data: updated };
+    }
+  }
+  return { success: false, message: "Failed to update sale" };
+}
+
 export async function fetchLedgerEntries(millId = "") {
   if (typeof navigator !== "undefined" && !navigator.onLine) {
     const [cachedLedger, challans, cashTxs, mills] = await Promise.all([
@@ -840,7 +756,7 @@ export async function fetchLedgerEntries(millId = "") {
           entries.push({
             _id: c._id || c.id,
             createdAt: c.challanDate || c.createdAt || new Date().toISOString(),
-            clientName: c.millName || (mList.find((m) => (m._id || m.id) === cMillId)?.name) || "Textile Mill",
+            clientName: c.millName || (mList.find((m) => (m._id || m.id) === cMillId)?.name) || "Customer Account",
             transactionType: "Debit (Challan Dispatch)",
             paymentMode: "Challan Invoice",
             referenceNumber: c.challanNumber || "—",
@@ -856,7 +772,7 @@ export async function fetchLedgerEntries(millId = "") {
           entries.push({
             _id: tx._id || tx.id,
             createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
-            clientName: tx.party || "Textile Mill",
+            clientName: tx.party || "Customer Account",
             transactionType: tx.type === "Received" ? "Credit (Payment Received)" : "Debit (Cash Paid)",
             paymentMode: tx.paymentMethod || "Cash",
             referenceNumber: tx.receiptNo || "Cash Receipt",
@@ -921,7 +837,7 @@ export async function fetchLedgerEntries(millId = "") {
         entries.push({
           _id: c._id || c.id,
           createdAt: c.challanDate || c.createdAt || new Date().toISOString(),
-          clientName: c.millName || (mList.find((m) => (m._id || m.id) === cMillId)?.name) || "Textile Mill",
+          clientName: c.millName || (mList.find((m) => (m._id || m.id) === cMillId)?.name) || "Customer Account",
           transactionType: "Debit (Challan Dispatch)",
           paymentMode: "Challan Invoice",
           referenceNumber: c.challanNumber || "—",
@@ -937,7 +853,7 @@ export async function fetchLedgerEntries(millId = "") {
         entries.push({
           _id: tx._id || tx.id,
           createdAt: tx.transactionDate || tx.createdAt || new Date().toISOString(),
-          clientName: tx.party || "Textile Mill",
+          clientName: tx.party || "Customer Account",
           transactionType: tx.type === "Received" ? "Credit (Payment Received)" : "Debit (Cash Paid)",
           paymentMode: tx.paymentMethod || "Cash",
           referenceNumber: tx.receiptNo || "Cash Receipt",
@@ -956,9 +872,9 @@ export async function fetchLedgerEntries(millId = "") {
 export async function createPaymentEntry(data) {
   const localItem = {
     _id: `pay_${Date.now()}`,
-    clientType: "Textile Mill",
+    clientType: "Customer",
     mill: data.millId,
-    clientName: data.clientName || data.millName || "Textile Mill",
+    clientName: data.clientName || data.millName || "Customer Account",
     transactionType: "Credit (Payment Received)",
     amount: Number(data.amount) || 0,
     paymentMode: data.paymentMode || "Cash",
@@ -1724,17 +1640,6 @@ export async function fetchTrialBalanceApi() {
       totalDebit += bal;
     } else {
       rows.push({ account: `Customer: ${c.name}`, debit: 0, credit: Math.abs(bal) });
-      totalCredit += Math.abs(bal);
-    }
-  });
-
-  mList.forEach((m) => {
-    const bal = Number(m.currentBalance) || 0;
-    if (bal >= 0) {
-      rows.push({ account: `Textile Mill: ${m.name}`, debit: bal, credit: 0 });
-      totalDebit += bal;
-    } else {
-      rows.push({ account: `Textile Mill: ${m.name}`, debit: 0, credit: Math.abs(bal) });
       totalCredit += Math.abs(bal);
     }
   });

@@ -14,7 +14,6 @@ export const createProduct = async (req, res, next) => {
     const {
       name,
       sku,
-      brand,
       packagingType,
       costPrice,
       sellingPrice,
@@ -55,7 +54,6 @@ export const createProduct = async (req, res, next) => {
     const product = await Product.create({
       name,
       sku: finalSku,
-      brand: brand || "",
       packagingType: packagingType || "Liter",
       costPrice: Number(costPrice) || 0,
       sellingPrice: Number(sellingPrice) || 0,
@@ -79,6 +77,7 @@ export const updateProduct = async (req, res, next) => {
       throw new Error("Product not found");
     }
 
+    delete req.body.brand;
     delete req.body.category;
     delete req.body.subcategoryName;
     delete req.body.viscosity;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
   PlusIcon,
   SearchIcon,
@@ -11,6 +11,7 @@ import {
   RefreshCwIcon,
   CalendarIcon,
   FileSpreadsheetIcon,
+  Building2Icon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { CashStatsSummary } from "@/components/cash-stats-summary";
 import { CashTransactionModal } from "@/components/cash-transaction-modal";
 import { CashPartyReport } from "@/components/cash-party-report";
 import { CashPrintStatementModal } from "@/components/cash-print-statement-modal";
+import { BankKhataRegisterView } from "@/components/bank-khata-register-view";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
@@ -35,7 +37,11 @@ const PAGE_SIZE = 10;
 
 export function CashManager() {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const t = searchParams.get("tab");
+    return t || (location.state?.tab || "bank");
+  });
   const [transactions, setTransactions] = useState([]);
   const [partySummaries, setPartySummaries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -125,8 +131,13 @@ export function CashManager() {
     <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Cash Transactions & Reports</h1>
-          <p className="text-xs text-muted-foreground">Manage Paid Cash (outflow), Received Cash (inflow), and Party-wise ledger reports.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Building2Icon className="size-6 text-primary" />
+            <span>Bank Khatay & Cash Manager (کھاتہ بنام)</span>
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Manage Bank Accounts (کھاتہ بنام: HBL, Meezan, etc.), Cash Inflows, Outflows, aur Party-wise ledger reports.
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -150,26 +161,24 @@ export function CashManager() {
         </div>
       </div>
 
-      <CashStatsSummary
-        totalPaid={totalPaid}
-        totalReceived={totalReceived}
-        partyCount={partySummaries.length}
-      />
-
       <div className="flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto">
           {[
-            { id: "all", label: "All Transactions" },
+            { id: "bank", label: "کھاتہ بنام (Bank Khata - HBL)" },
+            { id: "all", label: "All Cash Entries" },
             { id: "paid", label: "Paid Cash Records" },
             { id: "received", label: "Received Cash Records" },
             { id: "party", label: "Party-Wise Reports" },
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSearchParams(tab.id === "bank" ? {} : { tab: tab.id });
+              }}
+              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer shrink-0 ${
                 activeTab === tab.id
-                  ? "border-primary text-primary"
+                  ? "border-primary text-primary font-bold"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -178,40 +187,56 @@ export function CashManager() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2 mb-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (activeTab === "party") {
-                exportPartySummaryToExcel(partySummaries);
-              } else {
-                exportTransactionsToExcel(transactions);
-              }
-              toast.success("Excel report exported successfully!");
-            }}
-            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
-          >
-            <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
-            <span>Export Excel</span>
-          </Button>
+        {activeTab !== "bank" && (
+          <div className="flex items-center gap-2 mb-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (activeTab === "party") {
+                  exportPartySummaryToExcel(partySummaries);
+                } else {
+                  exportTransactionsToExcel(transactions);
+                }
+                toast.success("Excel report exported successfully!");
+              }}
+              className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+            >
+              <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
+              <span>Export Excel</span>
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsPrintModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
-          >
-            <PrinterIcon className="size-3.5 text-primary" />
-            <span>View & Print A4 Statement</span>
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPrintModalOpen(true)}
+              className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+            >
+              <PrinterIcon className="size-3.5 text-primary" />
+              <span>View & Print A4 Statement</span>
+            </Button>
+          </div>
+        )}
       </div>
 
-      {activeTab === "party" ? (
-        <CashPartyReport partySummaries={partySummaries} loading={loading} />
+      {activeTab === "bank" ? (
+        <BankKhataRegisterView />
+      ) : activeTab === "party" ? (
+        <>
+          <CashStatsSummary
+            totalPaid={totalPaid}
+            totalReceived={totalReceived}
+            partyCount={partySummaries.length}
+          />
+          <CashPartyReport partySummaries={partySummaries} loading={loading} />
+        </>
       ) : (
         <div className="space-y-4">
+          <CashStatsSummary
+            totalPaid={totalPaid}
+            totalReceived={totalReceived}
+            partyCount={partySummaries.length}
+          />
           <form onSubmit={handleSearchSubmit} className="bg-card p-3 rounded-xl border border-border">
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center w-full">
               <div className="relative col-span-12 md:col-span-4">

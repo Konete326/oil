@@ -3,7 +3,7 @@ import { SearchIcon, BookOpenIcon, PrinterIcon, FileSpreadsheetIcon, CalendarIco
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fetchDetailedPartyLedgerApi, fetchMills, fetchSuppliersApi } from "@/lib/api";
+import { fetchDetailedPartyLedgerApi, fetchCustomers, fetchSuppliersApi } from "@/lib/api";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
@@ -23,9 +23,9 @@ export function PartyLedgerReportView() {
 
   useEffect(() => {
     if (partyType === "Customer") {
-      fetchMills().then((res) => {
+      fetchCustomers().then((res) => {
         if (res?.success) {
-          const names = res.data.map((m) => m.name);
+          const names = res.data.map((c) => c.name);
           setPartiesList(names);
           if (names.length > 0) setPartyName(names[0]);
         }

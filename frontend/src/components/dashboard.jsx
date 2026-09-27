@@ -9,23 +9,36 @@ import { DashboardInvoices } from "@/components/dashboard-invoices";
 import { NetRevenueChart } from "@/components/net-revenue-chart";
 import { DashboardStats } from "@/components/stats";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   DropletIcon,
   LayersIcon,
   TrendingUpIcon,
   WalletCardsIcon,
-  ShoppingCartIcon,
-  ReceiptIcon,
-  PackageIcon,
+  RotateCwIcon,
+  CalendarIcon,
+  FilterIcon,
+  ClockIcon,
 } from "lucide-react";
 
 export function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("today");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const navigate = useNavigate();
 
-  const loadDashboard = () => {
-    fetchDashboardData().then((res) => {
+  const loadDashboard = (activePeriod = period, sDate = startDate, eDate = endDate) => {
+    setLoading(true);
+    const params = { period: activePeriod };
+    if (activePeriod === "custom") {
+      if (sDate) params.startDate = sDate;
+      if (eDate) params.endDate = eDate;
+    }
+
+    fetchDashboardData(params).then((res) => {
       if (res && res.success) {
         setData(res.data);
       }
@@ -34,10 +47,25 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    loadDashboard();
-    window.addEventListener("refresh-dashboard", loadDashboard);
-    return () => window.removeEventListener("refresh-dashboard", loadDashboard);
-  }, []);
+    loadDashboard(period, startDate, endDate);
+    const handleRefresh = () => loadDashboard(period, startDate, endDate);
+    window.addEventListener("refresh-dashboard", handleRefresh);
+    return () => window.removeEventListener("refresh-dashboard", handleRefresh);
+  }, [period]);
+
+  const handlePeriodChange = (newPeriod) => {
+    setPeriod(newPeriod);
+    if (newPeriod !== "custom") {
+      loadDashboard(newPeriod, "", "");
+    }
+  };
+
+  const handleApplyCustomFilter = (e) => {
+    e.preventDefault();
+    if (startDate) {
+      loadDashboard("custom", startDate, endDate);
+    }
+  };
 
   const kpis = data?.kpis || [
     { label: "Total Stock in Hand", value: "0 L", subtext: "Active Stock in Liters", type: "green" },
@@ -48,10 +76,116 @@ export function Dashboard() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="border-b border-border pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
-        <p className="text-xs text-muted-foreground">Real-time KPI overview, oil inventory stock status, and sales metrics.</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
+            <Badge
+              variant="outline"
+              className={`text-[10px] font-mono uppercase px-2 py-0.5 ${
+                period === "today"
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                  : period === "monthly"
+                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
+                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+              }`}
+            >
+              {period === "today"
+                ? "Daily Fresh (Rozana)"
+                : period === "monthly"
+                ? "Monthly Aggregate"
+                : "Custom Range"}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Rozana ka taza hisab kitab, monthly aggregated revenue, aur inventory stock status.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center p-1 rounded-xl bg-muted/40 border border-border text-xs">
+            <button
+              onClick={() => handlePeriodChange("today")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium flex items-center gap-1.5 ${
+                period === "today"
+                  ? "bg-background text-foreground shadow-xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ClockIcon className="size-3.5 text-emerald-500" />
+              <span>Today (آج کا دن)</span>
+            </button>
+
+            <button
+              onClick={() => handlePeriodChange("monthly")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium flex items-center gap-1.5 ${
+                period === "monthly"
+                  ? "bg-background text-foreground shadow-xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <CalendarIcon className="size-3.5 text-blue-500" />
+              <span>This Month (اس ماہ)</span>
+            </button>
+
+            <button
+              onClick={() => handlePeriodChange("custom")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium flex items-center gap-1.5 ${
+                period === "custom"
+                  ? "bg-background text-foreground shadow-xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <FilterIcon className="size-3.5 text-amber-500" />
+              <span>Custom Date Range</span>
+            </button>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => loadDashboard(period, startDate, endDate)}
+            disabled={loading}
+            className="h-9 px-3 text-xs gap-1.5 cursor-pointer shrink-0"
+          >
+            <RotateCwIcon className={`size-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+        </div>
       </div>
+
+      {period === "custom" && (
+        <form
+          onSubmit={handleApplyCustomFilter}
+          className="p-3 rounded-xl border border-border/80 bg-muted/20 flex flex-wrap items-center gap-3 text-xs animate-in fade-in"
+        >
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <CalendarIcon className="size-3.5 text-primary" />
+            <span className="font-semibold text-foreground">Select Range:</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="text-xs h-8 bg-background w-36"
+              required
+            />
+            <span className="text-muted-foreground text-xs">to</span>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="text-xs h-8 bg-background w-36"
+            />
+          </div>
+
+          <Button type="submit" size="sm" className="h-8 text-xs px-3 font-semibold cursor-pointer">
+            Apply Custom Filter
+          </Button>
+        </form>
+      )}
 
       <DashboardHeroCards heroCards={data?.heroCards} loading={loading} />
 

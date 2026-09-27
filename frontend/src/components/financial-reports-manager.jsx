@@ -10,6 +10,8 @@ export function FinancialReportsManager() {
   const [activeTab, setActiveTab] = useState("masterReport");
   const [tbAccounts, setTbAccounts] = useState([]);
   const [tbSummary, setTbSummary] = useState({});
+  const [tbSuppliers, setTbSuppliers] = useState([]);
+  const [tbCustomers, setTbCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadTrialBalance = async () => {
@@ -17,8 +19,10 @@ export function FinancialReportsManager() {
       setLoading(true);
       const res = await fetchTrialBalanceApi();
       if (res?.success) {
-        setTbAccounts(res.data);
-        setTbSummary(res.summary);
+        setTbAccounts(res.data || []);
+        setTbSummary(res.summary || {});
+        setTbSuppliers(res.suppliersTrial || []);
+        setTbCustomers(res.customersTrial || []);
       }
     } catch (err) {
       toast.error("Failed to load trial balance");
@@ -70,7 +74,13 @@ export function FinancialReportsManager() {
       )}
 
       {activeTab === "trialBalance" && (
-        <TrialBalanceView accounts={tbAccounts} summary={tbSummary} loading={loading} />
+        <TrialBalanceView
+          accounts={tbAccounts}
+          summary={tbSummary}
+          suppliersTrial={tbSuppliers}
+          customersTrial={tbCustomers}
+          loading={loading}
+        />
       )}
 
       {activeTab === "profitLoss" && (

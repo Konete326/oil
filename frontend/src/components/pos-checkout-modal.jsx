@@ -61,7 +61,7 @@ export function PosCheckoutModal({
   const handleConfirm = () => {
     if (!isFormValid) return;
     if (isLossSale) {
-      toast.error(`Loss Prevention: Grand Total (Rs ${grandTotal.toLocaleString()}) Kharid Cost (Rs ${cartCostTotal.toLocaleString()}) se kam nahi ho sakta!`);
+      toast.error(`Loss Prevention: Grand Total (Rs ${grandTotal.toLocaleString()}) cannot be lower than Cost Price (Rs ${cartCostTotal.toLocaleString()})!`);
       return;
     }
     if (paymentMode === "Cash" && cashReceivedNum > 0 && cashReceivedNum < grandTotal) {

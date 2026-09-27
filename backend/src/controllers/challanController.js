@@ -4,7 +4,7 @@ import { Product } from "../models/productModel.js";
 
 export const getChallans = async (req, res, next) => {
   try {
-    const challans = await Challan.find().populate("mill", "name code zone").populate("product", "name sku brand").sort({ createdAt: -1 });
+    const challans = await Challan.find().populate("mill", "name code zone").populate("product", "name sku").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: challans.length, data: challans });
   } catch (error) {
     next(error);
@@ -69,7 +69,7 @@ export const createChallan = async (req, res, next) => {
       notes: notes || "",
     });
 
-    const populated = await Challan.findById(challan._id).populate("mill", "name code zone").populate("product", "name sku brand");
+    const populated = await Challan.findById(challan._id).populate("mill", "name code zone").populate("product", "name sku");
     res.status(201).json({ success: true, data: populated });
   } catch (error) {
     next(error);

@@ -1,13 +1,17 @@
 import { ShopShift } from "../models/shopShiftModel.js";
 import { SystemLog } from "../models/systemLogModel.js";
 import { calculateShiftMetrics } from "../utils/shiftMetricsHelper.js";
+import { checkAndAutoCloseShift } from "../utils/shiftAutoCloser.js";
 
 export const getCurrentShiftStatus = async (req, res, next) => {
   try {
     const now = new Date();
     const currentHour = (now.getUTCHours() + 5) % 24;
     const todayStr = now.toISOString().split("T")[0];
-    const closedShift = await ShopShift.findOne({ shiftDate: todayStr, isClosed: true });
+    let closedShift = await checkAndAutoCloseShift(todayStr);
+    if (!closedShift) {
+      closedShift = await ShopShift.findOne({ shiftDate: todayStr, isClosed: true });
+    }
     const isShiftActive = !closedShift && currentHour >= 10 && currentHour < 18;
     const metrics = closedShift
       ? {
@@ -21,6 +25,8 @@ export const getCurrentShiftStatus = async (req, res, next) => {
           creditSales: closedShift.creditSales,
           ordersCount: closedShift.ordersCount,
           netCashInDrawer: closedShift.cashSales - closedShift.totalExpenses,
+          totalStockRemainingLiters: closedShift.totalStockRemainingLiters || 0,
+          totalStockValuation: closedShift.totalStockValuation || 0,
         }
       : await calculateShiftMetrics(todayStr);
 

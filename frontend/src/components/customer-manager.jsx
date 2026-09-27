@@ -26,7 +26,9 @@ import {
   LayoutGridIcon,
   ListIcon,
   BookOpenIcon,
+  ScaleIcon,
 } from "lucide-react";
+import { CustomerTrialSheetModal } from "@/components/customer-trial-sheet-modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,7 @@ const PAGE_SIZE = 4;
 export function CustomerManager() {
   const [viewMode, setViewMode] = useState(() => (typeof window !== "undefined" && window.innerWidth < 768 ? "cards" : "table"));
   const [customers, setCustomers] = useState([]);
+  const [selectedCustomerForTrial, setSelectedCustomerForTrial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [customerType, setCustomerType] = useState("");
@@ -309,6 +312,15 @@ export function CustomerManager() {
                             <Button
                               variant="ghost"
                               size="icon-sm"
+                              onClick={() => setSelectedCustomerForTrial(c)}
+                              className="size-7 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                              title="Customer Individual Trial Balance Sheet"
+                            >
+                              <ScaleIcon className="size-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={() => handleOpenPrint(c)}
                               disabled={loadingPrintId === c._id}
                               className="size-7 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
@@ -420,6 +432,16 @@ export function CustomerManager() {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => setSelectedCustomerForTrial(c)}
+                            className="h-6.5 text-[10.5px] gap-1 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                            title="Customer Trial Balance Sheet"
+                          >
+                            <ScaleIcon className="size-2.5" />
+                            <span>Trial Sheet</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleOpenDetail(c._id)}
                             className="h-6.5 text-[10.5px] gap-1 px-2 cursor-pointer"
                           >
@@ -496,6 +518,12 @@ export function CustomerManager() {
           ledgerEntries={printDirectData?.ledgerEntries || []}
         />
       )}
+
+      <CustomerTrialSheetModal
+        isOpen={Boolean(selectedCustomerForTrial)}
+        onClose={() => setSelectedCustomerForTrial(null)}
+        customer={selectedCustomerForTrial}
+      />
 
       <ConfirmModal
         isOpen={!!deleteTarget}
