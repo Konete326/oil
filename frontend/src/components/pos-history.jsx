@@ -42,7 +42,6 @@ import {
   ClockIcon,
   BookOpenIcon,
   CreditCardIcon,
-  UsersIcon,
   HandCoinsIcon,
   CheckCircle2Icon,
   ShoppingCartIcon,
@@ -76,7 +75,6 @@ export function PosHistory() {
     return ["sales", "expenses", "combined", "udhar"].includes(tab) ? tab : "sales";
   });
 
-  const [udharViewMode, setUdharViewMode] = useState("bills");
   const [salesHistory, setSalesHistory] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [staffAdvances, setStaffAdvances] = useState([]);
@@ -511,52 +509,11 @@ export function PosHistory() {
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [salesHistory, expenses, staffAdvancesGiven, search]);
 
-  const customerCreditSummary = useMemo(() => {
-    const map = new Map();
-    salesHistory.forEach((sale) => {
-      if (!sale.isCredit) return;
-      const cName = sale.customerName?.trim() || "Walk-in Customer";
-      const totalLtr = (sale.items || []).reduce(
-        (acc, it) => acc + (Number(it.quantity) || 0),
-        0
-      );
-      if (!map.has(cName)) {
-        map.set(cName, {
-          name: cName,
-          phone: sale.customerPhone || "",
-          billCount: 0,
-          totalLiters: 0,
-          totalAmount: 0,
-          lastDate: sale.createdAt,
-        });
-      }
-      const existing = map.get(cName);
-      existing.billCount += 1;
-      existing.totalLiters += totalLtr;
-      existing.totalAmount += Number(sale.grandTotal) || 0;
-      if (new Date(sale.createdAt) > new Date(existing.lastDate)) {
-        existing.lastDate = sale.createdAt;
-      }
-    });
-
-    return Array.from(map.values()).sort((a, b) => b.totalAmount - a.totalAmount);
-  }, [salesHistory]);
-
-  const filteredCustomerCreditSummary = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return customerCreditSummary;
-    return customerCreditSummary.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        (c.phone && c.phone.toLowerCase().includes(q))
-    );
-  }, [customerCreditSummary, search]);
-
   const currentList =
     activeTab === "sales"
       ? filteredSales
       : activeTab === "udhar"
-      ? (udharViewMode === "summary" ? filteredCustomerCreditSummary : filteredUdharSales)
+      ? filteredUdharSales
       : activeTab === "expenses"
       ? filteredExpenses
       : combinedTransactions;
@@ -635,104 +592,71 @@ export function PosHistory() {
         netCashInHand={netCashInHand}
       />
 
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-1 p-1 bg-muted/40 border border-border/70 rounded-xl overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => handleTabChange("sales")}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-              activeTab === "sales"
-                ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
-                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-            )}
-          >
-            <ReceiptIcon className="size-3.5 text-blue-500" />
-            <span>Sales & Invoices</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
-              {salesHistory.length}
-            </span>
-          </button>
+      <div className="flex items-center gap-1 p-1 bg-muted/40 border border-border/70 rounded-xl overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => handleTabChange("sales")}
+          className={cn(
+            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+            activeTab === "sales"
+              ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
+              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+          )}
+        >
+          <ReceiptIcon className="size-3.5 text-blue-500" />
+          <span>Sales & Invoices</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
+            {salesHistory.length}
+          </span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange("udhar")}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-              activeTab === "udhar"
-                ? "bg-card text-foreground shadow-xs font-bold border border-amber-500/40 text-amber-600 dark:text-amber-400"
-                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-            )}
-          >
-            <CreditCardIcon className="size-3.5 text-amber-500" />
-            <span>Udhar / Credit Khata</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">
-              {creditSalesCount}
-            </span>
-          </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("udhar")}
+          className={cn(
+            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+            activeTab === "udhar"
+              ? "bg-card text-foreground shadow-xs font-bold border border-amber-500/40 text-amber-600 dark:text-amber-400"
+              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+          )}
+        >
+          <CreditCardIcon className="size-3.5 text-amber-500" />
+          <span>Udhar / Credit Khata</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">
+            {creditSalesCount}
+          </span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange("expenses")}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-              activeTab === "expenses"
-                ? "bg-card text-foreground shadow-xs font-bold border border-rose-500/40 text-rose-600 dark:text-rose-400"
-                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-            )}
-          >
-            <HandCoinsIcon className="size-3.5 text-rose-500" />
-            <span>Expenses & Staff</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
-              {unifiedExpensesList.length}
-            </span>
-          </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("expenses")}
+          className={cn(
+            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+            activeTab === "expenses"
+              ? "bg-card text-foreground shadow-xs font-bold border border-rose-500/40 text-rose-600 dark:text-rose-400"
+              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+          )}
+        >
+          <HandCoinsIcon className="size-3.5 text-rose-500" />
+          <span>Expenses & Staff</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
+            {unifiedExpensesList.length}
+          </span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange("combined")}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-              activeTab === "combined"
-                ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
-                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-            )}
-          >
-            <WalletIcon className="size-3.5 text-primary" />
-            <span>All Journal Entries</span>
-          </button>
-        </div>
-
-        {activeTab === "udhar" && (
-          <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                setUdharViewMode("bills");
-                setCurrentPage(1);
-              }}
-              className={cn(
-                "px-2.5 py-1 rounded-md font-semibold cursor-pointer transition-colors text-[11px]",
-                udharViewMode === "bills" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Credit Bills ({creditSalesCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setUdharViewMode("summary");
-                setCurrentPage(1);
-              }}
-              className={cn(
-                "px-2.5 py-1 rounded-md font-semibold cursor-pointer transition-colors text-[11px]",
-                udharViewMode === "summary" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Customer Accounts ({customerCreditSummary.length})
-            </button>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={() => handleTabChange("combined")}
+          className={cn(
+            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+            activeTab === "combined"
+              ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
+              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+          )}
+        >
+          <WalletIcon className="size-3.5 text-primary" />
+          <span>All Journal Entries</span>
+        </button>
       </div>
 
       <div className="bg-card p-2.5 rounded-xl border border-border/80 shadow-2xs">
@@ -976,7 +900,7 @@ export function PosHistory() {
                 </Table>
               )}
 
-              {activeTab === "udhar" && udharViewMode === "bills" && (
+              {activeTab === "udhar" && (
                 <Table>
                   <TableHeader className="bg-muted/70 backdrop-blur-xs">
                     <TableRow className="border-b border-border/80">
@@ -1046,67 +970,6 @@ export function PosHistory() {
                             >
                               <ReceiptIcon className="size-3 text-primary" />
                               <span>Bill</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-
-              {activeTab === "udhar" && udharViewMode === "summary" && (
-                <Table>
-                  <TableHeader className="bg-muted/70 backdrop-blur-xs">
-                    <TableRow className="border-b border-border/80">
-                      <TableHead className="text-xs h-9 font-semibold">Customer / Account</TableHead>
-                      <TableHead className="text-xs h-9 font-semibold">Phone</TableHead>
-                      <TableHead className="text-center text-xs h-9 font-semibold">Total Bills</TableHead>
-                      <TableHead className="text-center text-xs h-9 font-semibold">Total Liters</TableHead>
-                      <TableHead className="text-right text-xs h-9 font-semibold">Total Udhar (PKR)</TableHead>
-                      <TableHead className="text-center text-xs h-9 font-semibold">Last Date</TableHead>
-                      <TableHead className="text-right text-xs h-9 pe-4 font-semibold">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedItems.map((cust) => (
-                      <TableRow key={cust.name} className="hover:bg-muted/20 text-xs border-b border-border/40">
-                        <TableCell className="font-bold text-foreground py-2.5">
-                          {cust.name}
-                        </TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
-                          {cust.phone || "-"}
-                        </TableCell>
-                        <TableCell className="text-center font-mono py-2.5">
-                          {cust.billCount}
-                        </TableCell>
-                        <TableCell className="text-center font-mono font-bold text-foreground py-2.5">
-                          {cust.totalLiters.toLocaleString()} L
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-amber-600 dark:text-amber-400 py-2.5 text-xs">
-                          Rs {cust.totalAmount.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-muted-foreground text-[11px] py-2.5">
-                          {new Date(cust.lastDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right py-2.5 pe-4">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
-                              onClick={() => setDiaryCustomer(cust.name)}
-                            >
-                              <BookOpenIcon className="size-3 text-amber-600" />
-                              <span>Udhar Diary</span>
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-primary/40 text-primary hover:bg-primary/10"
-                              onClick={() => navigate(`/ledger?search=${encodeURIComponent(cust.name)}`)}
-                            >
-                              <span>Khata</span>
                             </Button>
                           </div>
                         </TableCell>
