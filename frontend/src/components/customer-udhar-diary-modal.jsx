@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   HandCoinsIcon,
   PrinterIcon,
@@ -10,8 +11,6 @@ import {
   ArrowUpRightIcon,
   ScaleIcon,
   XIcon,
-  CheckCircle2Icon,
-  ClockIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -267,7 +266,7 @@ export function CustomerUdharDiaryModal({
     );
   }, [khataEntries, searchFilter]);
 
-  if (!isOpen || !customerName) return null;
+  if (!isOpen || !customerName || typeof window === "undefined") return null;
 
   const handleVasooliSubmit = async (e) => {
     e.preventDefault();
@@ -378,14 +377,87 @@ export function CustomerUdharDiaryModal({
   };
 
   const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = `Customer_Ledger_${(customerName || "Customer").replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}`;
     window.print();
+    const restore = () => {
+      document.title = originalTitle;
+      window.removeEventListener("afterprint", restore);
+    };
+    window.addEventListener("afterprint", restore);
+    setTimeout(restore, 2000);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto">
-      <div className="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl bg-card border border-border/80 shadow-2xl p-4 sm:p-6 space-y-4 animate-in fade-in zoom-in-95">
+  return createPortal(
+    <div className="print-portal fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto print:p-0 print:m-0 print:bg-white print:static print:overflow-visible print:block print:w-full print:h-auto animate-in fade-in duration-150">
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 6mm 8mm;
+          }
+          body * {
+            visibility: hidden !important;
+          }
+          .print-portal, .print-portal * {
+            visibility: visible !important;
+          }
+          .print-portal {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-card {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            background: white !important;
+            color: black !important;
+          }
+          .print-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+          .print-table th, .print-table td {
+            border: 1px solid #222 !important;
+            padding: 5px 8px !important;
+            color: #000 !important;
+            font-size: 11px !important;
+          }
+          .print-table th {
+            background-color: #f2f2f2 !important;
+            font-weight: bold !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .print-header {
+            border-bottom: 2px solid #000 !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 12px !important;
+          }
+          .print-signatures {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 40px !important;
+            margin-top: 32px !important;
+            padding-top: 8px !important;
+          }
+        }
+      `}</style>
+
+      <div className="relative w-full max-w-4xl my-auto max-h-[92vh] overflow-y-auto rounded-2xl bg-card border border-border/80 shadow-2xl p-4 sm:p-6 space-y-4 print-card animate-in zoom-in-95 duration-150">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/70 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/70 pb-4 print-header">
           <div className="flex items-center gap-3">
             <div className="size-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shrink-0">
               <OilDropLogo className="size-6" />
@@ -418,12 +490,13 @@ export function CustomerUdharDiaryModal({
                   </span>
                 )}
                 {customerProfile?.city && <span>City: {customerProfile.city}</span>}
-                <span>Total Bills: {khataEntries.length}</span>
+                <span className="no-print">Total Bills: {khataEntries.length}</span>
+                <span className="hidden print:inline">Statement Date: {new Date().toLocaleDateString("en-GB")}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap self-end sm:self-auto">
+          <div className="flex items-center gap-1.5 flex-wrap self-end sm:self-auto no-print">
             <Button
               variant="outline"
               size="sm"
@@ -436,13 +509,13 @@ export function CustomerUdharDiaryModal({
             </Button>
 
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={handlePrint}
-              className="h-8 gap-1.5 text-xs px-2.5 cursor-pointer border-border hover:bg-muted"
-              title="Print ledger statement"
+              className="h-8 gap-1.5 text-xs px-3 cursor-pointer shadow-xs"
+              title="Print A4 ledger statement"
             >
-              <PrinterIcon className="size-3.5 text-primary" />
+              <PrinterIcon className="size-3.5" />
               <span>Print A4</span>
             </Button>
 
@@ -467,7 +540,7 @@ export function CustomerUdharDiaryModal({
                 Rs {totalDebit.toLocaleString()}
               </p>
             </div>
-            <div className="size-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
+            <div className="size-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center no-print">
               <ArrowDownLeftIcon className="size-4" />
             </div>
           </div>
@@ -481,7 +554,7 @@ export function CustomerUdharDiaryModal({
                 Rs {totalCredit.toLocaleString()}
               </p>
             </div>
-            <div className="size-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+            <div className="size-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center no-print">
               <ArrowUpRightIcon className="size-4" />
             </div>
           </div>
@@ -495,13 +568,13 @@ export function CustomerUdharDiaryModal({
                 Rs {currentBalance.toLocaleString()}
               </p>
             </div>
-            <div className="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
+            <div className="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center no-print">
               <ScaleIcon className="size-4" />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 flex-wrap border-y border-border/70 py-2.5">
+        <div className="flex items-center justify-between gap-2 flex-wrap border-y border-border/70 py-2.5 no-print">
           <div className="flex items-center gap-2">
             <Button
               size="sm"
@@ -540,7 +613,7 @@ export function CustomerUdharDiaryModal({
         {activeForm === "vasooli" && (
           <form
             onSubmit={handleVasooliSubmit}
-            className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 space-y-3 animate-in fade-in"
+            className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 space-y-3 animate-in fade-in no-print"
           >
             <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
               <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
@@ -631,7 +704,7 @@ export function CustomerUdharDiaryModal({
         {activeForm === "udhar" && (
           <form
             onSubmit={handleUdharSubmit}
-            className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 space-y-3 animate-in fade-in"
+            className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 space-y-3 animate-in fade-in no-print"
           >
             <div className="flex items-center justify-between border-b border-primary/20 pb-2">
               <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
@@ -733,7 +806,7 @@ export function CustomerUdharDiaryModal({
         )}
 
         <div className="rounded-xl border border-border/80 overflow-hidden shadow-2xs">
-          <Table>
+          <Table className="print-table">
             <TableHeader className="bg-muted/70 text-xs">
               <TableRow className="border-b border-border/80">
                 <TableHead className="w-[105px] text-xs h-9 font-semibold text-foreground">
@@ -757,7 +830,7 @@ export function CustomerUdharDiaryModal({
                 <TableHead className="w-[125px] text-xs h-9 text-right font-bold text-foreground">
                   Balance (PKR)
                 </TableHead>
-                <TableHead className="w-[70px] text-xs h-9 text-right pe-3 font-semibold text-muted-foreground">
+                <TableHead className="w-[70px] text-xs h-9 text-right pe-3 font-semibold text-muted-foreground no-print">
                   Action
                 </TableHead>
               </TableRow>
@@ -809,7 +882,7 @@ export function CustomerUdharDiaryModal({
                       Rs {row.balance.toLocaleString()}
                     </TableCell>
 
-                    <TableCell className="text-right py-2.5 pe-3">
+                    <TableCell className="text-right py-2.5 pe-3 no-print">
                       {row.debit > 0 && row.rawSale && (
                         <Button
                           variant="ghost"
@@ -829,11 +902,36 @@ export function CustomerUdharDiaryModal({
                   </TableRow>
                 ))
               )}
+
+              <TableRow className="bg-muted/40 font-bold border-t-2 border-border text-xs">
+                <TableCell colSpan={4} className="py-2.5 uppercase tracking-wider text-foreground">
+                  Ledger Totals
+                </TableCell>
+                <TableCell className="py-2.5 text-right font-mono text-foreground">
+                  Rs {totalDebit.toLocaleString()}
+                </TableCell>
+                <TableCell className="py-2.5 text-right font-mono text-emerald-600 dark:text-emerald-400">
+                  Rs {totalCredit.toLocaleString()}
+                </TableCell>
+                <TableCell className="py-2.5 text-right font-mono text-amber-600 dark:text-amber-400">
+                  Rs {currentBalance.toLocaleString()}
+                </TableCell>
+                <TableCell className="no-print"></TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border/80 pt-3">
+        <div className="hidden print:grid print-signatures pt-8 text-center text-xs">
+          <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+            Customer Signature
+          </div>
+          <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+            Authorized Signature (Al Khaleej)
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border/80 pt-3 no-print">
           <p className="text-[11px]">
             Showing {filteredEntries.length} ledger entries.
           </p>
@@ -849,6 +947,7 @@ export function CustomerUdharDiaryModal({
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
