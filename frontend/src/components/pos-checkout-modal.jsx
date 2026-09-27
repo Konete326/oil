@@ -146,33 +146,22 @@ export function PosCheckoutModal({
       }}
     >
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5">
-          <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-primary/5">
+          <div className="flex items-center gap-2">
             <ReceiptIcon className="size-4 text-primary" />
-            Complete Checkout
-          </h3>
-          <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer size-6.5" disabled={submitting}>
-            <XIcon className="size-3.5" />
-          </Button>
+            <h3 className="font-bold text-sm text-foreground">Complete Checkout</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+              Rs {grandTotal.toLocaleString()}
+            </span>
+            <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer size-6.5" disabled={submitting}>
+              <XIcon className="size-3.5" />
+            </Button>
+          </div>
         </div>
 
         <div className="p-4 space-y-2.5 text-xs">
-          <div className="rounded-lg bg-muted/40 border border-border p-2.5 space-y-1">
-            <div className="flex justify-between text-muted-foreground text-[11px]">
-              <span>Subtotal</span>
-              <span className="font-mono font-semibold text-foreground">Rs {cartSubtotal.toLocaleString()}</span>
-            </div>
-            {discountNum > 0 && (
-              <div className="flex justify-between text-emerald-600 dark:text-emerald-400 text-[11px]">
-                <span>Discount{discountMode === "percent" ? ` (${discountRaw}%)` : ""}</span>
-                <span className="font-mono font-semibold">- Rs {discountNum.toLocaleString()}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-primary font-bold text-sm pt-1 border-t border-border/60">
-              <span>Grand Total</span>
-              <span className="font-mono">Rs {grandTotal.toLocaleString()}</span>
-            </div>
-          </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
