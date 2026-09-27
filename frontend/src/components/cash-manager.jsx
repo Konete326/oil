@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import {
-  PlusIcon,
   SearchIcon,
   PrinterIcon,
   Trash2Icon,
   ArrowUpRightIcon,
   ArrowDownLeftIcon,
-  ListFilterIcon,
-  RefreshCwIcon,
   CalendarIcon,
   FileSpreadsheetIcon,
   Building2Icon,
@@ -83,7 +80,7 @@ export function CashManager() {
 
       if (txRes?.success) setTransactions(txRes.data);
       if (partyRes?.success) setPartySummaries(partyRes.data);
-    } catch (err) {
+    } catch {
       toast.error("Failed to load cash data");
     } finally {
       setLoading(false);
@@ -128,15 +125,15 @@ export function CashManager() {
     .reduce((sum, t) => sum + (t.amount || 0), 0);
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Building2Icon className="size-6 text-primary" />
-            <span>Bank Khatay & Cash Manager</span>
+          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Building2Icon className="size-5 text-primary" />
+            <span>Bank & Cash Ledger</span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            Manage Bank Accounts (HBL, Meezan, etc.), Cash Inflows, Outflows, and Party-wise ledger reports.
+            Manage bank accounts, daily cash register, party summaries & statements.
           </p>
         </div>
 
@@ -144,31 +141,31 @@ export function CashManager() {
           <Button
             size="sm"
             onClick={() => handleOpenModal("Paid")}
-            className="bg-rose-500 hover:bg-rose-600 text-white gap-1.5 cursor-pointer text-xs"
+            className="h-7.5 bg-rose-600 hover:bg-rose-700 text-white gap-1.5 cursor-pointer text-xs font-semibold px-2.5 shadow-2xs"
           >
             <ArrowUpRightIcon className="size-3.5" />
-            <span>Record Paid Cash</span>
+            <span>Record Paid</span>
           </Button>
 
           <Button
             size="sm"
             onClick={() => handleOpenModal("Received")}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 cursor-pointer text-xs"
+            className="h-7.5 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer text-xs font-semibold px-2.5 shadow-2xs"
           >
             <ArrowDownLeftIcon className="size-3.5" />
-            <span>Record Received Cash</span>
+            <span>Record Received</span>
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-b border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-1">
         <div className="flex items-center gap-1 overflow-x-auto">
           {[
-            { id: "bank", label: "Bank Khata Register (HBL)" },
+            { id: "bank", label: "Bank Register" },
             { id: "all", label: "All Cash Entries" },
-            { id: "paid", label: "Paid Cash Records" },
-            { id: "received", label: "Received Cash Records" },
-            { id: "party", label: "Party-Wise Reports" },
+            { id: "paid", label: "Paid Records" },
+            { id: "received", label: "Received Records" },
+            { id: "party", label: "Party Reports" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -176,10 +173,10 @@ export function CashManager() {
                 setActiveTab(tab.id);
                 setSearchParams(tab.id === "bank" ? {} : { tab: tab.id });
               }}
-              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer shrink-0 ${
+              className={`py-1.5 px-3 text-xs font-medium rounded-lg transition-all cursor-pointer shrink-0 ${
                 activeTab === tab.id
-                  ? "border-primary text-primary font-bold"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground font-semibold shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               {tab.label}
@@ -188,7 +185,7 @@ export function CashManager() {
         </div>
 
         {activeTab !== "bank" && (
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               variant="outline"
               size="sm"
@@ -200,7 +197,7 @@ export function CashManager() {
                 }
                 toast.success("Excel report exported successfully!");
               }}
-              className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+              className="h-7 items-center gap-1.5 text-xs px-2.5 cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -210,10 +207,10 @@ export function CashManager() {
               variant="outline"
               size="sm"
               onClick={() => setIsPrintModalOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 text-xs cursor-pointer"
+              className="h-7 items-center gap-1.5 text-xs px-2.5 cursor-pointer"
             >
               <PrinterIcon className="size-3.5 text-primary" />
-              <span>View & Print A4 Statement</span>
+              <span>Print A4</span>
             </Button>
           </div>
         )}
@@ -222,31 +219,31 @@ export function CashManager() {
       {activeTab === "bank" ? (
         <BankKhataRegisterView />
       ) : activeTab === "party" ? (
-        <>
+        <div className="space-y-3.5">
           <CashStatsSummary
             totalPaid={totalPaid}
             totalReceived={totalReceived}
             partyCount={partySummaries.length}
           />
           <CashPartyReport partySummaries={partySummaries} loading={loading} />
-        </>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           <CashStatsSummary
             totalPaid={totalPaid}
             totalReceived={totalReceived}
             partyCount={partySummaries.length}
           />
-          <form onSubmit={handleSearchSubmit} className="bg-card p-3 rounded-xl border border-border">
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center w-full">
+          <form onSubmit={handleSearchSubmit} className="bg-card p-2 rounded-xl border border-border shadow-2xs">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center w-full">
               <div className="relative col-span-12 md:col-span-4">
-                <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Search party, ref no, notes..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="ps-9 text-xs h-9"
+                  className="ps-8 text-xs h-7.5 bg-background"
                 />
               </div>
 
@@ -254,7 +251,7 @@ export function CashManager() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 >
                   <option value="">All Categories</option>
                   <option value="Customer Payment">Customer Payment</option>
@@ -270,9 +267,9 @@ export function CashManager() {
                 <select
                   value={paymentMode}
                   onChange={(e) => setPaymentMode(e.target.value)}
-                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 >
-                  <option value="">All Payment Modes</option>
+                  <option value="">All Modes</option>
                   <option value="Cash">Cash</option>
                   <option value="Bank Transfer">Bank Transfer</option>
                   <option value="Cheque">Cheque</option>
@@ -280,7 +277,7 @@ export function CashManager() {
                 </select>
               </div>
 
-              <div className="col-span-12 md:col-span-3 flex items-center gap-1 text-xs text-muted-foreground bg-background px-2.5 h-9 rounded-md border border-border w-full justify-between">
+              <div className="col-span-12 md:col-span-3 flex items-center gap-1 text-xs text-muted-foreground bg-background px-2 h-7.5 rounded-md border border-border w-full justify-between">
                 <CalendarIcon className="size-3.5 shrink-0" />
                 <input
                   type="date"
@@ -288,7 +285,7 @@ export function CashManager() {
                   onChange={(e) => setStartDate(e.target.value)}
                   className="bg-transparent text-foreground outline-none text-xs w-full text-center"
                 />
-                <span className="shrink-0 text-[11px]">to</span>
+                <span className="shrink-0 text-[10px] text-muted-foreground">-</span>
                 <input
                   type="date"
                   value={endDate}
@@ -299,73 +296,73 @@ export function CashManager() {
             </div>
           </form>
 
-          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+                <thead className="bg-muted/50 border-b border-border font-semibold text-muted-foreground uppercase text-[10.5px] tracking-wider">
                   <tr>
-                    <th className="p-3 ps-4">Date</th>
-                    <th className="p-3">Type</th>
-                    <th className="p-3">Party / Customer Name</th>
-                    <th className="p-3">Category</th>
-                    <th className="p-3 text-right">Amount</th>
-                    <th className="p-3">Mode</th>
-                    <th className="p-3">Reference No</th>
-                    <th className="p-3">Notes</th>
-                    <th className="p-3 pe-4 text-center">Action</th>
+                    <th className="p-2.5 ps-3.5">Date</th>
+                    <th className="p-2.5">Type</th>
+                    <th className="p-2.5">Party / Customer</th>
+                    <th className="p-2.5">Category</th>
+                    <th className="p-2.5 text-right">Amount</th>
+                    <th className="p-2.5">Mode</th>
+                    <th className="p-2.5">Reference</th>
+                    <th className="p-2.5">Notes</th>
+                    <th className="p-2.5 pe-3.5 text-center">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/60">
+                <tbody className="divide-y divide-border/50">
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                      <td colSpan={9} className="p-6 text-center text-muted-foreground">
                         Loading cash transactions...
                       </td>
                     </tr>
                   ) : transactions.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center text-muted-foreground">
-                        No cash transactions recorded. Click "Record Paid Cash" or "Record Received Cash" to create entries.
+                      <td colSpan={9} className="p-6 text-center text-muted-foreground">
+                        No cash transactions recorded. Click "Record Paid" or "Record Received" to create entries.
                       </td>
                     </tr>
                   ) : (
                     transactions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((tx) => (
-                      <tr key={tx._id} className="hover:bg-muted/30 transition-colors">
-                        <td className="p-3 ps-4 text-muted-foreground text-[11px]">
+                      <tr key={tx._id} className="hover:bg-muted/20 transition-colors">
+                        <td className="p-2.5 ps-3.5 text-muted-foreground text-[11px] font-mono whitespace-nowrap">
                           {new Date(tx.transactionDate || tx.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="p-3">
+                        <td className="p-2.5">
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold border ${
                               tx.type === "Paid"
-                                ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                             }`}
                           >
-                            {tx.type === "Paid" ? <ArrowUpRightIcon className="size-3" /> : <ArrowDownLeftIcon className="size-3" />}
+                            {tx.type === "Paid" ? <ArrowUpRightIcon className="size-2.5" /> : <ArrowDownLeftIcon className="size-2.5" />}
                             {tx.type}
                           </span>
                         </td>
-                        <td className="p-3 font-semibold text-foreground">{tx.partyName}</td>
-                        <td className="p-3 text-muted-foreground">{tx.category}</td>
+                        <td className="p-2.5 font-semibold text-foreground">{tx.partyName}</td>
+                        <td className="p-2.5 text-muted-foreground">{tx.category}</td>
                         <td
-                          className={`p-3 text-right font-mono font-bold ${
-                            tx.type === "Paid" ? "text-rose-500" : "text-emerald-500"
+                          className={`p-2.5 text-right font-mono font-bold text-xs ${
+                            tx.type === "Paid" ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"
                           }`}
                         >
-                          {tx.type === "Paid" ? "-" : "+"}Rs. {tx.amount.toLocaleString()}
+                          {tx.type === "Paid" ? "-" : "+"}Rs {tx.amount.toLocaleString()}
                         </td>
-                        <td className="p-3 text-muted-foreground">{tx.paymentMode}</td>
-                        <td className="p-3 font-mono text-[11px] text-muted-foreground">{tx.referenceNo || "-"}</td>
-                        <td className="p-3 text-muted-foreground max-w-xs truncate">{tx.notes || "-"}</td>
-                        <td className="p-3 pe-4 text-center">
+                        <td className="p-2.5 text-muted-foreground">{tx.paymentMode}</td>
+                        <td className="p-2.5 font-mono text-[11px] text-muted-foreground">{tx.referenceNo || "-"}</td>
+                        <td className="p-2.5 text-muted-foreground max-w-xs truncate">{tx.notes || "-"}</td>
+                        <td className="p-2.5 pe-3.5 text-center">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setDeletingId(tx._id)}
-                            className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                            className="size-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                           >
-                            <Trash2Icon className="size-3.5" />
+                            <Trash2Icon className="size-3" />
                           </Button>
                         </td>
                       </tr>

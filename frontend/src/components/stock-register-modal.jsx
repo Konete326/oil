@@ -82,6 +82,13 @@ export function StockRegisterModal({
     return products.filter((p) => p.name.toLowerCase().includes(q));
   }, [products, productSearch]);
 
+  const supplierSuggestions = useMemo(() => {
+    const names = purchases
+      .map((p) => p.supplierName)
+      .filter(Boolean);
+    return [...new Set(names)].sort();
+  }, [purchases]);
+
   const activeProductLabel = useMemo(() => {
     const p = products.find((x) => x._id === selectedProductId);
     return p ? `${p.name} (${formatStockVolume(p.stockQuantity)})` : "";
@@ -820,13 +827,19 @@ export function StockRegisterModal({
                 <label className="font-semibold text-foreground text-[11px] block">
                   Supplier / Source Name *
                 </label>
-                <Input
+                <input
                   required
+                  list="supplier-suggestions"
                   placeholder="e.g. Al-Noor Lubricants / Shell Distributor"
                   value={inwardSupplier}
                   onChange={(e) => setInwardSupplier(e.target.value)}
-                  className="h-8.5 text-xs"
+                  className="flex h-8.5 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
+                <datalist id="supplier-suggestions">
+                  {supplierSuggestions.map((name) => (
+                    <option key={name} value={name} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="space-y-1">

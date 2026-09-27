@@ -432,7 +432,7 @@ export function PosCounter() {
   return (
     <div className="h-full max-h-full flex flex-col lg:overflow-hidden select-none">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:h-full flex-1 min-h-0">
-        <div className="lg:col-span-7 xl:col-span-8 flex flex-col lg:h-full space-y-1.5 min-h-0">
+        <div className="lg:col-span-6 xl:col-span-7 flex flex-col lg:h-full space-y-1.5 min-h-0">
           <div className="flex items-center justify-between gap-2 border-b border-border pb-1 shrink-0">
             <div>
               <h2 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
@@ -461,7 +461,7 @@ export function PosCounter() {
 
           <div className="flex-1 overflow-y-auto max-h-[45vh] lg:max-h-none pe-1.5 rounded-xl border border-border/70 bg-muted/10 p-1.5 min-h-0">
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div key={i} className="h-32 rounded-xl border border-border bg-card p-2 space-y-1.5">
                     <Skeleton className="h-14 w-full" />
@@ -477,7 +477,7 @@ export function PosCounter() {
                 <p className="text-[10px]">Try searching a different SKU or name.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {filteredProducts.map((prod) => {
                   const isOutOfStock = (prod.stockQuantity || 0) <= 0;
                   return (
@@ -540,7 +540,7 @@ export function PosCounter() {
           </div>
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-4 rounded-2xl border border-border bg-card p-2 sm:p-2.5 shadow-md flex flex-col justify-between lg:h-full min-h-0">
+        <div className="lg:col-span-6 xl:col-span-5 rounded-2xl border border-border bg-card p-2 sm:p-2.5 shadow-md flex flex-col justify-between lg:h-full min-h-0">
           <div className="space-y-1 flex-1 flex flex-col overflow-hidden min-h-0">
             <div className="flex items-center justify-between border-b border-border pb-1 shrink-0">
               <div className="flex items-center gap-1.5">
