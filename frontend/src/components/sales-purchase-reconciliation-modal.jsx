@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OilDropLogo } from "@/components/logo";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function SalesPurchaseReconciliationModal({
@@ -210,16 +211,24 @@ export function SalesPurchaseReconciliationModal({
             dir="ltr"
             lang="en"
           >
-            <div className="pb-4 space-y-1">
-              <h1 className="font-extrabold text-xs uppercase tracking-tight text-black">
-                {activeType.toUpperCase()} TRANSACTIONS
-              </h1>
-              <p className="font-bold text-[11px] uppercase underline text-black">
-                MONTHLY RECONCILIATION REPORT
-              </p>
-              <p className="font-bold text-[10px] uppercase text-black pt-0.5">
-                Month: <span className="underline">{currentMonthName}</span>
-              </p>
+            <div className="pb-4 flex items-start justify-between border-b border-black mb-3">
+              <div className="space-y-1">
+                <h1 className="font-extrabold text-xs uppercase tracking-tight text-black">
+                  {activeType.toUpperCase()} TRANSACTIONS
+                </h1>
+                <p className="font-bold text-[11px] uppercase underline text-black">
+                  MONTHLY RECONCILIATION REPORT
+                </p>
+                <p className="font-bold text-[10px] uppercase text-black pt-0.5">
+                  Month: <span className="underline">{currentMonthName}</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <OilDropLogo className="size-8" />
+                <span className="font-black text-sm uppercase tracking-tight font-mono">
+                  AL KHALEEJ LUBRICANTS
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pb-4 mb-1 text-[10px] leading-tight font-sans">

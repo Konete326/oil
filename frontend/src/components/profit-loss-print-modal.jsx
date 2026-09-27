@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OilDropLogo } from "@/components/logo";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function ProfitLossPrintModal({
@@ -172,16 +173,19 @@ export function ProfitLossPrintModal({
           lang="en"
         >
           <div className="flex justify-between items-start pb-2">
-            <div>
-              <h1 className="font-extrabold text-base tracking-tight text-black">
-                Profit and Loss Statement
-              </h1>
-              <p className="font-bold text-xs text-black uppercase">
-                AL KHALEEJ LUBRICANTS
-              </p>
-              <p className="text-[11px] text-gray-700 font-medium">
-                For the {period.toUpperCase()} period ending: {periodLabel}
-              </p>
+            <div className="flex items-start gap-3">
+              <OilDropLogo className="size-9 shrink-0 mt-0.5" />
+              <div>
+                <h1 className="font-extrabold text-base tracking-tight text-black">
+                  Profit and Loss Statement
+                </h1>
+                <p className="font-bold text-xs text-black uppercase">
+                  AL KHALEEJ LUBRICANTS
+                </p>
+                <p className="text-[11px] text-gray-700 font-medium">
+                  For the {period.toUpperCase()} period ending: {periodLabel}
+                </p>
+              </div>
             </div>
             <div className="text-right text-[11px] font-semibold text-gray-700">
               Stated in PKR

@@ -8,7 +8,7 @@ import {
   CheckCircle2Icon,
   CreditCardIcon,
 } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import { OilDropLogo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 function getProcessedItems(sale) {
@@ -89,8 +89,8 @@ function CashMemoBody({ sale, copyLabel = "" }) {
 
         <div className="flex items-center justify-between gap-3 pt-1 pb-3 border-b-2 border-slate-900">
           <div className="flex items-center gap-2.5">
-            <div className="size-11 rounded-full border border-slate-900 p-0.5 flex items-center justify-center shrink-0 overflow-hidden bg-white">
-              <img src={logoImg} alt="Al Khaleej" className="size-full object-contain" />
+            <div className="size-11 rounded-full border border-slate-900 p-1 flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-2xs">
+              <OilDropLogo className="size-8" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-950 uppercase leading-none font-mono">
@@ -287,8 +287,8 @@ function CreditMemoBody({ sale, copyLabel = "" }) {
 
         <div className="flex items-center justify-between gap-3 pt-1 pb-3 border-b-2 border-red-700">
           <div className="flex items-center gap-2.5">
-            <div className="size-11 rounded-full border-2 border-red-700 p-0.5 flex items-center justify-center shrink-0 overflow-hidden bg-white">
-              <img src={logoImg} alt="Al Khaleej" className="size-full object-contain" />
+            <div className="size-11 rounded-full border-2 border-red-700 p-1 flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-2xs">
+              <OilDropLogo className="size-8" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-black tracking-tight text-red-700 uppercase leading-none font-mono">

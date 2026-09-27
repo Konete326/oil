@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OilDropLogo } from "@/components/logo";
 import {
   Table,
   TableBody,
@@ -337,7 +338,7 @@ export function CustomerUdharDiaryModal({
             
             <div className="flex items-center gap-3">
               <div className="size-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shrink-0">
-                <BookOpenIcon className="size-6" />
+                <OilDropLogo className="size-7" />
               </div>
 
               <div>

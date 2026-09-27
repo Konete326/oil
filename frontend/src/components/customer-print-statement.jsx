@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { PrinterIcon, XIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import { OilDropLogo } from "@/components/logo";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function CustomerPrintStatement({
@@ -211,7 +211,7 @@ export function CustomerPrintStatement({
           <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate" dir="ltr" lang="en">
           <div className="flex justify-between items-start border-b border-black pb-4 mb-4">
             <div className="flex items-center gap-3">
-              <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
+              <OilDropLogo className="size-10" />
               <div>
                 <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                   AL KHALEEJ LUBRICANTS

@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { XIcon, PrinterIcon, SendIcon, CheckCircle2Icon } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import { OilDropLogo } from "@/components/logo";
 import { numberToWords } from "@/lib/number-to-words";
 
 export function ChallanPrintModal({ isOpen, onClose, challan }) {
@@ -110,7 +110,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
           <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 print:m-0 a4-sheet relative notranslate" dir="ltr" lang="en">
           <div className="text-center space-y-1 pb-3 print:pb-2 print:pt-0">
             <div className="flex items-center justify-center gap-3">
-              <img src={logoImg} alt="Al Khaleej Logo" className="size-10 object-contain" />
+              <OilDropLogo className="size-10" />
               <h1 className="font-extrabold text-xl tracking-tight text-black uppercase">
                 AL KHALEEJ LUBRICANTS
               </h1>

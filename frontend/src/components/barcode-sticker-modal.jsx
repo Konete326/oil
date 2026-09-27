@@ -8,6 +8,7 @@ import {
   CheckIcon,
   LayersIcon,
 } from "lucide-react";
+import { OilDropLogo } from "@/components/logo";
 import { toast } from "sonner";
 
 const CODE128_PATTERNS = [
@@ -90,9 +91,12 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
       className="barcode-sticker-card w-[230px] bg-white text-black p-2.5 rounded-lg border border-neutral-300 shadow-xs flex flex-col items-center justify-between text-center select-none shrink-0"
     >
       <div className="w-full border-b border-neutral-200 pb-1">
-        <p className="text-[9px] font-black tracking-wider uppercase text-neutral-800">
-          AL KHALEEJ LUBRICANTS
-        </p>
+        <div className="flex items-center justify-center gap-1 mb-0.5">
+          <OilDropLogo className="size-3" />
+          <p className="text-[9px] font-black tracking-wider uppercase text-neutral-800">
+            AL KHALEEJ LUBRICANTS
+          </p>
+        </div>
         <h4 className="text-[11px] font-bold leading-tight truncate text-black">
           {product.name}
         </h4>

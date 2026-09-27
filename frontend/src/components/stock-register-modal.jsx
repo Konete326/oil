@@ -25,6 +25,7 @@ import {
   CalendarIcon,
   Loader2Icon,
 } from "lucide-react";
+import { OilDropLogo } from "@/components/logo";
 import {
   fetchPurchasesApi,
   createPurchaseApi,
@@ -644,13 +645,16 @@ export function StockRegisterModal({
             dir="ltr"
             lang="en"
           >
-            <div className="text-center pb-3 border-b border-border/80 print:border-b-2 print:border-black">
-              <h1 className="font-extrabold text-base sm:text-xl tracking-wider text-foreground print:text-black uppercase font-mono">
+            <div className="text-center pb-3 border-b border-border/80 print:border-b-2 print:border-black flex flex-col items-center justify-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <OilDropLogo className="size-7" />
+                <span className="font-black text-sm uppercase tracking-tight text-foreground print:text-black font-mono">
+                  AL KHALEEJ LUBRICANTS
+                </span>
+              </div>
+              <h1 className="font-extrabold text-base sm:text-lg tracking-wider text-foreground print:text-black uppercase font-mono">
                 STOCK (INWARD & OUTWARD) REGISTER
               </h1>
-              <p className="text-[11px] text-muted-foreground print:text-gray-700 font-semibold tracking-wide">
-                AL KHALEEJ LUBRICANTS · INVENTORY MOVEMENT REGISTER
-              </p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 py-3 border-b border-border/80 print:border-b-2 print:border-black text-xs font-mono">

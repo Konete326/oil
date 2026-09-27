@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { fetchCurrentShiftStatusApi, closeShopShiftApi } from "@/lib/api";
 import { useToastNotification } from "@/components/toast-notification-provider";
-import logoImg from "@/assets/logo.png";
+import { OilDropLogo } from "@/components/logo";
 import {
   XIcon,
   StoreIcon,
@@ -424,7 +424,9 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                 
                 <div className="flex items-center justify-between pb-4 border-b-2 border-slate-900 gap-4">
                   <div className="flex items-center gap-3">
-                    <img src={logoImg} alt="Al Khaleej" className="size-14 object-contain border border-slate-900 p-0.5 rounded-full" />
+                    <div className="size-14 rounded-full border border-slate-900 p-1 flex items-center justify-center shrink-0 bg-white">
+                      <OilDropLogo className="size-10" />
+                    </div>
                     <div>
                       <h1 className="text-xl font-black text-slate-950 font-mono tracking-tight uppercase">
                         AL KHALEEJ LUBRICANTS

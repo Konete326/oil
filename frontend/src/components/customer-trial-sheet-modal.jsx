@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { OilDropLogo } from "@/components/logo";
 import {
   fetchPosSales,
   fetchChallans,
@@ -282,8 +283,8 @@ export function CustomerTrialSheetModal({ isOpen, onClose, customer }) {
       <div className="relative w-full max-w-5xl my-auto max-h-[92vh] overflow-y-auto bg-card border border-border/80 rounded-2xl shadow-2xl p-4 sm:p-6 space-y-4 print-card animate-in zoom-in-95 duration-150">
         <div className="flex items-start justify-between border-b pb-3 print-header">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary shrink-0 no-print">
-              <ScaleIcon className="size-6" />
+            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
+              <OilDropLogo className="size-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">

@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { XIcon, PrinterIcon, SendIcon, FileSpreadsheetIcon, CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OilDropLogo } from "@/components/logo";
 import { exportTransactionsToExcel } from "@/lib/cash-export-utils";
 
 export function CashPrintStatementModal({
@@ -184,13 +185,16 @@ export function CashPrintStatementModal({
             Annex 10
           </div>
 
-          <div className="text-center pb-4">
-            <h1 className="text-sm md:text-base font-bold uppercase tracking-wider text-black">
+          <div className="text-center pb-4 flex flex-col items-center justify-center">
+            <div className="flex items-center justify-center gap-2.5 mb-1">
+              <OilDropLogo className="size-8" />
+              <span className="text-base font-black tracking-tight text-black uppercase font-mono">
+                AL KHALEEJ LUBRICANTS
+              </span>
+            </div>
+            <h1 className="text-xs md:text-sm font-bold uppercase tracking-wider text-black">
               CASH BOOK STATEMENT
             </h1>
-            <p className="text-[11px] text-gray-700 font-medium">
-              AL KHALEEJ LUBRICANTS
-            </p>
           </div>
 
           <div className="border border-black mb-4 text-[11px] leading-relaxed">

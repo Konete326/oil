@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { OilDropLogo } from "@/components/logo";
 import { fetchMasterPlatformReportApi } from "@/lib/api";
 import { exportMasterReportToExcel } from "@/lib/master-report-export";
 import { useToastNotification } from "@/components/toast-notification-provider";
@@ -87,6 +88,24 @@ export function MasterPlatformReportView() {
 
   return (
     <div className="w-full space-y-6">
+      <div className="hidden print:flex items-center justify-between border-b-2 border-black pb-3 mb-4">
+        <div className="flex items-center gap-3">
+          <OilDropLogo className="size-10" />
+          <div>
+            <h1 className="text-lg font-black tracking-tight text-black uppercase font-mono">
+              AL KHALEEJ LUBRICANTS
+            </h1>
+            <p className="text-xs font-bold text-gray-800">
+              MASTER PLATFORM CONSOLIDATED AUDIT REPORT
+            </p>
+          </div>
+        </div>
+        <div className="text-right text-[10px] text-gray-700 font-mono">
+          <p>Date: {new Date().toLocaleDateString("en-GB")}</p>
+          <p>Period: {period.toUpperCase()}</p>
+        </div>
+      </div>
+
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-4 print:hidden">
         <div>
           <div className="flex items-center gap-2">
