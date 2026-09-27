@@ -30,7 +30,6 @@ import { PosUdharUpdateModal } from "@/components/pos-udhar-update-modal";
 import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { PosHistoryKpiCards } from "@/components/pos-history-kpi-cards";
-import { PosProfitLossTab } from "@/components/pos-profit-loss-tab";
 import { PosConsolidatedJournalTab } from "@/components/pos-consolidated-journal-tab";
 import {
   HistoryIcon,
@@ -39,21 +38,21 @@ import {
   WalletIcon,
   Trash2Icon,
   PlusIcon,
-  PrinterIcon,
   FileSpreadsheetIcon,
   ClockIcon,
   BookOpenIcon,
   CreditCardIcon,
   UsersIcon,
   HandCoinsIcon,
-  BarChart3Icon,
+  CheckCircle2Icon,
+  ShoppingCartIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 const EXPENSE_CATEGORIES = [
   "All",
@@ -74,9 +73,10 @@ export function PosHistory() {
 
   const [activeTab, setActiveTab] = useState(() => {
     const tab = searchParams.get("tab");
-    return ["expenses", "combined", "udhar", "profit-loss"].includes(tab) ? tab : "combined";
+    return ["sales", "expenses", "combined", "udhar"].includes(tab) ? tab : "sales";
   });
 
+  const [udharViewMode, setUdharViewMode] = useState("bills");
   const [salesHistory, setSalesHistory] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [staffAdvances, setStaffAdvances] = useState([]);
@@ -102,7 +102,6 @@ export function PosHistory() {
   const [isDeletingExpense, setIsDeletingExpense] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [customerSummarySearch, setCustomerSummarySearch] = useState("");
 
   const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
   const currentUser = userStr ? JSON.parse(userStr) : null;
@@ -162,13 +161,9 @@ export function PosHistory() {
       );
 
       setSalesHistory(combinedSales);
-      if (expRes && expRes.success) setExpenses(expRes.data || []);
-      if (advRes && advRes.success && Array.isArray(advRes.data)) {
-        setStaffAdvances(advRes.data);
-      }
-      if (empRes && empRes.success && Array.isArray(empRes.data)) {
-        setEmployees(empRes.data);
-      }
+      if (expRes?.success) setExpenses(expRes.data || []);
+      if (advRes?.success && Array.isArray(advRes.data)) setStaffAdvances(advRes.data);
+      if (empRes?.success && Array.isArray(empRes.data)) setEmployees(empRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -191,7 +186,7 @@ export function PosHistory() {
     setActiveTab(newTab);
     setCurrentPage(1);
     setSearch("");
-    setSearchParams(newTab === "combined" ? {} : { tab: newTab });
+    setSearchParams(newTab === "sales" ? {} : { tab: newTab });
   };
 
   const handleDeleteSale = async ({ reason, notes }) => {
@@ -199,8 +194,8 @@ export function PosHistory() {
     setIsDeletingSale(true);
     try {
       const res = await deletePosSaleApi(saleToDelete._id, { reason, notes });
-      if (res && res.success) {
-        toast.success(`POS Sale ${saleToDelete.saleNumber} deleted & inventory restored`);
+      if (res?.success) {
+        toast.success(`POS Sale ${saleToDelete.saleNumber} deleted & inventory restored automatically`);
         setSalesHistory((prev) => prev.filter((s) => s._id !== saleToDelete._id));
         setSaleToDelete(null);
       } else {
@@ -218,8 +213,8 @@ export function PosHistory() {
     setIsDeletingExpense(true);
     try {
       const res = await deleteExpenseApi(expenseToDelete._id);
-      if (res && res.success) {
-        toast.success("Expense voucher deleted successfully");
+      if (res?.success) {
+        toast.success("Expense voucher deleted");
         setExpenses((prev) => prev.filter((e) => e._id !== expenseToDelete._id));
         setExpenseToDelete(null);
       } else {
@@ -236,8 +231,8 @@ export function PosHistory() {
     if (!advanceToDelete) return;
     try {
       const res = await deleteEmployeeAdvanceApi(advanceToDelete._id);
-      if (res && res.success) {
-        toast.success("Staff advance deleted & khata adjusted");
+      if (res?.success) {
+        toast.success("Staff advance deleted");
         setStaffAdvances((prev) => prev.filter((a) => a._id !== advanceToDelete._id));
         setAdvanceToDelete(null);
       } else {
@@ -248,84 +243,52 @@ export function PosHistory() {
     }
   };
 
-  const handleExportJournalExcel = () => {
-    const data = combinedTransactions.map((item, idx) => ({
-      "S.No": idx + 1,
-      "Date & Time": new Date(item.date).toLocaleString(),
-      "Ref / Voucher": item.reference,
-      "Particulars / Party": item.description,
-      Type: item.type,
-      "Payment Mode": item.paymentMode,
-      "Inflow (+) PKR": item.type === "Sale" || item.type === "Udhar Sale" ? item.amount : 0,
-      "Outflow (-) PKR": item.type === "Expense" || item.type === "Staff Advance" ? item.amount : 0,
-      Notes: item.notes || "-",
-    }));
+  const handleExportExcel = () => {
+    let data = [];
+    let filename = "POS_Records";
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Poora_Hisab_Kitab");
-    XLSX.writeFile(workbook, `Poora_Hisab_Kitab_Journal_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Transaction journal exported to Excel successfully!");
-  };
-
-  const handleExportExpensesExcel = () => {
-    const data = unifiedExpensesList.map((e, idx) => ({
-      "S.No": idx + 1,
-      Date: new Date(e.date).toLocaleDateString(),
-      "Voucher No": e.voucherNumber || "-",
-      Title: e.title,
-      Category: e.category,
-      "Amount (PKR)": e.amount,
-      "Payment Mode": e.paymentMode,
-      Notes: e.notes || "-",
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses_and_Salaries");
-    XLSX.writeFile(workbook, `Expenses_Salaries_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Expenses & Salaries exported to Excel successfully!");
-  };
-
-  const handleExportCurrent = () => {
     if (activeTab === "expenses") {
-      handleExportExpensesExcel();
-    } else if (activeTab === "combined") {
-      handleExportJournalExcel();
-    } else if (activeTab === "udhar") {
-      const data = filteredUdharSales.map((s, idx) => ({
+      filename = "Expenses_Staff_Advances";
+      data = unifiedExpensesList.map((e, idx) => ({
         "S.No": idx + 1,
-        "Date": new Date(s.createdAt).toLocaleDateString(),
-        "Bill No": s.saleNumber,
-        "Customer Name": s.customerName || "Walk-in Customer",
-        "Phone": s.customerPhone || "-",
-        "Items Count": s.items?.length || 0,
-        "Udhar Baqaya (PKR)": s.grandTotal,
+        Date: new Date(e.date).toLocaleDateString(),
+        "Voucher No": e.voucherNumber || "-",
+        Title: e.title,
+        Category: e.category,
+        "Amount (PKR)": e.amount,
+        "Payment Mode": e.paymentMode,
+        Notes: e.notes || "-",
       }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Udhar_Register");
-      XLSX.writeFile(wb, `Udhar_Khata_${new Date().toISOString().slice(0, 10)}.xlsx`);
-      toast.success("Udhar register exported to Excel!");
-    } else {
-      const data = filteredSales.map((s, idx) => ({
+    } else if (activeTab === "udhar") {
+      filename = "Udhar_Khata_Register";
+      data = filteredUdharSales.map((s, idx) => ({
         "S.No": idx + 1,
-        "Date": new Date(s.createdAt).toLocaleString(),
+        Date: new Date(s.createdAt).toLocaleDateString(),
         "Bill No": s.saleNumber,
-        "Customer": s.customerName || "Walk-in Customer",
+        Customer: s.customerName || "Walk-in Customer",
+        Phone: s.customerPhone || "-",
+        "Items Count": s.items?.length || 0,
+        "Total Udhar (PKR)": s.grandTotal,
+      }));
+    } else {
+      filename = "POS_Sales_History";
+      data = filteredSales.map((s, idx) => ({
+        "S.No": idx + 1,
+        Date: new Date(s.createdAt).toLocaleString(),
+        "Bill No": s.saleNumber,
+        Customer: s.customerName || "Walk-in Customer",
         "Sale Type": s.saleType,
         "Payment Mode": s.paymentMode,
-        "Total (PKR)": s.grandTotal,
+        "Grand Total (PKR)": s.grandTotal,
       }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Sales_History");
-      XLSX.writeFile(wb, `Sales_History_${new Date().toISOString().slice(0, 10)}.xlsx`);
-      toast.success("Sales history exported to Excel!");
     }
-  };
 
-  const todayStr = new Date().toISOString().split("T")[0];
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success("Excel exported successfully");
+  };
 
   const totalRevenue = useMemo(
     () => salesHistory.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0),
@@ -348,15 +311,6 @@ export function PosHistory() {
     [salesHistory]
   );
 
-  const todayCreditRevenue = useMemo(() => {
-    return salesHistory
-      .filter((s) => {
-        const d = s.createdAt ? new Date(s.createdAt).toISOString().split("T")[0] : "";
-        return d === todayStr && s.isCredit;
-      })
-      .reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
-  }, [salesHistory, todayStr]);
-
   const creditSalesCount = useMemo(
     () => salesHistory.filter((s) => s.isCredit).length,
     [salesHistory]
@@ -364,9 +318,7 @@ export function PosHistory() {
 
   const totalCOGS = useMemo(() => {
     return salesHistory.reduce((acc, s) => {
-      if (s.totalCost && Number(s.totalCost) > 0) {
-        return acc + Number(s.totalCost);
-      }
+      if (s.totalCost && Number(s.totalCost) > 0) return acc + Number(s.totalCost);
       const itemCost = (s.items || []).reduce((iAcc, it) => {
         const cp = Number(it.costPrice) || 0;
         const qty = Number(it.quantity) || 1;
@@ -378,11 +330,6 @@ export function PosHistory() {
 
   const grossProfit = totalRevenue - totalCOGS;
 
-  const totalGeneralExpenses = useMemo(
-    () => expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-    [expenses]
-  );
-
   const staffAdvancesGiven = useMemo(
     () => staffAdvances.filter((a) => a.type === "Advance Given"),
     [staffAdvances]
@@ -393,30 +340,12 @@ export function PosHistory() {
     [staffAdvancesGiven]
   );
 
+  const totalGeneralExpenses = useMemo(
+    () => expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+    [expenses]
+  );
+
   const totalExpenses = totalGeneralExpenses + totalStaffAdvances;
-
-  const todayGeneralExpenses = useMemo(() => {
-    return expenses
-      .filter((e) => {
-        const d = e.expenseDate || e.createdAt;
-        const expDate = d ? new Date(d).toISOString().split("T")[0] : "";
-        return expDate === todayStr;
-      })
-      .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-  }, [expenses, todayStr]);
-
-  const todayStaffAdvances = useMemo(() => {
-    return staffAdvancesGiven
-      .filter((a) => {
-        const d = a.date || a.createdAt;
-        const advDate = d ? new Date(d).toISOString().split("T")[0] : "";
-        return advDate === todayStr;
-      })
-      .reduce((sum, a) => sum + (Number(a.amount) || 0), 0);
-  }, [staffAdvancesGiven, todayStr]);
-
-  const todayTotalExpenses = todayGeneralExpenses + todayStaffAdvances;
-
   const netProfitOrLoss = grossProfit - totalExpenses;
 
   const totalCashOutflow = useMemo(() => {
@@ -582,20 +511,6 @@ export function PosHistory() {
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [salesHistory, expenses, staffAdvancesGiven, search]);
 
-  const currentList =
-    activeTab === "sales"
-      ? filteredSales
-      : activeTab === "udhar"
-      ? filteredUdharSales
-      : activeTab === "expenses"
-      ? filteredExpenses
-      : combinedTransactions;
-
-  const totalPages = Math.ceil(currentList.length / PAGE_SIZE) || 1;
-  const paginatedItems = useMemo(() => {
-    return currentList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  }, [currentList, currentPage]);
-
   const customerCreditSummary = useMemo(() => {
     const map = new Map();
     salesHistory.forEach((sale) => {
@@ -628,200 +543,82 @@ export function PosHistory() {
   }, [salesHistory]);
 
   const filteredCustomerCreditSummary = useMemo(() => {
-    const q = customerSummarySearch.toLowerCase().trim();
+    const q = search.toLowerCase().trim();
     if (!q) return customerCreditSummary;
     return customerCreditSummary.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.phone && c.phone.toLowerCase().includes(q))
     );
-  }, [customerCreditSummary, customerSummarySearch]);
+  }, [customerCreditSummary, search]);
 
-  const renderSalesRows = (itemsList) => {
-    return itemsList.map((sale) => (
-      <TableRow
-        key={sale._id}
-        className={cn(
-          "hover:bg-muted/20 text-xs border-b border-border/40",
-          sale.isCredit && "bg-amber-500/5 dark:bg-amber-500/10"
-        )}
-      >
-        <TableCell className="font-mono font-bold text-primary py-2.5">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span>{sale.saleNumber}</span>
-            {sale.isNextDayShift && (
-              <span className="rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 px-1 py-0.2 text-[9px] font-semibold">
-                Next Day
-              </span>
-            )}
-            {sale.source === "Challan" && (
-              <span className="rounded bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 px-1 py-0.2 text-[9px] font-semibold">
-                Challan
-              </span>
-            )}
-          </div>
-        </TableCell>
-        <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
-          {new Date(sale.createdAt).toLocaleString()}
-        </TableCell>
-        <TableCell className="font-semibold text-foreground py-2.5">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {sale.isCredit && sale.customerName && sale.customerName !== "Walk-in Customer" ? (
-              <button
-                type="button"
-                onClick={() => setDiaryCustomer(sale.customerName)}
-                className="font-bold text-left hover:text-primary hover:underline cursor-pointer transition-colors"
-                title={`${sale.customerName} ka hisab-kitab / diary dekhein`}
-              >
-                {sale.customerName}
-              </button>
-            ) : (
-              <span className="font-bold">{sale.customerName || "Walk-in Customer"}</span>
-            )}
-            {sale.customerPhone && (
-              <span className="text-muted-foreground text-[10px]">({sale.customerPhone})</span>
-            )}
-          </div>
-        </TableCell>
-        <TableCell className="text-center py-2.5">
-          <span
-            className={cn(
-              "inline-block rounded px-1.5 py-0.5 text-[9.5px] font-semibold",
-              sale.saleType === "Wholesale"
-                ? "bg-purple-500/10 text-purple-500 border border-purple-500/20"
-                : sale.saleType === "Challan / Delivery"
-                ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
-                : "bg-blue-500/10 text-blue-500 border border-blue-500/20"
-            )}
-          >
-            {sale.saleType}
-          </span>
-        </TableCell>
-        <TableCell className="text-center font-mono py-2.5 text-[11px]">
-          {sale.items?.length || 0} Items
-        </TableCell>
-        <TableCell className="py-2.5 text-[11px]">
-          {sale.isCredit ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/35 text-amber-600 dark:text-amber-400">
-              <ClockIcon className="size-3" />
-              <span>Udhar (Khata)</span>
-            </span>
-          ) : (sale.paymentMode || "").toLowerCase().includes("cash") ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 border border-emerald-500/35 text-emerald-600 dark:text-emerald-400">
-              <span>Cash Paid</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 border border-blue-500/35 text-blue-600 dark:text-blue-400">
-              <span>{sale.paymentMode || "Bank / Card"}</span>
-            </span>
-          )}
-        </TableCell>
-        <TableCell className="text-right font-mono font-bold py-2.5 text-xs">
-          <div className={cn(sale.isCredit ? "text-amber-600 dark:text-amber-400" : "text-foreground")}>
-            Rs {sale.grandTotal?.toLocaleString()}
-          </div>
-          {sale.isCredit && (
-            <span className="text-[9px] font-semibold text-amber-600 dark:text-amber-400 block">
-              Udhar Baqaya
-            </span>
-          )}
-        </TableCell>
-        <TableCell className="text-right py-2.5 pe-4">
-          <div className="flex items-center justify-end gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 gap-1 text-[11px] px-2.5 cursor-pointer hover:border-primary hover:text-primary transition-colors"
-              onClick={() => setCompletedSale(sale)}
-            >
-              <ReceiptIcon className="size-3 text-primary" />
-              <span>Receipt</span>
-            </Button>
+  const currentList =
+    activeTab === "sales"
+      ? filteredSales
+      : activeTab === "udhar"
+      ? (udharViewMode === "summary" ? filteredCustomerCreditSummary : filteredUdharSales)
+      : activeTab === "expenses"
+      ? filteredExpenses
+      : combinedTransactions;
 
-            {sale.isCredit && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 gap-1 text-[11px] px-2.5 cursor-pointer border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
-                onClick={() => setSaleToUpdate(sale)}
-                title="Udhar Wasooli Darj Karein / Bill Update Karein"
-              >
-                <HandCoinsIcon className="size-3 text-emerald-600" />
-                <span>Wasooli</span>
-              </Button>
-            )}
-
-            {isAdmin && !sale.isChallan && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
-                onClick={() => setSaleToDelete(sale)}
-                title="Delete Sale & Restore Stock"
-              >
-                <Trash2Icon className="size-3" />
-              </Button>
-            )}
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
-  };
+  const totalPages = Math.ceil(currentList.length / PAGE_SIZE) || 1;
+  const paginatedItems = useMemo(() => {
+    return currentList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  }, [currentList, currentPage]);
 
   return (
-    <div className="space-y-3 p-3 md:p-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-border/60 pb-2.5">
+    <div className="space-y-3 p-3 md:p-4 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
         <div>
           <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <HistoryIcon className="size-5 text-primary" />
-            <span>Sale History & Mukammal Hisab-Kitab (P&L)</span>
+            <span>POS Sales & Transaction History</span>
           </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Poora hisab-kitab: Counter Sales, Udhar Khata, Dukan Akhrajat, Staff Tankhwah / Advance, aur Nafa / Nuqsan (Profit & Loss).
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Automated stock deductions, customer ledgers, and revenue records.
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button
             size="sm"
-            onClick={() => setIsExpenseModalOpen(true)}
-            className="h-8 gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-medium px-3 text-xs shadow-xs cursor-pointer"
+            onClick={() => navigate("/pos")}
+            className="h-8.5 gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-3 text-xs shadow-2xs rounded-xl cursor-pointer"
           >
-            <PlusIcon className="size-3.5" />
-            <span>+ Dukan Expense</span>
+            <ShoppingCartIcon className="size-3.5" />
+            <span>New Sale</span>
           </Button>
 
           <Button
             size="sm"
-            onClick={() => setIsAdvanceModalOpen(true)}
-            className="h-8 gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-medium px-3 text-xs shadow-xs cursor-pointer"
+            variant="outline"
+            onClick={() => setIsExpenseModalOpen(true)}
+            className="h-8.5 gap-1.5 border-border hover:bg-muted text-foreground text-xs px-3 rounded-xl cursor-pointer"
           >
-            <HandCoinsIcon className="size-3.5" />
-            <span>+ Staff Advance</span>
+            <PlusIcon className="size-3.5 text-rose-500" />
+            <span>Expense</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsAdvanceModalOpen(true)}
+            className="h-8.5 gap-1.5 border-border hover:bg-muted text-foreground text-xs px-3 rounded-xl cursor-pointer"
+          >
+            <HandCoinsIcon className="size-3.5 text-purple-500" />
+            <span>Staff Advance</span>
           </Button>
 
           <Button
             variant="outline"
             size="sm"
-            onClick={handleExportCurrent}
-            className="h-8 gap-1.5 text-xs px-3 cursor-pointer border-border hover:bg-muted/50"
-            title="Export currently viewed list to Excel"
+            onClick={handleExportExcel}
+            className="h-8.5 gap-1.5 text-xs px-3 rounded-xl cursor-pointer border-border hover:bg-muted"
+            title="Export Excel"
           >
             <FileSpreadsheetIcon className="size-3.5 text-emerald-600" />
-            <span>Export Excel</span>
+            <span>Export</span>
           </Button>
-
-          {activeTab === "expenses" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsPrintStatementOpen(true)}
-              className="h-8 gap-1.5 text-xs px-2.5 cursor-pointer"
-            >
-              <PrinterIcon className="size-3.5 text-primary" />
-              <span>Print Statement</span>
-            </Button>
-          )}
         </div>
       </div>
 
@@ -830,459 +627,458 @@ export function PosHistory() {
         totalCashRevenue={totalCashRevenue}
         totalCreditRevenue={totalCreditRevenue}
         creditSalesCount={creditSalesCount}
-        todayCreditRevenue={todayCreditRevenue}
         totalCOGS={totalCOGS}
         grossProfit={grossProfit}
         totalExpenses={totalExpenses}
         totalStaffExpenses={totalStaffAdvances}
-        todayTotalExpenses={todayTotalExpenses}
         netProfitOrLoss={netProfitOrLoss}
         netCashInHand={netCashInHand}
       />
 
-      <div className="flex items-center gap-1 p-1 bg-muted/40 border border-border/70 rounded-xl overflow-x-auto">
-        <button
-          type="button"
-          onClick={() => handleTabChange("combined")}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-            activeTab === "combined"
-              ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
-              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-          )}
-        >
-          <WalletIcon className="size-3.5 text-primary" />
-          <span>Poora Hisab-Kitab</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
-            {salesHistory.length + expenses.length + staffAdvancesGiven.length}
-          </span>
-        </button>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1 p-1 bg-muted/40 border border-border/70 rounded-xl overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => handleTabChange("sales")}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+              activeTab === "sales"
+                ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+            )}
+          >
+            <ReceiptIcon className="size-3.5 text-blue-500" />
+            <span>Sales & Invoices</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
+              {salesHistory.length}
+            </span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabChange("sales")}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-            activeTab === "sales"
-              ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
-              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-          )}
-        >
-          <ReceiptIcon className="size-3.5 text-blue-500" />
-          <span>Sales & Receipts</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
-            {salesHistory.length}
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={() => handleTabChange("udhar")}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+              activeTab === "udhar"
+                ? "bg-card text-foreground shadow-xs font-bold border border-amber-500/40 text-amber-600 dark:text-amber-400"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+            )}
+          >
+            <CreditCardIcon className="size-3.5 text-amber-500" />
+            <span>Udhar / Credit Khata</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">
+              {creditSalesCount}
+            </span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabChange("udhar")}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-            activeTab === "udhar"
-              ? "bg-card text-foreground shadow-xs font-bold border border-amber-500/40 text-amber-600 dark:text-amber-400"
-              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-          )}
-        >
-          <CreditCardIcon className="size-3.5 text-amber-500" />
-          <span>Udhar (Khata)</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">
-            {creditSalesCount}
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={() => handleTabChange("expenses")}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+              activeTab === "expenses"
+                ? "bg-card text-foreground shadow-xs font-bold border border-rose-500/40 text-rose-600 dark:text-rose-400"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+            )}
+          >
+            <HandCoinsIcon className="size-3.5 text-rose-500" />
+            <span>Expenses & Staff</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
+              {unifiedExpensesList.length}
+            </span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabChange("expenses")}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-            activeTab === "expenses"
-              ? "bg-card text-foreground shadow-xs font-bold border border-rose-500/40 text-rose-600 dark:text-rose-400"
-              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-          )}
-        >
-          <HandCoinsIcon className="size-3.5 text-rose-500" />
-          <span>Akhrajat & Staff</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
-            {unifiedExpensesList.length}
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={() => handleTabChange("combined")}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+              activeTab === "combined"
+                ? "bg-card text-foreground shadow-xs font-bold border border-border/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+            )}
+          >
+            <WalletIcon className="size-3.5 text-primary" />
+            <span>All Journal Entries</span>
+          </button>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => handleTabChange("profit-loss")}
-          className={cn(
-            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-            activeTab === "profit-loss"
-              ? "bg-card text-foreground shadow-xs font-bold border border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
-              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
-          )}
-        >
-          <BarChart3Icon className="size-3.5 text-emerald-500" />
-          <span>Nafa / Nuqsan (P&L)</span>
-        </button>
+        {activeTab === "udhar" && (
+          <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setUdharViewMode("bills");
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "px-2.5 py-1 rounded-md font-semibold cursor-pointer transition-colors text-[11px]",
+                udharViewMode === "bills" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Credit Bills ({creditSalesCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUdharViewMode("summary");
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "px-2.5 py-1 rounded-md font-semibold cursor-pointer transition-colors text-[11px]",
+                udharViewMode === "summary" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Customer Accounts ({customerCreditSummary.length})
+            </button>
+          </div>
+        )}
       </div>
 
-      {activeTab === "profit-loss" ? (
-        <PosProfitLossTab
-          salesHistory={salesHistory}
-          expenses={expenses}
-          staffAdvances={staffAdvances}
-        />
-      ) : (
-        <>
-          <div className="bg-card p-2.5 rounded-xl border border-border/80 shadow-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center w-full">
-              <div className="relative col-span-12 md:col-span-6">
-                <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
-                <Input
-                  placeholder={
-                    activeTab === "sales"
-                      ? "Search receipt no, customer name, phone..."
-                      : activeTab === "udhar"
-                      ? "Search udhar customer name, bill no..."
-                      : activeTab === "expenses"
-                      ? "Search expense voucher, title, staff advance, notes..."
-                      : "Search reference, customer, staff, or description..."
-                  }
-                  value={search}
+      <div className="bg-card p-2.5 rounded-xl border border-border/80 shadow-2xs">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center w-full">
+          <div className="relative col-span-12 md:col-span-6">
+            <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+            <Input
+              placeholder={
+                activeTab === "sales"
+                  ? "Search by invoice #, customer name, phone, or payment mode..."
+                  : activeTab === "udhar"
+                  ? "Search udhar customer or bill..."
+                  : activeTab === "expenses"
+                  ? "Search expense voucher, title, staff advance, category..."
+                  : "Search transaction reference, description, amount..."
+              }
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="ps-8 text-xs h-8.5 bg-muted/30 focus:bg-background rounded-lg"
+            />
+          </div>
+
+          {activeTab === "sales" && (
+            <>
+              <div className="col-span-6 md:col-span-3">
+                <select
+                  value={saleTypeFilter}
                   onChange={(e) => {
-                    setSearch(e.target.value);
+                    setSaleTypeFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="ps-8 text-xs h-7.5 bg-muted/30 focus:bg-background"
-                />
+                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2 text-xs text-foreground shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="all">All Sale Types</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Wholesale">Wholesale</option>
+                  <option value="Challan / Delivery">Challan Delivery</option>
+                </select>
               </div>
+
+              <div className="col-span-6 md:col-span-3">
+                <select
+                  value={paymentModeFilter}
+                  onChange={(e) => {
+                    setPaymentModeFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2 text-xs text-foreground shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="all">All Payment Status</option>
+                  <option value="cash">Cash Paid</option>
+                  <option value="credit">Udhar / Khata</option>
+                  <option value="bank">Bank / Card</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {activeTab === "expenses" && (
+            <>
+              <div className="col-span-6 md:col-span-3">
+                <select
+                  value={expenseCategoryFilter}
+                  onChange={(e) => {
+                    setExpenseCategoryFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2 text-xs text-foreground shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  {EXPENSE_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-span-6 md:col-span-3">
+                <select
+                  value={paymentModeFilter}
+                  onChange={(e) => {
+                    setPaymentModeFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2 text-xs text-foreground shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="all">All Modes</option>
+                  <option value="cash">Cash</option>
+                  <option value="bank transfer">Bank Transfer</option>
+                  <option value="cheque">Cheque</option>
+                </select>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden flex flex-col">
+        {loading ? (
+          <div className="p-5 space-y-3">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+        ) : paginatedItems.length === 0 ? (
+          <div className="p-10 text-center text-muted-foreground text-xs space-y-1">
+            <p className="font-semibold text-foreground text-sm">No Records Found</p>
+            <p className="text-xs text-muted-foreground">Try adjusting your search query or filters.</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto min-h-[300px]">
+              {activeTab === "combined" && (
+                <PosConsolidatedJournalTab
+                  items={paginatedItems}
+                  onViewReceipt={(sale) => setCompletedSale(sale)}
+                  onViewKhata={(customerName) =>
+                    navigate(`/ledger?search=${encodeURIComponent(customerName)}`)
+                  }
+                  onViewDiary={(customerName) => setDiaryCustomer(customerName)}
+                  onUpdateSale={(sale) => setSaleToUpdate(sale)}
+                  onDeleteExpense={(exp) => setExpenseToDelete(exp)}
+                  onDeleteAdvance={(adv) => setAdvanceToDelete(adv)}
+                  isAdmin={isAdmin}
+                />
+              )}
 
               {activeTab === "sales" && (
-                <>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-3">
-                    <select
-                      value={saleTypeFilter}
-                      onChange={(e) => {
-                        setSaleTypeFilter(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <option value="all">All Sale Types</option>
-                      <option value="Retail">Retail Sales</option>
-                      <option value="Wholesale">Wholesale Sales</option>
-                      <option value="Challan / Delivery">Challan / Delivery</option>
-                    </select>
-                  </div>
-
-                  <div className="col-span-12 sm:col-span-6 md:col-span-3">
-                    <select
-                      value={paymentModeFilter}
-                      onChange={(e) => {
-                        setPaymentModeFilter(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <option value="all">All Payment Modes</option>
-                      <option value="cash">Cash Only (Paid)</option>
-                      <option value="credit">Udhar / Khata (Credit Maal)</option>
-                      <option value="bank">Bank Transfer / Card</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {activeTab === "udhar" && (
-                <div className="col-span-12 sm:col-span-6 md:col-span-6 text-right text-xs text-amber-600 dark:text-amber-400 font-medium">
-                  Tamam Udhar / Credit par farokht shuda maal ki live tafseelat.
-                </div>
-              )}
-
-              {activeTab === "expenses" && (
-                <>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-3">
-                    <select
-                      value={expenseCategoryFilter}
-                      onChange={(e) => {
-                        setExpenseCategoryFilter(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      {EXPENSE_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat === "All" ? "All Categories" : cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-span-12 sm:col-span-6 md:col-span-3">
-                    <select
-                      value={paymentModeFilter}
-                      onChange={(e) => {
-                        setPaymentModeFilter(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <option value="all">All Payment Modes</option>
-                      <option value="cash">Cash</option>
-                      <option value="bank transfer">Bank Transfer</option>
-                      <option value="cheque">Cheque</option>
-                      <option value="online pos">Online POS</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {activeTab === "combined" && (
-                <div className="col-span-12 sm:col-span-6 md:col-span-6 text-right text-xs text-muted-foreground">
-                  Poora Hisab-Kitab: Sales (+), Udhar (+), Akhrajat (-), Staff Advance (-).
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card shadow-xs overflow-hidden flex flex-col">
-            {loading ? (
-              <div className="p-4 space-y-3">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : paginatedItems.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground text-xs space-y-1">
-                <p className="font-semibold text-foreground text-xs">No Records Found</p>
-                <p className="text-[11px]">Try adjusting your search query or filters.</p>
-              </div>
-            ) : (
-              <>
-                <div className="max-h-[calc(100vh-270px)] min-h-[260px] overflow-y-auto overflow-x-auto">
-                  {activeTab === "combined" && (
-                    <PosConsolidatedJournalTab
-                      items={paginatedItems}
-                      onViewReceipt={(sale) => setCompletedSale(sale)}
-                      onViewKhata={(customerName) =>
-                        navigate(`/ledger?search=${encodeURIComponent(customerName)}`)
-                      }
-                      onViewDiary={(customerName) => setDiaryCustomer(customerName)}
-                      onUpdateSale={(sale) => setSaleToUpdate(sale)}
-                      onDeleteExpense={(exp) => setExpenseToDelete(exp)}
-                      onDeleteAdvance={(adv) => setAdvanceToDelete(adv)}
-                      isAdmin={isAdmin}
-                    />
-                  )}
-
-                  {activeTab === "sales" && (
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
-                        <TableRow className="border-b border-border/80">
-                          <TableHead className="w-[110px] text-xs h-9">Receipt No.</TableHead>
-                          <TableHead className="text-xs h-9">Date & Time</TableHead>
-                          <TableHead className="text-xs h-9">Customer Name</TableHead>
-                          <TableHead className="text-center text-xs h-9">Sale Type</TableHead>
-                          <TableHead className="text-center text-xs h-9">Items</TableHead>
-                          <TableHead className="text-xs h-9">Payment Status / Mode</TableHead>
-                          <TableHead className="text-right text-xs h-9">Grand Total</TableHead>
-                          <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>{renderSalesRows(paginatedItems)}</TableBody>
-                    </Table>
-                  )}
-
-                  {activeTab === "udhar" && (
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
-                        <TableRow className="border-b border-border/80">
-                          <TableHead className="w-[110px] text-xs h-9">Invoice / Bill</TableHead>
-                          <TableHead className="text-xs h-9">Date & Time</TableHead>
-                          <TableHead className="text-xs h-9">Udhar Customer</TableHead>
-                          <TableHead className="text-center text-xs h-9">Sale Type</TableHead>
-                          <TableHead className="text-center text-xs h-9">Items</TableHead>
-                          <TableHead className="text-xs h-9">Status</TableHead>
-                          <TableHead className="text-right text-xs h-9">Udhar Amount (PKR)</TableHead>
-                          <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>{renderSalesRows(paginatedItems)}</TableBody>
-                    </Table>
-                  )}
-
-                  {activeTab === "expenses" && (
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
-                        <TableRow className="border-b border-border/80">
-                          <TableHead className="w-[120px] text-xs h-9">Voucher No.</TableHead>
-                          <TableHead className="text-xs h-9">Date</TableHead>
-                          <TableHead className="text-xs h-9">Title / Particulars</TableHead>
-                          <TableHead className="text-center text-xs h-9">Category</TableHead>
-                          <TableHead className="text-xs h-9">Payment Mode</TableHead>
-                          <TableHead className="text-right text-xs h-9">Amount (PKR)</TableHead>
-                          <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedItems.map((exp) => (
-                          <TableRow
-                            key={`${exp.isStaffAdvance ? "adv" : "exp"}-${exp._id}`}
-                            className={cn(
-                              "hover:bg-muted/20 text-xs border-b border-border/40",
-                              exp.isStaffAdvance && "bg-purple-500/5 dark:bg-purple-500/10"
-                            )}
-                          >
-                            <TableCell
-                              className={cn(
-                                "font-mono font-bold py-2",
-                                exp.isStaffAdvance ? "text-purple-600 dark:text-purple-400" : "text-rose-600 dark:text-rose-400"
-                              )}
-                            >
-                              {exp.voucherNumber}
-                            </TableCell>
-                            <TableCell className="font-mono text-muted-foreground text-[11px] py-2">
-                              {new Date(exp.date).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="py-2">
-                              <p className="font-semibold text-foreground text-xs">{exp.title}</p>
-                              {exp.notes && (
-                                <p className="text-[10px] text-muted-foreground italic truncate max-w-xs">{exp.notes}</p>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-center py-2">
-                              <span
-                                className={cn(
-                                  "inline-block rounded px-2 py-0.5 text-[10px] font-semibold border",
-                                  exp.isStaffAdvance
-                                    ? "bg-purple-500/15 border-purple-500/30 text-purple-600 dark:text-purple-400"
-                                    : "bg-muted border-border"
-                                )}
-                              >
-                                {exp.category}
-                              </span>
-                            </TableCell>
-                            <TableCell className="font-medium text-foreground py-2 text-[11px]">
-                              {exp.paymentMode || "Cash"}
-                            </TableCell>
-                            <TableCell
-                              className={cn(
-                                "text-right font-mono font-bold py-2 text-xs",
-                                exp.isStaffAdvance ? "text-purple-600 dark:text-purple-400" : "text-rose-600 dark:text-rose-400"
-                              )}
-                            >
-                              Rs {exp.amount?.toLocaleString()}
-                            </TableCell>
-                            <TableCell className="text-right py-2 pe-4">
-                              {isAdmin && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  className="size-6.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
-                                  onClick={() => {
-                                    if (exp.isStaffAdvance) {
-                                      setAdvanceToDelete(exp.raw);
-                                    } else {
-                                      setExpenseToDelete(exp.raw);
-                                    }
-                                  }}
-                                  title="Delete Record"
-                                >
-                                  <Trash2Icon className="size-3" />
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </div>
-
-                <PaginationBar
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalItems={currentList.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(page) => setCurrentPage(page)}
-                />
-              </>
-            )}
-          </div>
-
-          <div className="rounded-xl border border-amber-500/35 bg-card p-3.5 sm:p-4 shadow-xs space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-border/70 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="size-9 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                  <UsersIcon className="size-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-sm sm:text-base text-foreground">
-                      Customer-Wise Udhar (Credit) Khata Summary
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                      {customerCreditSummary.length} Udhar Customers
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Har customer / party ke naam ke sath unka kul udhar maal, khareed shuda liters, aur baqaya raqam.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="relative w-full sm:w-64">
-                  <SearchIcon className="absolute left-2.5 top-2 size-3.5 text-muted-foreground" />
-                  <Input
-                    placeholder="Search udhar customer name..."
-                    value={customerSummarySearch}
-                    onChange={(e) => setCustomerSummarySearch(e.target.value)}
-                    className="ps-8 text-xs h-7.5 bg-muted/30 focus:bg-background"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {filteredCustomerCreditSummary.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground text-xs">
-                <CreditCardIcon className="size-8 mx-auto text-muted-foreground/40 mb-1.5" />
-                <p className="font-semibold text-foreground">Koi Udhar Khata Record Nahi Mila</p>
-                <p className="text-[11px]">Kisi customer ne abhi tak udhar par maal nahi liya ya search match nahi hua.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto rounded-lg border border-border/70">
                 <Table>
-                  <TableHeader className="bg-muted/60 text-xs">
+                  <TableHeader className="bg-muted/70 backdrop-blur-xs">
                     <TableRow className="border-b border-border/80">
-                      <TableHead className="text-xs h-8.5">Customer / Party Name</TableHead>
-                      <TableHead className="text-xs h-8.5">Contact / Phone</TableHead>
-                      <TableHead className="text-center text-xs h-8.5">Total Udhar Bills</TableHead>
-                      <TableHead className="text-center text-xs h-8.5">Total Liters</TableHead>
-                      <TableHead className="text-right text-xs h-8.5">Kul Udhar Maal (PKR)</TableHead>
-                      <TableHead className="text-center text-xs h-8.5">Akhri Udhar Tareekh</TableHead>
-                      <TableHead className="text-right text-xs h-8.5 pe-4">Quick Actions</TableHead>
+                      <TableHead className="w-[120px] text-xs h-9 font-semibold">Invoice #</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Date & Time</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Customer</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Sale Type</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Stock Status</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Payment</TableHead>
+                      <TableHead className="text-right text-xs h-9 font-semibold">Grand Total</TableHead>
+                      <TableHead className="text-right text-xs h-9 pe-4 font-semibold">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCustomerCreditSummary.map((cust) => (
-                      <TableRow key={cust.name} className="hover:bg-muted/20 text-xs border-b border-border/40">
-                        <TableCell className="font-semibold text-foreground py-2.5">
-                          <div className="flex items-center gap-2">
-                            <div className="size-7 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold font-mono text-[10.5px] flex items-center justify-center shrink-0 border border-amber-500/30">
-                              {cust.name.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="font-bold text-xs text-foreground">{cust.name}</p>
-                              <span className="text-[9.5px] text-amber-600 dark:text-amber-400 font-medium">Udhar Account</span>
-                            </div>
+                    {paginatedItems.map((sale) => (
+                      <TableRow
+                        key={sale._id}
+                        className={cn(
+                          "hover:bg-muted/20 text-xs border-b border-border/40",
+                          sale.isCredit && "bg-amber-500/5"
+                        )}
+                      >
+                        <TableCell className="font-mono font-bold text-primary py-2.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>{sale.saleNumber}</span>
+                            {sale.source === "Challan" && (
+                              <span className="rounded bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 px-1 py-0.2 text-[9px] font-semibold">
+                                Challan
+                              </span>
+                            )}
                           </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
+                          {new Date(sale.createdAt).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="font-semibold text-foreground py-2.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>{sale.customerName || "Walk-in Customer"}</span>
+                            {sale.customerPhone && (
+                              <span className="text-muted-foreground text-[10px]">({sale.customerPhone})</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center py-2.5">
+                          <span className="inline-block rounded-md px-2 py-0.5 text-[10px] font-medium bg-muted border border-border text-muted-foreground">
+                            {sale.saleType}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center py-2.5 text-[11px]">
+                          <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                            <CheckCircle2Icon className="size-3" />
+                            <span>{sale.items?.length || 1} Items Deducted</span>
+                          </span>
+                        </TableCell>
+                        <TableCell className="py-2.5 text-[11px]">
+                          {sale.isCredit ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/35 text-amber-600 dark:text-amber-400">
+                              <ClockIcon className="size-3" />
+                              <span>Udhar Khata</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 border border-emerald-500/35 text-emerald-600 dark:text-emerald-400">
+                              <span>Paid ({sale.paymentMode || "Cash"})</span>
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-bold py-2.5 text-xs">
+                          Rs {sale.grandTotal?.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right py-2.5 pe-4">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                              onClick={() => setCompletedSale(sale)}
+                            >
+                              <ReceiptIcon className="size-3 text-primary" />
+                              <span>Receipt</span>
+                            </Button>
+
+                            {sale.isCredit && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 transition-colors"
+                                onClick={() => setSaleToUpdate(sale)}
+                              >
+                                <HandCoinsIcon className="size-3 text-emerald-600" />
+                                <span>Wasooli</span>
+                              </Button>
+                            )}
+
+                            {isAdmin && !sale.isChallan && (
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer transition-colors"
+                                onClick={() => setSaleToDelete(sale)}
+                                title="Delete Sale & Restore Stock"
+                              >
+                                <Trash2Icon className="size-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+
+              {activeTab === "udhar" && udharViewMode === "bills" && (
+                <Table>
+                  <TableHeader className="bg-muted/70 backdrop-blur-xs">
+                    <TableRow className="border-b border-border/80">
+                      <TableHead className="w-[120px] text-xs h-9 font-semibold">Bill #</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Date</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Customer</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Sale Type</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Items</TableHead>
+                      <TableHead className="text-right text-xs h-9 font-semibold">Pending Udhar (PKR)</TableHead>
+                      <TableHead className="text-right text-xs h-9 pe-4 font-semibold">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedItems.map((sale) => (
+                      <TableRow key={sale._id} className="hover:bg-muted/20 text-xs border-b border-border/40 bg-amber-500/5">
+                        <TableCell className="font-mono font-bold text-amber-600 dark:text-amber-400 py-2.5">
+                          {sale.saleNumber}
+                        </TableCell>
+                        <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
+                          {new Date(sale.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="font-semibold text-foreground py-2.5">
+                          <button
+                            type="button"
+                            onClick={() => setDiaryCustomer(sale.customerName)}
+                            className="font-bold text-left hover:text-primary hover:underline cursor-pointer"
+                          >
+                            {sale.customerName || "Walk-in Customer"}
+                          </button>
+                        </TableCell>
+                        <TableCell className="text-center py-2.5 text-[11px]">
+                          {sale.saleType}
+                        </TableCell>
+                        <TableCell className="text-center font-mono py-2.5 text-[11px]">
+                          {sale.items?.length || 1}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-bold text-amber-600 dark:text-amber-400 py-2.5 text-xs">
+                          Rs {sale.grandTotal?.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right py-2.5 pe-4">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-amber-500/40 text-amber-700 hover:bg-amber-50"
+                              onClick={() => setDiaryCustomer(sale.customerName)}
+                            >
+                              <BookOpenIcon className="size-3 text-amber-600" />
+                              <span>Diary</span>
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-emerald-600/40 text-emerald-700 hover:bg-emerald-50"
+                              onClick={() => setSaleToUpdate(sale)}
+                            >
+                              <HandCoinsIcon className="size-3 text-emerald-600" />
+                              <span>Wasooli</span>
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer"
+                              onClick={() => setCompletedSale(sale)}
+                            >
+                              <ReceiptIcon className="size-3 text-primary" />
+                              <span>Bill</span>
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+
+              {activeTab === "udhar" && udharViewMode === "summary" && (
+                <Table>
+                  <TableHeader className="bg-muted/70 backdrop-blur-xs">
+                    <TableRow className="border-b border-border/80">
+                      <TableHead className="text-xs h-9 font-semibold">Customer / Account</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Phone</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Total Bills</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Total Liters</TableHead>
+                      <TableHead className="text-right text-xs h-9 font-semibold">Total Udhar (PKR)</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Last Date</TableHead>
+                      <TableHead className="text-right text-xs h-9 pe-4 font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedItems.map((cust) => (
+                      <TableRow key={cust.name} className="hover:bg-muted/20 text-xs border-b border-border/40">
+                        <TableCell className="font-bold text-foreground py-2.5">
+                          {cust.name}
                         </TableCell>
                         <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
                           {cust.phone || "-"}
                         </TableCell>
                         <TableCell className="text-center font-mono py-2.5">
-                          <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-muted border border-border">
-                            {cust.billCount} {cust.billCount === 1 ? "Bill" : "Bills"}
-                          </span>
+                          {cust.billCount}
                         </TableCell>
                         <TableCell className="text-center font-mono font-bold text-foreground py-2.5">
                           {cust.totalLiters.toLocaleString()} L
@@ -1298,37 +1094,18 @@ export function PosHistory() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-6.5 gap-1 text-[11px] px-2 cursor-pointer border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
+                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
                               onClick={() => setDiaryCustomer(cust.name)}
-                              title={`Open ${cust.name} Ledger Account Diary`}
                             >
                               <BookOpenIcon className="size-3 text-amber-600" />
-                              <span>Ledger Diary</span>
+                              <span>Udhar Diary</span>
                             </Button>
-
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-6.5 gap-1 text-[11px] px-2 cursor-pointer border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
-                              onClick={() => {
-                                setSearch(cust.name);
-                                setActiveTab("udhar");
-                                window.scrollTo({ top: 320, behavior: "smooth" });
-                              }}
-                              title="Is customer ke tamam bills upar list me dekhein"
-                            >
-                              <ReceiptIcon className="size-3" />
-                              <span>Bills</span>
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-6.5 gap-1 text-[11px] px-2 cursor-pointer border-primary/40 text-primary hover:bg-primary/10"
+                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-primary/40 text-primary hover:bg-primary/10"
                               onClick={() => navigate(`/ledger?search=${encodeURIComponent(cust.name)}`)}
-                              title="Customer ka mukammal Khata / Ledger open karein"
                             >
-                              <BookOpenIcon className="size-3" />
                               <span>Khata</span>
                             </Button>
                           </div>
@@ -1337,11 +1114,106 @@ export function PosHistory() {
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            )}
-          </div>
-        </>
-      )}
+              )}
+
+              {activeTab === "expenses" && (
+                <Table>
+                  <TableHeader className="bg-muted/70 backdrop-blur-xs">
+                    <TableRow className="border-b border-border/80">
+                      <TableHead className="w-[120px] text-xs h-9 font-semibold">Voucher #</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Date</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Title</TableHead>
+                      <TableHead className="text-center text-xs h-9 font-semibold">Category</TableHead>
+                      <TableHead className="text-xs h-9 font-semibold">Payment Mode</TableHead>
+                      <TableHead className="text-right text-xs h-9 font-semibold">Amount (PKR)</TableHead>
+                      <TableHead className="text-right text-xs h-9 pe-4 font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedItems.map((exp) => (
+                      <TableRow
+                        key={`${exp.isStaffAdvance ? "adv" : "exp"}-${exp._id}`}
+                        className={cn(
+                          "hover:bg-muted/20 text-xs border-b border-border/40",
+                          exp.isStaffAdvance && "bg-purple-500/5"
+                        )}
+                      >
+                        <TableCell
+                          className={cn(
+                            "font-mono font-bold py-2.5",
+                            exp.isStaffAdvance ? "text-purple-600 dark:text-purple-400" : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          {exp.voucherNumber}
+                        </TableCell>
+                        <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
+                          {new Date(exp.date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="py-2.5">
+                          <p className="font-semibold text-foreground text-xs">{exp.title}</p>
+                          {exp.notes && (
+                            <p className="text-[10px] text-muted-foreground truncate max-w-xs">{exp.notes}</p>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center py-2.5">
+                          <span
+                            className={cn(
+                              "inline-block rounded-md px-2 py-0.5 text-[10px] font-medium border",
+                              exp.isStaffAdvance
+                                ? "bg-purple-500/15 border-purple-500/30 text-purple-600 dark:text-purple-400"
+                                : "bg-muted border-border"
+                            )}
+                          >
+                            {exp.category}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-medium text-foreground py-2.5 text-[11px]">
+                          {exp.paymentMode || "Cash"}
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            "text-right font-mono font-bold py-2.5 text-xs",
+                            exp.isStaffAdvance ? "text-purple-600 dark:text-purple-400" : "text-rose-600 dark:text-rose-400"
+                          )}
+                        >
+                          Rs {exp.amount?.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right py-2.5 pe-4">
+                          {isAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer transition-colors"
+                              onClick={() => {
+                                if (exp.isStaffAdvance) {
+                                  setAdvanceToDelete(exp.raw);
+                                } else {
+                                  setExpenseToDelete(exp.raw);
+                                }
+                              }}
+                              title="Delete Record"
+                            >
+                              <Trash2Icon className="size-3" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={currentList.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </>
+        )}
+      </div>
 
       <PosReceiptModal
         isOpen={!!completedSale}
