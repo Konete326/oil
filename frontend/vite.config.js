@@ -96,8 +96,7 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: true,
-        type: 'module',
+        enabled: false,
       },
     }),
   ],
@@ -110,6 +109,3 @@ export default defineConfig({
     chunkSizeWarningLimit: 2500,
   },
 })
-
-
-
