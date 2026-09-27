@@ -321,6 +321,8 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
           isOpen={isTrialSheetOpen}
           onClose={() => setIsTrialSheetOpen(false)}
           customer={customer}
+          initialSales={posSales}
+          initialLedger={ledgerEntries}
         />
       )}
     </>
