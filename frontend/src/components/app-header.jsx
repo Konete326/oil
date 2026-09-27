@@ -242,7 +242,7 @@ export function AppHeader({ user, onLogout }) {
                   icon: <WalletIcon className="size-4 text-emerald-500" />,
                 });
               });
-          } else if (modKey === "ledger") {
+          } else if (modKey === "ledger" || modKey === "customers") {
             res.data
               .filter(
                 (c) =>
@@ -256,9 +256,9 @@ export function AppHeader({ user, onLogout }) {
                   id: `cust-${c._id}`,
                   title: c.name,
                   subtitle: `Balance: Rs ${Number(c.currentBalance || 0).toLocaleString()} | Phone: ${c.phone || "-"}`,
-                  category: "Customer Ledger",
-                  path: "/ledger",
-                  icon: <BookOpenIcon className="size-4 text-amber-500" />,
+                  category: "Customers & Accounts",
+                  path: "/customers",
+                  icon: <UsersIcon className="size-4 text-primary" />,
                 });
               });
           } else if (modKey === "supplier-ledger") {
@@ -402,11 +402,11 @@ export function AppHeader({ user, onLogout }) {
       icon: <TruckIcon className="size-3.5 text-purple-500" />,
     },
     {
-      label: "Record Client Payment",
-      path: "/ledger",
-      state: { openModal: true },
-      perm: "ledger",
-      icon: <BookOpenIcon className="size-3.5 text-amber-500" />,
+      label: "Customers & Accounts",
+      path: "/customers",
+      state: null,
+      perm: "customers",
+      icon: <UsersIcon className="size-3.5 text-primary" />,
     },
     {
       label: "Master Platform Report",

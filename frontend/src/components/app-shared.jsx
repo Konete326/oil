@@ -63,18 +63,13 @@ export const navGroups = [
       },
       {
         title: "Khatas & Ledgers",
-        path: "/ledger",
+        path: "/customers",
         icon: <BookOpenIcon />,
         subItems: [
           {
             title: "Customers & Accounts",
             path: "/customers",
             icon: <UsersIcon />,
-          },
-          {
-            title: "Customer Ledger & Khata",
-            path: "/ledger",
-            icon: <BookOpenIcon />,
           },
           {
             title: "Supplier Ledger",

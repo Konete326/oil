@@ -803,7 +803,7 @@ export function PosHistory() {
                   items={paginatedItems}
                   onViewReceipt={(sale) => setCompletedSale(sale)}
                   onViewKhata={(customerName) =>
-                    navigate(`/ledger?search=${encodeURIComponent(customerName)}`)
+                    navigate(`/customers?search=${encodeURIComponent(customerName)}`)
                   }
                   onViewDiary={(customerName) => setDiaryCustomer(customerName)}
                   onUpdateSale={(sale) => setSaleToUpdate(sale)}

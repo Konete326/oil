@@ -145,7 +145,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
       </div>
 
       <div
-        onClick={() => navigate("/ledger")}
+        onClick={() => navigate("/customers")}
         className="group relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-background p-5 shadow-sm hover:shadow-md hover:border-amber-500/50 transition-all duration-200 cursor-pointer flex flex-col justify-between"
       >
         <div className="flex items-start justify-between gap-3">

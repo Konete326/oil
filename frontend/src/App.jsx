@@ -9,7 +9,6 @@ import { StockRegisterPage } from "@/components/stock-register-page";
 import { PosCounter } from "@/components/pos-counter";
 import { PosHistory } from "@/components/pos-history";
 import { CustomerManager } from "@/components/customer-manager";
-import { LedgerManager } from "@/components/ledger-manager";
 import { CashManager } from "@/components/cash-manager";
 import { SalesPurchaseManager } from "@/components/sales-purchase-manager";
 import { ProfitLossWidget } from "@/components/profit-loss-widget";
@@ -138,7 +137,7 @@ export default function App() {
                         <Route path="/pos" element={<PosCounter />} />
                         <Route path="/pos/history" element={<PosHistory />} />
                         <Route path="/customers" element={<CustomerManager />} />
-                        <Route path="/ledger" element={<LedgerManager />} />
+                        <Route path="/ledger" element={<Navigate to="/customers" replace />} />
                         <Route path="/cash" element={<CashManager />} />
                         <Route path="/sales-purchases" element={<SalesPurchaseManager />} />
                         <Route path="/profit-loss" element={<ProfitLossWidget />} />
