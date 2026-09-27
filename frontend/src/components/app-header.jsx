@@ -436,8 +436,8 @@ export function AppHeader({ user, onLogout }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-end min-w-0">
-        <div ref={searchRef} className="relative flex-1 min-w-[180px] max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+      <div className="flex-1 max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-2 sm:mx-6 min-w-0">
+        <div ref={searchRef} className="relative w-full">
           <div className="relative flex items-center">
             <SearchIcon className="absolute left-3.5 size-4 text-muted-foreground pointer-events-none" />
             <Input
@@ -450,7 +450,7 @@ export function AppHeader({ user, onLogout }) {
                 if (searchQuery.trim().length > 0 || searchResults.length > 0) setIsSearchOpen(true);
               }}
               onKeyDown={handleKeyDown}
-              className="ps-10 pe-16 text-xs h-10 w-full bg-muted/30 hover:bg-muted/50 focus:bg-background border-border/80 rounded-xl transition-all shadow-2xs focus-visible:ring-1 focus-visible:ring-primary"
+              className="ps-10 pe-16 text-xs h-10 w-full bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/80 rounded-xl transition-all shadow-2xs focus-visible:ring-1 focus-visible:ring-primary"
             />
             <div className="absolute right-2.5 flex items-center gap-1">
               {searchQuery ? (
@@ -476,7 +476,7 @@ export function AppHeader({ user, onLogout }) {
           </div>
 
           {isSearchOpen && (
-            <div className="absolute left-0 right-0 sm:-right-8 md:right-0 top-11 z-50 rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-100 min-w-[300px] sm:min-w-[420px] md:min-w-[480px]">
+            <div className="absolute left-0 right-0 top-11.5 z-50 rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-100 w-full">
               <div className="p-2.5 border-b border-border bg-muted/40 flex flex-col gap-2">
                 <div className="flex justify-between items-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   <span className="flex items-center gap-1.5 text-foreground">
@@ -584,47 +584,15 @@ export function AppHeader({ user, onLogout }) {
             </div>
           )}
         </div>
+      </div>
 
-        {quickActions.length > 0 && (
-          <div ref={quickActionRef} className="relative hidden md:block shrink-0">
-            <Button
-              size="sm"
-              onClick={() => setIsQuickActionOpen(!isQuickActionOpen)}
-              className="gap-1 h-9.5 px-3 text-xs shadow-2xs cursor-pointer bg-primary text-primary-foreground rounded-xl"
-            >
-              <span>Quick Action</span>
-              <ChevronDownIcon className="size-3 ml-0.5" />
-            </Button>
-
-            {isQuickActionOpen && (
-              <div className="absolute right-0 top-11 z-50 w-56 rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl overflow-hidden animate-in fade-in-50 duration-100 p-1 space-y-0.5">
-                <div className="px-2.5 py-1.5 text-[10px] uppercase font-semibold text-muted-foreground border-b border-border mb-1">
-                  Permitted Quick Tasks
-                </div>
-                {quickActions.map((action) => (
-                  <button
-                    key={action.path + action.label}
-                    onClick={() => {
-                      setIsQuickActionOpen(false);
-                      navigate(action.path, action.state ? { state: action.state } : undefined);
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2.5 cursor-pointer"
-                  >
-                    <div className="p-1 rounded-md bg-muted/80">{action.icon}</div>
-                    <span className="truncate">{action.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         <Button
           size="sm"
           variant="outline"
           onClick={() => setIsShopModalOpen(true)}
           className={cn(
-            "gap-2 h-9.5 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer shadow-2xs shrink-0",
+            "gap-2 h-9 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer shadow-2xs shrink-0",
             shiftStatus?.isClosed
               ? "border-border/80 bg-muted/40 text-muted-foreground hover:bg-muted"
               : "border-border/80 bg-background/60 hover:bg-muted/70 text-foreground"
@@ -656,7 +624,7 @@ export function AppHeader({ user, onLogout }) {
           size="sm"
           variant="outline"
           onClick={() => navigate("/notifications")}
-          className="cursor-pointer relative shrink-0 size-9.5 p-0 rounded-xl border-border/80 bg-background/50 hover:bg-muted/80 flex items-center justify-center"
+          className="cursor-pointer relative shrink-0 size-9 p-0 rounded-xl border-border/80 bg-background/50 hover:bg-muted/80 flex items-center justify-center"
         >
           <BellIcon className="size-4" />
           {unreadCount > 0 && (
@@ -665,10 +633,12 @@ export function AppHeader({ user, onLogout }) {
             </span>
           )}
         </Button>
+
         <Separator
-          className="h-4 data-[orientation=vertical]:self-center hidden sm:block"
+          className="h-4 data-[orientation=vertical]:self-center hidden sm:block mx-0.5"
           orientation="vertical"
         />
+
         <NavUser user={user} onLogout={onLogout} />
       </div>
 
