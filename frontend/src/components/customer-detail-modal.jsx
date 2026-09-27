@@ -82,9 +82,10 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 size="sm"
                 variant="outline"
                 className="gap-1.5 cursor-pointer text-xs font-bold border-border hover:bg-muted"
+                title="Customer Ledger Diary"
               >
                 <BookOpenIcon className="size-3.5 text-primary" />
-                <span>کھاتہ ڈائری</span>
+                <span>Ledger Diary</span>
               </Button>
 
               <Button

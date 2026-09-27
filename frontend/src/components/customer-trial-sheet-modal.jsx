@@ -235,12 +235,12 @@ export function CustomerTrialSheetModal({ isOpen, onClose, customer }) {
     const phoneClean = (customer.phone || "").replace(/\D/g, "");
     const dateStr = new Date().toLocaleDateString();
 
-    const msg = `محترم ${customer.name} صاحب،\nالخلیج لبریکنٹس سے آپ کی ٹرائل بیلنس کھاتہ شیٹ (${dateStr}):\n\n` +
-      `▪ کل مال خریدا (Debit / نام): Rs ${totalDebit.toLocaleString()}\n` +
-      `▪ کل وصولی / ادا (Credit / جمع): Rs ${totalCredit.toLocaleString()}\n` +
+    const msg = `Dear ${customer.name},\nTrial Balance Statement from Al Khaleej Lubricants (${dateStr}):\n\n` +
+      `▪ Total Purchases (Debit): Rs ${totalDebit.toLocaleString()}\n` +
+      `▪ Total Received / Paid (Credit): Rs ${totalCredit.toLocaleString()}\n` +
       `------------------------------------\n` +
-      `▪ باقی واجب الادا رقم (میزان): Rs ${currentReceivable.toLocaleString()}\n\n` +
-      `شکریہ! برائے کسی بھی سوال رابطہ فرمائیں۔`;
+      `▪ Net Balance Due: Rs ${currentReceivable.toLocaleString()}\n\n` +
+      `Thank you! For any questions, please contact us.`;
 
     const encoded = encodeURIComponent(msg);
     const url = phoneClean ? `https://wa.me/${phoneClean}?text=${encoded}` : `https://wa.me/?text=${encoded}`;

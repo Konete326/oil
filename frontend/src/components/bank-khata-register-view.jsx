@@ -399,7 +399,7 @@ export function BankKhataRegisterView() {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-1.5">
-                <span className="text-muted-foreground font-normal">کھاتہ بنام:</span>
+                <span className="text-muted-foreground font-normal">Account Title:</span>
                 <span className="text-primary font-mono">{selectedBank}</span>
               </h2>
               <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-muted border border-border">
@@ -645,18 +645,18 @@ export function BankKhataRegisterView() {
               <Table>
                 <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                   <TableRow className="border-b border-border/80 text-xs">
-                    <TableHead className="w-[100px] text-xs h-9">تاریخ (Date)</TableHead>
-                    <TableHead className="text-xs h-9">تفصیل (Tafseel & Reason)</TableHead>
-                    <TableHead className="w-[120px] text-xs h-9">صفحہ / چیک #</TableHead>
-                    <TableHead className="w-[110px] text-xs h-9 text-center">Type / Zariya</TableHead>
+                    <TableHead className="w-[100px] text-xs h-9">Date</TableHead>
+                    <TableHead className="text-xs h-9">Description / Reason</TableHead>
+                    <TableHead className="w-[120px] text-xs h-9">Ref / Cheque #</TableHead>
+                    <TableHead className="w-[110px] text-xs h-9 text-center">Type / Mode</TableHead>
                     <TableHead className="w-[130px] text-xs h-9 text-right text-rose-600 dark:text-rose-400">
-                      نام (روپیہ)
+                      Debit (Out)
                     </TableHead>
                     <TableHead className="w-[130px] text-xs h-9 text-right text-emerald-600 dark:text-emerald-400">
-                      جمع (روپیہ)
+                      Credit (In)
                     </TableHead>
                     <TableHead className="w-[140px] text-xs h-9 text-right font-bold text-foreground">
-                      بقایا (روپیہ)
+                      Balance (PKR)
                     </TableHead>
                     <TableHead className="w-[60px] text-xs h-9 text-right pe-4">Action</TableHead>
                   </TableRow>

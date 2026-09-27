@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/language-context";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", native: "English", flag: "🇬🇧" },
-  { code: "ur", label: "Urdu", native: "اردو", flag: "🇵🇰" },
+  { code: "ur", label: "Urdu", native: "Urdu", flag: "🇵🇰" },
   { code: "hinglish", label: "Aasan Urdu (Roman)", native: "Aasan Urdu", flag: "🔤" },
 ];
 
@@ -45,7 +45,7 @@ export function LanguageSelector({ variant = "header", className }) {
                 Language & Translation Settings
               </h3>
               <p className="text-xs text-muted-foreground">
-                Switch system language instantly between English, Urdu (اردو), and Aasan Urdu (Roman).
+                Switch system language instantly between English, Urdu, and Aasan Urdu (Roman).
               </p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export function LanguageSelector({ variant = "header", className }) {
       {isOpen && (
         <div className="absolute right-0 top-10 z-50 w-52 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg overflow-hidden animate-in fade-in-50 duration-100 p-1 space-y-0.5">
           <div className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground border-b border-border/50 flex items-center justify-between">
-            <span>Select Language / زبان</span>
+            <span>Select Language</span>
             <Globe className="size-3 text-primary" />
           </div>
 

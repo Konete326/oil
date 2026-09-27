@@ -107,7 +107,7 @@ export function CustomerUdharDiaryModal({
       entries.push({
         id: `opening-${customerProfile._id}`,
         date: customerProfile.createdAt || new Date().toISOString(),
-        tafseel: "سابقہ بقایا (Opening Balance)",
+        tafseel: "Opening Balance",
         safha: "OPN-01",
         naam: Number(customerProfile.openingBalance),
         jama: 0,
@@ -144,7 +144,7 @@ export function CustomerUdharDiaryModal({
           entries.push({
             id: `sale-part-${sale._id}`,
             date: sale.updatedAt || sale.createdAt,
-            tafseel: `وصولی برائے بل ${sale.saleNumber}`,
+            tafseel: `Payment received for Bill ${sale.saleNumber}`,
             safha: sale.saleNumber || "VOUCH",
             naam: 0,
             jama: cashRec,
@@ -175,7 +175,7 @@ export function CustomerUdharDiaryModal({
             entries.push({
               id: `cashtx-${tx._id}`,
               date: tx.transactionDate || tx.createdAt,
-              tafseel: `${tx.paymentMode || "Cash"} وصولی ${tx.notes ? `- ${tx.notes}` : ""}`,
+              tafseel: `${tx.paymentMode || "Cash"} Receipt ${tx.notes ? `- ${tx.notes}` : ""}`,
               safha: tx.referenceNo || `VCH-${String(tx._id).slice(-4)}`,
               naam: 0,
               jama: Number(tx.amount) || 0,
@@ -312,12 +312,12 @@ export function CustomerUdharDiaryModal({
     const phoneClean = (customerProfile?.phone || "").replace(/\D/g, "");
     const dateStr = new Date().toLocaleDateString();
 
-    const msg = `محترم ${customerName} صاحب،\nآئل شاپ سے آپ کا کھاتہ حساب کتاب (${dateStr}):\n\n` +
-      `▪ کل ادھار مال (نام): Rs ${totalNaam.toLocaleString()}\n` +
-      `▪ کل وصول شدہ رقم (جمع): Rs ${totalJama.toLocaleString()}\n` +
+    const msg = `Dear ${customerName},\nLedger Statement from Al Khaleej Lubricants (${dateStr}):\n\n` +
+      `▪ Total Debit (Billed): Rs ${totalNaam.toLocaleString()}\n` +
+      `▪ Total Credit (Received): Rs ${totalJama.toLocaleString()}\n` +
       `------------------------------------\n` +
-      `▪ باقی واجب الادا رقم (میزان): Rs ${kulBaqaya.toLocaleString()}\n\n` +
-      `شکریہ! برائے کسی بھی سوال رابطہ فرمائیں۔`;
+      `▪ Net Balance Due: Rs ${kulBaqaya.toLocaleString()}\n\n` +
+      `Thank you! For any questions, please contact us.`;
 
     const encoded = encodeURIComponent(msg);
     const url = phoneClean ? `https://wa.me/${phoneClean}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
@@ -343,12 +343,12 @@ export function CustomerUdharDiaryModal({
               <div>
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground font-mono flex items-center gap-2">
-                    <span className="text-red-600 dark:text-red-400 text-lg">کھاتہ بنام:</span>
+                    <span className="text-red-600 dark:text-red-400 text-lg">Account Title:</span>
                     <span className="underline decoration-red-500/50 underline-offset-4">{customerName}</span>
                   </h2>
 
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-red-500/15 text-red-700 dark:text-red-300 border border-red-500/30">
-                    صفحہ نمبر: {customerProfile?.folioNumber || "۷۵"}
+                    Folio No: {customerProfile?.folioNumber || "75"}
                   </span>
                 </div>
 
@@ -360,9 +360,9 @@ export function CustomerUdharDiaryModal({
                     </span>
                   )}
                   {customerProfile?.city && (
-                    <span>شہر: {customerProfile.city}</span>
+                    <span>City: {customerProfile.city}</span>
                   )}
-                  <span>کل بلز: {khataEntries.length}</span>
+                  <span>Total Bills: {khataEntries.length}</span>
                 </div>
               </div>
             </div>
@@ -376,7 +376,7 @@ export function CustomerUdharDiaryModal({
                 title="Send Khata statement via WhatsApp"
               >
                 <Share2Icon className="size-3.5 text-emerald-600" />
-                <span>واٹس ایپ</span>
+                <span>WhatsApp</span>
               </Button>
 
               <Button
@@ -387,7 +387,7 @@ export function CustomerUdharDiaryModal({
                 title="Print Khata statement"
               >
                 <PrinterIcon className="size-3.5 text-primary" />
-                <span>پرنٹ کھاتہ</span>
+                <span>Print Ledger</span>
               </Button>
 
               <Button
@@ -406,7 +406,7 @@ export function CustomerUdharDiaryModal({
           <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-3.5 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10.5px] font-bold text-red-700 dark:text-red-400 block font-mono">
-                کل نام / ادھار خریدا (Total Debit)
+                Total Debit (Billed)
               </span>
               <p className="text-xl font-black font-mono text-red-600 dark:text-red-400 mt-0.5">
                 Rs {totalNaam.toLocaleString()}
@@ -420,7 +420,7 @@ export function CustomerUdharDiaryModal({
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10.5px] font-bold text-emerald-700 dark:text-emerald-400 block font-mono">
-                کل جمع / وصول شدہ (Total Credit)
+                Total Credit (Received)
               </span>
               <p className="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
                 Rs {totalJama.toLocaleString()}
@@ -434,7 +434,7 @@ export function CustomerUdharDiaryModal({
           <div className="rounded-xl border-2 border-amber-500/50 bg-amber-500/10 p-3.5 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[10.5px] font-extrabold text-amber-800 dark:text-amber-300 block font-mono">
-                میزان / باقی واجب الادا (Net Due Balance)
+                Net Balance Due
               </span>
               <p className="text-2xl font-black font-mono text-amber-600 dark:text-amber-400 mt-0.5">
                 Rs {kulBaqaya.toLocaleString()}
@@ -457,7 +457,7 @@ export function CustomerUdharDiaryModal({
               className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer shadow-xs"
             >
               <HandCoinsIcon className="size-3.5" />
-              <span>+ وصولی (جمع) درج کریں</span>
+              <span>+ Record Payment Received</span>
             </Button>
 
             <Button
@@ -467,14 +467,14 @@ export function CustomerUdharDiaryModal({
               className="h-8 text-xs font-bold border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/10 gap-1.5 cursor-pointer"
             >
               <PlusIcon className="size-3.5" />
-              <span>+ نیا ادھار (نام) درج کریں</span>
+              <span>+ Record New Credit / Bill</span>
             </Button>
           </div>
 
           <div className="relative w-full sm:w-60">
             <SearchIcon className="absolute left-2.5 top-2.5 size-3 text-muted-foreground" />
             <Input
-              placeholder="تاریخ یا بل نمبر تلاش کریں..."
+              placeholder="Search by date or bill number..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               className="h-8 ps-7.5 text-xs bg-muted/30 focus:bg-background"
@@ -490,7 +490,7 @@ export function CustomerUdharDiaryModal({
             <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
               <h4 className="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                 <HandCoinsIcon className="size-4 text-emerald-600" />
-                <span>{customerName} سے وصولی (جمع رقم) ریکارڈ کریں</span>
+                <span>Record Payment Received from {customerName}</span>
               </h4>
               <button
                 type="button"
@@ -503,7 +503,7 @@ export function CustomerUdharDiaryModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">
               <div>
-                <label className="block font-semibold mb-1">وصولی رقم (PKR) *</label>
+                <label className="block font-semibold mb-1">Received Amount (PKR) *</label>
                 <Input
                   type="number"
                   min="1"
@@ -516,20 +516,20 @@ export function CustomerUdharDiaryModal({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">ذریعہ (Payment Mode) *</label>
+                <label className="block font-semibold mb-1">Payment Mode *</label>
                 <select
                   value={vasooliMode}
                   onChange={(e) => setVasooliMode(e.target.value)}
                   className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-medium cursor-pointer"
                 >
-                  <option value="Cash">Cash (دکان کا گلہ)</option>
-                  <option value="Bank Transfer">Bank Transfer (بینک کھاتہ)</option>
-                  <option value="Cheque">Cheque (چیک)</option>
+                  <option value="Cash">Cash (Shop Drawer)</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Cheque">Cheque</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">تاریخ (Date) *</label>
+                <label className="block font-semibold mb-1">Date *</label>
                 <Input
                   type="date"
                   required
@@ -540,13 +540,13 @@ export function CustomerUdharDiaryModal({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">تفصیل / رسید نوٹ</label>
+                <label className="block font-semibold mb-1">Receipt Note / Voucher</label>
                 <Input
                   type="text"
                   value={vasooliNotes}
                   onChange={(e) => setVasooliNotes(e.target.value)}
                   className="h-8 text-xs"
-                  placeholder="نوٹ یا واؤچر نمبر..."
+                  placeholder="Note or voucher reference..."
                 />
               </div>
             </div>
@@ -567,7 +567,7 @@ export function CustomerUdharDiaryModal({
                 disabled={submitting}
                 className="h-7 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
               >
-                {submitting ? "ریکارڈ ہو رہا ہے..." : "وصولی جمع اور کھاتہ کلئیر کریں"}
+                {submitting ? "Recording..." : "Record Payment & Update Khata"}
               </Button>
             </div>
           </form>
@@ -581,7 +581,7 @@ export function CustomerUdharDiaryModal({
             <div className="flex items-center justify-between border-b border-red-500/20 pb-2">
               <h4 className="font-bold text-xs text-red-800 dark:text-red-300 flex items-center gap-1.5">
                 <PlusIcon className="size-4 text-red-600" />
-                <span>{customerName} کے کھاتے میں نیا ادھار مال درج کریں</span>
+                <span>Record New Credit Sale for {customerName}</span>
               </h4>
               <button
                 type="button"
@@ -594,7 +594,7 @@ export function CustomerUdharDiaryModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-2.5 text-xs">
               <div className="sm:col-span-2">
-                <label className="block font-semibold mb-1">آئل پروڈکٹ / مال کی تفصیل *</label>
+                <label className="block font-semibold mb-1">Product / Item Description *</label>
                 <Input
                   type="text"
                   required
@@ -606,7 +606,7 @@ export function CustomerUdharDiaryModal({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">مقدار (لیٹرز) *</label>
+                <label className="block font-semibold mb-1">Quantity (Liters) *</label>
                 <Input
                   type="number"
                   min="0.5"
@@ -625,7 +625,7 @@ export function CustomerUdharDiaryModal({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">ریٹ فی لیٹر (PKR)</label>
+                <label className="block font-semibold mb-1">Rate per Liter (PKR)</label>
                 <Input
                   type="number"
                   min="1"
@@ -643,7 +643,7 @@ export function CustomerUdharDiaryModal({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">کل ادھار رقم (PKR) *</label>
+                <label className="block font-semibold mb-1">Total Amount (PKR) *</label>
                 <Input
                   type="number"
                   min="1"
@@ -657,7 +657,7 @@ export function CustomerUdharDiaryModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-1">
               <div>
-                <label className="block font-semibold mb-1">تاریخ (Date) *</label>
+                <label className="block font-semibold mb-1">Date *</label>
                 <Input
                   type="date"
                   required
@@ -668,13 +668,13 @@ export function CustomerUdharDiaryModal({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">اضافی تفصیل / بل نوٹ</label>
+                <label className="block font-semibold mb-1">Additional Note / Remarks</label>
                 <Input
                   type="text"
                   value={udharNotes}
                   onChange={(e) => setUdharNotes(e.target.value)}
                   className="h-8 text-xs"
-                  placeholder="گاڑی نمبر یا ریمارکس..."
+                  placeholder="Vehicle number or remarks..."
                 />
               </div>
             </div>
@@ -695,7 +695,7 @@ export function CustomerUdharDiaryModal({
                 disabled={submitting}
                 className="h-7 text-xs font-bold bg-red-600 hover:bg-red-700 text-white cursor-pointer"
               >
-                {submitting ? "درج ہو رہا ہے..." : "کھاتے میں ادھار مال درج کریں"}
+                {submitting ? "Adding..." : "Add to Customer Khata"}
               </Button>
             </div>
           </form>
@@ -706,25 +706,25 @@ export function CustomerUdharDiaryModal({
             <TableHeader className="bg-muted/70 text-xs">
               <TableRow className="border-b border-border/80">
                 <TableHead className="w-[105px] text-xs h-9 font-bold text-foreground">
-                  تاریخ (Date)
+                  Date
                 </TableHead>
                 <TableHead className="text-xs h-9 font-bold text-foreground">
-                  تفصیل (Particulars / Items)
+                  Description (Particulars / Items)
                 </TableHead>
                 <TableHead className="w-[100px] text-xs h-9 font-bold text-foreground">
-                  صفحہ / رسید
+                  Ref / Bill #
                 </TableHead>
                 <TableHead className="w-[115px] text-xs h-9 text-right font-bold text-red-600 dark:text-red-400">
-                  نام روپیہ (Udhar)
+                  Debit (Billed)
                 </TableHead>
                 <TableHead className="w-[115px] text-xs h-9 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                  جمع روپیہ (Wasooli)
+                  Credit (Received)
                 </TableHead>
                 <TableHead className="w-[125px] text-xs h-9 text-right font-extrabold text-foreground">
-                  بقایا روپیہ (Balance)
+                  Balance (PKR)
                 </TableHead>
                 <TableHead className="w-[75px] text-xs h-9 text-right pe-3 font-bold text-muted-foreground">
-                  عمل
+                  Action
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -732,7 +732,7 @@ export function CustomerUdharDiaryModal({
               {filteredEntries.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-xs text-muted-foreground">
-                    اس کسٹمر کے کھاتے میں کوئی ریکارڈ نہیں ملا۔
+                    No ledger records found for this customer.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -781,7 +781,7 @@ export function CustomerUdharDiaryModal({
                             setVasooliNotes(`Wasooli for bill ${row.safha}`);
                             setActiveForm("vasooli");
                           }}
-                          title="اس بل کی وصولی جمع کریں"
+                          title="Record payment for this bill"
                         >
                           <HandCoinsIcon className="size-3" />
                         </Button>
@@ -796,7 +796,7 @@ export function CustomerUdharDiaryModal({
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border/80 pt-3">
           <p className="font-mono text-[11px]">
-            تمام اندراجات دکان کے کیش رجسٹر اور پی او ایس سسٹم کے ساتھ مکمل ہم آہنگ (Synced) ہیں۔
+            All ledger records are fully synchronized with the shop's cash register and POS system.
           </p>
 
           <Button
@@ -805,7 +805,7 @@ export function CustomerUdharDiaryModal({
             onClick={onClose}
             className="h-7 text-xs px-3 cursor-pointer self-end sm:self-auto"
           >
-            بند کریں (Close)
+            Close
           </Button>
         </div>
 

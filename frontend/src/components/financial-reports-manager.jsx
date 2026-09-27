@@ -41,7 +41,7 @@ export function FinancialReportsManager() {
     <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Financial & Platform Reports (مالیاتی اور مکمل رپورٹس)</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Financial & Platform Reports</h1>
           <p className="text-xs text-muted-foreground">Consolidated Master Platform Report, Trial Balance Sheet, Profit & Loss, and Party Khatas.</p>
         </div>
       </div>
@@ -49,7 +49,7 @@ export function FinancialReportsManager() {
       <div className="flex items-center justify-between border-b border-border overflow-x-auto">
         <div className="flex items-center gap-1 min-w-max pb-1">
           {[
-            { id: "masterReport", label: "Master Platform Report (مکمل رپورٹ)" },
+            { id: "masterReport", label: "Master Platform Report" },
             { id: "trialBalance", label: "Trial Balance Sheet" },
             { id: "profitLoss", label: "Profit & Loss Statement" },
             { id: "partyLedger", label: "Party Ledger Report" },

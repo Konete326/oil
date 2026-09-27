@@ -1300,10 +1300,10 @@ export function PosHistory() {
                               size="sm"
                               className="h-6.5 gap-1 text-[11px] px-2 cursor-pointer border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
                               onClick={() => setDiaryCustomer(cust.name)}
-                              title={`${cust.name} کی ذاتی ادھار ڈائری (حساب) کھولیں`}
+                              title={`Open ${cust.name} Ledger Account Diary`}
                             >
                               <BookOpenIcon className="size-3 text-amber-600" />
-                              <span>حساب ڈائری</span>
+                              <span>Ledger Diary</span>
                             </Button>
 
                             <Button

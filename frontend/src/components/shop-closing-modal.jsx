@@ -107,9 +107,9 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
     const dateStr = shiftData?.todayStr || new Date().toLocaleDateString("en-GB");
     const text =
       `*AL KHALEEJ LUBRICANTS*\n` +
-      `*DAILY SHOP CLOSING & Z-REPORT (روزانہ کلوزنگ رپورٹ)*\n` +
-      `*Tareekh:* ${dateStr}\n` +
-      `*Status:* ${isClosed ? "CLOSED (دوکان بند)" : "ACTIVE SHIFT"}\n` +
+      `*DAILY SHOP CLOSING & Z-REPORT*\n` +
+      `*Date:* ${dateStr}\n` +
+      `*Status:* ${isClosed ? "CLOSED" : "ACTIVE SHIFT"}\n` +
       `------------------------------------\n` +
       `▪ *Kul Farokht (Gross Sales):* Rs ${(m.totalSales || 0).toLocaleString()} (${m.ordersCount || 0} Orders)\n` +
       `▪ *Naqd Farokht (Cash):* Rs ${(m.cashSales || 0).toLocaleString()}\n` +
@@ -430,7 +430,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                         AL KHALEEJ LUBRICANTS
                       </h1>
                       <p className="text-xs font-bold text-slate-800">
-                        DAILY SHOP SHIFT CLOSING & Z-REPORT (روزانہ حساب و کلوزنگ شیٹ)
+                        DAILY SHOP SHIFT CLOSING & Z-REPORT
                       </p>
                       <p className="text-[10px] text-slate-600">
                         Shop No. 23, Near Fatima Jinnah Girls College, Nishter Road, Karachi | Ph: 0300-2205541
@@ -454,7 +454,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                 <div className="space-y-4 text-xs">
                   <div>
                     <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
-                      1. Sales & Revenue Hisab (فروخت و آمدنی)
+                      1. Sales & Revenue Summary
                     </h3>
                     <table className="w-full text-xs mt-1.5 border border-slate-900 border-collapse">
                       <thead className="bg-slate-100 font-bold border-b border-slate-900">
@@ -490,7 +490,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
 
                   <div>
                     <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
-                      2. Stock & Liters Reconciliation (اسٹاک و لیٹرز کی تصدیق)
+                      2. Stock & Liters Reconciliation
                     </h3>
                     <table className="w-full text-xs mt-1.5 border border-slate-900 border-collapse">
                       <thead className="bg-slate-100 font-bold border-b border-slate-900">
@@ -517,7 +517,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
 
                   <div>
                     <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
-                      3. Financial Profit, Cost & Expenses (منافع و اخراجات)
+                      3. Financial Profit, Cost & Expenses
                     </h3>
                     <div className="grid grid-cols-4 gap-2 pt-1 font-mono text-center">
                       <div className="border border-slate-800 p-2 rounded">
@@ -541,7 +541,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
 
                   <div>
                     <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
-                      4. Galla Drawer Cash Hisab (دکان گلہ)
+                      4. Cash Drawer Reconciliation
                     </h3>
                     <div className="flex items-center justify-between p-2.5 border border-slate-900 bg-slate-50 font-mono">
                       <span>Net Cash In Drawer (Galla Balance):</span>

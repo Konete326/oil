@@ -133,10 +133,10 @@ export function CashManager() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Building2Icon className="size-6 text-primary" />
-            <span>Bank Khatay & Cash Manager (کھاتہ بنام)</span>
+            <span>Bank Khatay & Cash Manager</span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            Manage Bank Accounts (کھاتہ بنام: HBL, Meezan, etc.), Cash Inflows, Outflows, aur Party-wise ledger reports.
+            Manage Bank Accounts (HBL, Meezan, etc.), Cash Inflows, Outflows, and Party-wise ledger reports.
           </p>
         </div>
 
@@ -164,7 +164,7 @@ export function CashManager() {
       <div className="flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-1 overflow-x-auto">
           {[
-            { id: "bank", label: "کھاتہ بنام (Bank Khata - HBL)" },
+            { id: "bank", label: "Bank Khata Register (HBL)" },
             { id: "all", label: "All Cash Entries" },
             { id: "paid", label: "Paid Cash Records" },
             { id: "received", label: "Received Cash Records" },

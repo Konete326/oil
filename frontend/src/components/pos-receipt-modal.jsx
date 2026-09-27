@@ -207,22 +207,22 @@ function CashMemoBody({ sale, copyLabel = "" }) {
             {isCredit ? (
               <div className="flex items-center gap-2">
                 <span className="font-extrabold uppercase px-2 py-0.5 bg-amber-100 border border-amber-400 text-amber-900 rounded text-[10px]">
-                  UDHAR / CREDIT (ادھار کھاتہ)
+                  CREDIT / ON ACCOUNT
                 </span>
                 {cashReceived > 0 && (
                   <span className="font-mono text-slate-700">
-                    Wasooli: Rs {cashReceived.toLocaleString()} | Baqaya: <strong>Rs {balanceDue.toLocaleString()}</strong>
+                    Paid: Rs {cashReceived.toLocaleString()} | Balance Due: <strong>Rs {balanceDue.toLocaleString()}</strong>
                   </span>
                 )}
                 {cashReceived === 0 && (
                   <span className="font-mono font-bold text-red-700">
-                    Kul Baqaya: Rs {grandTotal.toLocaleString()}
+                    Total Due: Rs {grandTotal.toLocaleString()}
                   </span>
                 )}
               </div>
             ) : (
               <span className="font-extrabold uppercase px-2 py-0.5 bg-emerald-100 border border-emerald-400 text-emerald-900 rounded text-[10px]">
-                CASH PAID (نقد وصولی مکمل)
+                PAID IN FULL (CASH)
               </span>
             )}
           </div>
@@ -408,21 +408,21 @@ function CreditMemoBody({ sale, copyLabel = "" }) {
         <div className="mt-2.5 pt-2 border-t border-dashed border-red-300 flex items-center justify-between text-[11px]">
           <div className="flex items-center gap-2">
             <span className="font-extrabold uppercase px-2 py-0.5 bg-red-100 border border-red-400 text-red-900 rounded text-[10px]">
-              UDHAR / CREDIT (ادھار کھاتہ)
+              CREDIT MEMO / ON ACCOUNT
             </span>
             {cashReceived > 0 ? (
               <span className="font-mono text-slate-700">
-                Wasooli: Rs {cashReceived.toLocaleString()} | Baqaya: <strong className="text-red-700">Rs {balanceDue.toLocaleString()}</strong>
+                Paid: Rs {cashReceived.toLocaleString()} | Balance Due: <strong className="text-red-700">Rs {balanceDue.toLocaleString()}</strong>
               </span>
             ) : (
               <span className="font-mono font-bold text-red-700">
-                Kul Baqaya: Rs {grandTotal.toLocaleString()}
+                Total Due: Rs {grandTotal.toLocaleString()}
               </span>
             )}
           </div>
 
           <div className="font-mono text-[10px] text-slate-600">
-            Yeh maal ba-taur udhar customer ke hawale kiya gaya hai.
+            Goods delivered on credit terms to authorized customer.
           </div>
         </div>
       </div>
@@ -483,7 +483,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
 
     const text =
       `*AL KHALEEJ LUBRICANTS*\n` +
-      `*${memoType === "credit" ? "CREDIT MEMO (ادھار میمو)" : "BILL / CASH MEMO (کیش میمو)"}*\n` +
+      `*${memoType === "credit" ? "CREDIT MEMO" : "BILL / CASH MEMO"}*\n` +
       `*Memo No:* ${invNo}\n` +
       `*Customer (M/s):* ${client}\n` +
       `*Date:* ${dateStr}\n` +
@@ -497,7 +497,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
         .join("\n") +
       `\n------------------------------------\n` +
       `*Total Amount:* Rs ${grandTotal.toLocaleString()}\n` +
-      `*Status:* ${memoType === "credit" ? "UDHAR / CREDIT (ادھار)" : "CASH PAID (نقد)"}\n` +
+      `*Status:* ${memoType === "credit" ? "CREDIT / UNPAID" : "PAID IN FULL"}\n` +
       `Shop No. 23, Nishter Road, Karachi | Ph: 0300-2205541`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
@@ -573,9 +573,9 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
                   "px-2 py-1 rounded font-bold cursor-pointer transition-colors",
                   memoType === "credit" ? "bg-red-700 text-white shadow-2xs" : "text-red-600 hover:text-red-700"
                 )}
-                title="Credit Memo (Red Pad for Udhar)"
+                title="Credit Memo (Red Pad for Credit)"
               >
-                Credit Memo (ادھار)
+                Credit Memo (Credit)
               </button>
             </div>
 

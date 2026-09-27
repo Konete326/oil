@@ -255,19 +255,19 @@ export function TrialBalanceView({
 
       <div className="flex items-center border-b border-border overflow-x-auto gap-1">
         {[
-          { id: "all", label: "All Accounts (مکمل شیٹ)" },
-          { id: "asset", label: "Assets (اثاثہ جات)" },
-          { id: "liability", label: "Liabilities (واجبات)" },
-          { id: "revenue", label: "Revenue (آمدنی)" },
-          { id: "expense", label: "Expenses (اخراجات)" },
+          { id: "all", label: "All Accounts" },
+          { id: "asset", label: "Assets" },
+          { id: "liability", label: "Liabilities" },
+          { id: "revenue", label: "Revenue" },
+          { id: "expense", label: "Expenses" },
           {
             id: "customers",
-            label: "Customer Trial Balance (ہر گاہک کی شیٹ)",
+            label: "Customer Trial Balance",
             count: customersTrial.length,
           },
           {
             id: "suppliers",
-            label: "Supplier Trial Balance (ہر سپلائر کی شیٹ)",
+            label: "Supplier Trial Balance",
             count: suppliersTrial.length,
           },
         ].map((tab) => (
@@ -379,9 +379,9 @@ export function TrialBalanceView({
                   <tr>
                     <th className="p-3 ps-4">Code</th>
                     <th className="p-3">Customer Name &amp; Contact</th>
-                    <th className="p-3 text-right">Kul Maal Liya (Debit)</th>
-                    <th className="p-3 text-right">Kul Wasooli (Credit)</th>
-                    <th className="p-3 text-right">Baqaya Lena Hai (Udhar)</th>
+                    <th className="p-3 text-right">Total Purchases (Debit)</th>
+                    <th className="p-3 text-right">Total Received (Credit)</th>
+                    <th className="p-3 text-right">Net Receivable (Due)</th>
                     <th className="p-3 text-center">Status</th>
                     <th className="p-3 pe-4 text-right">Individual Action</th>
                   </tr>
@@ -504,7 +504,7 @@ export function TrialBalanceView({
 
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
               <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs mb-1">
-                <span>Kul Adaigi Ki (Debit)</span>
+                <span>Total Payments (Debit)</span>
                 <ArrowUpRightIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
@@ -517,7 +517,7 @@ export function TrialBalanceView({
 
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
               <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-xs mb-1">
-                <span>Baqaya Udhar / Dena Hai</span>
+                <span>Total Payable (Due)</span>
                 <ScaleIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-amber-500">
@@ -549,8 +549,8 @@ export function TrialBalanceView({
                 className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground cursor-pointer focus:outline-none"
               >
                 <option value="all">All Suppliers ({suppliersTrial.length})</option>
-                <option value="payable">Udhar Baqaya (Payable)</option>
-                <option value="cleared">Hisab Clear (Zero Due)</option>
+                <option value="payable">Net Payable (Due)</option>
+                <option value="cleared">Cleared (Zero Due)</option>
               </select>
             </div>
           </div>
@@ -562,9 +562,9 @@ export function TrialBalanceView({
                   <tr>
                     <th className="p-3 ps-4">Code</th>
                     <th className="p-3">Supplier Name & Contact</th>
-                    <th className="p-3 text-right">Kul Maal Liya (Credit)</th>
-                    <th className="p-3 text-right">Kul Adaigi (Debit)</th>
-                    <th className="p-3 text-right">Baqaya Dena Hai (Udhar)</th>
+                    <th className="p-3 text-right">Total Purchases (Credit)</th>
+                    <th className="p-3 text-right">Total Payments (Debit)</th>
+                    <th className="p-3 text-right">Net Payable (Due)</th>
                     <th className="p-3 text-center">Status</th>
                     <th className="p-3 pe-4 text-right">Individual Action</th>
                   </tr>

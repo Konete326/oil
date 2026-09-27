@@ -113,7 +113,7 @@ export function Dashboard() {
               }`}
             >
               <ClockIcon className="size-3.5 text-emerald-500" />
-              <span>Today (آج کا دن)</span>
+              <span>Today</span>
             </button>
 
             <button
@@ -125,7 +125,7 @@ export function Dashboard() {
               }`}
             >
               <CalendarIcon className="size-3.5 text-blue-500" />
-              <span>This Month (اس ماہ)</span>
+              <span>This Month</span>
             </button>
 
             <button

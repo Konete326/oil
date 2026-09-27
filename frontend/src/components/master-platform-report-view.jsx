@@ -91,7 +91,7 @@ export function MasterPlatformReportView() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Master Platform Report & Audit (پورے پلیٹ فارم کی رپورٹ)
+              Master Platform Report & Audit
             </h1>
             <Badge variant="outline" className="text-[10px] font-mono uppercase bg-primary/10 text-primary border-primary/20">
               Consolidated

@@ -263,7 +263,7 @@ export function EmployeeAdvanceLedgerView({ employees = [], onOpenAdvanceModal, 
         <div className="p-3.5 border-b border-border bg-muted/40 font-semibold text-xs text-foreground flex items-center justify-between">
           <div className="flex items-center gap-2">
             <HandCoinsIcon className="size-4 text-amber-500" />
-            <span>Advance Khata Ledger Register (مکمل کھاتے کی تاریخ)</span>
+            <span>Advance Khata Ledger Register</span>
           </div>
           <span className="text-muted-foreground text-[11px] font-mono">
             Total Transactions: {ledgerEntries.length}

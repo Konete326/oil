@@ -167,10 +167,10 @@ export function PosConsolidatedJournalTab({
                       size="sm"
                       className="h-7 gap-1 text-[11px] px-2.5 cursor-pointer border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
                       onClick={() => onViewDiary ? onViewDiary(item.raw.customerName) : onViewKhata?.(item.raw.customerName)}
-                      title={`${item.raw.customerName} ka hisab-kitab`}
+                      title={`${item.raw.customerName} Ledger Details`}
                     >
                       <BookOpenIcon className="size-3" />
-                      <span>حساب</span>
+                      <span>Ledger</span>
                     </Button>
                   )}
 
