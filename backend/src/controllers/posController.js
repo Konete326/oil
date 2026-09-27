@@ -32,7 +32,7 @@ export const createPosSale = async (req, res, next) => {
         res.status(400);
         throw new Error(`Insufficient stock for ${product.name}. Available: ${product.stockQuantity} Liters`);
       }
-      product.stockQuantity = Math.max(0, Number((product.stockQuantity - item.quantity).toFixed(2)));
+      product.stockQuantity = Math.max(0, Number((product.stockQuantity - item.quantity).toFixed(3)));
       await product.save();
     }
 

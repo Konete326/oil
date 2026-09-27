@@ -37,6 +37,20 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 
+export function formatStockVolume(val) {
+  const num = Number(val) || 0;
+  if (num === 0) return "-";
+  if (num < 1) {
+    const ml = Math.round(num * 1000);
+    return `${ml} ML (${num} L)`;
+  }
+  if (num % 1 !== 0) {
+    const ml = Math.round(num * 1000);
+    return `${num} L (${ml.toLocaleString()} ML)`;
+  }
+  return `${num.toLocaleString()} L`;
+}
+
 export function StockRegisterModal({
   isOpen,
   onClose,
@@ -218,7 +232,7 @@ export function StockRegisterModal({
 
     let runningBal = 0;
     const computed = combined.map((entry) => {
-      runningBal = runningBal + entry.receipts - entry.issued;
+      runningBal = Number((runningBal + entry.receipts - entry.issued).toFixed(3));
       return {
         ...entry,
         balance: Math.max(0, runningBal),
@@ -279,9 +293,9 @@ export function StockRegisterModal({
       Date: new Date(e.date).toLocaleDateString("en-GB"),
       PARTICULARS: e.particulars,
       Folio: e.folio,
-      "Receipts (Inward L)": e.receipts > 0 ? e.receipts : "-",
-      "Issued (Outward L)": e.issued > 0 ? e.issued : "-",
-      "Balance (L)": e.balance,
+      "Receipts (Inward L / ML)": formatStockVolume(e.receipts),
+      "Issued (Outward L / ML)": formatStockVolume(e.issued),
+      "Balance (L / ML)": formatStockVolume(e.balance),
       Remarks: e.remarks,
     }));
 
@@ -495,7 +509,7 @@ export function StockRegisterModal({
             >
               {products.map((p) => (
                 <option key={p._id} value={p._id}>
-                  {p.name} ({p.stockQuantity} L)
+                  {p.name} ({formatStockVolume(p.stockQuantity)})
                 </option>
               ))}
             </select>
@@ -640,13 +654,13 @@ export function StockRegisterModal({
                           {row.folio}
                         </td>
                         <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-extrabold text-emerald-600 dark:text-emerald-400 print:text-emerald-800 bg-emerald-500/5 print:bg-emerald-50/50">
-                          {row.receipts > 0 ? row.receipts.toLocaleString() : "-"}
+                          {formatStockVolume(row.receipts)}
                         </td>
                         <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-extrabold text-rose-600 dark:text-rose-400 print:text-rose-800 bg-rose-500/5 print:bg-rose-50/50">
-                          {row.issued > 0 ? row.issued.toLocaleString() : "-"}
+                          {formatStockVolume(row.issued)}
                         </td>
                         <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-black text-foreground print:text-black bg-muted/40 print:bg-gray-100">
-                          {row.balance.toLocaleString()}
+                          {formatStockVolume(row.balance)}
                         </td>
                         <td className="py-2 px-2 font-sans text-[10px] text-muted-foreground print:text-gray-600">
                           {row.remarks}
@@ -736,8 +750,8 @@ export function StockRegisterModal({
                     required
                     type="number"
                     step="any"
-                    min="0.1"
-                    placeholder="e.g. 200"
+                    min="0.001"
+                    placeholder="e.g. 200 or 0.7 (700 ML)"
                     value={inwardQty}
                     onChange={(e) => setInwardQty(e.target.value)}
                     className="h-8.5 text-xs font-mono font-bold text-foreground"
@@ -861,9 +875,9 @@ export function StockRegisterModal({
                     required
                     type="number"
                     step="any"
-                    min="0.1"
+                    min="0.001"
                     max={currentBalance}
-                    placeholder="e.g. 10"
+                    placeholder="e.g. 10 or 0.7 (700 ML)"
                     value={outwardQty}
                     onChange={(e) => setOutwardQty(e.target.value)}
                     className="h-8.5 text-xs font-mono font-bold text-foreground"

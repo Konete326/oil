@@ -66,7 +66,7 @@ export function PosCounter() {
     const existingIndex = cart.findIndex((item) => item.product === product._id);
     if (existingIndex > -1) {
       const existingItem = cart[existingIndex];
-      const newQty = Number(((Number(existingItem.quantity) || 0) + 1).toFixed(2));
+      const newQty = Number(((Number(existingItem.quantity) || 0) + 1).toFixed(3));
       if (newQty > product.stockQuantity) {
         setError(`Insufficient stock for ${product.name}. Max: ${product.stockQuantity}`);
         return;
@@ -98,6 +98,7 @@ export function PosCounter() {
           productName: product.name,
           sku: product.sku,
           unitType: "Liters",
+          unitMode: "L",
           quantity: 1,
           costPrice: Number(product.costPrice) || 0,
           unitPrice: Number(defaultUnitPrice) || 0,
@@ -208,7 +209,7 @@ export function PosCounter() {
   const updateQuantity = (index, delta) => {
     const item = cart[index];
     const product = products.find((p) => p._id === item.product);
-    const newQty = Number((Math.max(0, (Number(item.quantity) || 0) + delta)).toFixed(2));
+    const newQty = Number((Math.max(0, (Number(item.quantity) || 0) + delta)).toFixed(3));
 
     if (newQty <= 0) {
       removeFromCart(index);
@@ -236,7 +237,7 @@ export function PosCounter() {
     setError("");
   };
 
-  const setDirectQuantity = (index, val) => {
+  const setDirectQuantity = (index, val, unit = "L") => {
     const item = cart[index];
     const product = products.find((p) => p._id === item.product);
     if (val === "" || val === null) {
@@ -246,8 +247,9 @@ export function PosCounter() {
       return;
     }
 
-    const newQty = Number(Number(val).toFixed(2));
-    if (newQty < 0) return;
+    const rawNum = Number(val);
+    if (isNaN(rawNum) || rawNum < 0) return;
+    const newQty = unit === "ML" ? Number((rawNum / 1000).toFixed(3)) : Number(rawNum.toFixed(3));
 
     if (product && newQty > product.stockQuantity) {
       setError(`Stock limit: Only ${product.stockQuantity} Liters available for ${product.name}`);
@@ -268,6 +270,14 @@ export function PosCounter() {
     };
     setCart(updatedCart);
     setError("");
+  };
+
+  const toggleUnitMode = (index) => {
+    const updatedCart = [...cart];
+    const item = updatedCart[index];
+    const newMode = (item.unitMode || "L") === "L" ? "ML" : "L";
+    updatedCart[index] = { ...item, unitMode: newMode };
+    setCart(updatedCart);
   };
 
   const updateUnitPrice = (index, newPrice) => {
@@ -360,11 +370,20 @@ export function PosCounter() {
     setSubmitting(true);
     const { customerName, saleType, discount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
     try {
-      const sanitizedItems = cart.map((it) => ({
-        ...it,
-        unitPrice: Number(it.unitPrice) || 0,
-        costPrice: Number(it.costPrice) || 0,
-      }));
+      const sanitizedItems = cart.map((it) => {
+        const qty = Number(it.quantity) || 1;
+        const volMl = Math.round(qty * 1000);
+        const displayQty = qty < 1 ? `${volMl} ML` : (qty % 1 !== 0 ? `${qty} L (${volMl} ML)` : `${qty} L`);
+        return {
+          ...it,
+          quantity: Number(qty.toFixed(3)),
+          volumeMl: volMl,
+          displayQuantity: displayQty,
+          unitType: qty < 1 ? "ML" : (it.unitType || "Liters"),
+          unitPrice: Number(it.unitPrice) || 0,
+          costPrice: Number(it.costPrice) || 0,
+        };
+      });
       const anyLoss = sanitizedItems.some((it) => it.unitPrice < it.costPrice);
       if (anyLoss) {
         toast.error("Loss detected: Selling price cannot be lower than cost price.");
@@ -497,7 +516,11 @@ export function PosCounter() {
                               : "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                           )}
                         >
-                          {prod.stockQuantity} Liters
+                          {Number(prod.stockQuantity) < 1 && Number(prod.stockQuantity) > 0
+                            ? `${Math.round(Number(prod.stockQuantity) * 1000)} ML`
+                            : Number(prod.stockQuantity) % 1 !== 0
+                            ? `${prod.stockQuantity} L (${Math.round(Number(prod.stockQuantity) * 1000)} ML)`
+                            : `${prod.stockQuantity} Liters`}
                         </span>
                       </div>
 
@@ -703,14 +726,27 @@ export function PosCounter() {
                               <input
                                 type="number"
                                 step="any"
-                                min="0.01"
-                                value={item.quantity ?? ""}
-                                onChange={(e) => setDirectQuantity(idx, e.target.value)}
-                                className="w-14 h-6 text-center font-mono font-bold text-xs bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
-                                placeholder="Qty"
-                                title="Decimal quantity (e.g. 1.5, 0.75, 0.5 L)"
+                                min="0.001"
+                                value={
+                                  item.quantity === ""
+                                    ? ""
+                                    : item.unitMode === "ML"
+                                    ? Math.round((Number(item.quantity) || 0) * 1000)
+                                    : item.quantity ?? ""
+                                }
+                                onChange={(e) => setDirectQuantity(idx, e.target.value, item.unitMode || "L")}
+                                className="w-16 h-6 text-center font-mono font-bold text-xs bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
+                                placeholder={item.unitMode === "ML" ? "ML" : "Qty"}
+                                title={item.unitMode === "ML" ? "Milliliters (e.g. 700, 500, 250 ML)" : "Decimal Liters (e.g. 0.7, 0.75, 1.5 L)"}
                               />
-                              <span className="text-[10px] font-mono text-muted-foreground font-semibold pr-1">L</span>
+                              <button
+                                type="button"
+                                onClick={() => toggleUnitMode(idx)}
+                                className="text-[9.5px] font-mono px-1 py-0.5 rounded bg-muted/60 hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer font-bold border border-border/80"
+                                title="Click to toggle between Liters (L) and Milliliters (ML)"
+                              >
+                                {item.unitMode === "ML" ? "ML" : "L"}
+                              </button>
                             </div>
 
                             <Button
@@ -728,6 +764,7 @@ export function PosCounter() {
                             {[
                               { val: 0.25, label: "250ml" },
                               { val: 0.5, label: "500ml" },
+                              { val: 0.7, label: "700ml" },
                               { val: 0.75, label: "750ml" },
                               { val: 1, label: "1L" },
                               { val: 1.5, label: "1.5L" },
@@ -736,7 +773,7 @@ export function PosCounter() {
                               <button
                                 key={preset.val}
                                 type="button"
-                                onClick={() => setDirectQuantity(idx, preset.val)}
+                                onClick={() => setDirectQuantity(idx, preset.val, "L")}
                                 className={cn(
                                   "px-1.5 py-0.5 rounded border cursor-pointer transition-colors",
                                   Number(item.quantity) === preset.val
@@ -749,11 +786,13 @@ export function PosCounter() {
                               </button>
                             ))}
 
-                            {Number(item.quantity) > 0 && (Number(item.quantity) < 1 || Number(item.quantity) % 1 !== 0) && (
-                              <span className="text-[9.5px] font-mono px-1 py-0.2 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30">
+                            {Number(item.quantity) > 0 && (
+                              <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30">
                                 {Number(item.quantity) < 1
                                   ? `${Math.round(Number(item.quantity) * 1000)} ML`
-                                  : `${Math.round(Number(item.quantity) * 1000)} ML`}
+                                  : Number(item.quantity) % 1 !== 0
+                                  ? `${item.quantity} L (${Math.round(Number(item.quantity) * 1000)} ML)`
+                                  : `${item.quantity} L`}
                               </span>
                             )}
                           </div>

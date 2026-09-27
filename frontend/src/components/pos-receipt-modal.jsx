@@ -30,10 +30,10 @@ function getProcessedItems(sale) {
 
     if (qty < 1) {
       qtyDisplay = `${Math.round(qty * 1000)} ML`;
-      if (!packing || packing === "Ltr") packing = "ML";
+      packing = "ML";
     } else if (qty % 1 !== 0) {
-      qtyDisplay = `${qty}L (${Math.round(qty * 1000)} ML)`;
-      if (!packing) packing = "Ltr";
+      qtyDisplay = `${qty} L (${Math.round(qty * 1000)} ML)`;
+      if (!packing || packing === "Ltr" || packing === "Liters") packing = "Ltr / ML";
     } else if (!packing) {
       const match = (item.productName || "").match(/(\d+\s*(?:L|Ltr|Liter|Litre|KG|Can|Drum))/i);
       packing = match ? match[1].toUpperCase() : "Ltr";
@@ -489,7 +489,11 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
       `*Date:* ${dateStr}\n` +
       `------------------------------------\n` +
       (sale.items || [])
-        .map((it) => `• ${it.quantity}x ${it.productName} = Rs ${(it.subtotal || it.quantity * it.unitPrice || 0).toLocaleString()}`)
+        .map((it) => {
+          const qty = Number(it.quantity) || 1;
+          const qtyLabel = qty < 1 ? `${Math.round(qty * 1000)} ML` : (qty % 1 !== 0 ? `${qty} L (${Math.round(qty * 1000)} ML)` : `${qty} L`);
+          return `• ${qtyLabel} x ${it.productName} = Rs ${(it.subtotal || it.quantity * it.unitPrice || 0).toLocaleString()}`;
+        })
         .join("\n") +
       `\n------------------------------------\n` +
       `*Total Amount:* Rs ${grandTotal.toLocaleString()}\n` +

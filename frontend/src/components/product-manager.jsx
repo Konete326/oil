@@ -349,7 +349,13 @@ export function ProductManager() {
                                   : "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                               )}
                             >
-                              {prod.stockQuantity} Liters
+                              {isOutOfStock
+                                ? "Out of Stock"
+                                : Number(prod.stockQuantity) < 1
+                                ? `${Math.round(Number(prod.stockQuantity) * 1000)} ML`
+                                : Number(prod.stockQuantity) % 1 !== 0
+                                ? `${prod.stockQuantity} L (${Math.round(Number(prod.stockQuantity) * 1000)} ML)`
+                                : `${prod.stockQuantity} Liters`}
                             </span>
                           </TableCell>
                           <TableCell className="text-right py-2.5 pe-4">
@@ -439,7 +445,13 @@ export function ProductManager() {
                                 : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                             )}
                           >
-                            {isOutOfStock ? "Out of Stock" : `${prod.stockQuantity} Liters`}
+                            {isOutOfStock
+                              ? "Out of Stock"
+                              : Number(prod.stockQuantity) < 1
+                              ? `${Math.round(Number(prod.stockQuantity) * 1000)} ML`
+                              : Number(prod.stockQuantity) % 1 !== 0
+                              ? `${prod.stockQuantity} L (${Math.round(Number(prod.stockQuantity) * 1000)} ML)`
+                              : `${prod.stockQuantity} Liters`}
                           </span>
                         </div>
 
