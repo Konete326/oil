@@ -20,6 +20,7 @@ import {
   BellIcon,
   SettingsIcon,
   Building2Icon,
+  BookOpenIcon,
 } from "lucide-react";
 
 export const navGroups = [
@@ -81,16 +82,10 @@ export const navGroups = [
             icon: <TruckIcon />,
           },
           {
-            title: "Bank Khatay (HBL / Accounts)",
+            title: "Bank & Cash Khatay",
             path: "/cash",
             state: { tab: "bank" },
             icon: <Building2Icon />,
-          },
-          {
-            title: "Cash Transactions",
-            path: "/cash",
-            state: { tab: "all" },
-            icon: <BanknoteIcon />,
           },
           {
             title: "Sales & Purchases",
