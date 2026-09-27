@@ -49,7 +49,6 @@ export function PosCheckoutModal({
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [cashReceived, setCashReceived] = useState("");
   const [selectedBankAccountId, setSelectedBankAccountId] = useState("");
-  const [bankReferenceNo, setBankReferenceNo] = useState("");
 
   const [customerValid, setCustomerValid] = useState(true);
   const [discountValid, setDiscountValid] = useState(true);
@@ -81,7 +80,6 @@ export function PosCheckoutModal({
         const firstBank = availableBankAccounts.find((a) => a.accountType !== "Tijori / Cash") || availableBankAccounts[0];
         setSelectedBankAccountId(firstBank.id);
       }
-      setBankReferenceNo("");
     }
   }, [isOpen, initialDiscount, initialPaymentMode, availableBankAccounts]);
 
@@ -131,7 +129,7 @@ export function PosCheckoutModal({
       bankAccountTitle: activeBankAccount?.accountTitle || "",
       bankName: activeBankAccount?.bankName || "",
       bankAccountNumber: activeBankAccount?.accountNumber || "",
-      bankReferenceNo: bankReferenceNo.trim(),
+      bankReferenceNo: "",
     });
   };
 
@@ -273,37 +271,22 @@ export function PosCheckoutModal({
           </div>
 
           {(paymentMode === "Bank Transfer" || paymentMode === "Card") && (
-            <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 space-y-2 animate-in fade-in duration-150">
-              <div className="space-y-1">
-                <label className="font-semibold text-[11px] text-foreground flex items-center gap-1.5">
-                  <LandmarkIcon className="size-3.5 text-primary" />
-                  Deposit to Bank Account *
-                </label>
-                <select
-                  value={selectedBankAccountId}
-                  onChange={(e) => setSelectedBankAccountId(e.target.value)}
-                  className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  {availableBankAccounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.bankName} — {acc.accountTitle} ({acc.accountNumber})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-medium text-[10.5px] text-muted-foreground">
-                  Reference / Slip / Tx ID # (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. IBFT-91028 or Slip #"
-                  value={bankReferenceNo}
-                  onChange={(e) => setBankReferenceNo(e.target.value)}
-                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
+            <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 space-y-1.5 animate-in fade-in duration-150">
+              <label className="font-semibold text-[11px] text-foreground flex items-center gap-1.5">
+                <LandmarkIcon className="size-3.5 text-primary" />
+                Deposit to Bank Account *
+              </label>
+              <select
+                value={selectedBankAccountId}
+                onChange={(e) => setSelectedBankAccountId(e.target.value)}
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                {availableBankAccounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.bankName} — {acc.accountTitle} ({acc.accountNumber})
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 
