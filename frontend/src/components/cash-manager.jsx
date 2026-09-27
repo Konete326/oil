@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
   SearchIcon,
   PrinterIcon,
@@ -12,6 +12,7 @@ import {
   PlusIcon,
   LandmarkIcon,
   WalletIcon,
+  UsersIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,12 @@ import { Input } from "@/components/ui/input";
 import { CashTransactionModal } from "@/components/cash-transaction-modal";
 import { BankAccountModal } from "@/components/bank-account-modal";
 import { CashPrintStatementModal } from "@/components/cash-print-statement-modal";
+import { CashPartyReport } from "@/components/cash-party-report";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
   fetchCashTransactionsApi,
+  fetchPartyCashSummaryApi,
   createCashTransactionApi,
   deleteCashTransactionApi,
   fetchPosSales,
@@ -62,6 +65,8 @@ const INITIAL_ACCOUNTS = [
 
 export function CashManager() {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeMainTab = searchParams.get("tab") === "party" ? "party" : "register";
 
   const [accounts, setAccounts] = useState(() => {
     try {
@@ -76,6 +81,7 @@ export function CashManager() {
 
   const [selectedAccountId, setSelectedAccountId] = useState("all");
   const [transactions, setTransactions] = useState([]);
+  const [partySummaries, setPartySummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -102,15 +108,19 @@ export function CashManager() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [txRes, posRes, expRes] = await Promise.all([
+      const [txRes, posRes, expRes, partyRes] = await Promise.all([
         fetchCashTransactionsApi({ limit: 1000 }).catch(() => null),
         fetchPosSales().catch(() => null),
         fetchExpensesApi({ period: "all" }).catch(() => null),
+        fetchPartyCashSummaryApi().catch(() => null),
       ]);
 
       const rawCash = txRes?.success && Array.isArray(txRes.data) ? txRes.data : [];
       const rawSales = posRes?.success && Array.isArray(posRes.data) ? posRes.data : [];
       const rawExpenses = expRes?.success && Array.isArray(expRes.data) ? expRes.data : [];
+      if (partyRes?.success && Array.isArray(partyRes.data)) {
+        setPartySummaries(partyRes.data);
+      }
 
       const list = [];
       const seen = new Set();
@@ -394,256 +404,286 @@ export function CashManager() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar border-b border-border/60">
-        <button
-          onClick={() => {
-            setSelectedAccountId("all");
-            setCurrentPage(1);
-          }}
-          className={cn(
-            "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-            selectedAccountId === "all"
-              ? "bg-primary text-primary-foreground shadow-2xs"
-              : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
-          )}
-        >
-          <Building2Icon className="size-3.5" />
-          <span>All Accounts</span>
-        </button>
-
-        {accounts.map((acc) => (
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/70 pb-2">
+        <div className="flex items-center gap-1.5">
           <button
-            key={acc.id}
-            onClick={() => {
-              setSelectedAccountId(acc.id);
-              setCurrentPage(1);
-            }}
+            onClick={() => setSearchParams({})}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-              selectedAccountId === acc.id
-                ? "bg-primary text-primary-foreground shadow-2xs font-semibold"
-                : "bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/70"
+              "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5",
+              activeMainTab === "register"
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             )}
           >
-            {acc.accountType === "Tijori / Cash" ? (
-              <WalletIcon className="size-3.5 text-amber-500" />
-            ) : (
-              <LandmarkIcon className="size-3.5 text-blue-500" />
-            )}
-            <span>{acc.accountTitle}</span>
+            <Building2Icon className="size-3.5" />
+            <span>Cash &amp; Bank Register</span>
           </button>
-        ))}
+          <button
+            onClick={() => setSearchParams({ tab: "party" })}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5",
+              activeMainTab === "party"
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            )}
+          >
+            <UsersIcon className="size-3.5" />
+            <span>Party Reports ({partySummaries.length})</span>
+          </button>
+        </div>
+
+        {activeMainTab === "register" && (
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 no-scrollbar">
+            <button
+              onClick={() => {
+                setSelectedAccountId("all");
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap",
+                selectedAccountId === "all"
+                  ? "bg-muted text-foreground font-bold border border-border"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              All Accounts
+            </button>
+            {accounts.map((acc) => (
+              <button
+                key={acc.id}
+                onClick={() => {
+                  setSelectedAccountId(acc.id);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "px-2.5 py-1 rounded-md text-[11px] transition-all cursor-pointer whitespace-nowrap",
+                  selectedAccountId === acc.id
+                    ? "bg-muted text-foreground font-bold border border-border"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {acc.accountTitle}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3 flex items-center justify-between shadow-2xs">
-          <div>
-            <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Total Cash In (Received)</p>
-            <p className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
-              Rs. {totalReceived.toLocaleString()}
-            </p>
-            <p className="text-[10px] text-muted-foreground">All Inflows &amp; Collections</p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <ArrowDownLeftIcon className="size-4" />
-          </div>
-        </div>
+      {activeMainTab === "party" ? (
+        <CashPartyReport partySummaries={partySummaries} loading={loading} />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3 flex items-center justify-between shadow-2xs">
+              <div>
+                <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Total Cash In (Received)</p>
+                <p className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                  Rs. {totalReceived.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-muted-foreground">All Inflows &amp; Collections</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <ArrowDownLeftIcon className="size-4" />
+              </div>
+            </div>
 
-        <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 p-3 flex items-center justify-between shadow-2xs">
-          <div>
-            <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">Total Cash Out (Paid)</p>
-            <p className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400">
-              Rs. {totalPaid.toLocaleString()}
-            </p>
-            <p className="text-[10px] text-muted-foreground">All Payments &amp; Expenses</p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-            <ArrowUpRightIcon className="size-4" />
-          </div>
-        </div>
+            <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 p-3 flex items-center justify-between shadow-2xs">
+              <div>
+                <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">Total Cash Out (Paid)</p>
+                <p className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400">
+                  Rs. {totalPaid.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-muted-foreground">All Payments &amp; Expenses</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                <ArrowUpRightIcon className="size-4" />
+              </div>
+            </div>
 
-        <div className="rounded-xl border border-border bg-card p-3 flex items-center justify-between shadow-2xs">
-          <div>
-            <p className="text-[11px] font-medium text-muted-foreground">Net Available Balance</p>
-            <p className={cn("text-xl font-bold font-mono", netBalance >= 0 ? "text-primary" : "text-destructive")}>
-              Rs. {netBalance.toLocaleString()}
-            </p>
-            <p className="text-[10px] text-muted-foreground">Inflow minus Outflow</p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
-            <WalletIcon className="size-4" />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-0.5">
-        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/80 text-xs">
-          <button
-            onClick={() => setEntryTypeFilter("all")}
-            className={cn(
-              "px-3 py-1 rounded-md transition-colors cursor-pointer font-medium",
-              entryTypeFilter === "all" ? "bg-background text-foreground shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            All ({filteredTransactions.length})
-          </button>
-          <button
-            onClick={() => setEntryTypeFilter("received")}
-            className={cn(
-              "px-3 py-1 rounded-md transition-colors cursor-pointer font-medium",
-              entryTypeFilter === "received" ? "bg-background text-emerald-500 shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Received (In)
-          </button>
-          <button
-            onClick={() => setEntryTypeFilter("paid")}
-            className={cn(
-              "px-3 py-1 rounded-md transition-colors cursor-pointer font-medium",
-              entryTypeFilter === "paid" ? "bg-background text-rose-500 shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Paid (Out)
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2 flex-1 sm:max-w-md">
-          <div className="relative flex-1">
-            <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search party, ref, account, notes..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="ps-8 text-xs h-8 bg-muted/30"
-            />
+            <div className="rounded-xl border border-border bg-card p-3 flex items-center justify-between shadow-2xs">
+              <div>
+                <p className="text-[11px] font-medium text-muted-foreground">Net Available Balance</p>
+                <p className={cn("text-xl font-bold font-mono", netBalance >= 0 ? "text-primary" : "text-destructive")}>
+                  Rs. {netBalance.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-muted-foreground">Inflow minus Outflow</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                <WalletIcon className="size-4" />
+              </div>
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 px-2 h-8 rounded-lg border border-border">
-            <CalendarIcon className="size-3.5 shrink-0" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-foreground outline-none text-xs w-28"
-            />
-            <span>-</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-foreground outline-none text-xs w-28"
-            />
-          </div>
-        </div>
-      </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-0.5">
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/80 text-xs">
+              <button
+                onClick={() => setEntryTypeFilter("all")}
+                className={cn(
+                  "px-3 py-1 rounded-md transition-colors cursor-pointer font-medium",
+                  entryTypeFilter === "all" ? "bg-background text-foreground shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                All ({filteredTransactions.length})
+              </button>
+              <button
+                onClick={() => setEntryTypeFilter("received")}
+                className={cn(
+                  "px-3 py-1 rounded-md transition-colors cursor-pointer font-medium",
+                  entryTypeFilter === "received" ? "bg-background text-emerald-500 shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Received (In)
+              </button>
+              <button
+                onClick={() => setEntryTypeFilter("paid")}
+                className={cn(
+                  "px-3 py-1 rounded-md transition-colors cursor-pointer font-medium",
+                  entryTypeFilter === "paid" ? "bg-background text-rose-500 shadow-xs font-bold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Paid (Out)
+              </button>
+            </div>
 
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border font-semibold text-muted-foreground uppercase text-[10.5px] tracking-wider">
-              <tr>
-                <th className="p-2.5 ps-3.5 w-10">#</th>
-                <th className="p-2.5">Date &amp; Time</th>
-                <th className="p-2.5">Account / Channel</th>
-                <th className="p-2.5">Type</th>
-                <th className="p-2.5">Party / Particulars</th>
-                <th className="p-2.5">Ref #</th>
-                <th className="p-2.5 text-right text-rose-600 dark:text-rose-400">Cash Out (Paid)</th>
-                <th className="p-2.5 text-right text-emerald-600 dark:text-emerald-400">Cash In (Received)</th>
-                <th className="p-2.5 text-right font-mono">Running Balance</th>
-                <th className="p-2.5 pe-3.5 text-center w-12">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {loading ? (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-muted-foreground">
-                    <div className="size-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                    Loading register transactions...
-                  </td>
-                </tr>
-              ) : chronologicalEntries.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-muted-foreground">
-                    No transactions found for the selected filter. Click "Cash In" or "Cash Out" to add entries.
-                  </td>
-                </tr>
-              ) : (
-                chronologicalEntries
-                  .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-                  .map((tx, idx) => (
-                    <tr key={tx.id || idx} className="hover:bg-muted/20 transition-colors">
-                      <td className="p-2.5 ps-3.5 text-muted-foreground text-[11px] font-mono">
-                        {(currentPage - 1) * PAGE_SIZE + idx + 1}
-                      </td>
-                      <td className="p-2.5 text-muted-foreground text-[11px] font-mono whitespace-nowrap">
-                        {new Date(tx.date).toLocaleDateString()}
-                      </td>
-                      <td className="p-2.5 font-medium text-foreground">
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-muted/70 text-foreground border border-border">
-                          {tx.account}
-                        </span>
-                      </td>
-                      <td className="p-2.5">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border",
-                            tx.type === "Paid"
-                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                          )}
-                        >
-                          {tx.type === "Paid" ? (
-                            <ArrowUpRightIcon className="size-2.5" />
-                          ) : (
-                            <ArrowDownLeftIcon className="size-2.5" />
-                          )}
-                          {tx.type}
-                        </span>
-                      </td>
-                      <td className="p-2.5 font-semibold text-foreground max-w-[220px] truncate">
-                        <div>{tx.party}</div>
-                        {tx.notes && <div className="text-[10px] font-normal text-muted-foreground truncate">{tx.notes}</div>}
-                      </td>
-                      <td className="p-2.5 text-muted-foreground font-mono text-[11px]">
-                        {tx.reference || "-"}
-                      </td>
-                      <td className="p-2.5 text-right font-mono font-medium text-rose-600 dark:text-rose-400">
-                        {tx.debit > 0 ? `Rs. ${tx.debit.toLocaleString()}` : "—"}
-                      </td>
-                      <td className="p-2.5 text-right font-mono font-medium text-emerald-600 dark:text-emerald-400">
-                        {tx.credit > 0 ? `Rs. ${tx.credit.toLocaleString()}` : "—"}
-                      </td>
-                      <td className="p-2.5 text-right font-mono font-bold text-foreground">
-                        Rs. {Number(tx.runningBalance || 0).toLocaleString()}
-                      </td>
-                      <td className="p-2.5 pe-3.5 text-center">
-                        {tx.isManual && (
-                          <button
-                            onClick={() => setDeletingId(tx.id)}
-                            className="p-1 text-muted-foreground hover:text-destructive rounded transition-colors cursor-pointer"
-                            title="Delete entry"
-                          >
-                            <Trash2Icon className="size-3.5" />
-                          </button>
-                        )}
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
+              <div className="relative flex-1">
+                <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search party, ref, account, notes..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="ps-8 text-xs h-8 bg-muted/30"
+                />
+              </div>
+
+              <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 px-2 h-8 rounded-lg border border-border">
+                <CalendarIcon className="size-3.5 shrink-0" />
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="bg-transparent text-foreground outline-none text-xs w-28"
+                />
+                <span>-</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="bg-transparent text-foreground outline-none text-xs w-28"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/50 border-b border-border font-semibold text-muted-foreground uppercase text-[10.5px] tracking-wider">
+                  <tr>
+                    <th className="p-2.5 ps-3.5 w-10">#</th>
+                    <th className="p-2.5">Date &amp; Time</th>
+                    <th className="p-2.5">Account / Channel</th>
+                    <th className="p-2.5">Type</th>
+                    <th className="p-2.5">Party / Particulars</th>
+                    <th className="p-2.5">Ref #</th>
+                    <th className="p-2.5 text-right text-rose-600 dark:text-rose-400">Cash Out (Paid)</th>
+                    <th className="p-2.5 text-right text-emerald-600 dark:text-emerald-400">Cash In (Received)</th>
+                    <th className="p-2.5 text-right font-mono">Running Balance</th>
+                    <th className="p-2.5 pe-3.5 text-center w-12">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={10} className="p-8 text-center text-muted-foreground">
+                        <div className="size-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                        Loading register transactions...
                       </td>
                     </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                  ) : chronologicalEntries.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="p-8 text-center text-muted-foreground">
+                        No transactions found for the selected filter. Click "Cash In" or "Cash Out" to add entries.
+                      </td>
+                    </tr>
+                  ) : (
+                    chronologicalEntries
+                      .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+                      .map((tx, idx) => (
+                        <tr key={tx.id || idx} className="hover:bg-muted/20 transition-colors">
+                          <td className="p-2.5 ps-3.5 text-muted-foreground text-[11px] font-mono">
+                            {(currentPage - 1) * PAGE_SIZE + idx + 1}
+                          </td>
+                          <td className="p-2.5 text-muted-foreground text-[11px] font-mono whitespace-nowrap">
+                            {new Date(tx.date).toLocaleDateString()}
+                          </td>
+                          <td className="p-2.5 font-medium text-foreground">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-muted/70 text-foreground border border-border">
+                              {tx.account}
+                            </span>
+                          </td>
+                          <td className="p-2.5">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border",
+                                tx.type === "Paid"
+                                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              )}
+                            >
+                              {tx.type === "Paid" ? (
+                                <ArrowUpRightIcon className="size-2.5" />
+                              ) : (
+                                <ArrowDownLeftIcon className="size-2.5" />
+                              )}
+                              {tx.type}
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-semibold text-foreground max-w-[220px] truncate">
+                            <div>{tx.party}</div>
+                            {tx.notes && <div className="text-[10px] font-normal text-muted-foreground truncate">{tx.notes}</div>}
+                          </td>
+                          <td className="p-2.5 text-muted-foreground font-mono text-[11px]">
+                            {tx.reference || "-"}
+                          </td>
+                          <td className="p-2.5 text-right font-mono font-medium text-rose-600 dark:text-rose-400">
+                            {tx.debit > 0 ? `Rs. ${tx.debit.toLocaleString()}` : "—"}
+                          </td>
+                          <td className="p-2.5 text-right font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                            {tx.credit > 0 ? `Rs. ${tx.credit.toLocaleString()}` : "—"}
+                          </td>
+                          <td className="p-2.5 text-right font-mono font-bold text-foreground">
+                            Rs. {Number(tx.runningBalance || 0).toLocaleString()}
+                          </td>
+                          <td className="p-2.5 pe-3.5 text-center">
+                            {tx.isManual && (
+                              <button
+                                onClick={() => setDeletingId(tx.id)}
+                                className="p-1 text-muted-foreground hover:text-destructive rounded transition-colors cursor-pointer"
+                                title="Delete entry"
+                              >
+                                <Trash2Icon className="size-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={Math.ceil(chronologicalEntries.length / PAGE_SIZE) || 1}
-          totalItems={chronologicalEntries.length}
-          pageSize={PAGE_SIZE}
-          onPageChange={(p) => setCurrentPage(p)}
-        />
-      </div>
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={Math.ceil(chronologicalEntries.length / PAGE_SIZE) || 1}
+              totalItems={chronologicalEntries.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          </div>
+        </>
+      )}
 
       <CashTransactionModal
         isOpen={isModalOpen}
