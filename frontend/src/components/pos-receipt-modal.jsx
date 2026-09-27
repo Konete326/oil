@@ -438,24 +438,24 @@ function CreditMemoBody({ sale, copyLabel = "" }) {
 }
 
 export function PosReceiptModal({ isOpen, onClose, sale }) {
+  const [printLayout, setPrintLayout] = useState("single");
+
+  if (!isOpen || !sale || typeof window === "undefined") return null;
+
   const isSaleCredit = Boolean(
     sale?.isCredit ||
     (sale?.paymentMode || "").toLowerCase().includes("credit") ||
     (sale?.paymentMode || "").toLowerCase().includes("khata")
   );
 
-  const [memoType, setMemoType] = useState(() => (isSaleCredit ? "credit" : "cash"));
-  const [printLayout, setPrintLayout] = useState("single");
-
-  if (!isOpen || !sale || typeof window === "undefined") return null;
-
+  const memoType = isSaleCredit ? "credit" : "cash";
   const grandTotal = Number(sale.grandTotal || sale.totalAmount || 0);
 
   const handlePrint = () => {
     const orig = document.title;
     const invNo = (sale.saleNumber || sale.challanNumber || "3546").replace(/[^a-zA-Z0-9-_]/g, "_");
     const client = (sale.customerName || sale.millName || "Customer").replace(/[^a-zA-Z0-9-_]/g, "_");
-    document.title = `${memoType === "credit" ? "CreditMemo" : "CashMemo"}_${invNo}_${client}`;
+    document.title = `${isSaleCredit ? "CreditMemo" : "CashMemo"}_${invNo}_${client}`;
     window.print();
     const restore = () => {
       document.title = orig;
@@ -472,7 +472,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
 
     const text =
       `*AL KHALEEJ LUBRICANTS*\n` +
-      `*${memoType === "credit" ? "CREDIT MEMO" : "BILL / CASH MEMO"}*\n` +
+      `*${isSaleCredit ? "CREDIT MEMO" : "BILL / CASH MEMO"}*\n` +
       `*Memo No:* ${invNo}\n` +
       `*Customer (M/s):* ${client}\n` +
       `*Date:* ${dateStr}\n` +
@@ -486,7 +486,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
         .join("\n") +
       `\n------------------------------------\n` +
       `*Total Amount:* Rs ${grandTotal.toLocaleString()}\n` +
-      `*Status:* ${memoType === "credit" ? "CREDIT / UNPAID" : "PAID IN FULL"}\n` +
+      `*Status:* ${isSaleCredit ? "CREDIT / UNPAID" : "PAID IN FULL"}\n` +
       `Shop No. 23, Nishter Road, Karachi | Ph: 0300-2205541`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
@@ -533,41 +533,20 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
         
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0 gap-2 flex-wrap">
           <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
-            {memoType === "credit" ? (
-              <CreditCardIcon className="size-4 text-red-600" />
+            {isSaleCredit ? (
+              <>
+                <CreditCardIcon className="size-4 text-red-600" />
+                <span className="text-red-700 font-bold">Credit Memo (Red Pad)</span>
+              </>
             ) : (
-              <CheckCircle2Icon className="size-4 text-emerald-500" />
+              <>
+                <CheckCircle2Icon className="size-4 text-emerald-500" />
+                <span className="text-foreground font-semibold">Bill / Cash Memo</span>
+              </>
             )}
-            <span>{memoType === "credit" ? "Credit Memo (Red Pad)" : "Cash Memo (Black Pad)"}</span>
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
-            <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-[11px]">
-              <button
-                type="button"
-                onClick={() => setMemoType("cash")}
-                className={cn(
-                  "px-2 py-1 rounded font-semibold cursor-pointer transition-colors",
-                  memoType === "cash" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground"
-                )}
-                title="Bill / Cash Memo (Black/Blue Pad)"
-              >
-                Cash Memo
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMemoType("credit")}
-                className={cn(
-                  "px-2 py-1 rounded font-bold cursor-pointer transition-colors",
-                  memoType === "credit" ? "bg-red-700 text-white shadow-2xs" : "text-red-600 hover:text-red-700"
-                )}
-                title="Credit Memo (Red Pad for Credit)"
-              >
-                Credit Memo (Credit)
-              </button>
-            </div>
-
             <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-[11px]">
               <button
                 type="button"
@@ -607,7 +586,7 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
               onClick={handlePrint}
               className={cn(
                 "gap-1.5 text-xs cursor-pointer text-white font-semibold h-7.5",
-                memoType === "credit" ? "bg-red-700 hover:bg-red-800" : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                isSaleCredit ? "bg-red-700 hover:bg-red-800" : "bg-primary hover:bg-primary/90 text-primary-foreground"
               )}
             >
               <PrinterIcon className="size-3" />
@@ -645,9 +624,9 @@ export function PosReceiptModal({ isOpen, onClose, sale }) {
 
         <div className="w-full flex items-center justify-between p-3 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0 text-xs text-muted-foreground">
           <span className="text-[11px] font-mono">
-            {memoType === "credit"
-              ? "Red Credit Memo format: Exactly matches Al Khaleej red booklet for Udhar sales."
-              : "Black Bill / Cash Memo format: Matches physical booklet for retail cash sales."}
+            {isSaleCredit
+              ? "Red Credit Memo: Generated for credit / udhar sale."
+              : "Black Bill / Cash Memo: Generated for retail cash sale."}
           </span>
           <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs h-7">
             Close
