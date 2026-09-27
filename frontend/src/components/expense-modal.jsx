@@ -5,17 +5,6 @@ import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { createExpenseApi } from "@/lib/api";
 
-const EXPENSE_CATEGORIES = [
-  "Salaries & Wages",
-  "Utilities",
-  "Transport & Freight",
-  "Rent",
-  "Maintenance & Repairs",
-  "Office Petty Cash",
-  "Official Fees & Licenses",
-  "Other",
-];
-
 const PAYMENT_MODES = ["Cash", "Bank Transfer", "Cheque", "Online POS"];
 
 function detectCategory(val) {
@@ -36,7 +25,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [voucherNumber, setVoucherNumber] = useState("");
-  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
 
   const [titleValid, setTitleValid] = useState(false);
@@ -58,7 +46,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
         amount: Number(amount),
         paymentMode,
         voucherNumber: voucherNumber.trim() || `EXP-${Date.now().toString().slice(-6)}`,
-        expenseDate,
+        expenseDate: new Date().toISOString().split("T")[0],
       });
 
       toast.success("Expense voucher recorded successfully!");
@@ -78,7 +66,6 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
     setAmount("");
     setPaymentMode("Cash");
     setVoucherNumber("");
-    setExpenseDate(new Date().toISOString().split("T")[0]);
   };
 
   return (
@@ -120,31 +107,19 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
             className="font-mono font-bold text-sm"
           />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Payment Mode</label>
-              <select
-                value={paymentMode}
-                onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                {PAYMENT_MODES.map((mode) => (
-                  <option key={mode} value={mode}>
-                    {mode}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="font-medium text-foreground">Date</label>
-              <input
-                type="date"
-                value={expenseDate}
-                onChange={(e) => setExpenseDate(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
-            </div>
+          <div className="space-y-1">
+            <label className="font-medium text-foreground">Payment Mode</label>
+            <select
+              value={paymentMode}
+              onChange={(e) => setPaymentMode(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {PAYMENT_MODES.map((mode) => (
+                <option key={mode} value={mode}>
+                  {mode}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
