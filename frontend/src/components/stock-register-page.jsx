@@ -14,7 +14,7 @@ export function StockRegisterPage() {
   }, []);
 
   return (
-    <div className="p-3 md:p-4 space-y-4">
+    <div className="p-2 md:p-3">
       <StockRegisterModal
         isOpen={true}
         products={products}

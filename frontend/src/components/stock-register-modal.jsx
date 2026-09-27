@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,20 +71,31 @@ export function StockRegisterModal({
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("asc");
 
+  const [productSearch, setProductSearch] = useState("");
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const productSearchRef = useRef(null);
+  const productDropdownRef = useRef(null);
+
+  const filteredProductOptions = useMemo(() => {
+    const q = productSearch.toLowerCase().trim();
+    if (!q) return products;
+    return products.filter((p) => p.name.toLowerCase().includes(q));
+  }, [products, productSearch]);
+
+  const activeProductLabel = useMemo(() => {
+    const p = products.find((x) => x._id === selectedProductId);
+    return p ? `${p.name} (${formatStockVolume(p.stockQuantity)})` : "";
+  }, [products, selectedProductId]);
+
   const [isInwardModalOpen, setIsInwardModalOpen] = useState(false);
   const [isOutwardModalOpen, setIsOutwardModalOpen] = useState(false);
   const [submittingMovement, setSubmittingMovement] = useState(false);
 
   const [inwardSupplier, setInwardSupplier] = useState("");
   const [inwardQty, setInwardQty] = useState("");
-  const [inwardRate, setInwardRate] = useState("");
-  const [inwardInvoiceNo, setInwardInvoiceNo] = useState("");
-  const [inwardNotes, setInwardNotes] = useState("");
 
   const [outwardReason, setOutwardReason] = useState("Manual Stock Adjustment / Return");
   const [outwardQty, setOutwardQty] = useState("");
-  const [outwardFolio, setOutwardFolio] = useState("");
-  const [outwardNotes, setOutwardNotes] = useState("");
 
   useEffect(() => {
     if (initialProducts.length === 0) {
@@ -323,17 +334,15 @@ export function StockRegisterModal({
         productName: activeProduct.name,
         quantity: Number(inwardQty),
         unitType: "Liters",
-        unitPrice: Number(inwardRate) || activeProduct.costPrice || 0,
-        invoiceNumber: inwardInvoiceNo.trim() || `REC-${Date.now().toString().slice(-5)}`,
-        notes: inwardNotes.trim() || "Stock Inward Register Entry",
+        unitPrice: activeProduct.costPrice || 0,
+        invoiceNumber: `REC-${Date.now().toString().slice(-5)}`,
+        notes: "Stock Inward Register Entry",
       });
 
       toast.success(`${inwardQty} Liters successfully added to stock register!`);
       setIsInwardModalOpen(false);
       setInwardQty("");
       setInwardSupplier("");
-      setInwardInvoiceNo("");
-      setInwardNotes("");
       await loadData();
       onStockUpdated?.();
     } catch (err) {
@@ -362,8 +371,7 @@ export function StockRegisterModal({
       toast.success(`${qty} Liters deducted from stock balance!`);
       setIsOutwardModalOpen(false);
       setOutwardQty("");
-      setOutwardFolio("");
-      setOutwardNotes("");
+      setOutwardReason("");
       await loadData();
       onStockUpdated?.();
     } catch (err) {
@@ -385,7 +393,12 @@ export function StockRegisterModal({
         @media print {
           @page {
             size: A4 portrait;
-            margin: 6mm 8mm;
+            margin: 10mm 12mm;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
           html, body {
             background: white !important;
@@ -393,8 +406,7 @@ export function StockRegisterModal({
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+            font-family: 'Times New Roman', Times, serif !important;
           }
           .print-portal {
             position: static !important;
@@ -419,10 +431,57 @@ export function StockRegisterModal({
             box-shadow: none !important;
             background: white !important;
             color: black !important;
+            border-radius: 0 !important;
           }
           .print\\:hidden,
           [class*="print:hidden"] {
             display: none !important;
+          }
+          .print-summary-box {
+            background: white !important;
+            border: 1.5px solid black !important;
+            color: black !important;
+          }
+          .print-summary-label {
+            color: #333 !important;
+          }
+          .print-summary-value {
+            color: black !important;
+          }
+          table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+          }
+          th, td {
+            border: 1px solid black !important;
+            color: black !important;
+            background: white !important;
+          }
+          thead tr {
+            background: #e8e8e8 !important;
+          }
+          thead th {
+            background: #e8e8e8 !important;
+            color: black !important;
+            border: 1.5px solid black !important;
+          }
+          tbody tr:nth-child(even) td {
+            background: #f8f8f8 !important;
+          }
+          .print-receipts-cell {
+            font-weight: 800 !important;
+            color: black !important;
+            background: white !important;
+          }
+          .print-issued-cell {
+            font-weight: 800 !important;
+            color: black !important;
+            background: white !important;
+          }
+          .print-balance-cell {
+            font-weight: 900 !important;
+            color: black !important;
+            background: #efefef !important;
           }
         }
       `}</style>
@@ -431,62 +490,52 @@ export function StockRegisterModal({
         "w-full rounded-2xl border border-border bg-background shadow-xs flex flex-col print:border-none print:shadow-none print:w-full print:block print:bg-white",
         !isPage && "max-w-5xl max-h-[94vh] shadow-2xl my-auto"
       )}>
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0 gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
-              <BookOpenIcon className="size-4" />
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between border-b border-border p-3 print:hidden bg-card rounded-t-2xl shrink-0 gap-2">
+          <div className="flex items-center gap-2">
+            <div className="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+              <BookOpenIcon className="size-3.5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm sm:text-base text-foreground">
-                  Stock (Inward & Outward) Register
-                </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25">
-                  Pakistani Standard
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Mal ka aana (Receipts), nikalna (Issued), aur live Baqaya balance ka mukammal register.
-              </p>
-            </div>
+            <h3 className="font-semibold text-sm text-foreground">
+              Stock Register
+            </h3>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Button
               size="sm"
               onClick={() => setIsInwardModalOpen(true)}
-              className="h-7.5 gap-1 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="h-7 gap-1 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white px-2.5"
             >
-              <PlusIcon className="size-3.5" />
-              <span>+ Maal Aaya (Inward)</span>
+              <PlusIcon className="size-3" />
+              <span>Maal Aaya</span>
             </Button>
 
             <Button
               size="sm"
               onClick={() => setIsOutwardModalOpen(true)}
-              className="h-7.5 gap-1 text-xs cursor-pointer bg-amber-600 hover:bg-amber-700 text-white"
+              className="h-7 gap-1 text-xs cursor-pointer bg-amber-600 hover:bg-amber-700 text-white px-2.5"
             >
-              <MinusIcon className="size-3.5" />
-              <span>- Maal Nikla (Outward)</span>
+              <MinusIcon className="size-3" />
+              <span>Maal Nikla</span>
             </Button>
 
             <Button
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="h-7.5 gap-1 text-xs px-2.5 cursor-pointer"
+              className="h-7 gap-1 text-xs px-2.5 cursor-pointer"
             >
-              <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
+              <FileSpreadsheetIcon className="size-3 text-emerald-500" />
               <span>Excel</span>
             </Button>
 
             <Button
               size="sm"
               onClick={handlePrint}
-              className="h-7.5 gap-1 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="h-7 gap-1 text-xs cursor-pointer bg-primary text-primary-foreground px-2.5"
             >
-              <PrinterIcon className="size-3.5" />
-              <span>Print A4</span>
+              <PrinterIcon className="size-3" />
+              <span>Print</span>
             </Button>
 
             {!isPage && (
@@ -502,17 +551,51 @@ export function StockRegisterModal({
             <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
               Select Article:
             </span>
-            <select
-              value={selectedProductId}
-              onChange={(e) => setSelectedProductId(e.target.value)}
-              className="w-full sm:w-72 h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground font-semibold shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-            >
-              {products.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name} ({formatStockVolume(p.stockQuantity)})
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full sm:w-72" ref={productDropdownRef}>
+              <Input
+                ref={productSearchRef}
+                placeholder="Search product..."
+                value={showProductDropdown ? productSearch : activeProductLabel}
+                onFocus={() => {
+                  setShowProductDropdown(true);
+                  setProductSearch("");
+                }}
+                onBlur={(e) => {
+                  if (!productDropdownRef.current?.contains(e.relatedTarget)) {
+                    setShowProductDropdown(false);
+                  }
+                }}
+                onChange={(e) => setProductSearch(e.target.value)}
+                className="h-8 text-xs font-semibold bg-background cursor-text"
+              />
+              {showProductDropdown && (
+                <div className="absolute z-50 top-full mt-1 w-full max-h-52 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg text-xs">
+                  {filteredProductOptions.length === 0 ? (
+                    <div className="px-3 py-2 text-muted-foreground">No products found</div>
+                  ) : (
+                    filteredProductOptions.map((p) => (
+                      <button
+                        key={p._id}
+                        type="button"
+                        tabIndex={0}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setSelectedProductId(p._id);
+                          setShowProductDropdown(false);
+                          setProductSearch("");
+                        }}
+                        className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-accent cursor-pointer transition-colors ${
+                          selectedProductId === p._id ? "bg-primary/10 text-primary font-semibold" : "text-foreground"
+                        }`}
+                      >
+                        <span>{p.name}</span>
+                        <span className="text-muted-foreground font-mono text-[10px]">{formatStockVolume(p.stockQuantity)}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -564,68 +647,68 @@ export function StockRegisterModal({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 py-3 border-b border-border/80 print:border-b-2 print:border-black text-xs font-mono">
-              <div className="border border-border/70 print:border-black p-2.5 rounded-lg bg-card/60 print:bg-transparent">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground print:text-gray-600 block">
+              <div className="border border-border/70 print:border-black p-2.5 rounded-lg bg-card/60 print-summary-box">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground print-summary-label block">
                   ARTICLE:
                 </span>
-                <span className="font-bold text-xs sm:text-sm text-foreground print:text-black uppercase">
+                <span className="font-bold text-xs sm:text-sm text-foreground print:text-black print-summary-value uppercase">
                   {activeProduct?.name || "OIL PRODUCT"}
                 </span>
-                <span className="text-[9.5px] text-muted-foreground print:text-gray-500 block">
+                <span className="text-[9.5px] text-muted-foreground print:text-black block">
                   SKU: {activeProduct?.sku || "-"}
                 </span>
               </div>
 
-              <div className="border border-border/70 print:border-black p-2.5 rounded-lg bg-card/60 print:bg-transparent">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground print:text-gray-600 block">
-                  RATES (KHARID):
+              <div className="border border-border/70 print:border-black p-2.5 rounded-lg bg-card/60 print-summary-box">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground print-summary-label block">
+                  COST RATE:
                 </span>
-                <span className="font-bold text-xs sm:text-sm text-foreground print:text-black">
+                <span className="font-bold text-xs sm:text-sm text-foreground print:text-black print-summary-value">
                   Rs {activeProduct?.costPrice?.toLocaleString() || 0} / L
                 </span>
-                <span className="text-[9.5px] text-muted-foreground print:text-gray-500 block">Standard Unit: Liters</span>
+                <span className="text-[9.5px] text-muted-foreground print:text-black block">Unit: Liters</span>
               </div>
 
-              <div className="border border-emerald-500/30 print:border-black p-2.5 rounded-lg bg-emerald-500/10 print:bg-emerald-50">
-                <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400 print:text-emerald-800 block">
-                  TOTAL INWARD (RECEIPTS):
+              <div className="border border-emerald-500/30 print:border-black p-2.5 rounded-lg bg-emerald-500/10 print-summary-box">
+                <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400 print-summary-label block">
+                  TOTAL INWARD:
                 </span>
-                <span className="font-bold text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 print:text-emerald-900">
-                  {totalReceipts.toLocaleString()} Liters
+                <span className="font-bold text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 print:text-black print-summary-value">
+                  {totalReceipts.toLocaleString()} L
                 </span>
-                <span className="text-[9.5px] text-emerald-600/80 dark:text-emerald-400/80 print:text-emerald-700 block">Total Mal Aaya</span>
+                <span className="text-[9.5px] text-emerald-600/80 print:text-black block">Total Mal Aaya</span>
               </div>
 
-              <div className="border border-amber-500/30 print:border-black p-2.5 rounded-lg bg-amber-500/10 print:bg-amber-50">
-                <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 print:text-amber-900 block">
+              <div className="border border-amber-500/30 print:border-black p-2.5 rounded-lg bg-amber-500/10 print-summary-box">
+                <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 print-summary-label block">
                   CURRENT BALANCE:
                 </span>
-                <span className="font-extrabold text-sm sm:text-base text-foreground print:text-black">
-                  {currentBalance.toLocaleString()} Liters
+                <span className="font-extrabold text-sm sm:text-base text-foreground print:text-black print-summary-value">
+                  {currentBalance.toLocaleString()} L
                 </span>
-                <span className="text-[9.5px] text-muted-foreground print:text-gray-700 block">
+                <span className="text-[9.5px] text-muted-foreground print:text-black block">
                   Issued: {totalIssued.toLocaleString()} L
                 </span>
               </div>
             </div>
 
-            <div className="mt-4 border border-border/80 print:border-black rounded-lg overflow-hidden">
+            <div className="mt-4 border border-border/80 print:border-2 print:border-black rounded-lg overflow-hidden">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-muted/50 print:bg-gray-100 text-foreground print:text-black border-b border-border/80 print:border-black font-mono font-bold text-[11px]">
-                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black w-24">Date</th>
+                  <tr className="bg-muted/50 print:bg-gray-200 text-foreground print:text-black border-b border-border/80 print:border-black font-mono font-bold text-[11px]">
+                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black w-20">DATE</th>
                     <th className="py-2 px-3 border-r border-border/70 print:border-black">PARTICULARS</th>
-                    <th className="py-2 px-2 border-r border-border/70 print:border-black text-center w-24">Folio</th>
-                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black text-center bg-emerald-500/10 print:bg-emerald-50 text-emerald-700 dark:text-emerald-400 print:text-emerald-900 w-24">
-                      Receipts
+                    <th className="py-2 px-2 border-r border-border/70 print:border-black text-center w-20">FOLIO</th>
+                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black text-center text-emerald-700 dark:text-emerald-400 print:text-black w-24">
+                      RECEIPTS
                     </th>
-                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black text-center bg-rose-500/10 print:bg-rose-50 text-rose-700 dark:text-rose-400 print:text-rose-900 w-24">
-                      Issued
+                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black text-center text-rose-700 dark:text-rose-400 print:text-black w-24">
+                      ISSUED
                     </th>
-                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black text-center bg-muted/80 print:bg-gray-200 text-foreground print:text-black w-24">
-                      Balance
+                    <th className="py-2 px-2.5 border-r border-border/70 print:border-black text-center print:text-black w-24">
+                      BALANCE
                     </th>
-                    <th className="py-2 px-2 text-left w-28">Remarks</th>
+                    <th className="py-2 px-2 text-left w-28">REMARKS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60 print:divide-black font-sans">
@@ -643,26 +726,26 @@ export function StockRegisterModal({
                     </tr>
                   ) : (
                     filteredEntries.map((row) => (
-                      <tr key={row.id} className="border-b border-border/40 print:border-gray-300 font-mono text-[11px]">
-                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black whitespace-nowrap text-muted-foreground print:text-gray-800">
+                      <tr key={row.id} className="border-b border-border/40 print:border-black font-mono text-[11px]">
+                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black whitespace-nowrap text-muted-foreground print:text-black">
                           {new Date(row.date).toLocaleDateString("en-GB")}
                         </td>
-                        <td className="py-2 px-3 border-r border-border/60 print:border-black font-sans font-semibold text-foreground print:text-gray-900">
+                        <td className="py-2 px-3 border-r border-border/60 print:border-black font-sans font-semibold text-foreground print:text-black">
                           {row.particulars}
                         </td>
-                        <td className="py-2 px-2 border-r border-border/60 print:border-black text-center font-bold text-muted-foreground print:text-gray-700">
+                        <td className="py-2 px-2 border-r border-border/60 print:border-black text-center font-bold text-muted-foreground print:text-black">
                           {row.folio}
                         </td>
-                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-extrabold text-emerald-600 dark:text-emerald-400 print:text-emerald-800 bg-emerald-500/5 print:bg-emerald-50/50">
+                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-extrabold text-emerald-600 dark:text-emerald-400 print:text-black print-receipts-cell">
                           {formatStockVolume(row.receipts)}
                         </td>
-                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-extrabold text-rose-600 dark:text-rose-400 print:text-rose-800 bg-rose-500/5 print:bg-rose-50/50">
+                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-extrabold text-rose-600 dark:text-rose-400 print:text-black print-issued-cell">
                           {formatStockVolume(row.issued)}
                         </td>
-                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-black text-foreground print:text-black bg-muted/40 print:bg-gray-100">
+                        <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-black text-foreground print:text-black bg-muted/40 print-balance-cell">
                           {formatStockVolume(row.balance)}
                         </td>
-                        <td className="py-2 px-2 font-sans text-[10px] text-muted-foreground print:text-gray-600">
+                        <td className="py-2 px-2 font-sans text-[10px] text-muted-foreground print:text-black">
                           {row.remarks}
                         </td>
                       </tr>
@@ -672,15 +755,20 @@ export function StockRegisterModal({
               </table>
             </div>
 
-            <div className="hidden print:grid pt-12 grid-cols-2 gap-8 text-xs text-black font-mono">
-              <div>
-                <div className="w-48 border-t border-black pt-1 text-center font-bold text-[10px] uppercase">
+            <div className="hidden print:flex pt-10 justify-between text-xs text-black font-mono">
+              <div className="text-center">
+                <div className="w-44 border-t-2 border-black pt-1 font-bold text-[10px] uppercase tracking-wide">
                   Store Incharge / Munshi
                 </div>
               </div>
-              <div className="flex justify-end">
-                <div className="w-48 border-t border-black pt-1 text-center font-bold text-[10px] uppercase">
-                  Proprietor / Auditor Signature
+              <div className="text-center">
+                <div className="text-[10px] font-mono text-black mb-1">
+                  Printed: {new Date().toLocaleDateString("en-GB")} {new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="w-44 border-t-2 border-black pt-1 font-bold text-[10px] uppercase tracking-wide">
+                  Proprietor / Auditor
                 </div>
               </div>
             </div>
@@ -741,62 +829,22 @@ export function StockRegisterModal({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-semibold text-foreground text-[11px] block">
-                    Quantity Inward (Liters) *
-                  </label>
-                  <Input
-                    required
-                    type="number"
-                    step="any"
-                    min="0.001"
-                    placeholder="e.g. 200 or 0.7 (700 ML)"
-                    value={inwardQty}
-                    onChange={(e) => setInwardQty(e.target.value)}
-                    className="h-8.5 text-xs font-mono font-bold text-foreground"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-foreground text-[11px] block">
-                    Cost Rate (Rs / Liter)
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder={`Default Rs ${activeProduct?.costPrice || 0}`}
-                    value={inwardRate}
-                    onChange={(e) => setInwardRate(e.target.value)}
-                    className="h-8.5 text-xs font-mono"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground text-[11px] block">
+                  Quantity Inward (Liters) *
+                </label>
+                <Input
+                  required
+                  type="number"
+                  step="any"
+                  min="0.001"
+                  placeholder="e.g. 200 or 0.7 (700 ML)"
+                  value={inwardQty}
+                  onChange={(e) => setInwardQty(e.target.value)}
+                  className="h-8.5 text-xs font-mono font-bold text-foreground"
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-semibold text-foreground text-[11px] block">
-                    Folio / Invoice / DC #
-                  </label>
-                  <Input
-                    placeholder="e.g. INV-8842"
-                    value={inwardInvoiceNo}
-                    onChange={(e) => setInwardInvoiceNo(e.target.value)}
-                    className="h-8.5 text-xs font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-foreground text-[11px] block">
-                    Remarks / Notes
-                  </label>
-                  <Input
-                    placeholder="e.g. Fresh stock arrival"
-                    value={inwardNotes}
-                    onChange={(e) => setInwardNotes(e.target.value)}
-                    className="h-8.5 text-xs"
-                  />
-                </div>
-              </div>
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
                 <Button
@@ -851,65 +899,34 @@ export function StockRegisterModal({
             <form onSubmit={handleRecordOutward} className="space-y-3 text-xs">
               <div className="space-y-1">
                 <label className="font-semibold text-foreground text-[11px] block">
-                  Particulars / Reason *
+                  Reason / Wajah
                 </label>
-                <select
+                <Input
+                  placeholder="e.g. Damaged oil, Return to supplier..."
                   value={outwardReason}
                   onChange={(e) => setOutwardReason(e.target.value)}
-                  className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground cursor-pointer"
-                >
-                  <option value="Damaged / Leakage Oil">Damaged / Leakage Oil</option>
-                  <option value="Return to Supplier">Return to Supplier</option>
-                  <option value="Internal Shop Consumption">Internal Shop Consumption</option>
-                  <option value="Stock Correction / Shortage">Stock Correction / Shortage</option>
-                  <option value="Sample / Testing">Sample / Testing</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-semibold text-foreground text-[11px] block">
-                    Quantity Outward (Liters) *
-                  </label>
-                  <Input
-                    required
-                    type="number"
-                    step="any"
-                    min="0.001"
-                    max={currentBalance}
-                    placeholder="e.g. 10 or 0.7 (700 ML)"
-                    value={outwardQty}
-                    onChange={(e) => setOutwardQty(e.target.value)}
-                    className="h-8.5 text-xs font-mono font-bold text-foreground"
-                  />
-                  <span className="text-[9.5px] text-muted-foreground">
-                    Available: {currentBalance} L
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-foreground text-[11px] block">
-                    Folio / Reference #
-                  </label>
-                  <Input
-                    placeholder="e.g. ADJ-01"
-                    value={outwardFolio}
-                    onChange={(e) => setOutwardFolio(e.target.value)}
-                    className="h-8.5 text-xs font-mono"
-                  />
-                </div>
+                  className="h-8.5 text-xs"
+                />
               </div>
 
               <div className="space-y-1">
                 <label className="font-semibold text-foreground text-[11px] block">
-                  Remarks / Notes
+                  Quantity Outward (Liters) *
                 </label>
                 <Input
-                  placeholder="e.g. Drum seal broken"
-                  value={outwardNotes}
-                  onChange={(e) => setOutwardNotes(e.target.value)}
-                  className="h-8.5 text-xs"
+                  required
+                  type="number"
+                  step="any"
+                  min="0.001"
+                  max={currentBalance}
+                  placeholder="e.g. 10 or 0.7 (700 ML)"
+                  value={outwardQty}
+                  onChange={(e) => setOutwardQty(e.target.value)}
+                  className="h-8.5 text-xs font-mono font-bold text-foreground"
                 />
+                <span className="text-[9.5px] text-muted-foreground">
+                  Available: {currentBalance} L
+                </span>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">

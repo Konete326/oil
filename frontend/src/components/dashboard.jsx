@@ -10,7 +10,6 @@ import { NetRevenueChart } from "@/components/net-revenue-chart";
 import { DashboardStats } from "@/components/stats";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   DropletIcon,
   LayersIcon,
@@ -21,6 +20,12 @@ import {
   FilterIcon,
   ClockIcon,
 } from "lucide-react";
+
+const PERIODS = [
+  { key: "today", label: "Today", icon: ClockIcon, color: "text-emerald-500" },
+  { key: "monthly", label: "Month", icon: CalendarIcon, color: "text-blue-500" },
+  { key: "custom", label: "Custom", icon: FilterIcon, color: "text-amber-500" },
+];
 
 export function Dashboard() {
   const [data, setData] = useState(null);
@@ -68,77 +73,47 @@ export function Dashboard() {
   };
 
   const kpis = data?.kpis || [
-    { label: "Total Stock in Hand", value: "0 L", subtext: "Active Stock in Liters", type: "green" },
-    { label: "Total Stock Valuation", value: "Rs. 0", subtext: "Asset value at cost", type: "blue" },
-    { label: "Net Sales Of This Month", value: "Rs. 0", subtext: "Monthly Volume", type: "purple" },
-    { label: "Customer Receivables", value: "Rs. 0", subtext: "Pending Khata Accounts", type: "orange" },
+    { label: "Stock in Hand", value: "0 L", subtext: "Active Stock", type: "green" },
+    { label: "Stock Valuation", value: "Rs. 0", subtext: "Asset at Cost", type: "blue" },
+    { label: "Net Sales", value: "Rs. 0", subtext: "Monthly Volume", type: "purple" },
+    { label: "Receivables", value: "Rs. 0", subtext: "Pending Khata", type: "orange" },
+  ];
+
+  const kpiConfig = [
+    { icon: DropletIcon, card: "border-emerald-500/25 bg-emerald-500/8 text-emerald-500", fig: "text-emerald-600 dark:text-emerald-400" },
+    { icon: LayersIcon, card: "border-blue-500/25 bg-blue-500/8 text-blue-500", fig: "text-blue-600 dark:text-blue-400" },
+    { icon: TrendingUpIcon, card: "border-indigo-500/25 bg-indigo-500/8 text-indigo-500", fig: "text-indigo-600 dark:text-indigo-400" },
+    { icon: WalletCardsIcon, card: "border-amber-500/25 bg-amber-500/8 text-amber-500", fig: "text-amber-600 dark:text-amber-400" },
   ];
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="w-full space-y-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Operational Dashboard</h1>
-            <Badge
-              variant="outline"
-              className={`text-[10px] font-mono uppercase px-2 py-0.5 ${
-                period === "today"
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
-                  : period === "monthly"
-                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
-                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
-              }`}
-            >
-              {period === "today"
-                ? "Daily Fresh (Rozana)"
-                : period === "monthly"
-                ? "Monthly Aggregate"
-                : "Custom Range"}
-            </Badge>
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Rozana ka taza hisab kitab, monthly aggregated revenue, aur inventory stock status.
+          <h1 className="text-lg font-semibold tracking-tight text-foreground leading-tight">
+            Operational Dashboard
+          </h1>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Rozana hisab · stock status · revenue
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center p-1 rounded-xl bg-muted/40 border border-border text-xs">
-            <button
-              onClick={() => handlePeriodChange("today")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium flex items-center gap-1.5 ${
-                period === "today"
-                  ? "bg-background text-foreground shadow-xs font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <ClockIcon className="size-3.5 text-emerald-500" />
-              <span>Today</span>
-            </button>
-
-            <button
-              onClick={() => handlePeriodChange("monthly")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium flex items-center gap-1.5 ${
-                period === "monthly"
-                  ? "bg-background text-foreground shadow-xs font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <CalendarIcon className="size-3.5 text-blue-500" />
-              <span>This Month</span>
-            </button>
-
-            <button
-              onClick={() => handlePeriodChange("custom")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium flex items-center gap-1.5 ${
-                period === "custom"
-                  ? "bg-background text-foreground shadow-xs font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <FilterIcon className="size-3.5 text-amber-500" />
-              <span>Custom Date Range</span>
-            </button>
+          <div className="flex items-center p-0.5 rounded-lg bg-muted/50 border border-border/60 text-xs">
+            {PERIODS.map(({ key, label, icon: Icon, color }) => (
+              <button
+                key={key}
+                onClick={() => handlePeriodChange(key)}
+                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium flex items-center gap-1 ${
+                  period === key
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className={`size-3 ${color}`} />
+                {label}
+              </button>
+            ))}
           </div>
 
           <Button
@@ -146,9 +121,9 @@ export function Dashboard() {
             size="sm"
             onClick={() => loadDashboard(period, startDate, endDate)}
             disabled={loading}
-            className="h-9 px-3 text-xs gap-1.5 cursor-pointer shrink-0"
+            className="h-7 px-2.5 text-xs gap-1 cursor-pointer shrink-0"
           >
-            <RotateCwIcon className={`size-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
+            <RotateCwIcon className={`size-3 ${loading ? "animate-spin text-primary" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
@@ -157,72 +132,52 @@ export function Dashboard() {
       {period === "custom" && (
         <form
           onSubmit={handleApplyCustomFilter}
-          className="p-3 rounded-xl border border-border/80 bg-muted/20 flex flex-wrap items-center gap-3 text-xs animate-in fade-in"
+          className="px-3 py-2 rounded-lg border border-border/60 bg-muted/20 flex flex-wrap items-center gap-2 text-xs animate-in fade-in"
         >
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <CalendarIcon className="size-3.5 text-primary" />
-            <span className="font-semibold text-foreground">Select Range:</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="text-xs h-8 bg-background w-36"
-              required
-            />
-            <span className="text-muted-foreground text-xs">to</span>
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="text-xs h-8 bg-background w-36"
-            />
-          </div>
-
-          <Button type="submit" size="sm" className="h-8 text-xs px-3 font-semibold cursor-pointer">
-            Apply Custom Filter
+          <CalendarIcon className="size-3.5 text-primary" />
+          <span className="font-medium text-foreground">Range:</span>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="text-xs h-7 bg-background w-32"
+            required
+          />
+          <span className="text-muted-foreground">→</span>
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="text-xs h-7 bg-background w-32"
+          />
+          <Button type="submit" size="sm" className="h-7 text-xs px-3 cursor-pointer">
+            Apply
           </Button>
         </form>
       )}
 
       <DashboardHeroCards heroCards={data?.heroCards} loading={loading} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((kpi, index) => {
-          let cardStyle = "border-emerald-500/30 bg-emerald-500/10 text-emerald-500";
-          let figureStyle = "text-emerald-500";
-          let Icon = DropletIcon;
-
-          if (kpi.type === "blue" || index === 1) {
-            cardStyle = "border-blue-500/30 bg-blue-500/10 text-blue-500";
-            figureStyle = "text-blue-500";
-            Icon = LayersIcon;
-          } else if (kpi.type === "purple" || index === 2) {
-            cardStyle = "border-indigo-500/30 bg-indigo-500/10 text-indigo-500";
-            figureStyle = "text-indigo-500";
-            Icon = TrendingUpIcon;
-          } else if (kpi.type === "orange" || index === 3) {
-            cardStyle = "border-amber-500/30 bg-amber-500/10 text-amber-500";
-            figureStyle = "text-amber-500";
-            Icon = WalletCardsIcon;
-          }
-
+          const { icon: Icon, card, fig } = kpiConfig[index] || kpiConfig[0];
           return (
-            <div key={kpi.label || index} className="rounded-xl border p-4 shadow-xs bg-card transition-all space-y-2 hover:border-border/80">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{kpi.label}</span>
-                <div className={`p-2 rounded-lg border ${cardStyle}`}>
-                  <Icon className="size-4" />
+            <div
+              key={kpi.label || index}
+              className="rounded-xl border p-3.5 bg-card transition-all hover:border-border/70 hover:shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight">
+                  {kpi.label}
+                </span>
+                <div className={`p-1.5 rounded-lg border ${card}`}>
+                  <Icon className="size-3.5" />
                 </div>
               </div>
-              <div>
-                <p className={`text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight ${figureStyle}`}>
-                  {kpi.value}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1 font-medium">{kpi.subtext || "Real-time Metrics"}</p>
-              </div>
+              <p className={`text-xl font-extrabold tabular-nums tracking-tight ${fig}`}>
+                {kpi.value}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{kpi.subtext}</p>
             </div>
           );
         })}
