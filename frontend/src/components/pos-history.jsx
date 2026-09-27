@@ -31,6 +31,7 @@ import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { PosHistoryKpiCards } from "@/components/pos-history-kpi-cards";
 import { PosConsolidatedJournalTab } from "@/components/pos-consolidated-journal-tab";
+import { PosProfitLossTab } from "@/components/pos-profit-loss-tab";
 import {
   HistoryIcon,
   SearchIcon,
@@ -45,6 +46,7 @@ import {
   HandCoinsIcon,
   CheckCircle2Icon,
   ShoppingCartIcon,
+  TrendingUpIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -72,7 +74,9 @@ export function PosHistory() {
 
   const [activeTab, setActiveTab] = useState(() => {
     const tab = searchParams.get("tab");
-    return ["sales", "expenses", "combined", "udhar"].includes(tab) ? tab : "sales";
+    return ["sales", "expenses", "combined", "udhar", "profit-loss"].includes(tab)
+      ? tab
+      : "sales";
   });
 
   const [salesHistory, setSalesHistory] = useState([]);
@@ -657,9 +661,31 @@ export function PosHistory() {
           <WalletIcon className="size-3.5 text-primary" />
           <span>All Journal Entries</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabChange("profit-loss")}
+          className={cn(
+            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+            activeTab === "profit-loss"
+              ? "bg-card text-foreground shadow-xs font-bold border border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+              : "text-muted-foreground hover:text-foreground hover:bg-card/40"
+          )}
+        >
+          <TrendingUpIcon className="size-3.5 text-emerald-500" />
+          <span>Profit & Loss (Aasan Hisab)</span>
+        </button>
       </div>
 
-      <div className="bg-card p-2.5 rounded-xl border border-border/80 shadow-2xs">
+      {activeTab === "profit-loss" ? (
+        <PosProfitLossTab
+          salesHistory={salesHistory}
+          expenses={expenses}
+          staffAdvances={staffAdvances}
+        />
+      ) : (
+        <>
+          <div className="bg-card p-2.5 rounded-xl border border-border/80 shadow-2xs">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center w-full">
           <div className="relative col-span-12 md:col-span-6">
             <SearchIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
@@ -1077,6 +1103,8 @@ export function PosHistory() {
           </>
         )}
       </div>
+        </>
+      )}
 
       <PosReceiptModal
         isOpen={!!completedSale}
