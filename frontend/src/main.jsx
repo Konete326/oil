@@ -5,17 +5,26 @@ import { Toaster } from 'sonner'
 import './index.css'
 import App from './App.jsx'
 import { initConsoleLogger } from './lib/console-logger.js'
-import { registerSW } from 'virtual:pwa-register'
 
 initConsoleLogger()
 
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh() {
-    updateSW(true)
-  },
-  onOfflineReady() {},
-})
+if (import.meta.env.PROD) {
+  import('virtual:pwa-register').then(({ registerSW }) => {
+    const updateSW = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        updateSW(true)
+      },
+      onOfflineReady() {},
+    })
+  })
+} else if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister()
+    }
+  })
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
