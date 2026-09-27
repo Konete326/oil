@@ -727,12 +727,12 @@ export function PosCounter() {
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between pt-1.5 border-t border-border/50 text-[10px] gap-2 flex-wrap">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <div className="flex items-center rounded-md border border-border bg-background shadow-2xs">
+                      <div className="flex items-center justify-between pt-1.5 border-t border-border/50 gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                          <div className="flex items-center rounded-md border border-border bg-background shadow-2xs shrink-0">
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon"
                               className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
                               onClick={() => updateQuantity(idx, -0.5)}
                               title="- 0.5 L"
@@ -740,7 +740,7 @@ export function PosCounter() {
                               <MinusIcon className="size-3" />
                             </Button>
 
-                            <div className="flex items-center px-1">
+                            <div className="flex items-center px-0.5">
                               <input
                                 type="number"
                                 step="any"
@@ -753,15 +753,14 @@ export function PosCounter() {
                                     : item.quantity ?? ""
                                 }
                                 onChange={(e) => setDirectQuantity(idx, e.target.value, item.unitMode || "L")}
-                                className="w-16 h-6 text-center font-mono font-bold text-xs bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
+                                className="w-12 h-6 text-center font-mono font-bold text-xs bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
                                 placeholder={item.unitMode === "ML" ? "ML" : "Qty"}
-                                title={item.unitMode === "ML" ? "Milliliters (e.g. 700, 500, 250 ML)" : "Decimal Liters (e.g. 0.7, 0.75, 1.5 L)"}
                               />
                               <button
                                 type="button"
                                 onClick={() => toggleUnitMode(idx)}
-                                className="text-[9.5px] font-mono px-1 py-0.5 rounded bg-muted/60 hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer font-bold border border-border/80"
-                                title="Click to toggle between Liters (L) and Milliliters (ML)"
+                                className="text-[9px] font-mono px-1 py-0.5 rounded bg-muted hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer font-bold border border-border"
+                                title="Toggle Liters / Milliliters"
                               >
                                 {item.unitMode === "ML" ? "ML" : "L"}
                               </button>
@@ -769,21 +768,19 @@ export function PosCounter() {
 
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon"
                               className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
                               onClick={() => updateQuantity(idx, 0.5)}
-                              title="+ 0.5 L (500 ML)"
+                              title="+ 0.5 L"
                             >
                               <PlusIcon className="size-3" />
                             </Button>
                           </div>
 
-                          <div className="flex items-center gap-1 text-[9px] font-mono flex-wrap">
+                          <div className="flex items-center gap-1 text-[9px] font-mono shrink-0">
                             {[
-                              { val: 0.25, label: "250ml" },
-                              { val: 0.5, label: "500ml" },
-                              { val: 0.7, label: "700ml" },
-                              { val: 0.75, label: "750ml" },
+                              { val: 0.5, label: "0.5L" },
+                              { val: 0.7, label: "0.7L" },
                               { val: 1, label: "1L" },
                               { val: 1.5, label: "1.5L" },
                               { val: 4, label: "4L" },
@@ -793,33 +790,22 @@ export function PosCounter() {
                                 type="button"
                                 onClick={() => setDirectQuantity(idx, preset.val, "L")}
                                 className={cn(
-                                  "px-1.5 py-0.5 rounded border cursor-pointer transition-colors",
+                                  "px-1.5 py-0.5 rounded border cursor-pointer transition-colors whitespace-nowrap",
                                   Number(item.quantity) === preset.val
                                     ? "bg-primary text-primary-foreground border-primary font-bold shadow-2xs"
                                     : "bg-muted/40 text-muted-foreground hover:text-foreground border-border/80 hover:bg-muted"
                                 )}
-                                title={`Set ${preset.label}`}
                               >
                                 {preset.label}
                               </button>
                             ))}
-
-                            {Number(item.quantity) > 0 && (
-                              <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30">
-                                {Number(item.quantity) < 1
-                                  ? `${Math.round(Number(item.quantity) * 1000)} ML`
-                                  : Number(item.quantity) % 1 !== 0
-                                  ? `${item.quantity} L (${Math.round(Number(item.quantity) * 1000)} ML)`
-                                  : `${item.quantity} L`}
-                              </span>
-                            )}
                           </div>
                         </div>
 
                         <Button
                           variant="ghost"
-                          size="icon-sm"
-                          className="size-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
+                          size="icon"
+                          className="size-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0 ms-auto"
                           onClick={() => removeFromCart(idx)}
                           title="Remove item"
                         >
