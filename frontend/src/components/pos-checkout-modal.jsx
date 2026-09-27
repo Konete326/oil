@@ -1,9 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { CustomerVendorSelect } from "@/components/ui/customer-vendor-select";
-import { XIcon, ReceiptIcon, Loader2Icon, UserIcon, TagIcon, CreditCardIcon, AlertTriangleIcon } from "lucide-react";
+import {
+  XIcon,
+  ReceiptIcon,
+  Loader2Icon,
+  UserIcon,
+  TagIcon,
+  CreditCardIcon,
+  AlertTriangleIcon,
+  LandmarkIcon,
+} from "lucide-react";
 import { toast } from "sonner";
+
+const FALLBACK_BANK_ACCOUNTS = [
+  {
+    id: "acc_hbl_01",
+    bankName: "HBL (Habib Bank Limited)",
+    accountTitle: "Al Khaleej Lubricants (Primary Current)",
+    accountNumber: "0192-8374619-01",
+    accountType: "Current",
+  },
+  {
+    id: "acc_meezan_01",
+    bankName: "Meezan Bank",
+    accountTitle: "Al Khaleej Sales & Collections",
+    accountNumber: "0293-8475618-02",
+    accountType: "Current",
+  },
+];
 
 export function PosCheckoutModal({
   isOpen,
@@ -22,10 +48,23 @@ export function PosCheckoutModal({
   const [discount, setDiscount] = useState("0");
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [cashReceived, setCashReceived] = useState("");
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState("");
+  const [bankReferenceNo, setBankReferenceNo] = useState("");
 
   const [customerValid, setCustomerValid] = useState(true);
   const [discountValid, setDiscountValid] = useState(true);
   const [cashReceivedValid, setCashReceivedValid] = useState(true);
+
+  const availableBankAccounts = useMemo(() => {
+    try {
+      const stored = localStorage.getItem("bank_accounts_v2");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return FALLBACK_BANK_ACCOUNTS;
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,8 +77,13 @@ export function PosCheckoutModal({
       if (initialPaymentMode) {
         setPaymentMode(initialPaymentMode);
       }
+      if (availableBankAccounts.length > 0) {
+        const firstBank = availableBankAccounts.find((a) => a.accountType !== "Tijori / Cash") || availableBankAccounts[0];
+        setSelectedBankAccountId(firstBank.id);
+      }
+      setBankReferenceNo("");
     }
-  }, [isOpen, initialDiscount, initialPaymentMode]);
+  }, [isOpen, initialDiscount, initialPaymentMode, availableBankAccounts]);
 
   if (!isOpen) return null;
 
@@ -58,6 +102,8 @@ export function PosCheckoutModal({
 
   const isFormValid = customerValid && discountValid && cashReceivedValid && !isLossSale;
 
+  const activeBankAccount = availableBankAccounts.find((a) => a.id === selectedBankAccountId);
+
   const handleConfirm = () => {
     if (!isFormValid) return;
     if (isLossSale) {
@@ -68,7 +114,25 @@ export function PosCheckoutModal({
       toast.error("Cash received is less than the Grand Total.");
       return;
     }
-    onConfirm({ customerName, saleType, discount: discountNum, grandTotal, paymentMode, cashReceived: cashReceivedNum, changeDue });
+    if ((paymentMode === "Bank Transfer" || paymentMode === "Card") && !selectedBankAccountId) {
+      toast.error("Please select the target Bank Account.");
+      return;
+    }
+
+    onConfirm({
+      customerName,
+      saleType,
+      discount: discountNum,
+      grandTotal,
+      paymentMode,
+      cashReceived: cashReceivedNum,
+      changeDue,
+      bankAccountId: activeBankAccount?.id || "",
+      bankAccountTitle: activeBankAccount?.accountTitle || "",
+      bankName: activeBankAccount?.bankName || "",
+      bankAccountNumber: activeBankAccount?.accountNumber || "",
+      bankReferenceNo: bankReferenceNo.trim(),
+    });
   };
 
   return (
@@ -190,8 +254,8 @@ export function PosCheckoutModal({
                 className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
               >
                 <option value="Cash">Cash</option>
-                <option value="Card">Card POS</option>
-                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Bank Transfer">Bank Transfer (IBFT)</option>
+                <option value="Card">Card / Digital POS</option>
                 <option value="Credit / Khata">Credit / Khata</option>
               </select>
             </div>
@@ -219,6 +283,41 @@ export function PosCheckoutModal({
             </div>
           </div>
 
+          {(paymentMode === "Bank Transfer" || paymentMode === "Card") && (
+            <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 space-y-2 animate-in fade-in duration-150">
+              <div className="space-y-1">
+                <label className="font-semibold text-[11px] text-foreground flex items-center gap-1.5">
+                  <LandmarkIcon className="size-3.5 text-primary" />
+                  Deposit to Bank Account *
+                </label>
+                <select
+                  value={selectedBankAccountId}
+                  onChange={(e) => setSelectedBankAccountId(e.target.value)}
+                  className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  {availableBankAccounts.map((acc) => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.bankName} — {acc.accountTitle} ({acc.accountNumber})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-medium text-[10.5px] text-muted-foreground">
+                  Reference / Slip / Tx ID # (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. IBFT-91028 or Slip #"
+                  value={bankReferenceNo}
+                  onChange={(e) => setBankReferenceNo(e.target.value)}
+                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+            </div>
+          )}
+
           {paymentMode === "Cash" && (
             <div className="grid grid-cols-2 gap-2.5">
               <ValidatedInput
@@ -240,12 +339,12 @@ export function PosCheckoutModal({
           )}
         </div>
 
-        <div className="px-5 pb-5 flex gap-2">
-          <Button variant="outline" className="flex-1 cursor-pointer text-xs" onClick={onClose} disabled={submitting}>
+        <div className="px-4 pb-4 flex gap-2">
+          <Button variant="outline" className="flex-1 cursor-pointer text-xs h-8" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
           <Button
-            className="flex-1 gap-1.5 text-xs cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="flex-1 gap-1.5 text-xs cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white h-8"
             onClick={handleConfirm}
             disabled={submitting || !isFormValid}
           >

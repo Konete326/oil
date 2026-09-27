@@ -17,7 +17,11 @@ export const getPosSales = async (req, res, next) => {
 
 export const createPosSale = async (req, res, next) => {
   try {
-    const { customerName, customerPhone, saleType, items, subtotal, discount, grandTotal, paymentMode, cashReceived, changeDue } = req.body;
+    const {
+      customerName, customerPhone, saleType, items, subtotal, discount, grandTotal,
+      paymentMode, cashReceived, changeDue, bankAccountId, bankAccountTitle,
+      bankName, bankAccountNumber, bankReferenceNo,
+    } = req.body;
     if (!items || items.length === 0 || !grandTotal) {
       res.status(400); throw new Error("Cart cannot be empty for POS transaction.");
     }
@@ -53,22 +57,14 @@ export const createPosSale = async (req, res, next) => {
     const totalProfit = Number(grandTotal) - totalCost;
 
     const sale = await PosSale.create({
-      saleNumber,
-      customerName: customerName || "Walk-in Customer",
-      customerPhone,
-      saleType: saleType || "Retail",
-      items,
-      subtotal: Number(subtotal),
-      discount: Number(discount) || 0,
-      grandTotal: Number(grandTotal),
-      totalCost,
-      totalProfit,
-      paymentMode: paymentMode || "Cash",
-      cashReceived: Number(cashReceived) || 0,
-      changeDue: Number(changeDue) || 0,
-      cashierName: req.user?.name || "Admin Cashier",
-      shiftDate: targetShiftDate,
-      isNextDayShift,
+      saleNumber, customerName: customerName || "Walk-in Customer", customerPhone,
+      saleType: saleType || "Retail", items, subtotal: Number(subtotal), discount: Number(discount) || 0,
+      grandTotal: Number(grandTotal), totalCost, totalProfit, paymentMode: paymentMode || "Cash",
+      bankAccountId: bankAccountId || "", bankAccountTitle: bankAccountTitle || "",
+      bankName: bankName || "", bankAccountNumber: bankAccountNumber || "",
+      bankReferenceNo: bankReferenceNo || "",
+      cashReceived: Number(cashReceived) || 0, changeDue: Number(changeDue) || 0,
+      cashierName: req.user?.name || "Admin Cashier", shiftDate: targetShiftDate, isNextDayShift,
     });
 
     if (paymentMode === "Credit / Khata" && customerName && customerName !== "Walk-in Customer") {

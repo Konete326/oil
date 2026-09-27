@@ -230,21 +230,31 @@ export function BankKhataRegisterView() {
 
     salesList.forEach((sale) => {
       const mode = (sale.paymentMode || "").toLowerCase();
-      const isBankSale =
-        !isCashAccount &&
-        (mode.includes("bank") || mode.includes("card") || mode.includes("online") || mode.includes("cheque"));
-      const isCashSale = isCashAccount && mode.includes("cash") && !sale.isCredit;
+      let matches = false;
 
-      if (isBankSale || isCashSale) {
+      if (sale.bankAccountId) {
+        matches = sale.bankAccountId === acc.id;
+      } else if (isCashAccount) {
+        matches = mode.includes("cash") && !sale.isCredit;
+      } else {
+        const isBankSale =
+          mode.includes("bank") || mode.includes("card") || mode.includes("online") || mode.includes("cheque");
+        const defaultBank = accounts.find((a) => a.accountType !== "Tijori / Cash");
+        matches = isBankSale && (acc.id === defaultBank?.id || acc.id === accounts[0]?.id);
+      }
+
+      if (matches) {
+        const refNote = sale.bankReferenceNo ? `Ref: ${sale.bankReferenceNo} | ` : "";
+        const bankTitleNote = sale.bankAccountTitle ? `[${sale.bankAccountTitle}] ` : "";
         result.push({
           id: `sale-${sale._id}`,
           date: sale.createdAt,
-          tafseel: `${sale.customerName || "Walk-in Customer"} (Counter Sale)`,
+          tafseel: `${sale.customerName || "Walk-in Customer"} (POS Sale)`,
           reason: `POS Bill #${sale.saleNumber}`,
           folio: sale.saleNumber,
           jama: Number(sale.grandTotal) || 0,
           naam: 0,
-          notes: `Payment Mode: ${sale.paymentMode}`,
+          notes: `${bankTitleNote}${refNote}Mode: ${sale.paymentMode}`,
           sourceType: "POS Sale",
           isDeletable: false,
         });

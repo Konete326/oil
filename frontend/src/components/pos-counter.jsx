@@ -368,7 +368,20 @@ export function PosCounter() {
 
   const handleCheckout = async (checkoutData) => {
     setSubmitting(true);
-    const { customerName, saleType, discount, grandTotal, paymentMode, cashReceived, changeDue } = checkoutData;
+    const {
+      customerName,
+      saleType,
+      discount,
+      grandTotal,
+      paymentMode,
+      cashReceived,
+      changeDue,
+      bankAccountId,
+      bankAccountTitle,
+      bankName,
+      bankAccountNumber,
+      bankReferenceNo,
+    } = checkoutData;
     try {
       const sanitizedItems = cart.map((it) => {
         const qty = Number(it.quantity) || 1;
@@ -404,6 +417,11 @@ export function PosCounter() {
         discount,
         grandTotal,
         paymentMode,
+        bankAccountId,
+        bankAccountTitle,
+        bankName,
+        bankAccountNumber,
+        bankReferenceNo,
         cashReceived,
         changeDue,
       });
