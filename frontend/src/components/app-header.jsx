@@ -40,6 +40,7 @@ import {
   LayoutGridIcon,
   SparklesIcon,
   ArrowRightIcon,
+  UsersIcon,
 } from "lucide-react";
 
 export function AppHeader({ user, onLogout }) {
