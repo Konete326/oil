@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/table";
 import { ProductModal } from "@/components/product-modal";
 import { BarcodeStickerModal } from "@/components/barcode-sticker-modal";
-import { StockRegisterModal } from "@/components/stock-register-modal";
+import { StockRegisterModal, formatStockVolume } from "@/components/stock-register-modal";
+import { InventoryKpiSummary } from "@/components/inventory-kpi-summary";
+import { ProductDetailModal } from "@/components/product-detail-modal";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
@@ -31,6 +33,7 @@ import {
   LayoutGrid as LayoutGridIcon,
   List as ListIcon,
   BookOpen as BookOpenIcon,
+  Eye as EyeIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -56,6 +59,7 @@ export function ProductManager() {
   const [barcodeProduct, setBarcodeProduct] = useState(null);
   const [isStockRegisterOpen, setIsStockRegisterOpen] = useState(false);
   const [selectedRegisterProduct, setSelectedRegisterProduct] = useState(null);
+  const [viewingProduct, setViewingProduct] = useState(null);
 
   useEffect(() => {
     if (location.state?.openModal) {
@@ -242,6 +246,8 @@ export function ProductManager() {
         </div>
       </div>
 
+      <InventoryKpiSummary products={products} />
+
       <div className="rounded-xl border border-border/80 bg-card p-2.5 shadow-xs">
         <div className="grid grid-cols-12 gap-2 items-center">
           <div className="relative col-span-12 md:col-span-4">
@@ -311,6 +317,7 @@ export function ProductManager() {
                       <TableHead className="text-xs h-9">Product Name</TableHead>
                       <TableHead className="text-right text-xs h-9">Kharid Rate (Cost / L)</TableHead>
                       <TableHead className="text-center text-xs h-9">Stock in Liters</TableHead>
+                      <TableHead className="text-right text-xs h-9">Stock Value (Maliyat)</TableHead>
                       <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -358,8 +365,20 @@ export function ProductManager() {
                                 : `${prod.stockQuantity} Liters`}
                             </span>
                           </TableCell>
+                          <TableCell className="text-right tabular-nums text-xs py-2.5 font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                            Rs {(((prod.stockQuantity || 0) * (prod.costPrice || 0))).toLocaleString()}
+                          </TableCell>
                           <TableCell className="text-right py-2.5 pe-4">
                             <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="size-7 text-muted-foreground hover:text-primary cursor-pointer"
+                                title="Product & Stock Valuation Dekhein"
+                                onClick={() => setViewingProduct(prod)}
+                              >
+                                <EyeIcon className="size-3.5" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
@@ -455,19 +474,32 @@ export function ProductManager() {
                           </span>
                         </div>
 
-                        <div className="p-2 rounded-md bg-muted/30 text-xs border border-border/50 flex items-center justify-between">
+                        <div className="grid grid-cols-2 gap-2 p-2 rounded-md bg-muted/30 text-xs border border-border/50">
                           <div>
                             <span className="text-[9px] text-muted-foreground block font-medium">Kharid Rate</span>
                             <span className="font-mono font-bold text-foreground text-xs">
                               Rs {prod.costPrice?.toLocaleString() || 0} / L
                             </span>
                           </div>
-                          <span className="text-[10px] text-muted-foreground font-mono bg-background px-2 py-0.5 rounded border border-border">
-                            Unit: Liters
-                          </span>
+                          <div className="text-right">
+                            <span className="text-[9px] text-emerald-700 dark:text-emerald-400 block font-semibold uppercase">Stock Value</span>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                              Rs {(((prod.stockQuantity || 0) * (prod.costPrice || 0))).toLocaleString()}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="pt-1.5 border-t border-border flex items-center justify-end gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewingProduct(prod)}
+                            className="h-6.5 text-[11px] gap-1 px-2 cursor-pointer"
+                            title="Product Details & Value"
+                          >
+                            <EyeIcon className="size-3 text-primary" />
+                            <span>View</span>
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
@@ -562,6 +594,22 @@ export function ProductManager() {
         initialProduct={selectedRegisterProduct}
         products={products}
         onStockUpdated={() => loadData(false)}
+      />
+
+      <ProductDetailModal
+        isOpen={!!viewingProduct}
+        onClose={() => setViewingProduct(null)}
+        product={viewingProduct}
+        allProducts={products}
+        onOpenRegister={(prod) => {
+          setSelectedRegisterProduct(prod);
+          setIsStockRegisterOpen(true);
+        }}
+        onOpenBarcode={(prod) => setBarcodeProduct(prod)}
+        onOpenEdit={(prod) => {
+          setEditingProduct(prod);
+          setIsModalOpen(true);
+        }}
       />
     </div>
   );

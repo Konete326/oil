@@ -292,6 +292,15 @@ export function StockRegisterModal({
     [registerEntries]
   );
   const currentBalance = activeProduct?.stockQuantity ?? 0;
+  const currentStockValue = Math.round(Number(currentBalance) * (Number(activeProduct?.costPrice) || 0));
+  const allStockTotalValue = useMemo(
+    () => products.reduce((acc, p) => acc + ((Number(p.stockQuantity) || 0) * (Number(p.costPrice) || 0)), 0),
+    [products]
+  );
+  const allStockTotalLiters = useMemo(
+    () => products.reduce((acc, p) => acc + (Number(p.stockQuantity) || 0), 0),
+    [products]
+  );
 
   const handlePrint = () => {
     const orig = document.title;
@@ -508,6 +517,22 @@ export function StockRegisterModal({
             </h3>
           </div>
 
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25">
+            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+              Item Value:
+            </span>
+            <span className="text-xs font-black font-mono text-emerald-700 dark:text-emerald-300">
+              Rs {currentStockValue.toLocaleString()}
+            </span>
+            <span className="text-border mx-1">|</span>
+            <span className="text-[11px] font-semibold text-muted-foreground">
+              All Godown:
+            </span>
+            <span className="text-xs font-bold font-mono text-foreground">
+              Rs {allStockTotalValue.toLocaleString()}
+            </span>
+          </div>
+
           <div className="flex items-center gap-1.5 flex-wrap">
             <Button
               size="sm"
@@ -596,8 +621,18 @@ export function StockRegisterModal({
                           selectedProductId === p._id ? "bg-primary/10 text-primary font-semibold" : "text-foreground"
                         }`}
                       >
-                        <span>{p.name}</span>
-                        <span className="text-muted-foreground font-mono text-[10px]">{formatStockVolume(p.stockQuantity)}</span>
+                        <div className="min-w-0 pr-2">
+                          <div className="truncate font-medium">{p.name}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono">
+                            Cost: Rs {Number(p.costPrice || 0).toLocaleString()} / L
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-muted-foreground font-mono text-[10px]">{formatStockVolume(p.stockQuantity)}</div>
+                          <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-[10.5px]">
+                            Rs {Math.round((Number(p.stockQuantity) || 0) * (Number(p.costPrice) || 0)).toLocaleString()}
+                          </div>
+                        </div>
                       </button>
                     ))
                   )}
@@ -657,48 +692,62 @@ export function StockRegisterModal({
               </h1>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 py-3 border-b border-border/80 print:border-b-2 print:border-black text-xs font-mono">
-              <div className="border border-border/70 print:border-black p-2.5 rounded-lg bg-card/60 print-summary-box">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground print-summary-label block">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 py-2.5 border-b border-border/80 print:border-b-2 print:border-black text-xs font-mono">
+              <div className="border border-border/70 print:border-black p-2 rounded-lg bg-card/60 print-summary-box">
+                <span className="text-[9.5px] uppercase font-bold text-muted-foreground print-summary-label block">
                   ARTICLE:
                 </span>
-                <span className="font-bold text-xs sm:text-sm text-foreground print:text-black print-summary-value uppercase">
+                <span className="font-bold text-xs sm:text-sm text-foreground print:text-black print-summary-value uppercase truncate block">
                   {activeProduct?.name || "OIL PRODUCT"}
                 </span>
-                <span className="text-[9.5px] text-muted-foreground print:text-black block">
+                <span className="text-[9px] text-muted-foreground print:text-black block">
                   SKU: {activeProduct?.sku || "-"}
                 </span>
               </div>
 
-              <div className="border border-border/70 print:border-black p-2.5 rounded-lg bg-card/60 print-summary-box">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground print-summary-label block">
+              <div className="border border-border/70 print:border-black p-2 rounded-lg bg-card/60 print-summary-box">
+                <span className="text-[9.5px] uppercase font-bold text-muted-foreground print-summary-label block">
                   COST RATE:
                 </span>
                 <span className="font-bold text-xs sm:text-sm text-foreground print:text-black print-summary-value">
                   Rs {activeProduct?.costPrice?.toLocaleString() || 0} / L
                 </span>
-                <span className="text-[9.5px] text-muted-foreground print:text-black block">Unit: Liters</span>
+                <span className="text-[9px] text-muted-foreground print:text-black block">Unit: Liters</span>
               </div>
 
-              <div className="border border-emerald-500/30 print:border-black p-2.5 rounded-lg bg-emerald-500/10 print-summary-box">
-                <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400 print-summary-label block">
-                  TOTAL INWARD:
+              <div className="border border-amber-500/30 print:border-black p-2 rounded-lg bg-amber-500/10 print-summary-box">
+                <span className="text-[9.5px] uppercase font-bold text-amber-700 dark:text-amber-400 print-summary-label block">
+                  AVAILABLE STOCK:
                 </span>
-                <span className="font-bold text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 print:text-black print-summary-value">
-                  {totalReceipts.toLocaleString()} L
-                </span>
-                <span className="text-[9.5px] text-emerald-600/80 print:text-black block">Total Mal Aaya</span>
-              </div>
-
-              <div className="border border-amber-500/30 print:border-black p-2.5 rounded-lg bg-amber-500/10 print-summary-box">
-                <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 print-summary-label block">
-                  CURRENT BALANCE:
-                </span>
-                <span className="font-extrabold text-sm sm:text-base text-foreground print:text-black print-summary-value">
+                <span className="font-extrabold text-xs sm:text-sm text-foreground print:text-black print-summary-value">
                   {currentBalance.toLocaleString()} L
                 </span>
-                <span className="text-[9.5px] text-muted-foreground print:text-black block">
-                  Issued: {totalIssued.toLocaleString()} L
+                <span className="text-[9px] text-muted-foreground print:text-black block">
+                  Total Out: {totalIssued.toLocaleString()} L
+                </span>
+              </div>
+
+              <div className="border border-emerald-500/40 print:border-black p-2 rounded-lg bg-emerald-500/10 print-summary-box">
+                <span className="text-[9.5px] uppercase font-bold text-emerald-700 dark:text-emerald-400 print-summary-label block">
+                  STOCK VALUE (MALIYAT):
+                </span>
+                <span className="font-black text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 print:text-black print-summary-value">
+                  Rs {currentStockValue.toLocaleString()}
+                </span>
+                <span className="text-[9px] text-emerald-700/80 dark:text-emerald-400/80 print:text-black block">
+                  Is Article Ka Kul Maal
+                </span>
+              </div>
+
+              <div className="border border-primary/30 print:border-black p-2 rounded-lg bg-primary/5 print-summary-box col-span-2 sm:col-span-1">
+                <span className="text-[9.5px] uppercase font-bold text-primary print-summary-label block">
+                  ALL STOCK VALUE:
+                </span>
+                <span className="font-extrabold text-xs sm:text-sm text-foreground print:text-black print-summary-value">
+                  Rs {allStockTotalValue.toLocaleString()}
+                </span>
+                <span className="text-[9px] text-muted-foreground print:text-black block">
+                  Kul Tail: {allStockTotalLiters.toLocaleString()} L
                 </span>
               </div>
             </div>
@@ -754,7 +803,10 @@ export function StockRegisterModal({
                           {formatStockVolume(row.issued)}
                         </td>
                         <td className="py-2 px-2.5 border-r border-border/60 print:border-black text-center font-black text-foreground print:text-black bg-muted/40 print-balance-cell">
-                          {formatStockVolume(row.balance)}
+                          <div>{formatStockVolume(row.balance)}</div>
+                          <div className="text-[9px] font-mono text-muted-foreground print:text-black font-semibold">
+                            Rs {Math.round(row.balance * (Number(activeProduct?.costPrice) || 0)).toLocaleString()}
+                          </div>
                         </td>
                         <td className="py-2 px-2 font-sans text-[10px] text-muted-foreground print:text-black">
                           {row.remarks}

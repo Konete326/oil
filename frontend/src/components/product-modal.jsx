@@ -9,6 +9,7 @@ import {
   Loader2Icon,
   LayersIcon,
   DropletIcon,
+  Banknote as BanknoteIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -204,6 +205,18 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
               onValidationChange={setStockValid}
               className="font-mono"
             />
+          </div>
+
+          <div className="flex items-center justify-between p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs">
+            <div className="flex items-center gap-1.5">
+              <BanknoteIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                Calculated Stock Value:
+              </span>
+            </div>
+            <span className="font-mono font-black text-sm text-emerald-700 dark:text-emerald-300">
+              Rs {Math.round((Number(costPrice) || 0) * (Number(stockQuantity) || 0)).toLocaleString()}
+            </span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card">
