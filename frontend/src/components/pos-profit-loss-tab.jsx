@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   TrendingUpIcon,
   TrendingDownIcon,
@@ -182,8 +183,8 @@ export function PosProfitLossTab({
       ? "Makhsoos Muddat (Custom Dates)"
       : "Mukammal Record (All Time)";
 
-  return (
-    <div className="space-y-4">
+  const filterSection = (
+    <div className="space-y-4 print:hidden">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
         <div className="flex items-center gap-1.5 flex-wrap">
           <div className="flex items-center gap-1 text-xs font-bold text-foreground pe-2 border-r border-border/70">
@@ -243,13 +244,17 @@ export function PosProfitLossTab({
           </Button>
         </div>
       </div>
+    </div>
+  );
 
+  const reportContent = (
+    <div className="space-y-4">
       <div
         className={cn(
-          "rounded-2xl border p-4 sm:p-5 shadow-xs transition-all relative overflow-hidden",
+          "rounded-2xl border p-4 sm:p-5 shadow-xs transition-all relative overflow-hidden print:shadow-none print:border-black",
           isLoss
-            ? "border-rose-500/40 bg-gradient-to-br from-rose-500/10 via-card to-card text-foreground"
-            : "border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-card to-card text-foreground"
+            ? "border-rose-500/40 bg-gradient-to-br from-rose-500/10 via-card to-card text-foreground print:border-rose-500 print:bg-none"
+            : "border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-card to-card text-foreground print:border-emerald-500 print:bg-none"
         )}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -419,6 +424,41 @@ export function PosProfitLossTab({
         </div>
       </div>
 
+      </div>
     </div>
+  );
+
+  return (
+    <>
+      {filterSection}
+      {reportContent}
+      
+      {typeof window !== "undefined" &&
+        createPortal(
+          <div className="hidden print:block print-portal bg-white text-black p-8 font-sans">
+            <style>{`
+              @media print {
+                .print\\:hidden { display: none !important; }
+                .print\\:block { display: block !important; }
+                .bg-card { background: white !important; }
+                .text-foreground { color: black !important; }
+                .border { border-color: #333 !important; }
+                .text-emerald-600 { color: #059669 !important; }
+                .text-rose-600 { color: #e11d48 !important; }
+                .bg-emerald-500\\/5, .bg-emerald-500\\/10 { background-color: #ecfdf5 !important; border: 1px solid #a7f3d0 !important; }
+                .bg-rose-500\\/5, .bg-rose-500\\/10 { background-color: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
+                .bg-amber-500\\/5 { background-color: #fffbeb !important; border: 1px solid #fde68a !important; }
+              }
+            `}</style>
+            <div className="text-center mb-6 border-b-2 border-black pb-4">
+              <h1 className="text-2xl font-black uppercase tracking-tight">Al Khaleej Lubricants</h1>
+              <h2 className="text-lg font-bold mt-1">Nafa Nuqsan (Profit & Loss) Report</h2>
+              <p className="text-sm text-gray-600 font-medium mt-1">Period: {periodLabel}</p>
+            </div>
+            {reportContent}
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
