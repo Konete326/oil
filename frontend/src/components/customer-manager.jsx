@@ -165,7 +165,8 @@ export function CustomerManager() {
         <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
           <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border">
             <button
-              onClick={() => setViewMode("table")}
+              type="button"
+              onClick={(e) => { e.preventDefault(); setViewMode("table"); }}
               className={cn(
                 "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "table" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
@@ -176,7 +177,8 @@ export function CustomerManager() {
               <span className="hidden sm:inline">Table</span>
             </button>
             <button
-              onClick={() => setViewMode("cards")}
+              type="button"
+              onClick={(e) => { e.preventDefault(); setViewMode("cards"); }}
               className={cn(
                 "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "cards" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
@@ -188,12 +190,12 @@ export function CustomerManager() {
             </button>
           </div>
 
-          <Button onClick={loadCustomers} variant="outline" size="sm" className="gap-1 cursor-pointer text-xs h-7.5 px-2.5">
+          <Button type="button" onClick={(e) => { e.preventDefault(); loadCustomers(); }} variant="outline" size="sm" className="gap-1 cursor-pointer text-xs h-7.5 px-2.5">
             <RefreshCwIcon className="size-3" />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
 
-          <Button onClick={handleOpenAdd} size="sm" className="gap-1.5 cursor-pointer text-xs font-semibold h-7.5 px-3">
+          <Button type="button" onClick={(e) => { e.preventDefault(); handleOpenAdd(); }} size="sm" className="gap-1.5 cursor-pointer text-xs font-semibold h-7.5 px-3">
             <UserPlusIcon className="size-3.5" />
             <span>Add Customer</span>
           </Button>
