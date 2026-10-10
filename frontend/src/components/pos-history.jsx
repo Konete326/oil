@@ -618,23 +618,6 @@ export function PosHistory() {
 
         <button
           type="button"
-          onClick={() => handleTabChange("udhar")}
-          className={cn(
-            "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
-            activeTab === "udhar"
-              ? "bg-card text-foreground shadow-sm border border-amber-500/40 text-amber-600 dark:text-amber-400"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
-          )}
-        >
-          <CreditCardIcon className="size-3.5 text-amber-500" />
-          <span>Udhar / Credit Khata</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">
-            {creditSalesCount}
-          </span>
-        </button>
-
-        <button
-          type="button"
           onClick={() => handleTabChange("expenses")}
           className={cn(
             "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
@@ -648,20 +631,6 @@ export function PosHistory() {
           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
             {unifiedExpensesList.length}
           </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleTabChange("combined")}
-          className={cn(
-            "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
-            activeTab === "combined"
-              ? "bg-card text-foreground shadow-sm border border-border/80"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
-          )}
-        >
-          <WalletIcon className="size-3.5 text-primary" />
-          <span>All Journal Entries</span>
         </button>
 
         <button
@@ -928,84 +897,6 @@ export function PosHistory() {
                 </Table>
               )}
 
-              {activeTab === "udhar" && (
-                <Table>
-                  <TableHeader className="bg-muted/70 backdrop-blur-xs">
-                    <TableRow className="border-b border-border/80">
-                      <TableHead className="w-[120px] text-xs h-9 font-semibold">Bill #</TableHead>
-                      <TableHead className="text-xs h-9 font-semibold">Date</TableHead>
-                      <TableHead className="text-xs h-9 font-semibold">Customer</TableHead>
-                      <TableHead className="text-center text-xs h-9 font-semibold">Sale Type</TableHead>
-                      <TableHead className="text-center text-xs h-9 font-semibold">Items</TableHead>
-                      <TableHead className="text-right text-xs h-9 font-semibold">Pending Udhar (PKR)</TableHead>
-                      <TableHead className="text-right text-xs h-9 pe-4 font-semibold">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedItems.map((sale) => (
-                      <TableRow key={sale._id} className="hover:bg-muted/20 text-xs border-b border-border/40 bg-amber-500/5">
-                        <TableCell className="font-mono font-bold text-amber-600 dark:text-amber-400 py-2.5">
-                          {sale.saleNumber}
-                        </TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
-                          {new Date(sale.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="font-semibold text-foreground py-2.5">
-                          <button
-                            type="button"
-                            onClick={() => setDiaryCustomer(sale.customerName)}
-                            className="font-bold text-left hover:text-primary hover:underline cursor-pointer"
-                          >
-                            {sale.customerName || "Walk-in Customer"}
-                          </button>
-                        </TableCell>
-                        <TableCell className="text-center py-2.5 text-[11px]">
-                          {sale.saleType}
-                        </TableCell>
-                        <TableCell className="text-center font-mono py-2.5 text-[11px]">
-                          {sale.items?.length || 1}
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-amber-600 dark:text-amber-400 py-2.5 text-xs">
-                          Rs {sale.grandTotal?.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right py-2.5 pe-4">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-amber-500/40 text-amber-700 hover:bg-amber-50"
-                              onClick={() => setDiaryCustomer(sale.customerName)}
-                            >
-                              <BookOpenIcon className="size-3 text-amber-600" />
-                              <span>Diary</span>
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer border-emerald-600/40 text-emerald-700 hover:bg-emerald-50"
-                              onClick={() => setSaleToUpdate(sale)}
-                            >
-                              <HandCoinsIcon className="size-3 text-emerald-600" />
-                              <span>Wasooli</span>
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 gap-1 text-[11px] px-2.5 rounded-lg cursor-pointer"
-                              onClick={() => setCompletedSale(sale)}
-                            >
-                              <ReceiptIcon className="size-3 text-primary" />
-                              <span>Bill</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
 
               {activeTab === "expenses" && (
                 <Table>

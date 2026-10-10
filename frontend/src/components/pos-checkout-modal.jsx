@@ -90,9 +90,8 @@ export function PosCheckoutModal({
     ? Number(((cartSubtotal * discountRaw) / 100).toFixed(2))
     : discountRaw;
   const grandTotal = Math.max(0, Number((cartSubtotal - discountNum).toFixed(2)));
-  const cashReceivedNum = Number(cashReceived) || 0;
+  const cashReceivedNum = Number(cashReceived) === 0 && cashReceived === "" ? grandTotal : (Number(cashReceived) || 0);
   const changeDue = Math.max(0, Number((cashReceivedNum - grandTotal).toFixed(2)));
-
   const currentBal = selectedCustomerObj?.currentBalance || 0;
   const credLimit = selectedCustomerObj?.creditLimit || 0;
   const isCreditBreached = credLimit > 0 && (currentBal + (paymentMode === "Credit / Khata" ? grandTotal : 0) > credLimit);
@@ -194,14 +193,9 @@ export function PosCheckoutModal({
               <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
                 <TagIcon className="size-3 text-muted-foreground" /> Sale Type
               </label>
-              <select
-                value={saleType}
-                onChange={(e) => setSaleType(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
-              >
-                <option value="Retail">Retail</option>
-                <option value="Wholesale">Wholesale</option>
-              </select>
+              <div className="w-full h-8 flex items-center rounded-md border border-input bg-muted/50 px-2 text-xs font-semibold">
+                {saleType}
+              </div>
             </div>
           </div>
 
@@ -250,14 +244,7 @@ export function PosCheckoutModal({
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="font-medium text-[11px] text-foreground">Discount ({discountMode === "fixed" ? "Rs" : "%"})</label>
-                <button
-                  type="button"
-                  onClick={() => { setDiscountMode(discountMode === "fixed" ? "percent" : "fixed"); }}
-                  className="text-[9.5px] text-primary hover:underline cursor-pointer"
-                >
-                  {discountMode === "fixed" ? "%" : "Rs"}
-                </button>
+                <label className="font-medium text-[11px] text-foreground">Discount (Rs)</label>
               </div>
               <ValidatedInput
                 rule="positiveNumber"

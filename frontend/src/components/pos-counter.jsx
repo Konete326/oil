@@ -849,27 +849,7 @@ export function PosCounter() {
 
             <div className="flex items-center justify-between gap-2 p-1 rounded-lg bg-card border border-border text-xs">
               <div className="flex items-center gap-1">
-                <span className="text-[9px] text-muted-foreground font-semibold">Cart Disc:</span>
-                <div className="flex items-center rounded border border-border overflow-hidden bg-muted/40 text-[9px]">
-                  <button
-                    type="button"
-                    onClick={() => setDiscountType("fixed")}
-                    className={`px-1.5 py-0.2 font-bold cursor-pointer transition-colors ${
-                      discountType === "fixed" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Rs
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDiscountType("percentage")}
-                    className={`px-1.5 py-0.2 font-bold cursor-pointer transition-colors ${
-                      discountType === "percentage" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    %
-                  </button>
-                </div>
+                <span className="text-[9px] text-muted-foreground font-semibold">Cart Disc (Rs):</span>
               </div>
               <div className="relative w-20">
                 <input
