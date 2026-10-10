@@ -46,6 +46,8 @@ export function CustomerManager() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [overallKhataBalance, setOverallKhataBalance] = useState(0);
+  const [overallCreditLimit, setOverallCreditLimit] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -68,6 +70,8 @@ export function CustomerManager() {
         setCustomers(res.data);
         setTotalPages(res.totalPages || 1);
         setTotalRecords(res.total || 0);
+        setOverallKhataBalance(res.totalKhataBalance || 0);
+        setOverallCreditLimit(res.totalCreditLimit || 0);
       }
     } catch (err) {
       console.error(err);
@@ -351,6 +355,18 @@ export function CustomerManager() {
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot className="bg-muted/80 backdrop-blur-sm sticky bottom-0 border-t border-border shadow-[0_-1px_2px_rgba(0,0,0,0.05)]">
+                    <tr>
+                      <td colSpan={4} className="p-2.5 text-right text-xs text-muted-foreground font-semibold">Overall Filtered Total:</td>
+                      <td className="p-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                        Rs {(overallKhataBalance || 0).toLocaleString()}
+                      </td>
+                      <td className="p-2.5 text-right font-mono font-bold text-muted-foreground text-xs">
+                        Rs {(overallCreditLimit || 0).toLocaleString()}
+                      </td>
+                      <td colSpan={2}></td>
+                    </tr>
+                  </tfoot>
                 </table>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-2.5 sm:p-3">

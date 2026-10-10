@@ -21,9 +21,13 @@ export const getCustomers = async (req, res, next) => {
     const limitNum = Math.max(1, parseInt(limit, 10));
     const skip = (pageNum - 1) * limitNum;
 
-    const [total, customers] = await Promise.all([
+    const [total, customers, stats] = await Promise.all([
       Customer.countDocuments(query),
       Customer.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+      Customer.aggregate([
+        { $match: query },
+        { $group: { _id: null, totalKhata: { $sum: "$currentBalance" }, totalCredit: { $sum: "$creditLimit" } } }
+      ])
     ]);
 
     res.status(200).json({
@@ -32,6 +36,8 @@ export const getCustomers = async (req, res, next) => {
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limitNum) || 1,
+      totalKhataBalance: stats[0]?.totalKhata || 0,
+      totalCreditLimit: stats[0]?.totalCredit || 0,
       data: customers,
     });
   } catch (error) {
