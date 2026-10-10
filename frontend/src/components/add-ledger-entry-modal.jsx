@@ -75,6 +75,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className="h-10 text-base"
                   required
                 />
               </div>
@@ -86,7 +87,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
                 <select
                   value={formData.transactionType}
                   onChange={(e) => setFormData({ ...formData, transactionType: e.target.value })}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   required
                 >
                   <option value="Debit">Debit</option>
@@ -108,6 +109,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 required
                 placeholder="0.00"
+                className="h-10 text-base"
               />
             </div>
 
@@ -120,7 +122,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
                 <select
                   value={formData.paymentMode}
                   onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="Cash">Cash</option>
                   <option value="Bank">Bank</option>
@@ -137,6 +139,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
                   value={formData.referenceNumber}
                   onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
                   placeholder="Optional"
+                  className="h-10 text-base"
                 />
               </div>
             </div>
@@ -151,7 +154,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Enter details about this entry..."
                 rows={3}
-                className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex min-h-[60px] w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
 
