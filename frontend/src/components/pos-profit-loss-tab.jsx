@@ -243,6 +243,7 @@ export function PosProfitLossTab({
             <span>Print Report</span>
           </Button>
         </div>
+      </div>
     </div>
   );
 
@@ -421,8 +422,6 @@ export function PosProfitLossTab({
             </p>
           </div>
         </div>
-      </div>
-
       </div>
     </div>
   );
