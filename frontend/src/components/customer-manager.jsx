@@ -305,27 +305,30 @@ export function CustomerManager() {
                         <td className="p-2 pe-3.5 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <Button
+                              type="button"
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => handleOpenDetail(c._id)}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenDetail(c._id); }}
                               className="size-7 text-primary hover:bg-primary/10 cursor-pointer"
                               title="View Analytics & Khata Details"
                             >
                               <EyeIcon className="size-3.5" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => setSelectedCustomerForTrial(c)}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedCustomerForTrial(c); }}
                               className="size-7 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
                               title="Customer Individual Trial Balance Sheet"
                             >
                               <ScaleIcon className="size-3.5" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => handleOpenPrint(c)}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenPrint(c); }}
                               disabled={loadingPrintId === c._id}
                               className="size-7 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
                               title="Print A4 Customer Khata Statement"
@@ -333,18 +336,20 @@ export function CustomerManager() {
                               <PrinterIcon className="size-3.5" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => handleOpenEdit(c)}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenEdit(c); }}
                               className="size-7 text-muted-foreground hover:bg-muted cursor-pointer"
                               title="Edit Customer"
                             >
                               <Edit2Icon className="size-3.5" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => setDeleteTarget(c)}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(c); }}
                               className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
                               title="Delete Customer"
                             >
@@ -446,9 +451,10 @@ export function CustomerManager() {
 
                         <div className="pt-1.5 border-t border-border flex items-center justify-end gap-1">
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedCustomerForTrial(c)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedCustomerForTrial(c); }}
                             className="h-6.5 text-[10.5px] gap-1 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
                             title="Customer Trial Balance Sheet"
                           >
@@ -456,18 +462,20 @@ export function CustomerManager() {
                             <span>Trial Sheet</span>
                           </Button>
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => handleOpenDetail(c._id)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenDetail(c._id); }}
                             className="h-6.5 text-[10.5px] gap-1 px-2 cursor-pointer"
                           >
                             <BookOpenIcon className="size-2.5 text-primary" />
                             <span>Khata</span>
                           </Button>
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => handleOpenPrint(c)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenPrint(c); }}
                             disabled={loadingPrintId === c._id}
                             className="h-6.5 text-[10.5px] gap-1 px-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
                             title="Print A4 Customer Statement"
@@ -476,18 +484,20 @@ export function CustomerManager() {
                             <span>Print</span>
                           </Button>
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => handleOpenEdit(c)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenEdit(c); }}
                             className="h-6.5 text-[10.5px] gap-1 px-2 cursor-pointer"
                           >
                             <Edit2Icon className="size-2.5 text-blue-500" />
                             <span>Edit</span>
                           </Button>
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setDeleteTarget(c)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(c); }}
                             className="h-6.5 text-[10.5px] px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
                           >
                             <Trash2Icon className="size-2.5" />
