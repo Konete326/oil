@@ -291,6 +291,7 @@ export function CustomerUdharDiaryModal({
         await createCashTransactionApi({
           type: "Received",
           partyName: customerName,
+          partyId: customerProfile?._id || "",
           amount: amt,
           category: "Customer Collection",
           paymentMode: vasooliMode,
@@ -325,6 +326,7 @@ export function CustomerUdharDiaryModal({
     try {
       setSubmitting(true);
       await createPosSale({
+        customerId: customerProfile?._id || "",
         customerName: customerName.trim(),
         customerPhone: customerProfile?.phone || "",
         saleType: "Retail",

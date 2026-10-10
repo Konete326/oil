@@ -5,6 +5,7 @@ const ledgerSchema = new mongoose.Schema(
     clientType: { type: String, enum: ["Textile Mill", "General Customer"], default: "Textile Mill" },
     mill: { type: mongoose.Schema.Types.ObjectId, ref: "Mill" },
     clientName: { type: String, required: true },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
     transactionType: { type: String, enum: ["Debit (Invoice/Challan)", "Credit (Payment Received)"], required: true },
     amount: { type: Number, required: true },
     paymentMode: { type: String, enum: ["Cash", "Cheque", "Bank Transfer", "Online POS"], default: "Cash" },

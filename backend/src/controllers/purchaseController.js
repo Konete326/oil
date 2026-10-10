@@ -28,7 +28,7 @@ export const getPurchases = async (req, res, next) => {
 export const createPurchase = async (req, res, next) => {
   try {
     await connectDB();
-    const { supplierName, productId, productName, quantity, unitType, unitPrice, paymentStatus, invoiceNumber, notes } = req.body;
+    const { supplierName, productId, productName, quantity, unitType, unitPrice, paymentStatus, invoiceNumber, notes, purchaseDate } = req.body;
 
     if (!supplierName || !productName || !quantity || !unitPrice) {
       res.status(400);
@@ -49,6 +49,7 @@ export const createPurchase = async (req, res, next) => {
       totalAmount,
       paymentStatus: paymentStatus || "Paid",
       invoiceNumber: invoiceNumber || "",
+      purchaseDate: purchaseDate ? new Date(purchaseDate) : undefined,
       notes: notes || "",
     });
 

@@ -17,6 +17,7 @@ const posSaleSchema = new mongoose.Schema(
   {
     saleNumber: { type: String, required: true, unique: true },
     customerName: { type: String, default: "Walk-in Customer" },
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
     customerPhone: { type: String },
     saleType: { type: String, enum: ["Retail", "Wholesale"], default: "Retail" },
     items: [posSaleItemSchema],

@@ -18,7 +18,8 @@ export function DashboardHeroCards({ heroCards, loading }) {
 
   if (loading && !heroCards) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <Skeleton className="h-44 w-full rounded-2xl" />
         <Skeleton className="h-44 w-full rounded-2xl" />
         <Skeleton className="h-44 w-full rounded-2xl" />
         <Skeleton className="h-44 w-full rounded-2xl" />
@@ -52,8 +53,14 @@ export function DashboardHeroCards({ heroCards, loading }) {
     pendingParties: 0,
   };
 
+  const payablesSummary = heroCards?.payablesSummary || {
+    totalPayable: 0,
+    formattedTotal: "Rs. 0",
+    pendingSuppliers: 0,
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
       <div
         onClick={() => navigate("/pos")}
         className="group relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background p-5 shadow-sm hover:shadow-md hover:border-emerald-500/50 transition-all duration-200 cursor-pointer flex flex-col justify-between"
@@ -153,11 +160,11 @@ export function DashboardHeroCards({ heroCards, loading }) {
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-amber-500" />
               <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                Customer Receivables (Khata)
+                Total Receivables
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {receivablesSummary.pendingParties} Pending Customer Accounts
+              {receivablesSummary.pendingParties} Pending Accounts
             </p>
           </div>
           <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 group-hover:scale-105 transition-transform">
@@ -175,12 +182,53 @@ export function DashboardHeroCards({ heroCards, loading }) {
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 text-muted-foreground">
               <UserCheck2Icon className="size-3.5 text-primary" />
-              Active Khata Customers: <strong className="text-foreground">{receivablesSummary.pendingParties}</strong>
+              Active Khata: <strong className="text-foreground">{receivablesSummary.pendingParties}</strong>
             </span>
           </div>
 
           <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             View Ledgers <ArrowRightIcon className="size-3" />
+          </span>
+        </div>
+      </div>
+
+      <div
+        onClick={() => navigate("/suppliers")}
+        className="group relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-background p-5 shadow-sm hover:shadow-md hover:border-rose-500/50 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="size-2.5 rounded-full bg-rose-500" />
+              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                Total Payables
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {payablesSummary.pendingSuppliers} Pending Suppliers
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 group-hover:scale-105 transition-transform">
+            <Building2Icon className="size-5" />
+          </div>
+        </div>
+
+        <div className="my-3 space-y-1">
+          <p className="text-3xl sm:text-4xl font-extrabold text-foreground tabular-nums tracking-tight">
+            {payablesSummary.formattedTotal}
+          </p>
+        </div>
+
+        <div className="pt-3 border-t border-rose-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <AlertTriangleIcon className="size-3.5 text-rose-500" />
+              Active Suppliers: <strong className="text-foreground">{payablesSummary.pendingSuppliers}</strong>
+            </span>
+          </div>
+
+          <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            View Suppliers <ArrowRightIcon className="size-3" />
           </span>
         </div>
       </div>

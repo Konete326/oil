@@ -4,6 +4,8 @@ import { Customer } from "../models/customerModel.js";
 import { Expense } from "../models/expenseModel.js";
 import { AuditLog } from "../models/auditModel.js";
 import { ShopShift } from "../models/shopShiftModel.js";
+import { Supplier } from "../models/supplierModel.js";
+import { Mill } from "../models/millModel.js";
 import { checkAndAutoCloseShift } from "../utils/shiftAutoCloser.js";
 
 export const getDashboardData = async (req, res, next) => {
@@ -17,12 +19,14 @@ export const getDashboardData = async (req, res, next) => {
     let closedShift = await checkAndAutoCloseShift(todayStr);
     if (!closedShift) closedShift = await ShopShift.findOne({ shiftDate: todayStr, isClosed: true });
 
-    const [posSales, products, customers, expenses, auditLogs] = await Promise.all([
+    const [posSales, products, customers, expenses, auditLogs, suppliers, mills] = await Promise.all([
       PosSale.find().sort({ createdAt: -1 }),
       Product.find(),
       Customer.find(),
       Expense.find(),
       AuditLog.find().sort({ timestamp: -1 }).limit(10),
+      Supplier.find(),
+      Mill.find(),
     ]);
 
     const isShiftActive = !closedShift && currentHour >= 10 && currentHour < 18;
@@ -69,7 +73,16 @@ export const getDashboardData = async (req, res, next) => {
     const totalStockLiters = products.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
     const stockValuation = products.reduce((sum, p) => sum + ((p.stockQuantity || 0) * (p.costPrice || 0)), 0);
     const inStockCount = products.filter((p) => (p.stockQuantity || 0) > 0).length, outOfStockCount = products.filter((p) => (p.stockQuantity || 0) === 0).length;
-    const totalCustomerReceivable = customers.reduce((sum, c) => sum + (c.currentBalance || 0), 0), pendingCustomersCount = customers.filter((c) => (c.currentBalance || 0) > 0).length;
+    const customerReceivable = customers.reduce((sum, c) => sum + (c.currentBalance || 0), 0);
+    const pendingCustomersCount = customers.filter((c) => (c.currentBalance || 0) > 0).length;
+    const millReceivable = mills.reduce((sum, m) => sum + (m.currentBalance || 0), 0);
+    const pendingMillsCount = mills.filter((m) => (m.currentBalance || 0) > 0).length;
+    
+    const totalReceivable = customerReceivable + millReceivable;
+    const totalPendingParties = pendingCustomersCount + pendingMillsCount;
+
+    const totalPayable = suppliers.reduce((sum, s) => sum + (s.currentBalance || 0), 0);
+    const pendingSuppliersCount = suppliers.filter((s) => (s.currentBalance || 0) > 0).length;
     const monthlySales = posSales.filter((s) => new Date(s.createdAt) >= firstDayOfMonth).reduce((sum, s) => sum + (s.grandTotal || 0), 0);
 
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -91,13 +104,14 @@ export const getDashboardData = async (req, res, next) => {
         heroCards: {
           todaySales: { total: activeTodaySales, formatted: `Rs. ${activeTodaySales.toLocaleString()}`, ordersCount: activeTodayOrders, cash: todayCashSales, credit: todayCreditSales, isShiftActive: period === "today" ? isShiftActive : false, shiftLabel: periodSubtitle, periodTitle, isClosed: period === "today" ? Boolean(closedShift) : false, closedShift: period === "today" ? closedShift : null, period },
           stockSummary: { valuation: stockValuation, formattedValuation: `Rs. ${stockValuation.toLocaleString()}`, totalUnits: totalStockLiters, totalProducts: products.length, inStock: inStockCount, lowStock: 0, outOfStock: outOfStockCount },
-          receivablesSummary: { totalReceivable: totalCustomerReceivable, formattedTotal: `Rs. ${totalCustomerReceivable.toLocaleString()}`, customerReceivable: totalCustomerReceivable, millReceivable: 0, pendingParties: pendingCustomersCount },
+          receivablesSummary: { totalReceivable: totalReceivable, formattedTotal: `Rs. ${totalReceivable.toLocaleString()}`, customerReceivable: customerReceivable, millReceivable: millReceivable, pendingParties: totalPendingParties },
+          payablesSummary: { totalPayable: totalPayable, formattedTotal: `Rs. ${totalPayable.toLocaleString()}`, pendingSuppliers: pendingSuppliersCount },
         },
         kpis: [
           { id: "stock-liters", label: "Total Stock in Hand", value: `${totalStockLiters.toLocaleString()} L`, subtext: `${inStockCount} Products in Stock`, type: "green" },
           { id: "stock-val", label: "Total Stock Valuation", value: `Rs. ${stockValuation.toLocaleString()}`, subtext: "Inventory Asset Value", type: "blue" },
           { id: "net-sales", label: "Net Sales Of This Month", value: `Rs. ${monthlySales.toLocaleString()}`, subtext: "Monthly POS Volume", type: "purple" },
-          { id: "receivables", label: "Customer Receivables", value: `Rs. ${totalCustomerReceivable.toLocaleString()}`, subtext: `${pendingCustomersCount} Pending Accounts`, type: "orange" },
+          { id: "receivables", label: "Customer Receivables", value: `Rs. ${totalReceivable.toLocaleString()}`, subtext: `${totalPendingParties} Pending Accounts`, type: "orange" },
         ],
         stats: [
           { label: "Total Sales Revenue", value: `Rs. ${totalRevenue.toLocaleString()}`, delta: totalRevenue > 0 ? 12.5 : 0 },

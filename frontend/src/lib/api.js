@@ -924,6 +924,24 @@ export async function createPaymentEntry(data) {
   return { success: true, data: localItem };
 }
 
+export async function updateLedgerEntryApi(id, data) {
+  try {
+    const res = await fetch(`${API_URL}/ledger/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to update ledger entry");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("updateLedgerEntryApi error:", error);
+    throw error;
+  }
+}
+
 export async function fetchAgingReport() {
   if (typeof navigator !== "undefined" && !navigator.onLine) {
     const mills = (await getLocalSnapshot("mills")) || [];

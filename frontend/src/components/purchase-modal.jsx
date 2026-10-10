@@ -14,6 +14,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
   const [unitPrice, setUnitPrice] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("Paid");
   const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [productsList, setProductsList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +60,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
         unitPrice: Number(unitPrice),
         paymentStatus,
         invoiceNumber,
+        purchaseDate,
       });
 
       toast.success("Stock purchase recorded successfully!");
@@ -79,6 +81,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
     setQuantity("");
     setUnitPrice("");
     setInvoiceNumber("");
+    setPurchaseDate(new Date().toISOString().slice(0, 10));
   };
 
   const calculatedTotal = Number(quantity || 0) * Number(unitPrice || 0);
@@ -174,7 +177,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
             <span className="font-mono font-bold text-sm text-primary">Rs. {calculatedTotal.toLocaleString()}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <label className="font-medium text-foreground">Payment Status</label>
               <select
@@ -197,6 +200,17 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
               onChange={(e) => setInvoiceNumber(e.target.value)}
               className="font-mono"
             />
+
+            <div className="space-y-1">
+              <label className="font-medium text-foreground">Purchase Date</label>
+              <input
+                type="date"
+                required
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">

@@ -101,6 +101,7 @@ export function StockRegisterModal({
 
   const [inwardSupplier, setInwardSupplier] = useState("");
   const [inwardQty, setInwardQty] = useState("");
+  const [inwardDate, setInwardDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   const [outwardReason, setOutwardReason] = useState("Manual Stock Adjustment / Return");
   const [outwardQty, setOutwardQty] = useState("");
@@ -352,6 +353,7 @@ export function StockRegisterModal({
         quantity: Number(inwardQty),
         unitType: "Liters",
         unitPrice: activeProduct.costPrice || 0,
+        purchaseDate: inwardDate || new Date().toISOString(),
         invoiceNumber: `REC-${Date.now().toString().slice(-5)}`,
         notes: "Stock Inward Register Entry",
       });
@@ -879,10 +881,11 @@ export function StockRegisterModal({
             </div>
 
             <form onSubmit={handleRecordInward} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold text-foreground text-[11px] block">
-                  Supplier / Source Name *
-                </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1 col-span-2 md:col-span-1">
+                  <label className="font-semibold text-foreground text-[11px] block">
+                    Supplier / Source Name *
+                  </label>
                 <input
                   required
                   list="supplier-suggestions"
@@ -896,6 +899,20 @@ export function StockRegisterModal({
                     <option key={name} value={name} />
                   ))}
                 </datalist>
+                </div>
+                
+                <div className="space-y-1 col-span-2 md:col-span-1">
+                  <label className="font-semibold text-foreground text-[11px] block">
+                    Inward Date *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={inwardDate}
+                    onChange={(e) => setInwardDate(e.target.value)}
+                    className="flex h-8.5 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">

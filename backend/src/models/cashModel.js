@@ -12,6 +12,10 @@ const cashTransactionSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    partyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+    },
     amount: {
       type: Number,
       required: true,

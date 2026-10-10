@@ -35,7 +35,7 @@ export const getCashTransactions = async (req, res, next) => {
 export const createCashTransaction = async (req, res, next) => {
   try {
     await connectDB();
-    const { type, partyName, amount, category, referenceNo, paymentMode, transactionDate, notes } = req.body;
+    const { type, partyName, partyId, amount, category, referenceNo, paymentMode, transactionDate, notes } = req.body;
 
     if (!type || !["Paid", "Received"].includes(type)) {
       res.status(400);
@@ -55,6 +55,7 @@ export const createCashTransaction = async (req, res, next) => {
     const transaction = await CashTransaction.create({
       type,
       partyName: partyName.trim(),
+      partyId,
       amount: Number(amount),
       category: category || "General",
       referenceNo: referenceNo || "",

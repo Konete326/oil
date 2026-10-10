@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { fetchCustomerDetail } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { CloudLoader } from "@/components/ui/cloud-loader";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal";
 import { CustomerTrialSheetModal } from "@/components/customer-trial-sheet-modal";
-import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon } from "lucide-react";
+import { EditLedgerEntryModal } from "@/components/edit-ledger-entry-modal";
+import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon, EditIcon } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export function CustomerDetailModal({ isOpen, onClose, customerId }) {
@@ -40,6 +41,99 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
   const monthlyData = data?.monthlyData || [];
   const posSales = data?.posSales || [];
   const ledgerEntries = data?.ledgerEntries || [];
+  
+  const [editingEntry, setEditingEntry] = useState(null);
+
+  const unifiedLedger = useMemo(() => {
+    if (!customer) return [];
+    const entries = [];
+    
+    posSales.forEach(sale => {
+      const isCredit = sale.paymentMode === "Credit / Khata";
+      const grandTotal = Number(sale.grandTotal) || 0;
+      const cashRec = Number(sale.cashReceived) || 0;
+      
+      const itemsDesc = (sale.items || [])
+        .map(it => `${it.quantity}L ${it.productName || "Product"}`)
+        .join(", ") || "Oil Products";
+
+      if (isCredit || grandTotal > cashRec) {
+        entries.push({
+          id: `sale-${sale._id}`,
+          date: sale.createdAt,
+          description: itemsDesc,
+          debit: grandTotal,
+          credit: 0,
+          type: "Credit Sale",
+          isEditable: false,
+        });
+        if (cashRec > 0) {
+          entries.push({
+            id: `sale-part-${sale._id}`,
+            date: sale.updatedAt || sale.createdAt,
+            description: `Payment for Sale ${sale.saleNumber || ""}`,
+            debit: 0,
+            credit: cashRec,
+            type: "Partial Payment",
+            isEditable: false,
+          });
+        }
+      } else {
+        entries.push({
+          id: `sale-${sale._id}`,
+          date: sale.createdAt,
+          description: itemsDesc + " (Cash)",
+          debit: grandTotal,
+          credit: grandTotal,
+          type: "Cash Sale",
+          isEditable: false,
+        });
+      }
+    });
+
+    ledgerEntries.forEach(entry => {
+      const isDebit = entry.transactionType.includes("Debit");
+      const isCredit = entry.transactionType.includes("Credit") || entry.transactionType.includes("Payment");
+      entries.push({
+        id: `ledger-${entry._id}`,
+        date: entry.createdAt,
+        description: entry.notes || entry.transactionType,
+        debit: isDebit ? entry.amount : 0,
+        credit: isCredit ? entry.amount : 0,
+        type: entry.transactionType,
+        isEditable: true,
+        original: entry
+      });
+    });
+    
+    entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let totalDebit = entries.reduce((sum, e) => sum + e.debit, 0);
+    let totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
+    let openingBalance = (customer.currentBalance || 0) - totalDebit + totalCredit;
+
+    if (openingBalance !== 0) {
+      entries.unshift({
+        id: 'opening',
+        date: customer.createdAt,
+        description: 'Opening Balance',
+        debit: openingBalance > 0 ? openingBalance : 0,
+        credit: openingBalance < 0 ? Math.abs(openingBalance) : 0,
+        type: 'Opening Balance',
+        isEditable: false
+      });
+    }
+
+    let running = 0;
+    return entries.map(e => {
+      running += e.debit - e.credit;
+      return { ...e, balance: running };
+    });
+  }, [customer, posSales, ledgerEntries]);
+
+  const reloadData = () => {
+    fetchCustomerDetail(customerId).then(res => setData(res)).catch(() => {});
+  };
 
   return (
     <>
@@ -247,37 +341,51 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                       <thead className="bg-muted/40 text-muted-foreground">
                         <tr>
                           <th className="p-3">Date</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Amount</th>
-                          <th className="p-3">Payment Mode</th>
-                          <th className="p-3">Running Balance</th>
+                          <th className="p-3">Description/Particulars</th>
+                          <th className="p-3 text-right">Debit (Dr.)</th>
+                          <th className="p-3 text-right">Credit (Cr.)</th>
+                          <th className="p-3 text-right">Balance</th>
+                          <th className="p-3 text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {ledgerEntries.length > 0 ? (
-                          ledgerEntries.map((entry) => (
-                            <tr key={entry._id} className="hover:bg-muted/10">
-                              <td className="p-3 text-muted-foreground">
-                                {new Date(entry.createdAt).toLocaleString()}
+                        {unifiedLedger.length > 0 ? (
+                          unifiedLedger.map((entry) => (
+                            <tr key={entry.id} className="hover:bg-muted/10 transition-colors">
+                              <td className="p-3 text-muted-foreground whitespace-nowrap">
+                                {new Date(entry.date).toLocaleString()}
                               </td>
                               <td className="p-3 font-medium text-foreground">
-                                {entry.transactionType}
+                                {entry.description}
+                                <div className="text-[10px] text-muted-foreground font-normal mt-0.5">{entry.type}</div>
                               </td>
-                              <td className="p-3 font-mono font-semibold text-foreground">
-                                Rs {(entry.amount || 0).toLocaleString()}
+                              <td className="p-3 text-right font-mono text-rose-500">
+                                {entry.debit > 0 ? `Rs ${entry.debit.toLocaleString()}` : "-"}
                               </td>
-                              <td className="p-3 text-muted-foreground">
-                                {entry.paymentMode || "Cash"}
+                              <td className="p-3 text-right font-mono text-emerald-500">
+                                {entry.credit > 0 ? `Rs ${entry.credit.toLocaleString()}` : "-"}
                               </td>
-                              <td className="p-3 font-mono font-bold text-emerald-500">
-                                Rs {(entry.runningBalance || 0).toLocaleString()}
+                              <td className="p-3 text-right font-mono font-bold text-foreground">
+                                Rs {entry.balance.toLocaleString()}
+                              </td>
+                              <td className="p-3 text-center">
+                                {entry.isEditable && entry.original && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-[10px] px-2 gap-1"
+                                    onClick={() => setEditingEntry(entry.original)}
+                                  >
+                                    <EditIcon className="size-3" /> Edit
+                                  </Button>
+                                )}
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={5} className="p-4 text-center text-muted-foreground">
-                              No ledger entries recorded.
+                            <td colSpan={6} className="p-6 text-center text-muted-foreground">
+                              No ledger records found.
                             </td>
                           </tr>
                         )}
@@ -323,6 +431,15 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
           customer={customer}
           initialSales={posSales}
           initialLedger={ledgerEntries}
+        />
+      )}
+
+      {editingEntry && (
+        <EditLedgerEntryModal
+          isOpen={!!editingEntry}
+          onClose={() => setEditingEntry(null)}
+          entry={editingEntry}
+          onSuccess={reloadData}
         />
       )}
     </>

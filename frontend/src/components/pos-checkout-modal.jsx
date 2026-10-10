@@ -118,6 +118,7 @@ export function PosCheckoutModal({
     }
 
     onConfirm({
+      customerId: selectedCustomerObj?._id || "",
       customerName,
       saleType,
       discount: discountNum,
