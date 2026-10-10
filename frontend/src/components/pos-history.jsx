@@ -537,7 +537,7 @@ export function PosHistory() {
             </div>
             <span>POS Sales & Transaction History</span>
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1.5 font-medium">
+          <p className="text-base sm:text-base text-muted-foreground mt-1.5 font-medium">
             Automated stock deductions, customer ledgers, and revenue records.
           </p>
         </div>
@@ -546,7 +546,7 @@ export function PosHistory() {
           <Button
             size="sm"
             onClick={() => navigate("/pos")}
-            className="h-9 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:to-primary text-primary-foreground font-semibold px-4 text-sm shadow-md rounded-xl cursor-pointer transition-all hover:scale-[1.02]"
+            className="h-9 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:to-primary text-primary-foreground font-semibold px-4 text-base shadow-md rounded-xl cursor-pointer transition-all hover:scale-[1.02]"
           >
             <ShoppingCartIcon className="size-4" />
             <span>New Sale</span>
@@ -556,7 +556,7 @@ export function PosHistory() {
             size="sm"
             variant="outline"
             onClick={() => setIsExpenseModalOpen(true)}
-            className="h-9 gap-2 border-border/60 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-foreground text-sm px-4 rounded-xl cursor-pointer transition-all shadow-sm"
+            className="h-9 gap-2 border-border/60 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-foreground text-base px-4 rounded-xl cursor-pointer transition-all shadow-sm"
           >
             <PlusIcon className="size-4 text-rose-500" />
             <span>Expense</span>
@@ -566,7 +566,7 @@ export function PosHistory() {
             size="sm"
             variant="outline"
             onClick={() => setIsAdvanceModalOpen(true)}
-            className="h-9 gap-2 border-border/60 hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-600 text-foreground text-sm px-4 rounded-xl cursor-pointer transition-all shadow-sm"
+            className="h-9 gap-2 border-border/60 hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-600 text-foreground text-base px-4 rounded-xl cursor-pointer transition-all shadow-sm"
           >
             <HandCoinsIcon className="size-4 text-purple-500" />
             <span>Staff Advance</span>
@@ -576,7 +576,7 @@ export function PosHistory() {
             variant="outline"
             size="sm"
             onClick={handleExportExcel}
-            className="h-9 gap-2 text-sm px-4 rounded-xl cursor-pointer border-border/60 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-600 transition-all shadow-sm"
+            className="h-9 gap-2 text-base px-4 rounded-xl cursor-pointer border-border/60 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-600 transition-all shadow-sm"
             title="Export Excel"
           >
             <FileSpreadsheetIcon className="size-4 text-emerald-600" />
@@ -603,7 +603,7 @@ export function PosHistory() {
           type="button"
           onClick={() => handleTabChange("sales")}
           className={cn(
-            "px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
+            "px-3.5 py-2 rounded-xl text-base font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
             activeTab === "sales"
               ? "bg-card text-foreground shadow-sm border border-border/80"
               : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
@@ -611,7 +611,7 @@ export function PosHistory() {
         >
           <ReceiptIcon className="size-3.5 text-blue-500" />
           <span>Sales & Invoices</span>
-          <span className="text-xs px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
+          <span className="text-sm px-1.5 py-0.2 rounded-full bg-muted font-mono text-muted-foreground">
             {salesHistory.length}
           </span>
         </button>
@@ -620,7 +620,7 @@ export function PosHistory() {
           type="button"
           onClick={() => handleTabChange("expenses")}
           className={cn(
-            "px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
+            "px-3.5 py-2 rounded-xl text-base font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
             activeTab === "expenses"
               ? "bg-card text-foreground shadow-sm border border-rose-500/40 text-rose-600 dark:text-rose-400"
               : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
@@ -628,7 +628,7 @@ export function PosHistory() {
         >
           <HandCoinsIcon className="size-3.5 text-rose-500" />
           <span>Expenses & Staff</span>
-          <span className="text-xs px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
+          <span className="text-sm px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
             {unifiedExpensesList.length}
           </span>
         </button>
@@ -637,7 +637,7 @@ export function PosHistory() {
           type="button"
           onClick={() => handleTabChange("profit-loss")}
           className={cn(
-            "px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
+            "px-3.5 py-2 rounded-xl text-base font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0",
             activeTab === "profit-loss"
               ? "bg-card text-foreground shadow-sm border border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
               : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
@@ -675,7 +675,7 @@ export function PosHistory() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-9 text-sm h-9 bg-muted/30 focus:bg-background rounded-xl border-border/60 shadow-inner"
+              className="ps-9 text-base h-9 bg-muted/30 focus:bg-background rounded-xl border-border/60 shadow-inner"
             />
           </div>
 
@@ -688,7 +688,7 @@ export function PosHistory() {
                     setSaleTypeFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-sm text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
+                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-base text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
                 >
                   <option value="all">All Sale Types</option>
                   <option value="Retail">Retail</option>
@@ -704,7 +704,7 @@ export function PosHistory() {
                     setPaymentModeFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-sm text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
+                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-base text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
                 >
                   <option value="all">All Payment Status</option>
                   <option value="cash">Cash Paid</option>
@@ -724,7 +724,7 @@ export function PosHistory() {
                     setExpenseCategoryFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-sm text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
+                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-base text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
                 >
                   {EXPENSE_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -741,7 +741,7 @@ export function PosHistory() {
                     setPaymentModeFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-sm text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
+                  className="w-full h-9 rounded-xl border border-border/60 bg-background/50 px-3 text-base text-foreground shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
                 >
                   <option value="all">All Modes</option>
                   <option value="cash">Cash</option>
@@ -762,9 +762,9 @@ export function PosHistory() {
             <Skeleton className="h-9 w-full" />
           </div>
         ) : paginatedItems.length === 0 ? (
-          <div className="p-10 text-center text-muted-foreground text-sm space-y-1">
+          <div className="p-10 text-center text-muted-foreground text-base space-y-1">
             <p className="font-semibold text-foreground text-base">No Records Found</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your search query or filters.</p>
+            <p className="text-base text-muted-foreground">Try adjusting your search query or filters.</p>
           </div>
         ) : (
           <>
@@ -788,14 +788,14 @@ export function PosHistory() {
                 <Table>
                   <TableHeader className="bg-muted/50 backdrop-blur-md">
                     <TableRow className="border-b border-border/50 hover:bg-transparent">
-                      <TableHead className="w-[120px] text-sm h-10 font-bold text-foreground">Invoice #</TableHead>
-                      <TableHead className="text-sm h-10 font-bold text-foreground">Date & Time</TableHead>
-                      <TableHead className="text-sm h-10 font-bold text-foreground">Customer</TableHead>
-                      <TableHead className="text-center text-sm h-10 font-bold text-foreground">Sale Type</TableHead>
-                      <TableHead className="text-center text-sm h-10 font-bold text-foreground">Stock Status</TableHead>
-                      <TableHead className="text-sm h-10 font-bold text-foreground">Payment</TableHead>
-                      <TableHead className="text-right text-sm h-10 font-bold text-foreground">Grand Total</TableHead>
-                      <TableHead className="text-right text-sm h-10 pe-4 font-bold text-foreground">Action</TableHead>
+                      <TableHead className="w-[120px] text-base h-10 font-bold text-foreground">Invoice #</TableHead>
+                      <TableHead className="text-base h-10 font-bold text-foreground">Date & Time</TableHead>
+                      <TableHead className="text-base h-10 font-bold text-foreground">Customer</TableHead>
+                      <TableHead className="text-center text-base h-10 font-bold text-foreground">Sale Type</TableHead>
+                      <TableHead className="text-center text-base h-10 font-bold text-foreground">Stock Status</TableHead>
+                      <TableHead className="text-base h-10 font-bold text-foreground">Payment</TableHead>
+                      <TableHead className="text-right text-base h-10 font-bold text-foreground">Grand Total</TableHead>
+                      <TableHead className="text-right text-base h-10 pe-4 font-bold text-foreground">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -803,7 +803,7 @@ export function PosHistory() {
                       <TableRow
                         key={sale._id}
                         className={cn(
-                          "hover:bg-muted/20 text-sm border-b border-border/40",
+                          "hover:bg-muted/20 text-base border-b border-border/40",
                           sale.isCredit && "bg-amber-500/5"
                         )}
                       >
@@ -811,47 +811,47 @@ export function PosHistory() {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span>{sale.saleNumber}</span>
                             {sale.source === "Challan" && (
-                              <span className="rounded bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 px-1 py-0.2 text-xs font-semibold">
+                              <span className="rounded bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 px-1 py-0.2 text-sm font-semibold">
                                 Challan
                               </span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-sm py-2.5">
+                        <TableCell className="font-mono text-muted-foreground text-base py-2.5">
                           {new Date(sale.createdAt).toLocaleString()}
                         </TableCell>
                         <TableCell className="font-semibold text-foreground py-2.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span>{sale.customerName || "Walk-in Customer"}</span>
                             {sale.customerPhone && (
-                              <span className="text-muted-foreground text-xs">({sale.customerPhone})</span>
+                              <span className="text-muted-foreground text-sm">({sale.customerPhone})</span>
                             )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center py-2.5">
-                          <span className="inline-block rounded-md px-2 py-0.5 text-xs font-medium bg-muted border border-border text-muted-foreground">
+                          <span className="inline-block rounded-md px-2 py-0.5 text-sm font-medium bg-muted border border-border text-muted-foreground">
                             {sale.saleType}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center py-2.5 text-sm">
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                        <TableCell className="text-center py-2.5 text-base">
+                          <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
                             <CheckCircle2Icon className="size-3" />
                             <span>{sale.items?.length || 1} Items Deducted</span>
                           </span>
                         </TableCell>
-                        <TableCell className="py-2.5 text-sm">
+                        <TableCell className="py-2.5 text-base">
                           {sale.isCredit ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 border border-amber-500/35 text-amber-600 dark:text-amber-400">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm font-bold bg-amber-500/15 border border-amber-500/35 text-amber-600 dark:text-amber-400">
                               <ClockIcon className="size-3" />
                               <span>Udhar Khata</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/35 text-emerald-600 dark:text-emerald-400">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm font-semibold bg-emerald-500/15 border border-emerald-500/35 text-emerald-600 dark:text-emerald-400">
                               <span>Paid ({sale.paymentMode || "Cash"})</span>
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right font-mono font-bold py-2.5 text-sm">
+                        <TableCell className="text-right font-mono font-bold py-2.5 text-base">
                           Rs {sale.grandTotal?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-right py-2.5 pe-4">
@@ -859,7 +859,7 @@ export function PosHistory() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 gap-1 text-sm px-2.5 rounded-lg cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                              className="h-7 gap-1 text-base px-2.5 rounded-lg cursor-pointer hover:border-primary hover:text-primary transition-colors"
                               onClick={() => setCompletedSale(sale)}
                             >
                               <ReceiptIcon className="size-3 text-primary" />
@@ -870,7 +870,7 @@ export function PosHistory() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 gap-1 text-sm px-2.5 rounded-lg cursor-pointer border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 transition-colors"
+                                className="h-7 gap-1 text-base px-2.5 rounded-lg cursor-pointer border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 transition-colors"
                                 onClick={() => setSaleToUpdate(sale)}
                               >
                                 <HandCoinsIcon className="size-3 text-emerald-600" />
@@ -902,13 +902,13 @@ export function PosHistory() {
                 <Table>
                   <TableHeader className="bg-muted/70 backdrop-blur-xs">
                     <TableRow className="border-b border-border/80">
-                      <TableHead className="w-[120px] text-sm h-9 font-semibold">Voucher #</TableHead>
-                      <TableHead className="text-sm h-9 font-semibold">Date</TableHead>
-                      <TableHead className="text-sm h-9 font-semibold">Title</TableHead>
-                      <TableHead className="text-center text-sm h-9 font-semibold">Category</TableHead>
-                      <TableHead className="text-sm h-9 font-semibold">Payment Mode</TableHead>
-                      <TableHead className="text-right text-sm h-9 font-semibold">Amount (PKR)</TableHead>
-                      <TableHead className="text-right text-sm h-9 pe-4 font-semibold">Actions</TableHead>
+                      <TableHead className="w-[120px] text-base h-9 font-semibold">Voucher #</TableHead>
+                      <TableHead className="text-base h-9 font-semibold">Date</TableHead>
+                      <TableHead className="text-base h-9 font-semibold">Title</TableHead>
+                      <TableHead className="text-center text-base h-9 font-semibold">Category</TableHead>
+                      <TableHead className="text-base h-9 font-semibold">Payment Mode</TableHead>
+                      <TableHead className="text-right text-base h-9 font-semibold">Amount (PKR)</TableHead>
+                      <TableHead className="text-right text-base h-9 pe-4 font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -916,7 +916,7 @@ export function PosHistory() {
                       <TableRow
                         key={`${exp.isStaffAdvance ? "adv" : "exp"}-${exp._id}`}
                         className={cn(
-                          "hover:bg-muted/20 text-sm border-b border-border/40",
+                          "hover:bg-muted/20 text-base border-b border-border/40",
                           exp.isStaffAdvance && "bg-purple-500/5"
                         )}
                       >
@@ -928,19 +928,19 @@ export function PosHistory() {
                         >
                           {exp.voucherNumber}
                         </TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-sm py-2.5">
+                        <TableCell className="font-mono text-muted-foreground text-base py-2.5">
                           {new Date(exp.date).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="py-2.5">
-                          <p className="font-semibold text-foreground text-sm">{exp.title}</p>
+                          <p className="font-semibold text-foreground text-base">{exp.title}</p>
                           {exp.notes && (
-                            <p className="text-xs text-muted-foreground truncate max-w-xs">{exp.notes}</p>
+                            <p className="text-sm text-muted-foreground truncate max-w-xs">{exp.notes}</p>
                           )}
                         </TableCell>
                         <TableCell className="text-center py-2.5">
                           <span
                             className={cn(
-                              "inline-block rounded-md px-2 py-0.5 text-xs font-medium border",
+                              "inline-block rounded-md px-2 py-0.5 text-sm font-medium border",
                               exp.isStaffAdvance
                                 ? "bg-purple-500/15 border-purple-500/30 text-purple-600 dark:text-purple-400"
                                 : "bg-muted border-border"
@@ -949,12 +949,12 @@ export function PosHistory() {
                             {exp.category}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-foreground py-2.5 text-sm">
+                        <TableCell className="font-medium text-foreground py-2.5 text-base">
                           {exp.paymentMode || "Cash"}
                         </TableCell>
                         <TableCell
                           className={cn(
-                            "text-right font-mono font-bold py-2.5 text-sm",
+                            "text-right font-mono font-bold py-2.5 text-base",
                             exp.isStaffAdvance ? "text-purple-600 dark:text-purple-400" : "text-rose-600 dark:text-rose-400"
                           )}
                         >

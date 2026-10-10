@@ -187,7 +187,7 @@ export function PosProfitLossTab({
     <div className="space-y-4 print:hidden">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <div className="flex items-center gap-1 text-sm font-bold text-foreground pe-2 border-r border-border/70">
+          <div className="flex items-center gap-1 text-base font-bold text-foreground pe-2 border-r border-border/70">
             <CalendarIcon className="size-4 text-primary" />
             <span>Muddat (Period):</span>
           </div>
@@ -205,7 +205,7 @@ export function PosProfitLossTab({
               size="sm"
               onClick={() => setPeriod(p.id)}
               className={cn(
-                "h-8 text-sm px-3 rounded-xl cursor-pointer font-medium transition-all",
+                "h-8 text-base px-3 rounded-xl cursor-pointer font-medium transition-all",
                 period === p.id && "shadow-xs font-bold"
               )}
             >
@@ -216,19 +216,19 @@ export function PosProfitLossTab({
 
         <div className="flex items-center gap-2 flex-wrap justify-between lg:justify-end">
           {period === "custom" && (
-            <div className="flex items-center gap-1.5 text-sm bg-muted/40 p-1 rounded-xl border border-border/70">
+            <div className="flex items-center gap-1.5 text-base bg-muted/40 p-1 rounded-xl border border-border/70">
               <input
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="bg-background text-foreground px-2 py-1 rounded-lg border border-border text-sm outline-none"
+                className="bg-background text-foreground px-2 py-1 rounded-lg border border-border text-base outline-none"
               />
-              <span className="text-muted-foreground text-sm">se</span>
+              <span className="text-muted-foreground text-base">se</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="bg-background text-foreground px-2 py-1 rounded-lg border border-border text-sm outline-none"
+                className="bg-background text-foreground px-2 py-1 rounded-lg border border-border text-base outline-none"
               />
             </div>
           )}
@@ -237,7 +237,7 @@ export function PosProfitLossTab({
             variant="outline"
             size="sm"
             onClick={handlePrint}
-            className="h-8 gap-1.5 text-sm px-3 rounded-xl cursor-pointer border-border hover:bg-muted"
+            className="h-8 gap-1.5 text-base px-3 rounded-xl cursor-pointer border-border hover:bg-muted"
           >
             <PrinterIcon className="size-3.5 text-primary" />
             <span>Print Report</span>
@@ -280,7 +280,7 @@ export function PosProfitLossTab({
                 </h3>
                 <span
                   className={cn(
-                    "text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider font-mono",
+                    "text-sm px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider font-mono",
                     isLoss
                       ? "bg-rose-600 text-white"
                       : "bg-emerald-600 text-white"
@@ -290,7 +290,7 @@ export function PosProfitLossTab({
                 </span>
               </div>
 
-              <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
+              <p className="text-base text-muted-foreground max-w-xl leading-relaxed">
                 {isLoss
                   ? "Khabardar! Is muddat mein dukan ke akhrajat aur maal ki lagat kul sale se zyada rahi hai."
                   : "Dukan ke tamam akhrajat, tankhwah aur maal ki lagat nikalne ke baad aap ki asal bachat."}
@@ -299,7 +299,7 @@ export function PosProfitLossTab({
           </div>
 
           <div className="text-left md:text-right bg-background/80 backdrop-blur-xs p-3 rounded-xl border border-border/60 shadow-2xs">
-            <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="text-base font-semibold text-muted-foreground uppercase tracking-wider">
               {periodLabel}
             </div>
             <div
@@ -312,7 +312,7 @@ export function PosProfitLossTab({
             >
               {isLoss ? "-" : "+"} Rs {Math.abs(netProfitOrLoss).toLocaleString()}
             </div>
-            <div className="flex items-center md:justify-end gap-1 text-sm font-mono font-bold text-muted-foreground">
+            <div className="flex items-center md:justify-end gap-1 text-base font-mono font-bold text-muted-foreground">
               <PercentIcon className="size-3 text-primary" />
               <span>Net Bachat Margin: {netMarginPercent}%</span>
             </div>
@@ -323,14 +323,14 @@ export function PosProfitLossTab({
       <div className="rounded-2xl border border-border/80 bg-card p-4 shadow-2xs space-y-3">
         <div className="flex items-center justify-between pb-1">
           <div className="flex items-center gap-2">
-            <div className="size-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+            <div className="size-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
               1
             </div>
-            <h4 className="font-bold text-sm sm:text-base text-foreground">
+            <h4 className="font-bold text-base sm:text-base text-foreground">
               Aasan 3-Step Hisab Kitab (Step-by-Step Profit Flow)
             </h4>
           </div>
-          <span className="text-sm text-muted-foreground hidden sm:inline">
+          <span className="text-base text-muted-foreground hidden sm:inline">
             Aam zaban mein nafa nuqsan ka calculation
           </span>
         </div>
@@ -338,7 +338,7 @@ export function PosProfitLossTab({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">
+              <span className="text-base font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">
                 Step 1: Kul Sale (+)
               </span>
               <ReceiptIcon className="size-4 text-emerald-600" />
@@ -346,14 +346,14 @@ export function PosProfitLossTab({
             <div className="text-lg font-black font-mono text-foreground">
               Rs {totalRevenue.toLocaleString()}
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Cash: Rs {cashSalesTotal.toLocaleString()} | Udhar: Rs {creditSalesTotal.toLocaleString()}
             </p>
           </div>
 
           <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+              <span className="text-base font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
                 Step 2: Maal Kharid Lagat (-)
               </span>
               <PackageIcon className="size-4 text-amber-600" />
@@ -361,14 +361,14 @@ export function PosProfitLossTab({
             <div className="text-lg font-black font-mono text-amber-600 dark:text-amber-400">
               - Rs {totalCOGS.toLocaleString()}
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Bikne walay oil aur filters ki kharid qeemat
             </p>
           </div>
 
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/5 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wide">
+              <span className="text-base font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wide">
                 Step 3: Dukan Akhrajat (-)
               </span>
               <HandCoinsIcon className="size-4 text-rose-600" />
@@ -376,7 +376,7 @@ export function PosProfitLossTab({
             <div className="text-lg font-black font-mono text-rose-600 dark:text-rose-400">
               - Rs {totalOperatingExpenses.toLocaleString()}
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Bills, rent, tankhwah aur staff advances
             </p>
           </div>
@@ -392,7 +392,7 @@ export function PosProfitLossTab({
             <div className="flex items-center justify-between">
               <span
                 className={cn(
-                  "text-sm font-bold uppercase tracking-wide",
+                  "text-base font-bold uppercase tracking-wide",
                   isLoss
                     ? "text-rose-700 dark:text-rose-400"
                     : "text-emerald-700 dark:text-emerald-400"
@@ -416,7 +416,7 @@ export function PosProfitLossTab({
             >
               {isLoss ? "-" : "+"} Rs {Math.abs(netProfitOrLoss).toLocaleString()}
             </div>
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-base text-muted-foreground font-medium">
               Aap ki jaib mein bachi hui raqam
             </p>
           </div>

@@ -157,7 +157,7 @@ export function CustomerManager() {
             <UsersIcon className="size-5 text-primary" />
             <span>Customer & Khata Directory</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-base text-muted-foreground mt-0.5">
             Manage customer accounts, credit limits, khata balances, analytics, and print statements.
           </p>
         </div>
@@ -168,7 +168,7 @@ export function CustomerManager() {
               type="button"
               onClick={(e) => { e.preventDefault(); setViewMode("table"); }}
               className={cn(
-                "px-2 py-1 rounded text-sm font-medium flex items-center gap-1 cursor-pointer transition-colors",
+                "px-2 py-1 rounded text-base font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "table" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
               )}
               title="Table View"
@@ -180,7 +180,7 @@ export function CustomerManager() {
               type="button"
               onClick={(e) => { e.preventDefault(); setViewMode("cards"); }}
               className={cn(
-                "px-2 py-1 rounded text-sm font-medium flex items-center gap-1 cursor-pointer transition-colors",
+                "px-2 py-1 rounded text-base font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "cards" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
               )}
               title="Card View"
@@ -190,12 +190,12 @@ export function CustomerManager() {
             </button>
           </div>
 
-          <Button type="button" onClick={(e) => { e.preventDefault(); loadCustomers(); }} variant="outline" size="sm" className="gap-1 cursor-pointer text-sm h-7.5 px-2.5">
+          <Button type="button" onClick={(e) => { e.preventDefault(); loadCustomers(); }} variant="outline" size="sm" className="gap-1 cursor-pointer text-base h-7.5 px-2.5">
             <RefreshCwIcon className="size-3" />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
 
-          <Button type="button" onClick={(e) => { e.preventDefault(); handleOpenAdd(); }} size="sm" className="gap-1.5 cursor-pointer text-sm font-semibold h-7.5 px-3">
+          <Button type="button" onClick={(e) => { e.preventDefault(); handleOpenAdd(); }} size="sm" className="gap-1.5 cursor-pointer text-base font-semibold h-7.5 px-3">
             <UserPlusIcon className="size-3.5" />
             <span>Add Customer</span>
           </Button>
@@ -209,19 +209,19 @@ export function CustomerManager() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by name, phone, city..."
-            className="pl-8 text-sm h-7.5 bg-muted/30 focus:bg-background"
+            className="pl-8 text-base h-7.5 bg-muted/30 focus:bg-background"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 text-base text-muted-foreground">
             <FilterIcon className="size-3 text-primary" />
             <span>Filters:</span>
           </div>
           <select
             value={customerType}
             onChange={(e) => { setCustomerType(e.target.value); setPage(1); }}
-            className="h-7.5 rounded-md border border-input bg-background px-2 text-sm cursor-pointer text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-7.5 rounded-md border border-input bg-background px-2 text-base cursor-pointer text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">All Types</option>
             <option value="Retail">Retail</option>
@@ -232,7 +232,7 @@ export function CustomerManager() {
           <select
             value={status}
             onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-            className="h-7.5 rounded-md border border-input bg-background px-2 text-sm cursor-pointer text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-7.5 rounded-md border border-input bg-background px-2 text-base cursor-pointer text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">All Statuses</option>
             <option value="Active">Active</option>
@@ -249,25 +249,25 @@ export function CustomerManager() {
             <Skeleton className="h-8 w-full" />
           </div>
         ) : customers.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground text-sm space-y-1">
-            <p className="font-semibold text-foreground text-sm">No Customers Found</p>
-            <p className="text-sm">Click "Add Customer" to create your first customer profile.</p>
+          <div className="p-8 text-center text-muted-foreground text-base space-y-1">
+            <p className="font-semibold text-foreground text-base">No Customers Found</p>
+            <p className="text-base">Click "Add Customer" to create your first customer profile.</p>
           </div>
         ) : (
           <>
             <div className="max-h-[calc(100vh-250px)] min-h-[260px] overflow-y-auto overflow-x-auto">
               {viewMode === "table" ? (
-                <table className="w-full text-left text-sm min-w-[700px]">
+                <table className="w-full text-left text-base min-w-[700px]">
                   <thead className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 text-muted-foreground border-b border-border/80 shadow-xs">
                     <tr>
-                      <th className="p-2.5 ps-3.5 font-semibold text-sm h-9">Customer Name</th>
-                      <th className="p-2.5 font-semibold text-sm h-9">Type</th>
-                      <th className="p-2.5 font-semibold text-sm h-9">Contact Info</th>
-                      <th className="p-2.5 font-semibold text-sm h-9">City</th>
-                      <th className="p-2.5 font-semibold text-right text-sm h-9">Khata Balance</th>
-                      <th className="p-2.5 font-semibold text-right text-sm h-9">Credit Limit</th>
-                      <th className="p-2.5 font-semibold text-center text-sm h-9">Status</th>
-                      <th className="p-2.5 pe-3.5 font-semibold text-center text-sm h-9">Actions</th>
+                      <th className="p-2.5 ps-3.5 font-semibold text-base h-9">Customer Name</th>
+                      <th className="p-2.5 font-semibold text-base h-9">Type</th>
+                      <th className="p-2.5 font-semibold text-base h-9">Contact Info</th>
+                      <th className="p-2.5 font-semibold text-base h-9">City</th>
+                      <th className="p-2.5 font-semibold text-right text-base h-9">Khata Balance</th>
+                      <th className="p-2.5 font-semibold text-right text-base h-9">Credit Limit</th>
+                      <th className="p-2.5 font-semibold text-center text-base h-9">Status</th>
+                      <th className="p-2.5 pe-3.5 font-semibold text-center text-base h-9">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
@@ -277,29 +277,29 @@ export function CustomerManager() {
                         className="hover:bg-muted/20 transition-colors cursor-pointer"
                         onClick={() => handleOpenDetail(c._id)}
                       >
-                        <td className="p-2 ps-3.5 font-semibold text-foreground text-sm">
+                        <td className="p-2 ps-3.5 font-semibold text-foreground text-base">
                           {c.name}
                         </td>
                         <td className="p-2">
-                          <span className="px-1.5 py-0.5 rounded text-xs font-mono font-medium bg-primary/10 text-primary border border-primary/20">
+                          <span className="px-1.5 py-0.5 rounded text-sm font-mono font-medium bg-primary/10 text-primary border border-primary/20">
                             {c.customerType || "Retail"}
                           </span>
                         </td>
-                        <td className="p-2 text-muted-foreground text-sm">
+                        <td className="p-2 text-muted-foreground text-base">
                           {c.phone || c.email || "—"}
                         </td>
-                        <td className="p-2 text-muted-foreground text-sm">
+                        <td className="p-2 text-muted-foreground text-base">
                           {c.city || "—"}
                         </td>
-                        <td className="p-2 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                        <td className="p-2 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-base">
                           Rs {(c.currentBalance || 0).toLocaleString()}
                         </td>
-                        <td className="p-2 text-right font-mono text-muted-foreground text-sm">
+                        <td className="p-2 text-right font-mono text-muted-foreground text-base">
                           Rs {(c.creditLimit || 0).toLocaleString()}
                         </td>
                         <td className="p-2 text-center">
                           <span
-                            className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
+                            className={`px-1.5 py-0.5 rounded text-sm font-semibold ${
                               c.status === "Active"
                                 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                                 : "bg-muted text-muted-foreground border border-border"
@@ -358,11 +358,11 @@ export function CustomerManager() {
                   </tbody>
                   <tfoot className="bg-muted/80 backdrop-blur-sm sticky bottom-0 border-t border-border shadow-[0_-1px_2px_rgba(0,0,0,0.05)]">
                     <tr>
-                      <td colSpan={4} className="p-2.5 text-right text-sm text-muted-foreground font-semibold">Overall Filtered Total:</td>
-                      <td className="p-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                      <td colSpan={4} className="p-2.5 text-right text-base text-muted-foreground font-semibold">Overall Filtered Total:</td>
+                      <td className="p-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-base">
                         Rs {(overallKhataBalance || 0).toLocaleString()}
                       </td>
-                      <td className="p-2.5 text-right font-mono font-bold text-muted-foreground text-sm">
+                      <td className="p-2.5 text-right font-mono font-bold text-muted-foreground text-base">
                         Rs {(overallCreditLimit || 0).toLocaleString()}
                       </td>
                       <td colSpan={2}></td>
@@ -380,18 +380,18 @@ export function CustomerManager() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h4 className="font-semibold text-sm text-foreground truncate">{c.name}</h4>
+                            <h4 className="font-semibold text-base text-foreground truncate">{c.name}</h4>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-xs font-medium px-1.5 py-0.2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                              <span className="text-sm font-medium px-1.5 py-0.2 rounded-full bg-primary/10 text-primary border border-primary/20">
                                 {c.customerType || "Retail"}
                               </span>
-                              <span className="text-xs text-muted-foreground truncate">{c.city || "Karachi"}</span>
+                              <span className="text-sm text-muted-foreground truncate">{c.city || "Karachi"}</span>
                             </div>
                           </div>
 
                           <span
                             className={cn(
-                              "px-1.5 py-0.5 rounded-full text-xs font-semibold shrink-0",
+                              "px-1.5 py-0.5 rounded-full text-sm font-semibold shrink-0",
                               c.status === "Active"
                                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                 : "bg-muted text-muted-foreground border border-border"
@@ -401,12 +401,12 @@ export function CustomerManager() {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-md bg-muted/30 text-sm border border-border/50">
+                        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-md bg-muted/30 text-base border border-border/50">
                           <div>
-                            <span className="text-xs text-muted-foreground block">Khata Balance</span>
+                            <span className="text-sm text-muted-foreground block">Khata Balance</span>
                             <span
                               className={cn(
-                                "font-mono font-bold text-sm",
+                                "font-mono font-bold text-base",
                                 hasBalance ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
                               )}
                             >
@@ -414,15 +414,15 @@ export function CustomerManager() {
                             </span>
                           </div>
                           <div>
-                            <span className="text-xs text-muted-foreground block">Credit Limit</span>
-                            <span className="font-mono text-muted-foreground text-sm">
+                            <span className="text-sm text-muted-foreground block">Credit Limit</span>
+                            <span className="font-mono text-muted-foreground text-base">
                               Rs {(c.creditLimit || 0).toLocaleString()}
                             </span>
                           </div>
                         </div>
 
                         {c.phone && (
-                          <div className="flex items-center justify-between gap-1 text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between gap-1 text-sm text-muted-foreground">
                             <span className="font-mono">{c.phone}</span>
                             <div className="flex items-center gap-1">
                               <a
@@ -451,7 +451,7 @@ export function CustomerManager() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedCustomerForTrial(c); }}
-                            className="h-6.5 text-xs gap-1 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
                             title="Customer Trial Balance Sheet"
                           >
                             <ScaleIcon className="size-2.5" />
@@ -462,7 +462,7 @@ export function CustomerManager() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenDetail(c._id); }}
-                            className="h-6.5 text-xs gap-1 px-2 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 cursor-pointer"
                           >
                             <BookOpenIcon className="size-2.5 text-primary" />
                             <span>Khata</span>
@@ -473,7 +473,7 @@ export function CustomerManager() {
                             size="sm"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenPrint(c); }}
                             disabled={loadingPrintId === c._id}
-                            className="h-6.5 text-xs gap-1 px-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
                             title="Print A4 Customer Statement"
                           >
                             <PrinterIcon className="size-2.5" />
@@ -484,7 +484,7 @@ export function CustomerManager() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenEdit(c); }}
-                            className="h-6.5 text-xs gap-1 px-2 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 cursor-pointer"
                           >
                             <Edit2Icon className="size-2.5 text-blue-500" />
                             <span>Edit</span>
@@ -494,7 +494,7 @@ export function CustomerManager() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(c); }}
-                            className="h-6.5 text-xs px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
+                            className="h-6.5 text-sm px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
                           >
                             <Trash2Icon className="size-2.5" />
                           </Button>
