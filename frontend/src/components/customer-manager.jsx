@@ -11,6 +11,7 @@ import { CustomerDetailModal } from "@/components/customer-detail-modal";
 import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { PaginationControl } from "@/components/pagination-control";
+import { AddLedgerEntryModal } from "@/components/add-ledger-entry-modal";
 import {
   UsersIcon,
   UserPlusIcon,
@@ -24,6 +25,7 @@ import {
   PhoneCallIcon,
   MessageSquareIcon,
   LayoutGridIcon,
+  WalletIcon,
   ListIcon,
   BookOpenIcon,
   ScaleIcon,
@@ -58,6 +60,7 @@ export function CustomerManager() {
   const [printDirectCustomer, setPrintDirectCustomer] = useState(null);
   const [printDirectData, setPrintDirectData] = useState(null);
   const [isPrintDirectOpen, setIsPrintDirectOpen] = useState(false);
+  const [ledgerEntryCustomer, setLedgerEntryCustomer] = useState(null);
   const [loadingPrintId, setLoadingPrintId] = useState(null);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -314,6 +317,16 @@ export function CustomerManager() {
                               type="button"
                               variant="ghost"
                               size="icon-sm"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLedgerEntryCustomer(c); }}
+                              className="size-7 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 cursor-pointer"
+                              title="Add Jama / Payment"
+                            >
+                              <WalletIcon className="size-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedCustomerForTrial(c); }}
                               className="size-7 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
                               title="Customer Individual Trial Balance Sheet"
@@ -450,6 +463,17 @@ export function CustomerManager() {
                             type="button"
                             variant="outline"
                             size="sm"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLedgerEntryCustomer(c); }}
+                            className="h-6.5 text-sm gap-1 px-2 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 cursor-pointer"
+                            title="Add Jama / Payment"
+                          >
+                            <WalletIcon className="size-2.5" />
+                            <span>Jama</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedCustomerForTrial(c); }}
                             className="h-6.5 text-sm gap-1 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
                             title="Customer Trial Balance Sheet"
@@ -555,6 +579,18 @@ export function CustomerManager() {
         description={`Are you sure you want to permanently delete customer profile for "${deleteTarget?.name}"?`}
         confirmText="Delete Profile"
         variant="destructive"
+      />
+
+      <AddLedgerEntryModal
+        open={!!ledgerEntryCustomer}
+        onOpenChange={(open) => !open && setLedgerEntryCustomer(null)}
+        customerId={ledgerEntryCustomer?._id}
+        clientName={ledgerEntryCustomer?.name}
+        onSuccess={() => {
+          setLedgerEntryCustomer(null);
+          loadCustomers(false);
+          toast.success("Ledger entry added successfully");
+        }}
       />
     </div>
   );
