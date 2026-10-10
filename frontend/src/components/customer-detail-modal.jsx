@@ -6,7 +6,7 @@ import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal";
 import { CustomerTrialSheetModal } from "@/components/customer-trial-sheet-modal";
 import { EditLedgerEntryModal } from "@/components/edit-ledger-entry-modal";
-import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon, EditIcon } from "lucide-react";
+import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon, Edit3Icon } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export function CustomerDetailModal({ isOpen, onClose, customerId }) {
@@ -92,8 +92,8 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
     });
 
     ledgerEntries.forEach(entry => {
-      const isDebit = entry.transactionType.includes("Debit");
-      const isCredit = entry.transactionType.includes("Credit") || entry.transactionType.includes("Payment");
+      const isDebit = entry.transactionType?.includes("Debit") || false;
+      const isCredit = entry.transactionType?.includes("Credit") || entry.transactionType?.includes("Payment") || false;
       entries.push({
         id: `ledger-${entry._id}`,
         date: entry.createdAt,
@@ -376,7 +376,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                                     className="h-7 text-[10px] px-2 gap-1"
                                     onClick={() => setEditingEntry(entry.original)}
                                   >
-                                    <EditIcon className="size-3" /> Edit
+                                    <Edit3Icon className="size-3" /> Edit
                                   </Button>
                                 )}
                               </td>
