@@ -49,16 +49,16 @@ export function CashPartyReport({ partySummaries = [], loading = false }) {
             placeholder="Search party name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-8 text-xs h-7.5 bg-background"
+            className="ps-8 text-sm h-7.5 bg-background"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
-          <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20 text-[11px]">
+        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+          <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20 text-sm">
             <ArrowUpRightIcon className="size-3" />
             <span>Total Paid: <strong className="font-mono font-bold">Rs {grandPaid.toLocaleString()}</strong></span>
           </div>
-          <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 text-[11px]">
+          <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 text-sm">
             <ArrowDownLeftIcon className="size-3" />
             <span>Total Received: <strong className="font-mono font-bold">Rs {grandReceived.toLocaleString()}</strong></span>
           </div>
@@ -67,8 +67,8 @@ export function CashPartyReport({ partySummaries = [], loading = false }) {
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase text-[10.5px] font-semibold tracking-wider">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase text-xs font-semibold tracking-wider">
               <tr>
                 <th className="p-2.5 ps-3.5">Party / Account Title</th>
                 <th className="p-2.5 text-right">Total Paid (Out)</th>
@@ -95,28 +95,28 @@ export function CashPartyReport({ partySummaries = [], loading = false }) {
                 filteredParties.map((party, idx) => (
                   <tr key={party.partyName || idx} className="hover:bg-muted/20 transition-colors">
                     <td className="p-2.5 ps-3.5 font-semibold text-foreground flex items-center gap-2">
-                      <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[11px] shrink-0 border border-primary/20">
+                      <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0 border border-primary/20">
                         {party.partyName ? party.partyName.charAt(0).toUpperCase() : <UsersIcon className="size-3" />}
                       </div>
                       <span>{party.partyName}</span>
                     </td>
-                    <td className="p-2.5 text-right font-mono font-medium text-rose-600 dark:text-rose-400 text-xs">
+                    <td className="p-2.5 text-right font-mono font-medium text-rose-600 dark:text-rose-400 text-sm">
                       Rs {party.totalPaid.toLocaleString()}
                     </td>
-                    <td className="p-2.5 text-right font-mono font-medium text-emerald-600 dark:text-emerald-400 text-xs">
+                    <td className="p-2.5 text-right font-mono font-medium text-emerald-600 dark:text-emerald-400 text-sm">
                       Rs {party.totalReceived.toLocaleString()}
                     </td>
-                    <td className={`p-2.5 text-right font-mono font-bold text-xs ${
+                    <td className={`p-2.5 text-right font-mono font-bold text-sm ${
                       party.netBalance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                     }`}>
                       {party.netBalance >= 0 ? "+" : ""}Rs {party.netBalance.toLocaleString()}
                     </td>
                     <td className="p-2.5 text-center">
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-muted text-muted-foreground border border-border">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground border border-border">
                         {party.paidCount} Paid / {party.receivedCount} Rec
                       </span>
                     </td>
-                    <td className="p-2.5 pe-3.5 text-right text-muted-foreground text-[11px] font-mono">
+                    <td className="p-2.5 pe-3.5 text-right text-muted-foreground text-sm font-mono">
                       {party.lastTransactionDate ? new Date(party.lastTransactionDate).toLocaleDateString() : "-"}
                     </td>
                   </tr>

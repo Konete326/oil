@@ -188,7 +188,7 @@ export function ProductManager() {
             <PackageIcon className="size-5 text-primary" />
             <span>Oil Products & Inventory</span>
           </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Manage oil products, purchase rates, stock in liters, and barcode stickers.
           </p>
         </div>
@@ -198,7 +198,7 @@ export function ProductManager() {
             <button
               onClick={() => setViewMode("table")}
               className={cn(
-                "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
+                "px-2 py-1 rounded text-sm font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "table"
                   ? "bg-background text-foreground shadow-xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -211,7 +211,7 @@ export function ProductManager() {
             <button
               onClick={() => setViewMode("cards")}
               className={cn(
-                "px-2 py-1 rounded text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors",
+                "px-2 py-1 rounded text-sm font-medium flex items-center gap-1 cursor-pointer transition-colors",
                 viewMode === "cards"
                   ? "bg-background text-foreground shadow-xs font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -227,7 +227,7 @@ export function ProductManager() {
             variant="outline"
             size="sm"
             onClick={() => navigate("/stock-register")}
-            className="h-7.5 gap-1.5 text-xs px-3 border-border hover:bg-muted text-foreground transition-colors cursor-pointer"
+            className="h-7.5 gap-1.5 text-sm px-3 border-border hover:bg-muted text-foreground transition-colors cursor-pointer"
           >
             <BookOpenIcon className="size-3.5 text-muted-foreground" />
             <span>Stock Register</span>
@@ -238,7 +238,7 @@ export function ProductManager() {
               setEditingProduct(null);
               setIsModalOpen(true);
             }}
-            className="gap-1.5 shadow-xs cursor-pointer text-xs h-7.5 px-3"
+            className="gap-1.5 shadow-xs cursor-pointer text-sm h-7.5 px-3"
           >
             <PlusIcon className="size-3.5" />
             <span>Add Product</span>
@@ -259,7 +259,7 @@ export function ProductManager() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8 text-xs h-7.5 w-full bg-muted/30 focus:bg-background"
+              className="ps-8 text-sm h-7.5 w-full bg-muted/30 focus:bg-background"
             />
           </div>
 
@@ -270,7 +270,7 @@ export function ProductManager() {
                 setStockStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="all">All Stock Status</option>
               <option value="inStock">In Stock Only</option>
@@ -282,7 +282,7 @@ export function ProductManager() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="name">Sort: Name (A-Z)</option>
               <option value="priceLow">Sort: Price (Low to High)</option>
@@ -304,8 +304,8 @@ export function ProductManager() {
         ) : filteredProducts.length === 0 ? (
           <div className="p-8 text-center space-y-2">
             <PackageIcon className="size-7 mx-auto text-muted-foreground/60" />
-            <p className="text-xs font-semibold text-foreground">No Products Found</p>
-            <p className="text-[11px] text-muted-foreground">Click "Add Product" to add your first oil item to inventory.</p>
+            <p className="text-sm font-semibold text-foreground">No Products Found</p>
+            <p className="text-sm text-muted-foreground">Click "Add Product" to add your first oil item to inventory.</p>
           </div>
         ) : (
           <>
@@ -314,11 +314,11 @@ export function ProductManager() {
                 <Table className="min-w-[760px]">
                   <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                     <TableRow className="border-b border-border/80">
-                      <TableHead className="text-xs h-9">Product Name</TableHead>
-                      <TableHead className="text-right text-xs h-9">Kharid Rate (Cost / L)</TableHead>
-                      <TableHead className="text-center text-xs h-9">Stock in Liters</TableHead>
-                      <TableHead className="text-right text-xs h-9">Stock Value (Maliyat)</TableHead>
-                      <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
+                      <TableHead className="text-sm h-9">Product Name</TableHead>
+                      <TableHead className="text-right text-sm h-9">Kharid Rate (Cost / L)</TableHead>
+                      <TableHead className="text-center text-sm h-9">Stock in Liters</TableHead>
+                      <TableHead className="text-right text-sm h-9">Stock Value (Maliyat)</TableHead>
+                      <TableHead className="text-right text-sm h-9 pe-4">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -335,22 +335,22 @@ export function ProductManager() {
                                   className="size-8 rounded-md object-contain border border-border bg-muted/40 shrink-0"
                                 />
                               ) : (
-                                <div className="size-8 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-[10px] shrink-0 font-mono">
+                                <div className="size-8 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
                                   {prod.name ? prod.name.slice(0, 2).toUpperCase() : "OL"}
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <p className="font-semibold text-xs text-foreground truncate">{prod.name}</p>
+                                <p className="font-semibold text-sm text-foreground truncate">{prod.name}</p>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right tabular-nums text-xs py-2.5 font-bold text-foreground">
+                          <TableCell className="text-right tabular-nums text-sm py-2.5 font-bold text-foreground">
                             Rs {prod.costPrice?.toLocaleString()} / L
                           </TableCell>
                           <TableCell className="text-center py-2.5">
                             <span
                               className={cn(
-                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold border font-mono",
+                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border font-mono",
                                 isOutOfStock
                                   ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400"
                                   : "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
@@ -365,7 +365,7 @@ export function ProductManager() {
                                 : `${prod.stockQuantity} Liters`}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right tabular-nums text-xs py-2.5 font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                          <TableCell className="text-right tabular-nums text-sm py-2.5 font-bold font-mono text-emerald-600 dark:text-emerald-400">
                             Rs {(((prod.stockQuantity || 0) * (prod.costPrice || 0))).toLocaleString()}
                           </TableCell>
                           <TableCell className="text-right py-2.5 pe-4">
@@ -447,18 +447,18 @@ export function ProductManager() {
                                 className="size-9 rounded-md object-contain border border-border bg-muted/40 shrink-0"
                               />
                             ) : (
-                              <div className="size-9 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
+                              <div className="size-9 rounded-md bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm shrink-0 font-mono">
                                 {prod.name ? prod.name.slice(0, 2).toUpperCase() : "OL"}
                               </div>
                             )}
                             <div className="min-w-0">
-                              <h4 className="font-semibold text-xs text-foreground truncate">{prod.name}</h4>
+                              <h4 className="font-semibold text-sm text-foreground truncate">{prod.name}</h4>
                             </div>
                           </div>
 
                           <span
                             className={cn(
-                              "px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 font-mono",
+                              "px-2 py-0.5 rounded-full text-xs font-bold shrink-0 font-mono",
                               isOutOfStock
                                 ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
                                 : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -474,16 +474,16 @@ export function ProductManager() {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 p-2 rounded-md bg-muted/30 text-xs border border-border/50">
+                        <div className="grid grid-cols-2 gap-2 p-2 rounded-md bg-muted/30 text-sm border border-border/50">
                           <div>
-                            <span className="text-[9px] text-muted-foreground block font-medium">Kharid Rate</span>
-                            <span className="font-mono font-bold text-foreground text-xs">
+                            <span className="text-xs text-muted-foreground block font-medium">Kharid Rate</span>
+                            <span className="font-mono font-bold text-foreground text-sm">
                               Rs {prod.costPrice?.toLocaleString() || 0} / L
                             </span>
                           </div>
                           <div className="text-right">
-                            <span className="text-[9px] text-emerald-700 dark:text-emerald-400 block font-semibold uppercase">Stock Value</span>
-                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                            <span className="text-xs text-emerald-700 dark:text-emerald-400 block font-semibold uppercase">Stock Value</span>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                               Rs {(((prod.stockQuantity || 0) * (prod.costPrice || 0))).toLocaleString()}
                             </span>
                           </div>
@@ -494,7 +494,7 @@ export function ProductManager() {
                             variant="outline"
                             size="sm"
                             onClick={() => setViewingProduct(prod)}
-                            className="h-6.5 text-[11px] gap-1 px-2 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 cursor-pointer"
                             title="Product Details & Value"
                           >
                             <EyeIcon className="size-3 text-primary" />
@@ -507,7 +507,7 @@ export function ProductManager() {
                               setSelectedRegisterProduct(prod);
                               setIsStockRegisterOpen(true);
                             }}
-                            className="h-6.5 text-[11px] gap-1 px-2 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
                           >
                             <BookOpenIcon className="size-3 text-emerald-600" />
                             <span>Register</span>
@@ -516,7 +516,7 @@ export function ProductManager() {
                             variant="outline"
                             size="sm"
                             onClick={() => setBarcodeProduct(prod)}
-                            className="h-6.5 text-[11px] gap-1 px-2 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 cursor-pointer"
                           >
                             <ScanBarcodeIcon className="size-3 text-primary" />
                             <span>Sticker</span>
@@ -528,7 +528,7 @@ export function ProductManager() {
                               setEditingProduct(prod);
                               setIsModalOpen(true);
                             }}
-                            className="h-6.5 text-[11px] gap-1 px-2 cursor-pointer"
+                            className="h-6.5 text-sm gap-1 px-2 cursor-pointer"
                           >
                             <Edit3Icon className="size-3 text-blue-500" />
                             <span>Edit</span>
@@ -537,7 +537,7 @@ export function ProductManager() {
                             variant="outline"
                             size="sm"
                             onClick={() => setConfirmDeleteProd(prod)}
-                            className="h-6.5 text-[11px] px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
+                            className="h-6.5 text-sm px-2 text-destructive hover:bg-destructive/10 cursor-pointer"
                           >
                             <Trash2Icon className="size-3" />
                           </Button>

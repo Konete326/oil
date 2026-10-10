@@ -125,10 +125,10 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
               <UserIcon className="size-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-foreground">
+              <h2 className="text-base sm:text-base font-bold text-foreground">
                 {editingUser ? "Edit User Account & Permissions" : "Create New User Account"}
               </h2>
-              <p className="text-[11px] text-muted-foreground">Configure profile credentials and accessible ERP modules.</p>
+              <p className="text-sm text-muted-foreground">Configure profile credentials and accessible ERP modules.</p>
             </div>
           </div>
           <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer size-7 rounded-lg">
@@ -136,7 +136,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-sm">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
             <div className="md:col-span-6 space-y-3">
               <div className="font-semibold text-foreground flex items-center gap-1.5 pb-1 border-b border-border/60">
@@ -186,7 +186,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold cursor-pointer"
+                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold cursor-pointer"
                   >
                     <option value="admin">Admin (Full Control)</option>
                     <option value="manager">Manager</option>
@@ -200,7 +200,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium cursor-pointer"
+                    className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium cursor-pointer"
                   >
                     <option value="Active">Active (Enabled)</option>
                     <option value="Inactive">Inactive (Disabled)</option>
@@ -218,7 +218,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                 <button
                   type="button"
                   onClick={handleSelectAllToggle}
-                  className="text-[10px] text-primary hover:underline font-semibold cursor-pointer flex items-center gap-1"
+                  className="text-xs text-primary hover:underline font-semibold cursor-pointer flex items-center gap-1"
                 >
                   <CheckSquareIcon className="size-3" />
                   <span>{selectedPermissions.includes("all") ? "Deselect All" : "Select All"}</span>
@@ -231,7 +231,7 @@ export function UserModal({ isOpen, onClose, editingUser = null, onSuccess }) {
                   return (
                     <label
                       key={perm.id}
-                      className={`flex items-center gap-2 text-[11px] p-1.5 rounded-lg cursor-pointer transition-colors border ${
+                      className={`flex items-center gap-2 text-sm p-1.5 rounded-lg cursor-pointer transition-colors border ${
                         isChecked
                           ? "bg-primary/10 border-primary/30 text-foreground font-medium"
                           : "border-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"

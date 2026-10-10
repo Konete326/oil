@@ -451,7 +451,7 @@ export function AppHeader({ user, onLogout }) {
                 if (searchQuery.trim().length > 0 || searchResults.length > 0) setIsSearchOpen(true);
               }}
               onKeyDown={handleKeyDown}
-              className="ps-10 pe-16 text-xs h-10 w-full bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/80 rounded-xl transition-all shadow-2xs focus-visible:ring-1 focus-visible:ring-primary"
+              className="ps-10 pe-16 text-sm h-10 w-full bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/80 rounded-xl transition-all shadow-2xs focus-visible:ring-1 focus-visible:ring-primary"
             />
             <div className="absolute right-2.5 flex items-center gap-1">
               {searchQuery ? (
@@ -469,8 +469,8 @@ export function AppHeader({ user, onLogout }) {
                   <XIcon className="size-3.5" />
                 </button>
               ) : (
-                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-muted-foreground bg-background/80 border border-border rounded shadow-2xs pointer-events-none">
-                  <span className="text-xs">⌘</span>K
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-mono font-semibold text-muted-foreground bg-background/80 border border-border rounded shadow-2xs pointer-events-none">
+                  <span className="text-sm">⌘</span>K
                 </kbd>
               )}
             </div>
@@ -479,12 +479,12 @@ export function AppHeader({ user, onLogout }) {
           {isSearchOpen && (
             <div className="absolute left-0 right-0 top-11.5 z-50 rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-100 w-full">
               <div className="p-2.5 border-b border-border bg-muted/40 flex flex-col gap-2">
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                <div className="flex justify-between items-center text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   <span className="flex items-center gap-1.5 text-foreground">
                     <SparklesIcon className="size-3 text-primary" />
                     Global Search ({filteredResults.length})
                   </span>
-                  <span className="font-mono text-[9.5px]">Role: {user?.role || "Staff"}</span>
+                  <span className="font-mono text-xs">Role: {user?.role || "Staff"}</span>
                 </div>
 
                 {categories.length > 2 && (
@@ -495,7 +495,7 @@ export function AppHeader({ user, onLogout }) {
                         type="button"
                         onClick={() => setSelectedCategory(cat)}
                         className={cn(
-                          "px-2 py-0.5 rounded-full text-[10.5px] font-medium whitespace-nowrap transition-colors cursor-pointer border",
+                          "px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border",
                           selectedCategory === cat
                             ? "bg-primary text-primary-foreground border-primary shadow-2xs"
                             : "bg-background/80 text-muted-foreground border-border hover:text-foreground hover:bg-muted"
@@ -510,14 +510,14 @@ export function AppHeader({ user, onLogout }) {
 
               <div ref={resultsContainerRef} className="max-h-80 overflow-y-auto divide-y divide-border/40 p-1">
                 {searchLoading ? (
-                  <div className="p-5 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                  <div className="p-5 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
                     <div className="size-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                     <span>Searching database...</span>
                   </div>
                 ) : filteredResults.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-muted-foreground space-y-1">
+                  <div className="p-6 text-center text-sm text-muted-foreground space-y-1">
                     <p className="font-medium text-foreground">No Records Found</p>
-                    <p className="text-[11px]">No matching records found for "{searchQuery}".</p>
+                    <p className="text-sm">No matching records found for "{searchQuery}".</p>
                   </div>
                 ) : (
                   filteredResults.map((res, idx) => (
@@ -541,16 +541,16 @@ export function AppHeader({ user, onLogout }) {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-xs text-foreground truncate">
+                            <span className="font-semibold text-sm text-foreground truncate">
                               {res.title}
                             </span>
                           </div>
-                          <p className="text-[11px] text-muted-foreground truncate">{res.subtitle}</p>
+                          <p className="text-sm text-muted-foreground truncate">{res.subtitle}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[9.5px] font-medium px-2 py-0.5 rounded-md bg-muted border border-border text-muted-foreground">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-muted border border-border text-muted-foreground">
                           {res.category}
                         </span>
                         <ArrowRightIcon className={cn(
@@ -563,7 +563,7 @@ export function AppHeader({ user, onLogout }) {
                 )}
               </div>
 
-              <div className="p-2 border-t border-border bg-muted/20 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+              <div className="p-2 border-t border-border bg-muted/20 flex items-center justify-between text-xs text-muted-foreground font-mono">
                 <div className="flex items-center gap-2.5">
                   <span className="flex items-center gap-1">
                     <kbd className="px-1 py-0.5 rounded bg-background border border-border">↑</kbd>
@@ -593,7 +593,7 @@ export function AppHeader({ user, onLogout }) {
           variant="outline"
           onClick={() => setIsShopModalOpen(true)}
           className={cn(
-            "gap-2 h-9 px-3 text-xs font-medium rounded-xl border transition-all cursor-pointer shadow-2xs shrink-0",
+            "gap-2 h-9 px-3 text-sm font-medium rounded-xl border transition-all cursor-pointer shadow-2xs shrink-0",
             shiftStatus?.isClosed
               ? "border-border/80 bg-muted/40 text-muted-foreground hover:bg-muted"
               : "border-border/80 bg-background/60 hover:bg-muted/70 text-foreground"
@@ -629,7 +629,7 @@ export function AppHeader({ user, onLogout }) {
         >
           <BellIcon className="size-4" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-primary text-[9.5px] font-bold text-primary-foreground font-mono">
+            <span className="absolute -top-1 -right-1 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground font-mono">
               {unreadCount}
             </span>
           )}

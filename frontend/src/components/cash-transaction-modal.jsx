@@ -77,19 +77,19 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
         <div className="flex items-center justify-between border-b border-border/80 pb-3">
           <div>
             <h2 className="text-base font-bold text-foreground tracking-tight">Record Cash Transaction</h2>
-            <p className="text-[11px] text-muted-foreground">Add new Paid Cash (outflow) or Received Cash (inflow) entry.</p>
+            <p className="text-sm text-muted-foreground">Add new Paid Cash (outflow) or Received Cash (inflow) entry.</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="size-7 cursor-pointer">
             <XIcon className="size-4" />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-2 p-1 bg-muted/40 rounded-lg border border-border">
             <button
               type="button"
               onClick={() => setType("Paid")}
-              className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-sm font-semibold transition-all cursor-pointer ${
                 type === "Paid"
                   ? "bg-rose-600 text-white shadow-2xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -102,7 +102,7 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
             <button
               type="button"
               onClick={() => setType("Received")}
-              className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-sm font-semibold transition-all cursor-pointer ${
                 type === "Received"
                   ? "bg-emerald-600 text-white shadow-2xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -142,7 +142,7 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
                 type="date"
                 value={transactionDate}
                 onChange={(e) => setTransactionDate(e.target.value)}
-                className="flex h-8 w-full rounded-md border border-input bg-background px-2.5 py-1 text-xs shadow-2xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-8 w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm shadow-2xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
           </div>
@@ -153,7 +153,7 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 {CATEGORY_OPTIONS.map((cat) => (
                   <option key={cat} value={cat}>
@@ -168,7 +168,7 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 {PAYMENT_MODES.map((mode) => (
                   <option key={mode} value={mode}>
@@ -190,10 +190,10 @@ export function CashTransactionModal({ isOpen, onClose, initialType = "Paid", on
           />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
-            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading} className="h-7.5 text-xs cursor-pointer">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading} className="h-7.5 text-sm cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="h-7.5 gap-1.5 text-xs font-semibold cursor-pointer">
+            <Button type="submit" size="sm" disabled={loading || !isFormValid} className="h-7.5 gap-1.5 text-sm font-semibold cursor-pointer">
               {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : <PlusIcon className="size-3.5" />}
               <span>Save {type} Record</span>
             </Button>

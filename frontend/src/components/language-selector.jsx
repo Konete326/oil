@@ -41,10 +41,10 @@ export function LanguageSelector({ variant = "header", className }) {
               <Globe className="size-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
                 Language & Translation Settings
               </h3>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Switch system language instantly between English, Urdu, and Aasan Urdu (Roman).
               </p>
             </div>
@@ -69,8 +69,8 @@ export function LanguageSelector({ variant = "header", className }) {
                 <div className="flex items-center gap-3">
                   <span className="text-xl leading-none">{lang.flag}</span>
                   <div>
-                    <p className="text-xs font-medium">{lang.label}</p>
-                    <p className="text-[11px] text-muted-foreground font-sans">{lang.native}</p>
+                    <p className="text-sm font-medium">{lang.label}</p>
+                    <p className="text-sm text-muted-foreground font-sans">{lang.native}</p>
                   </div>
                 </div>
 
@@ -84,7 +84,7 @@ export function LanguageSelector({ variant = "header", className }) {
           })}
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border/50 mt-3">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border/50 mt-3">
           <Sparkles className="size-4 text-primary shrink-0" />
           <span>
             Active Language: <strong className="text-foreground">{activeLanguageObj.label} ({activeLanguageObj.native})</strong>
@@ -112,7 +112,7 @@ export function LanguageSelector({ variant = "header", className }) {
 
       {isOpen && (
         <div className="absolute right-0 top-10 z-50 w-52 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg overflow-hidden animate-in fade-in-50 duration-100 p-1 space-y-0.5">
-          <div className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground border-b border-border/50 flex items-center justify-between">
+          <div className="px-2.5 py-1.5 text-xs uppercase tracking-wider font-semibold text-muted-foreground border-b border-border/50 flex items-center justify-between">
             <span>Select Language</span>
             <Globe className="size-3 text-primary" />
           </div>
@@ -125,14 +125,14 @@ export function LanguageSelector({ variant = "header", className }) {
                   key={lang.code}
                   onClick={() => handleSelectLanguage(lang.code)}
                   className={cn(
-                    "w-full text-left px-2.5 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer",
+                    "w-full text-left px-2.5 py-2 rounded-lg text-sm font-medium flex items-center justify-between transition-colors cursor-pointer",
                     isSelected
                       ? "bg-primary/10 text-primary font-semibold"
                       : "text-foreground hover:bg-muted"
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">{lang.flag}</span>
+                    <span className="text-base">{lang.flag}</span>
                     <span>{lang.label}</span>
                   </div>
                   {isSelected && <Check className="size-3 text-primary" />}

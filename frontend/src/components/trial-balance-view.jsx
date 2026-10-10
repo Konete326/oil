@@ -198,10 +198,10 @@ export function TrialBalanceView({
             <ScaleIcon className="size-5" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-foreground">
+            <h3 className="font-bold text-base text-foreground">
               Trial Balance Sheet (Khatey Ka Tawazun)
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Property-wise Trial Balance & Har Supplier Ki Alag-Alag Trial Sheet.
             </p>
           </div>
@@ -209,7 +209,7 @@ export function TrialBalanceView({
 
         <div className="flex items-center gap-2 flex-wrap">
           <div
-            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg border text-sm font-semibold flex items-center gap-1.5 ${
               displayedSummary.isBalanced
                 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                 : "bg-amber-500/10 text-amber-500 border-amber-500/20"
@@ -233,7 +233,7 @@ export function TrialBalanceView({
             variant="outline"
             size="sm"
             onClick={handleExportExcel}
-            className="gap-1.5 text-xs cursor-pointer h-8"
+            className="gap-1.5 text-sm cursor-pointer h-8"
           >
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
             <span>Export Excel</span>
@@ -244,7 +244,7 @@ export function TrialBalanceView({
               variant="outline"
               size="sm"
               onClick={() => setIsPrintModalOpen(true)}
-              className="gap-1.5 text-xs cursor-pointer h-8"
+              className="gap-1.5 text-sm cursor-pointer h-8"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print Sheet</span>
@@ -274,7 +274,7 @@ export function TrialBalanceView({
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`py-2 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+            className={`py-2 px-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === tab.id
                 ? "border-primary text-primary bg-primary/5 rounded-t-lg"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -282,7 +282,7 @@ export function TrialBalanceView({
           >
             <span>{tab.label}</span>
             {tab.count !== undefined && (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 font-mono">
                 {tab.count}
               </Badge>
             )}
@@ -294,53 +294,53 @@ export function TrialBalanceView({
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="p-3 rounded-xl bg-card border border-border">
-              <div className="flex items-center justify-between text-muted-foreground text-xs mb-1">
+              <div className="flex items-center justify-between text-muted-foreground text-sm mb-1">
                 <span>Kul Customers</span>
                 <UsersIcon className="size-3.5 text-primary" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
                 {customersTrial.length} Parties
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Registered buyers &amp; mills
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 text-xs mb-1">
+              <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 text-sm mb-1">
                 <span>Kul Maal Liya (Debit)</span>
                 <ArrowDownLeftIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
                 Rs. {totalCustomerSales.toLocaleString()}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Total invoiced sales
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs mb-1">
+              <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-sm mb-1">
                 <span>Kul Wasooli (Credit)</span>
                 <ArrowUpRightIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
                 Rs. {totalCustomerPayments.toLocaleString()}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Total payments recovered
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-xs mb-1">
+              <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-sm mb-1">
                 <span>Baqaya Lena Hai (Udhar)</span>
                 <ScaleIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-amber-500">
                 Rs. {totalCustomerReceivables.toLocaleString()}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Current net receivables
               </div>
             </div>
@@ -354,7 +354,7 @@ export function TrialBalanceView({
                 placeholder="Search customer name, code, phone, city..."
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                className="ps-8 text-xs h-8 bg-muted/20"
+                className="ps-8 text-sm h-8 bg-muted/20"
               />
             </div>
 
@@ -363,7 +363,7 @@ export function TrialBalanceView({
               <select
                 value={customerFilter}
                 onChange={(e) => setCustomerFilter(e.target.value)}
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground cursor-pointer focus:outline-none"
+                className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm text-foreground cursor-pointer focus:outline-none"
               >
                 <option value="all">All Customers ({customersTrial.length})</option>
                 <option value="receivable">Udhar Baqaya (Receivable)</option>
@@ -374,8 +374,8 @@ export function TrialBalanceView({
 
           <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
                   <tr>
                     <th className="p-3 ps-4">Code</th>
                     <th className="p-3">Customer Name &amp; Contact</th>
@@ -412,7 +412,7 @@ export function TrialBalanceView({
                             <span>{c.name}</span>
                           </div>
                           {(c.phone || c.city) && (
-                            <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                            <div className="text-xs text-muted-foreground font-mono mt-0.5">
                               {[c.phone, c.city].filter(Boolean).join(" • ")}
                             </div>
                           )}
@@ -428,7 +428,7 @@ export function TrialBalanceView({
                         </td>
                         <td className="p-3 text-center">
                           <span
-                            className={`inline-block px-2 py-0.5 rounded text-[9.5px] font-semibold ${
+                            className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
                               (c.currentBalance || 0) > 0
                                 ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
                                 : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
@@ -442,7 +442,7 @@ export function TrialBalanceView({
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedCustomerForTrial(c)}
-                            className="h-7 text-[11px] gap-1 px-2.5 cursor-pointer hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-medium"
+                            className="h-7 text-sm gap-1 px-2.5 cursor-pointer hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-medium"
                             title="Customer Individual Trial Balance Sheet & PDF Print"
                           >
                             <ScaleIcon className="size-3 text-amber-600" />
@@ -453,7 +453,7 @@ export function TrialBalanceView({
                     ))
                   )}
 
-                  <tr className="bg-muted/40 font-bold border-t-2 border-border text-xs">
+                  <tr className="bg-muted/40 font-bold border-t-2 border-border text-sm">
                     <td colSpan={2} className="p-3 ps-4 text-foreground uppercase tracking-wider">
                       Grand Total (Customers Khata Summary)
                     </td>
@@ -477,53 +477,53 @@ export function TrialBalanceView({
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="p-3 rounded-xl bg-card border border-border">
-              <div className="flex items-center justify-between text-muted-foreground text-xs mb-1">
+              <div className="flex items-center justify-between text-muted-foreground text-sm mb-1">
                 <span>Kul Suppliers</span>
                 <UsersIcon className="size-3.5 text-primary" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
                 {suppliersTrial.length} Parties
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Registered vendors
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 text-xs mb-1">
+              <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 text-sm mb-1">
                 <span>Kul Maal Khareeda (Credit)</span>
                 <ArrowDownLeftIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
                 Rs. {totalSupplierPurchases.toLocaleString()}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Total stock billed
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs mb-1">
+              <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-sm mb-1">
                 <span>Total Payments (Debit)</span>
                 <ArrowUpRightIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-foreground">
                 Rs. {totalSupplierPayments.toLocaleString()}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Total paid out
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-xs mb-1">
+              <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-sm mb-1">
                 <span>Total Payable (Due)</span>
                 <ScaleIcon className="size-3.5" />
               </div>
               <div className="text-lg font-bold font-mono text-amber-500">
                 Rs. {totalSupplierPayables.toLocaleString()}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Current net dues
               </div>
             </div>
@@ -537,7 +537,7 @@ export function TrialBalanceView({
                 placeholder="Search supplier name, code, phone..."
                 value={supplierSearch}
                 onChange={(e) => setSupplierSearch(e.target.value)}
-                className="ps-8 text-xs h-8 bg-muted/20"
+                className="ps-8 text-sm h-8 bg-muted/20"
               />
             </div>
 
@@ -546,7 +546,7 @@ export function TrialBalanceView({
               <select
                 value={supplierFilter}
                 onChange={(e) => setSupplierFilter(e.target.value)}
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground cursor-pointer focus:outline-none"
+                className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm text-foreground cursor-pointer focus:outline-none"
               >
                 <option value="all">All Suppliers ({suppliersTrial.length})</option>
                 <option value="payable">Net Payable (Due)</option>
@@ -557,8 +557,8 @@ export function TrialBalanceView({
 
           <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
                   <tr>
                     <th className="p-3 ps-4">Code</th>
                     <th className="p-3">Supplier Name & Contact</th>
@@ -595,7 +595,7 @@ export function TrialBalanceView({
                             <span>{s.name}</span>
                           </div>
                           {s.phone && (
-                            <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                            <div className="text-xs text-muted-foreground font-mono mt-0.5">
                               {s.phone}
                             </div>
                           )}
@@ -611,7 +611,7 @@ export function TrialBalanceView({
                         </td>
                         <td className="p-3 text-center">
                           <span
-                            className={`inline-block px-2 py-0.5 rounded text-[9.5px] font-semibold ${
+                            className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
                               (s.currentBalance || 0) > 0
                                 ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
                                 : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
@@ -625,7 +625,7 @@ export function TrialBalanceView({
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedSupplierForTrial(s)}
-                            className="h-7 text-[11px] gap-1 px-2.5 cursor-pointer hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-medium"
+                            className="h-7 text-sm gap-1 px-2.5 cursor-pointer hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors font-medium"
                             title="Supplier Individual Trial Balance Sheet & PDF Print"
                           >
                             <ScaleIcon className="size-3 text-amber-600" />
@@ -636,7 +636,7 @@ export function TrialBalanceView({
                     ))
                   )}
 
-                  <tr className="bg-muted/40 font-bold border-t-2 border-border text-xs">
+                  <tr className="bg-muted/40 font-bold border-t-2 border-border text-sm">
                     <td colSpan={2} className="p-3 ps-4 text-foreground uppercase tracking-wider">
                       Grand Total (Suppliers Khata Summary)
                     </td>
@@ -659,8 +659,8 @@ export function TrialBalanceView({
       ) : (
         <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
                 <tr>
                   <th className="p-3 ps-4">Account Code</th>
                   <th className="p-3">Account Title / Description</th>
@@ -689,7 +689,7 @@ export function TrialBalanceView({
                         <td className="p-3 ps-4 font-mono text-muted-foreground">{acc.code}</td>
                         <td className="p-3 font-semibold text-foreground">{acc.accountName}</td>
                         <td className="p-3">
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                          <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground border border-border">
                             {acc.category}
                           </span>
                         </td>
@@ -702,10 +702,10 @@ export function TrialBalanceView({
                       </tr>
                     ))}
 
-                    <tr className="bg-muted/40 font-bold border-t-2 border-border text-sm">
+                    <tr className="bg-muted/40 font-bold border-t-2 border-border text-base">
                       <td
                         colSpan={3}
-                        className="p-3 ps-4 text-foreground uppercase tracking-wider text-xs"
+                        className="p-3 ps-4 text-foreground uppercase tracking-wider text-sm"
                       >
                         Total ({activeTab.toUpperCase()})
                       </td>

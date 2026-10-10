@@ -69,11 +69,11 @@ export function DashboardHeroCards({ heroCards, loading }) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className={cn("size-2.5 rounded-full", todaySales.isClosed ? "bg-muted-foreground" : todaySales.isShiftActive ? "bg-emerald-500 animate-pulse" : "bg-amber-500")} />
-              <span className={cn("text-xs font-bold uppercase tracking-wider", todaySales.isClosed && !todaySales.periodTitle ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400")}>
+              <span className={cn("text-sm font-bold uppercase tracking-wider", todaySales.isClosed && !todaySales.periodTitle ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400")}>
                 {todaySales.periodTitle || (todaySales.isClosed ? "Shop Closed (Shift Ended)" : "Today's Sales (10 AM - 6 PM)")}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {todaySales.ordersCount} orders · {todaySales.shiftLabel || "10:00 AM - 6:00 PM"}
             </p>
           </div>
@@ -88,7 +88,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
           </p>
         </div>
 
-        <div className="pt-3 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="pt-3 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-2 text-sm">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 text-muted-foreground">
               <BanknoteIcon className="size-3.5 text-emerald-500" />
@@ -100,7 +100,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
             </span>
           </div>
 
-          <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             Open POS <ArrowRightIcon className="size-3" />
           </span>
         </div>
@@ -114,11 +114,11 @@ export function DashboardHeroCards({ heroCards, loading }) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-blue-500" />
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+              <span className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
                 Total Stock in Liters
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Total {Number(stockSummary.totalUnits || 0).toLocaleString()} Liters ({stockSummary.totalProducts} Products)
             </p>
           </div>
@@ -133,19 +133,19 @@ export function DashboardHeroCards({ heroCards, loading }) {
           </p>
         </div>
 
-        <div className="pt-3 border-t border-blue-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="pt-3 border-t border-blue-500/20 flex flex-wrap items-center justify-between gap-2 text-sm">
           <div className="flex items-center gap-2.5">
-            <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+            <span className="flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
               <CheckCircle2Icon className="size-3" /> {stockSummary.inStock} In-Stock
             </span>
             {stockSummary.outOfStock > 0 && (
-              <span className="flex items-center gap-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20">
+              <span className="flex items-center gap-1 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20">
                 {stockSummary.outOfStock} Out of Stock
               </span>
             )}
           </div>
 
-          <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             View Inventory <ArrowRightIcon className="size-3" />
           </span>
         </div>
@@ -159,11 +159,11 @@ export function DashboardHeroCards({ heroCards, loading }) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-amber-500" />
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              <span className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
                 Total Receivables
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {receivablesSummary.pendingParties} Pending Accounts
             </p>
           </div>
@@ -178,7 +178,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
           </p>
         </div>
 
-        <div className="pt-3 border-t border-amber-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="pt-3 border-t border-amber-500/20 flex flex-wrap items-center justify-between gap-2 text-sm">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 text-muted-foreground">
               <UserCheck2Icon className="size-3.5 text-primary" />
@@ -186,7 +186,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
             </span>
           </div>
 
-          <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span className="text-sm font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             View Ledgers <ArrowRightIcon className="size-3" />
           </span>
         </div>
@@ -200,11 +200,11 @@ export function DashboardHeroCards({ heroCards, loading }) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-rose-500" />
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+              <span className="text-sm font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
                 Total Payables
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {payablesSummary.pendingSuppliers} Pending Suppliers
             </p>
           </div>
@@ -219,7 +219,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
           </p>
         </div>
 
-        <div className="pt-3 border-t border-rose-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="pt-3 border-t border-rose-500/20 flex flex-wrap items-center justify-between gap-2 text-sm">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 text-muted-foreground">
               <AlertTriangleIcon className="size-3.5 text-rose-500" />
@@ -227,7 +227,7 @@ export function DashboardHeroCards({ heroCards, loading }) {
             </span>
           </div>
 
-          <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span className="text-sm font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             View Suppliers <ArrowRightIcon className="size-3" />
           </span>
         </div>

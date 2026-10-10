@@ -113,20 +113,20 @@ export function EmployeePayrollManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Employee Directory & Advance Khata</h1>
-          <p className="text-xs text-muted-foreground">Manage staff profiles, base salary details, and staff advance cash khata.</p>
+          <p className="text-sm text-muted-foreground">Manage staff profiles, base salary details, and staff advance cash khata.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
             onClick={() => setIsAdvanceModalOpen(true)}
-            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none"
+            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5 cursor-pointer text-sm flex-1 sm:flex-none"
           >
             <HandCoinsIcon className="size-3.5" />
             <span>Record Advance Cash</span>
           </Button>
 
-          <Button size="sm" onClick={handleOpenAddEmployee} className="gap-1.5 cursor-pointer text-xs flex-1 sm:flex-none">
+          <Button size="sm" onClick={handleOpenAddEmployee} className="gap-1.5 cursor-pointer text-sm flex-1 sm:flex-none">
             <PlusIcon className="size-3.5" />
             <span>Add Employee</span>
           </Button>
@@ -135,32 +135,32 @@ export function EmployeePayrollManager() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Monthly Base Payroll</span>
+          <span className="text-sm text-muted-foreground font-medium">Total Monthly Base Payroll</span>
           <div className="text-xl font-bold font-mono text-emerald-500">
             Rs. {totalMonthlyBaseSalary.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Combined Active Base Salaries</p>
+          <p className="text-sm text-muted-foreground">Combined Active Base Salaries</p>
         </div>
 
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Outstanding Advance Khata</span>
+          <span className="text-sm text-muted-foreground font-medium">Total Outstanding Advance Khata</span>
           <div className="text-xl font-bold font-mono text-amber-500">
             Rs. {totalOutstandingAdvance.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Pending Advance Deductions Owed</p>
+          <p className="text-sm text-muted-foreground">Pending Advance Deductions Owed</p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Registered Staff</span>
+          <span className="text-sm text-muted-foreground font-medium">Total Registered Staff</span>
           <div className="text-xl font-bold font-mono text-foreground">
             {empTotal || employees.length}
           </div>
-          <p className="text-[11px] text-muted-foreground">Active & Inactive Employee Profiles</p>
+          <p className="text-sm text-muted-foreground">Active & Inactive Employee Profiles</p>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
-        <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-xs">
+        <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-sm">
           {[
             { id: "employees", label: "Employee Directory" },
             { id: "advance", label: "Advance Salary Khata" },
@@ -179,7 +179,7 @@ export function EmployeePayrollManager() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2 text-xs w-full sm:w-auto">
+        <div className="flex items-center gap-2 text-sm w-full sm:w-auto">
           <div className="relative w-full sm:w-56">
             <SearchIcon className="absolute left-3 top-2.5 size-3.5 text-muted-foreground" />
             <Input
@@ -187,16 +187,16 @@ export function EmployeePayrollManager() {
               placeholder="Search staff name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="ps-8 text-xs"
+              className="ps-8 text-sm"
             />
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-xs cursor-pointer">
+          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-sm cursor-pointer">
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
             <span>Export Excel</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs cursor-pointer">
+          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-sm cursor-pointer">
             <PrinterIcon className="size-3.5" />
             <span>Print Report</span>
           </Button>
@@ -206,8 +206,8 @@ export function EmployeePayrollManager() {
       {activeTab === "employees" && (
         <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
                 <tr>
                   <th className="p-3 ps-4">Employee Name</th>
                   <th className="p-3">Designation</th>
@@ -235,7 +235,7 @@ export function EmployeePayrollManager() {
                   employees.map((emp) => (
                     <tr key={emp._id} className="hover:bg-muted/30 transition-colors">
                       <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
-                        <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
                           {emp.name.charAt(0).toUpperCase()}
                         </div>
                         <span>{emp.name}</span>
@@ -250,7 +250,7 @@ export function EmployeePayrollManager() {
                       </td>
                       <td className="p-3">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                             emp.status === "Active"
                               ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                               : "bg-destructive/10 text-destructive border-destructive/20"

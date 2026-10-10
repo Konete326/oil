@@ -79,7 +79,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
 
       <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:p-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-base">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
             <span>Delivery Challan & Gate Pass (A4 Standard)</span>
           </div>
@@ -87,7 +87,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -95,7 +95,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Challan</span>
@@ -107,7 +107,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
         </div>
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0 print:m-0">
-          <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 print:m-0 a4-sheet relative notranslate" dir="ltr" lang="en">
+          <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-sm print:shadow-none print:border-none print:p-0 print:m-0 a4-sheet relative notranslate" dir="ltr" lang="en">
           <div className="text-center space-y-1 pb-3 print:pb-2 print:pt-0">
             <div className="flex items-center justify-center gap-3">
               <OilDropLogo className="size-10" />
@@ -115,59 +115,59 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                 AL KHALEEJ LUBRICANTS
               </h1>
             </div>
-            <p className="text-[11px] text-gray-700 font-medium">
+            <p className="text-sm text-gray-700 font-medium">
               PLOT NO. 44/B, SECTOR 15, KORANGI INDUSTRIAL AREA, KARACHI, PAKISTAN.
             </p>
-            <p className="text-[10px] text-gray-600">
+            <p className="text-xs text-gray-600">
               TEL: (021) 35091244, 35091245, FAX: (021) 35091246
             </p>
           </div>
 
           <div className="text-center py-1.5 mb-3 print:py-1 print:mb-2">
-            <span className="font-black text-sm tracking-wider uppercase underline underline-offset-4 decoration-2">
+            <span className="font-black text-base tracking-wider uppercase underline underline-offset-4 decoration-2">
               DELIVERY CHALLAN & GATE PASS
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-800">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-800">
                 CUSTOMER / TEXTILE MILL:
               </p>
-              <p className="font-bold text-sm text-black uppercase">
+              <p className="font-bold text-base text-black uppercase">
                 {challan.millName}
               </p>
-              <p className="text-[11px] text-gray-700 leading-tight">
+              <p className="text-sm text-gray-700 leading-tight">
                 {challan.mill?.zone || "Karachi Industrial Zone, Sindh."}
               </p>
-              <p className="text-[11px] text-gray-800 font-medium">
+              <p className="text-sm text-gray-800 font-medium">
                 STATUS: {challan.gatePassStatus || "DISPATCHED"}
               </p>
             </div>
 
             <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-right font-mono">
-              <p className="text-xs font-bold text-black">
+              <p className="text-sm font-bold text-black">
                 CHALLAN #: {challan.challanNumber}
               </p>
-              <p className="text-[11px] text-gray-800">
+              <p className="text-sm text-gray-800">
                 DATE: {new Date(challan.createdAt || Date.now()).toLocaleDateString("en-GB")}
               </p>
-              <p className="text-[11px] text-gray-800">
+              <p className="text-sm text-gray-800">
                 VEHICLE #: <strong className="text-black uppercase">{challan.vehicleNumber || "-"}</strong>
               </p>
-              <p className="text-[10px] text-gray-700 font-sans">
+              <p className="text-xs text-gray-700 font-sans">
                 DRIVER: <strong>{challan.driverName || "-"}</strong> {challan.driverPhone ? `(${challan.driverPhone})` : ""}
               </p>
-              <p className="text-[10px] text-gray-700 font-sans">
+              <p className="text-xs text-gray-700 font-sans">
                 DIP: <strong>{challan.dipMeasurementInches ? `${challan.dipMeasurementInches}" Inches` : "-"}</strong>
               </p>
             </div>
           </div>
 
           <div className="mb-4 overflow-hidden border border-black">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="bg-gray-200 text-black border-b border-black font-bold uppercase text-[11px]">
+                <tr className="bg-gray-200 text-black border-b border-black font-bold uppercase text-sm">
                   <th className="py-2 px-3 w-12 text-center border-r border-black">#</th>
                   <th className="py-2 px-3 border-r border-black">PRODUCT DESCRIPTION</th>
                   <th className="py-2 px-3 text-center border-r border-black w-28">QUANTITY (LTR)</th>
@@ -199,7 +199,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                     {quantityLiters.toLocaleString()} LTR
                   </td>
                   <td className="py-2.5 px-3 border-r border-black"></td>
-                  <td className="py-2.5 px-3 text-right font-mono text-sm text-black">
+                  <td className="py-2.5 px-3 text-right font-mono text-base text-black">
                     Rs {Number(grandTotal).toFixed(2)}
                   </td>
                 </tr>
@@ -207,14 +207,14 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
             </table>
           </div>
 
-          <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-6 font-mono text-[11px] font-semibold text-black">
+          <div className="border border-black p-2.5 rounded-xs bg-gray-50 mb-6 font-mono text-sm font-semibold text-black">
             <span>Amount in Words: </span>
             <span className="font-bold underline decoration-1">{numberToWords(grandTotal)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-6 pt-2 items-end">
-            <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-[10px] font-mono leading-relaxed">
-              <p className="font-bold text-[11px] text-black">Gate Pass Verification:</p>
+            <div className="border border-black p-3 rounded-xs space-y-1 bg-white text-xs font-mono leading-relaxed">
+              <p className="font-bold text-sm text-black">Gate Pass Verification:</p>
               <p>Vehicle Dispatched from Main Depot</p>
               <p>Tanker Seal Number Verified</p>
               <p>Security Checkpoint: Cleared</p>
@@ -228,7 +228,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
                     <span className="text-[6px]">LUBRICANTS</span>
                     <span>DISPATCH</span>
                   </div>
-                  <div className="border-t border-black pt-1 w-36 text-center font-bold text-[9px] uppercase">
+                  <div className="border-t border-black pt-1 w-36 text-center font-bold text-xs uppercase">
                     <p>AL KHALEEJ LUBRICANTS</p>
                     <p className="text-[8px] text-gray-600">DISPATCH DEPARTMENT</p>
                   </div>
@@ -236,7 +236,7 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
 
                 <div className="text-center">
                   <div className="h-14"></div>
-                  <div className="border-t border-black pt-1 w-44 text-center font-bold text-[9px] uppercase">
+                  <div className="border-t border-black pt-1 w-44 text-center font-bold text-xs uppercase">
                     Receiver Signature
                   </div>
                 </div>
@@ -247,13 +247,13 @@ export function ChallanPrintModal({ isOpen, onClose, challan }) {
       </div>
 
       <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
           Close Preview
         </Button>
         <Button
           size="sm"
           onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
         >
           <PrinterIcon className="size-3.5" />
           <span>Print A4 Challan</span>

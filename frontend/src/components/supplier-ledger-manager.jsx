@@ -160,7 +160,7 @@ export function SupplierLedgerManager() {
             <TruckIcon className="size-5 text-primary" />
             <span>Supplier & Refinery Ledger (Accounts Payable)</span>
           </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Purchases, payments, and running balance records for oil suppliers and refineries.
           </p>
         </div>
@@ -173,7 +173,7 @@ export function SupplierLedgerManager() {
               setSupplierToPrint(selectedSupplierObj || { name: "All Suppliers / Refineries Khata Summary", address: "Korangi Industrial Area", city: "Karachi", openingBalance: 0 });
               setIsPrintModalOpen(true);
             }}
-            className="gap-1 cursor-pointer text-xs h-7.5 px-2.5"
+            className="gap-1 cursor-pointer text-sm h-7.5 px-2.5"
           >
             <PrinterIcon className="size-3 text-primary" />
             <span>Print A4</span>
@@ -182,7 +182,7 @@ export function SupplierLedgerManager() {
           <Button
             size="sm"
             onClick={() => setIsPaymentModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 cursor-pointer text-xs h-7.5 px-3"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 cursor-pointer text-sm h-7.5 px-3"
           >
             <PlusIcon className="size-3.5" />
             <span>Record Payment</span>
@@ -192,7 +192,7 @@ export function SupplierLedgerManager() {
             variant="outline"
             size="sm"
             onClick={() => setShowAddSupplierForm(!showAddSupplierForm)}
-            className="gap-1 cursor-pointer text-xs h-7.5 px-2.5"
+            className="gap-1 cursor-pointer text-sm h-7.5 px-2.5"
           >
             <Building2Icon className="size-3 text-primary" />
             <span>{showAddSupplierForm ? "Close Form" : "Add Supplier"}</span>
@@ -201,15 +201,15 @@ export function SupplierLedgerManager() {
       </div>
 
       {showAddSupplierForm && (
-        <form onSubmit={handleAddSupplier} className="p-3 bg-card rounded-xl border border-border/80 space-y-2.5 shadow-xs text-xs">
-          <h3 className="font-semibold text-xs text-foreground">Add New Supplier Profile</h3>
+        <form onSubmit={handleAddSupplier} className="p-3 bg-card rounded-xl border border-border/80 space-y-2.5 shadow-xs text-sm">
+          <h3 className="font-semibold text-sm text-foreground">Add New Supplier Profile</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Input
               type="text"
               placeholder="Supplier Name *"
               value={newSupplierName}
               onChange={(e) => setNewSupplierName(e.target.value)}
-              className="text-xs h-7.5"
+              className="text-sm h-7.5"
               required
             />
             <Input
@@ -217,18 +217,18 @@ export function SupplierLedgerManager() {
               placeholder="Phone Number (Optional)"
               value={newSupplierPhone}
               onChange={(e) => setNewSupplierPhone(e.target.value)}
-              className="text-xs h-7.5"
+              className="text-sm h-7.5"
             />
             <Input
               type="text"
               placeholder="Office / Refinery Address (Optional)"
               value={newSupplierAddress}
               onChange={(e) => setNewSupplierAddress(e.target.value)}
-              className="text-xs h-7.5"
+              className="text-sm h-7.5"
             />
           </div>
           <div className="flex justify-end gap-1.5 pt-1">
-            <Button type="submit" size="sm" className="text-xs h-7.5 px-3 cursor-pointer">
+            <Button type="submit" size="sm" className="text-sm h-7.5 px-3 cursor-pointer">
               Save Supplier
             </Button>
           </div>
@@ -241,7 +241,7 @@ export function SupplierLedgerManager() {
             <TruckIcon className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] text-muted-foreground font-medium truncate">Total Owed to Suppliers</p>
+            <p className="text-xs text-muted-foreground font-medium truncate">Total Owed to Suppliers</p>
             <p className="text-base sm:text-lg font-bold font-mono text-rose-500">Rs. {totalOwedBalance.toLocaleString()}</p>
           </div>
         </div>
@@ -251,7 +251,7 @@ export function SupplierLedgerManager() {
             <Building2Icon className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] text-muted-foreground font-medium truncate">Registered Suppliers</p>
+            <p className="text-xs text-muted-foreground font-medium truncate">Registered Suppliers</p>
             <p className="text-base sm:text-lg font-bold text-foreground">{suppliers.length} Vendors</p>
           </div>
         </div>
@@ -261,7 +261,7 @@ export function SupplierLedgerManager() {
             <PrinterIcon className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] text-muted-foreground font-medium truncate">Ledger Entries Count</p>
+            <p className="text-xs text-muted-foreground font-medium truncate">Ledger Entries Count</p>
             <p className="text-base sm:text-lg font-bold text-foreground">{ledgerEntries.length} Records</p>
           </div>
         </div>
@@ -271,7 +271,7 @@ export function SupplierLedgerManager() {
         <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-lg border border-border">
           <button
             onClick={() => { setActiveTab("transactions"); setCurrentPage(1); }}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "transactions"
                 ? "bg-background text-foreground shadow-xs font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -281,7 +281,7 @@ export function SupplierLedgerManager() {
           </button>
           <button
             onClick={() => { setActiveTab("suppliers"); setCurrentPage(1); }}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "suppliers"
                 ? "bg-background text-foreground shadow-xs font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -292,7 +292,7 @@ export function SupplierLedgerManager() {
         </div>
 
         {activeTab === "transactions" && (
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1 text-xs h-7.5 px-2.5 cursor-pointer">
+          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1 text-sm h-7.5 px-2.5 cursor-pointer">
             <FileSpreadsheetIcon className="size-3 text-emerald-500" />
             <span>Export Excel</span>
           </Button>
@@ -310,7 +310,7 @@ export function SupplierLedgerManager() {
                   placeholder="Search supplier name, ref no, or notes..."
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                  className="ps-8 text-xs h-7.5 w-full bg-muted/30 focus:bg-background"
+                  className="ps-8 text-sm h-7.5 w-full bg-muted/30 focus:bg-background"
                 />
               </div>
 
@@ -318,7 +318,7 @@ export function SupplierLedgerManager() {
                 <select
                   value={selectedSupplierId}
                   onChange={(e) => { setSelectedSupplierId(e.target.value); setCurrentPage(1); }}
-                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full h-7.5 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 >
                   <option value="">All Suppliers</option>
                   {suppliers.map((s) => (
@@ -332,23 +332,23 @@ export function SupplierLedgerManager() {
           </div>
 
           {selectedSupplierObj && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-2.5 bg-muted/30 border border-border/60 rounded-lg text-xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-2.5 bg-muted/30 border border-border/60 rounded-lg text-sm">
               <div className="space-y-0.5">
-                <span className="font-semibold text-xs text-foreground">{selectedSupplierObj.name}</span>
-                <p className="text-muted-foreground text-[10.5px]">
+                <span className="font-semibold text-sm text-foreground">{selectedSupplierObj.name}</span>
+                <p className="text-muted-foreground text-xs">
                   {selectedSupplierObj.phone ? `Phone: ${selectedSupplierObj.phone}` : "No phone"} | {selectedSupplierObj.address || "Address not provided"}
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="text-right pe-1">
-                  <span className="text-[9.5px] text-muted-foreground uppercase font-semibold">Owed Balance:</span>
-                  <p className="font-mono font-bold text-rose-500 text-xs">Rs. {selectedSupplierObj.currentBalance?.toLocaleString() || 0}</p>
+                  <span className="text-xs text-muted-foreground uppercase font-semibold">Owed Balance:</span>
+                  <p className="font-mono font-bold text-rose-500 text-sm">Rs. {selectedSupplierObj.currentBalance?.toLocaleString() || 0}</p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedSupplierForTrial(selectedSupplierObj)}
-                  className="gap-1 text-[11px] h-6.5 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                  className="gap-1 text-sm h-6.5 px-2 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
                   title="Supplier Individual Trial Balance Sheet"
                 >
                   <ScaleIcon className="size-3" />
@@ -358,7 +358,7 @@ export function SupplierLedgerManager() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSupplierToView(selectedSupplierObj)}
-                  className="gap-1 text-[11px] h-6.5 px-2 cursor-pointer"
+                  className="gap-1 text-sm h-6.5 px-2 cursor-pointer"
                 >
                   <EyeIcon className="size-3" />
                   <span>View Details</span>
@@ -367,7 +367,7 @@ export function SupplierLedgerManager() {
                   variant="destructive"
                   size="sm"
                   onClick={() => setSupplierToDelete(selectedSupplierObj)}
-                  className="gap-1 text-[11px] h-6.5 px-2 cursor-pointer"
+                  className="gap-1 text-sm h-6.5 px-2 cursor-pointer"
                 >
                   <Trash2Icon className="size-3" />
                   <span>Delete</span>
@@ -378,8 +378,8 @@ export function SupplierLedgerManager() {
 
           <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs flex flex-col">
             <div className="max-h-[calc(100vh-270px)] min-h-[240px] overflow-y-auto overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[700px]">
-                <thead className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 border-b border-border/80 text-muted-foreground uppercase text-[10px] tracking-wider shadow-xs">
+              <table className="w-full text-left text-sm min-w-[700px]">
+                <thead className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 border-b border-border/80 text-muted-foreground uppercase text-xs tracking-wider shadow-xs">
                   <tr>
                     <th className="p-2.5 ps-3.5 h-9 font-semibold">Date</th>
                     <th className="p-2.5 h-9 font-semibold">Supplier Name</th>
@@ -393,20 +393,20 @@ export function SupplierLedgerManager() {
                 <tbody className="divide-y divide-border/40">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="p-6 text-center text-muted-foreground text-xs">
+                      <td colSpan={7} className="p-6 text-center text-muted-foreground text-sm">
                         Loading supplier ledger transactions...
                       </td>
                     </tr>
                   ) : filteredLedgerEntries.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-6 text-center text-muted-foreground text-xs">
+                      <td colSpan={7} className="p-6 text-center text-muted-foreground text-sm">
                         No supplier ledger entries found.
                       </td>
                     </tr>
                   ) : (
                     filteredLedgerEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item) => (
                       <tr key={item._id} className="hover:bg-muted/20 transition-colors">
-                        <td className="p-2 ps-3.5 text-muted-foreground text-[11px]">
+                        <td className="p-2 ps-3.5 text-muted-foreground text-sm">
                           {new Date(item.createdAt || Date.now()).toLocaleDateString()}
                         </td>
                         <td className="p-2 font-semibold text-foreground">
@@ -422,7 +422,7 @@ export function SupplierLedgerManager() {
                         </td>
                         <td className="p-2">
                           <span
-                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-semibold border ${
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold border ${
                               String(item.transactionType || "").includes("Purchase")
                                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
                                 : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
@@ -431,14 +431,14 @@ export function SupplierLedgerManager() {
                             {item.transactionType || "Transaction"}
                           </span>
                         </td>
-                        <td className="p-2 text-right font-mono font-bold text-foreground text-xs">
+                        <td className="p-2 text-right font-mono font-bold text-foreground text-sm">
                           Rs. {(Number(item.amount) || 0).toLocaleString()}
                         </td>
-                        <td className="p-2 text-right font-mono font-bold text-amber-600 dark:text-amber-400 text-xs">
+                        <td className="p-2 text-right font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">
                           Rs. {(Number(item.runningBalance) || 0).toLocaleString()}
                         </td>
-                        <td className="p-2 text-muted-foreground text-[11px]">{item.paymentMode || "Cash"}</td>
-                        <td className="p-2 pe-3.5 text-right text-muted-foreground text-[11px]">
+                        <td className="p-2 text-muted-foreground text-sm">{item.paymentMode || "Cash"}</td>
+                        <td className="p-2 pe-3.5 text-right text-muted-foreground text-sm">
                           {item.referenceNumber || item.notes || "-"}
                         </td>
                       </tr>
@@ -459,8 +459,8 @@ export function SupplierLedgerManager() {
       ) : (
         <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs flex flex-col">
           <div className="max-h-[calc(100vh-270px)] min-h-[240px] overflow-y-auto overflow-x-auto">
-            <table className="w-full text-left text-xs min-w-[650px]">
-              <thead className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 border-b border-border/80 text-muted-foreground uppercase text-[10px] tracking-wider shadow-xs">
+            <table className="w-full text-left text-sm min-w-[650px]">
+              <thead className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 border-b border-border/80 text-muted-foreground uppercase text-xs tracking-wider shadow-xs">
                 <tr>
                   <th className="p-2.5 ps-3.5 h-9 font-semibold">S.No</th>
                   <th className="p-2.5 h-9 font-semibold">Supplier / Refinery Name</th>
@@ -473,14 +473,14 @@ export function SupplierLedgerManager() {
               <tbody className="divide-y divide-border/40">
                 {suppliers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-6 text-center text-muted-foreground text-xs">
+                    <td colSpan={6} className="p-6 text-center text-muted-foreground text-sm">
                       No suppliers registered yet. Click "Add Supplier" to create one.
                     </td>
                   </tr>
                 ) : (
                   suppliers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((sup, idx) => (
                     <tr key={sup._id} className="hover:bg-muted/20 transition-colors">
-                      <td className="p-2 ps-3.5 font-mono text-muted-foreground text-[11px]">
+                      <td className="p-2 ps-3.5 font-mono text-muted-foreground text-sm">
                         {(currentPage - 1) * PAGE_SIZE + idx + 1}
                       </td>
                       <td className="p-2 font-semibold text-foreground">
@@ -491,13 +491,13 @@ export function SupplierLedgerManager() {
                           {sup.name}
                         </button>
                       </td>
-                      <td className="p-2 text-muted-foreground font-mono text-[11px]">
+                      <td className="p-2 text-muted-foreground font-mono text-sm">
                         {sup.phone || "-"}
                       </td>
-                      <td className="p-2 text-muted-foreground text-[11px]">
+                      <td className="p-2 text-muted-foreground text-sm">
                         {sup.address || "-"}
                       </td>
-                      <td className="p-2 text-right font-mono font-bold text-rose-500 text-xs">
+                      <td className="p-2 text-right font-mono font-bold text-rose-500 text-sm">
                         Rs. {(sup.currentBalance || 0).toLocaleString()}
                       </td>
                       <td className="p-2 pe-3.5 text-right">

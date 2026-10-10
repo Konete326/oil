@@ -453,12 +453,12 @@ export function PosCounter() {
         <div className="lg:col-span-6 xl:col-span-7 flex flex-col lg:h-full space-y-1.5 min-h-0">
           <div className="flex items-center justify-between gap-2 border-b border-border pb-1 shrink-0">
             <div>
-              <h2 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
+              <h2 className="text-base font-bold tracking-tight text-foreground flex items-center gap-1.5">
                 <ShoppingCartIcon className="size-4 text-primary" />
                 POS Billing Counter
               </h2>
             </div>
-            <div className="text-[10px] font-mono text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-md border border-border shrink-0">
+            <div className="text-xs font-mono text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-md border border-border shrink-0">
               {filteredProducts.length} Items
             </div>
           </div>
@@ -472,7 +472,7 @@ export function PosCounter() {
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="ps-8 text-xs h-7.5 bg-muted/20 border-primary/40 focus-visible:ring-primary focus-visible:border-primary font-medium"
+                className="ps-8 text-sm h-7.5 bg-muted/20 border-primary/40 focus-visible:ring-primary focus-visible:border-primary font-medium"
               />
             </div>
           </div>
@@ -489,10 +489,10 @@ export function PosCounter() {
                 ))}
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground text-xs space-y-1.5 flex flex-col items-center justify-center h-full">
+              <div className="py-12 text-center text-muted-foreground text-sm space-y-1.5 flex flex-col items-center justify-center h-full">
                 <PackageIcon className="size-8 text-muted-foreground/40" />
                 <p className="font-semibold text-foreground">No Products Found</p>
-                <p className="text-[10px]">Try searching a different SKU or name.</p>
+                <p className="text-xs">Try searching a different SKU or name.</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1.5">
@@ -543,10 +543,10 @@ export function PosCounter() {
                       </div>
 
                       <div className="p-1.5 flex flex-col gap-0.5 flex-1">
-                        <h4 className="font-bold text-[11px] text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-tight">
+                        <h4 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-tight">
                           {prod.name}
                         </h4>
-                        <p className="font-mono font-bold text-xs text-foreground pt-0.5">
+                        <p className="font-mono font-bold text-sm text-foreground pt-0.5">
                           Kharid: <span className="text-primary font-bold">Rs {prod.costPrice?.toLocaleString() || 0}</span> <span className="text-[8.5px] font-normal text-muted-foreground">/L</span>
                         </p>
                       </div>
@@ -566,10 +566,10 @@ export function PosCounter() {
                   <ShoppingCartIcon className="size-3.5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-xs text-foreground">
+                  <h3 className="font-bold text-sm text-foreground">
                     Current Order Cart
                   </h3>
-                  <span className="text-[9px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {totalItemsCount} item{totalItemsCount !== 1 ? "s" : ""}
                   </span>
                 </div>
@@ -583,7 +583,7 @@ export function PosCounter() {
                     setDiscountValue("");
                     searchInputRef.current?.focus();
                   }}
-                  className="text-[10px] text-destructive hover:text-destructive border-destructive/30 hover:border-destructive cursor-pointer h-5 px-1.5"
+                  className="text-xs text-destructive hover:text-destructive border-destructive/30 hover:border-destructive cursor-pointer h-5 px-1.5"
                 >
                   Clear Cart
                 </Button>
@@ -591,14 +591,14 @@ export function PosCounter() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-destructive/10 border border-destructive/30 px-2 py-0.5 text-[10px] text-destructive flex items-center justify-between gap-1 shrink-0 animate-in fade-in duration-150">
+              <div className="rounded-md bg-destructive/10 border border-destructive/30 px-2 py-0.5 text-xs text-destructive flex items-center justify-between gap-1 shrink-0 animate-in fade-in duration-150">
                 <div className="flex items-center gap-1 min-w-0">
                   <AlertCircleIcon className="size-3 shrink-0" />
                   <span className="truncate">{error}</span>
                 </div>
                 <button
                   onClick={() => setError("")}
-                  className="hover:opacity-70 text-xs shrink-0 cursor-pointer font-bold leading-none px-1"
+                  className="hover:opacity-70 text-sm shrink-0 cursor-pointer font-bold leading-none px-1"
                 >
                   ×
                 </button>
@@ -606,10 +606,10 @@ export function PosCounter() {
             )}
 
             {cart.length === 0 ? (
-              <div className="py-4 text-center text-muted-foreground text-xs space-y-1 flex-1 flex flex-col items-center justify-center border border-dashed border-border/80 rounded-xl my-1 min-h-0">
+              <div className="py-4 text-center text-muted-foreground text-sm space-y-1 flex-1 flex flex-col items-center justify-center border border-dashed border-border/80 rounded-xl my-1 min-h-0">
                 <ShoppingCartIcon className="size-6 text-muted-foreground/30" />
-                <p className="font-semibold text-foreground text-xs">Your Cart is Empty</p>
-                <p className="text-[9px] text-muted-foreground max-w-xs">Scan any product barcode or click from the catalog to start billing.</p>
+                <p className="font-semibold text-foreground text-sm">Your Cart is Empty</p>
+                <p className="text-xs text-muted-foreground max-w-xs">Scan any product barcode or click from the catalog to start billing.</p>
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto space-y-1.5 pe-1 min-h-0 border border-border/60 rounded-xl bg-muted/10 p-1.5">
@@ -623,7 +623,7 @@ export function PosCounter() {
                     <div
                       key={idx}
                       className={cn(
-                        "p-2.5 rounded-xl border text-xs space-y-2 shadow-2xs transition-all",
+                        "p-2.5 rounded-xl border text-sm space-y-2 shadow-2xs transition-all",
                         isLoss
                           ? "border-destructive bg-destructive/10 ring-1 ring-destructive/40"
                           : hasDiscount
@@ -633,22 +633,22 @@ export function PosCounter() {
                     >
                       <div className="flex items-start justify-between gap-1.5">
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-xs sm:text-sm text-foreground leading-tight truncate">{item.productName}</p>
-                          <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                          <p className="font-bold text-sm sm:text-base text-foreground leading-tight truncate">{item.productName}</p>
+                          <div className="text-xs text-muted-foreground font-mono mt-0.5">
                             SKU: {item.sku || "N/A"} · {item.quantity} Liters
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                          <span className="font-mono font-bold text-xs sm:text-sm text-primary block">
+                          <span className="font-mono font-bold text-sm sm:text-base text-primary block">
                             Rs. {item.subtotal?.toLocaleString()}
                           </span>
                           {isLoss ? (
-                            <span className="font-mono text-[10px] text-destructive block font-bold">
+                            <span className="font-mono text-xs text-destructive block font-bold">
                               Loss: -Rs. {itemLoss.toLocaleString()}
                             </span>
                           ) : (
-                            <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
+                            <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 block font-semibold">
                               +Rs. {itemProfit.toLocaleString()} profit
                             </span>
                           )}
@@ -657,12 +657,12 @@ export function PosCounter() {
 
                       <div className="grid grid-cols-2 gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/80">
                         <div className="space-y-0.5">
-                          <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                          <div className="flex items-center justify-between text-sm font-semibold text-muted-foreground">
                             <span>Kharid (Cost):</span>
-                            <span className="text-[10px] font-mono text-muted-foreground/80">/ L</span>
+                            <span className="text-xs font-mono text-muted-foreground/80">/ L</span>
                           </div>
                           <div className="relative flex items-center">
-                            <span className="absolute left-2 text-xs font-mono font-semibold text-muted-foreground pointer-events-none select-none">
+                            <span className="absolute left-2 text-sm font-mono font-semibold text-muted-foreground pointer-events-none select-none">
                               Rs
                             </span>
                             <input
@@ -670,7 +670,7 @@ export function PosCounter() {
                               min="0"
                               value={item.costPrice ?? ""}
                               onChange={(e) => updateCostPrice(idx, e.target.value)}
-                              className="w-full h-7.5 ps-7 pe-1.5 font-mono font-bold text-xs rounded-md border border-input bg-background text-foreground focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all shadow-2xs"
+                              className="w-full h-7.5 ps-7 pe-1.5 font-mono font-bold text-sm rounded-md border border-input bg-background text-foreground focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all shadow-2xs"
                               placeholder="0"
                               title="Editable Kharid (Purchase / Cost Price) per Liter"
                             />
@@ -678,14 +678,14 @@ export function PosCounter() {
                         </div>
 
                         <div className="space-y-0.5">
-                          <div className="flex items-center justify-between text-[11px] font-semibold">
+                          <div className="flex items-center justify-between text-sm font-semibold">
                             <span className={isLoss ? "text-destructive font-bold" : "text-primary"}>
                               Farokht (Sale):
                             </span>
-                            <span className="text-[10px] font-mono text-muted-foreground/80">/ L</span>
+                            <span className="text-xs font-mono text-muted-foreground/80">/ L</span>
                           </div>
                           <div className="relative flex items-center">
-                            <span className="absolute left-2 text-xs font-mono font-semibold text-muted-foreground pointer-events-none select-none">
+                            <span className="absolute left-2 text-sm font-mono font-semibold text-muted-foreground pointer-events-none select-none">
                               Rs
                             </span>
                             <input
@@ -694,7 +694,7 @@ export function PosCounter() {
                               value={item.unitPrice ?? ""}
                               onChange={(e) => updateUnitPrice(idx, e.target.value)}
                               className={cn(
-                                "w-full h-7.5 ps-7 pe-1.5 font-mono font-bold text-xs rounded-md border bg-background focus:ring-1 focus:outline-none transition-all shadow-2xs",
+                                "w-full h-7.5 ps-7 pe-1.5 font-mono font-bold text-sm rounded-md border bg-background focus:ring-1 focus:outline-none transition-all shadow-2xs",
                                 isLoss
                                   ? "border-destructive text-destructive font-black focus:ring-destructive"
                                   : "border-input text-foreground focus:ring-primary focus:border-primary"
@@ -706,7 +706,7 @@ export function PosCounter() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between px-1 text-[11px]">
+                      <div className="flex items-center justify-between px-1 text-sm">
                         <span className="text-muted-foreground">
                           Profit Margin:{" "}
                           <strong className={Number(item.unitPrice) - Number(item.costPrice) >= 0 ? "text-emerald-600 dark:text-emerald-400 font-mono font-bold" : "text-destructive font-mono font-bold"}>
@@ -714,14 +714,14 @@ export function PosCounter() {
                           </strong>
                         </span>
                         {Number(item.costPrice) > 0 && (
-                          <span className="text-[10px] text-muted-foreground font-mono">
+                          <span className="text-xs text-muted-foreground font-mono">
                             ({Number(item.unitPrice) - Number(item.costPrice) >= 0 ? "+" : ""}{Math.round(((Number(item.unitPrice) - Number(item.costPrice)) / Number(item.costPrice)) * 100)}%)
                           </span>
                         )}
                       </div>
 
                       {isLoss && (
-                        <div className="p-1.5 rounded-lg bg-destructive/20 border border-destructive/40 text-destructive text-[10px] font-bold flex items-center gap-1.5">
+                        <div className="p-1.5 rounded-lg bg-destructive/20 border border-destructive/40 text-destructive text-xs font-bold flex items-center gap-1.5">
                           <AlertCircleIcon className="size-3.5 shrink-0" />
                           <span>Loss Warning: Farokht rate (Rs {item.unitPrice}) kharid rate (Rs {item.costPrice}) se kam hai!</span>
                         </div>
@@ -753,13 +753,13 @@ export function PosCounter() {
                                     : item.quantity ?? ""
                                 }
                                 onChange={(e) => setDirectQuantity(idx, e.target.value, item.unitMode || "L")}
-                                className="w-12 h-6 text-center font-mono font-bold text-xs bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
+                                className="w-12 h-6 text-center font-mono font-bold text-sm bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded text-foreground"
                                 placeholder={item.unitMode === "ML" ? "ML" : "Qty"}
                               />
                               <button
                                 type="button"
                                 onClick={() => toggleUnitMode(idx)}
-                                className="text-[9px] font-mono px-1 py-0.5 rounded bg-muted hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer font-bold border border-border"
+                                className="text-xs font-mono px-1 py-0.5 rounded bg-muted hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer font-bold border border-border"
                                 title="Toggle Liters / Milliliters"
                               >
                                 {item.unitMode === "ML" ? "ML" : "L"}
@@ -777,7 +777,7 @@ export function PosCounter() {
                             </Button>
                           </div>
 
-                          <div className="flex items-center gap-1 text-[9px] font-mono shrink-0">
+                          <div className="flex items-center gap-1 text-xs font-mono shrink-0">
                             {[
                               { val: 0.5, label: "0.5L" },
                               { val: 0.7, label: "0.7L" },
@@ -834,7 +834,7 @@ export function PosCounter() {
                     type="button"
                     onClick={() => setSelectedPaymentMode(pm.id)}
                     className={cn(
-                      "flex items-center justify-center gap-1 py-0.5 px-1 rounded-lg border text-[11px] font-semibold cursor-pointer transition-all",
+                      "flex items-center justify-center gap-1 py-0.5 px-1 rounded-lg border text-sm font-semibold cursor-pointer transition-all",
                       active
                         ? "bg-primary text-primary-foreground border-primary shadow-xs"
                         : "bg-card text-muted-foreground border-border hover:bg-muted hover:text-foreground"
@@ -847,9 +847,9 @@ export function PosCounter() {
               })}
             </div>
 
-            <div className="flex items-center justify-between gap-2 p-1 rounded-lg bg-card border border-border text-xs">
+            <div className="flex items-center justify-between gap-2 p-1 rounded-lg bg-card border border-border text-sm">
               <div className="flex items-center gap-1">
-                <span className="text-[9px] text-muted-foreground font-semibold">Cart Disc (Rs):</span>
+                <span className="text-xs text-muted-foreground font-semibold">Cart Disc (Rs):</span>
               </div>
               <div className="relative w-20">
                 <input
@@ -858,37 +858,37 @@ export function PosCounter() {
                   placeholder="0"
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
-                  className="w-full text-right font-mono font-bold text-xs h-5 px-1 rounded border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-right font-mono font-bold text-sm h-5 px-1 rounded border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
-            <div className="space-y-0.5 text-xs">
-              <div className="flex justify-between text-muted-foreground text-[10px]">
+            <div className="space-y-0.5 text-sm">
+              <div className="flex justify-between text-muted-foreground text-xs">
                 <span>Total Kharid Cost:</span>
                 <span className="font-mono font-semibold text-foreground">Rs {totalCartCost.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-muted-foreground text-[10px]">
+              <div className="flex justify-between text-muted-foreground text-xs">
                 <span>Total Farokht Amount:</span>
                 <span className="font-mono font-semibold text-foreground">Rs {grossSubtotal.toLocaleString()}</span>
               </div>
               {itemDiscountsTotal > 0 && (
-                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium text-[10px]">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium text-xs">
                   <span>Item Discounts:</span>
                   <span className="font-mono">-Rs {itemDiscountsTotal.toLocaleString()}</span>
                 </div>
               )}
               {cartDiscountAmount > 0 && (
-                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium text-[10px]">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium text-xs">
                   <span>Cart Disc ({discountType === "percentage" ? `${discountValue}%` : "Fixed"}):</span>
                   <span className="font-mono">-Rs {cartDiscountAmount.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between text-xs font-bold pt-0.5 border-t border-border text-foreground">
+              <div className="flex justify-between text-sm font-bold pt-0.5 border-t border-border text-foreground">
                 <span>Net Payable:</span>
-                <span className="font-mono text-primary text-sm">Rs {estimatedGrandTotal.toLocaleString()}</span>
+                <span className="font-mono text-primary text-base">Rs {estimatedGrandTotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-[11px] font-bold pt-0.5 text-foreground">
+              <div className="flex justify-between text-sm font-bold pt-0.5 text-foreground">
                 <span>Estimated Profit:</span>
                 <span className={cn("font-mono font-bold", hasLossItem ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}>
                   {hasLossItem ? "Loss Warning" : `+Rs ${totalCartProfit.toLocaleString()}`}
@@ -897,7 +897,7 @@ export function PosCounter() {
             </div>
 
             {hasLossItem && (
-              <div className="p-1.5 rounded-lg bg-destructive/15 border border-destructive/40 text-destructive text-[10px] font-bold flex items-center gap-1.5">
+              <div className="p-1.5 rounded-lg bg-destructive/15 border border-destructive/40 text-destructive text-xs font-bold flex items-center gap-1.5">
                 <AlertCircleIcon className="size-3.5 shrink-0" />
                 <span>Loss Warning: Selling price is lower than cost price! Checkout blocked.</span>
               </div>
@@ -918,7 +918,7 @@ export function PosCounter() {
               }}
               disabled={cart.length === 0 || hasLossItem}
               className={cn(
-                "w-full h-8 gap-1.5 font-bold text-xs cursor-pointer shadow-md",
+                "w-full h-8 gap-1.5 font-bold text-sm cursor-pointer shadow-md",
                 hasLossItem
                   ? "bg-destructive text-destructive-foreground opacity-60 cursor-not-allowed"
                   : "bg-primary text-primary-foreground"

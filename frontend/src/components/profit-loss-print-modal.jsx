@@ -130,7 +130,7 @@ export function ProfitLossPrintModal({
 
       <div className="w-full max-w-5xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-base">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
             <span>Profit and Loss Statement Preview (A4 Standard)</span>
           </div>
@@ -138,7 +138,7 @@ export function ProfitLossPrintModal({
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -147,7 +147,7 @@ export function ProfitLossPrintModal({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1.5 text-sm cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -155,7 +155,7 @@ export function ProfitLossPrintModal({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Statement</span>
@@ -168,7 +168,7 @@ export function ProfitLossPrintModal({
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
-            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-portrait-sheet relative notranslate"
+            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-sm print:shadow-none print:border-none print:p-0 a4-portrait-sheet relative notranslate"
           dir="ltr"
           lang="en"
         >
@@ -179,21 +179,21 @@ export function ProfitLossPrintModal({
                 <h1 className="font-extrabold text-base tracking-tight text-black">
                   Profit and Loss Statement
                 </h1>
-                <p className="font-bold text-xs text-black uppercase">
+                <p className="font-bold text-sm text-black uppercase">
                   AL KHALEEJ LUBRICANTS
                 </p>
-                <p className="text-[11px] text-gray-700 font-medium">
+                <p className="text-sm text-gray-700 font-medium">
                   For the {period.toUpperCase()} period ending: {periodLabel}
                 </p>
               </div>
             </div>
-            <div className="text-right text-[11px] font-semibold text-gray-700">
+            <div className="text-right text-sm font-semibold text-gray-700">
               Stated in PKR
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pb-4 mb-2">
-            <div className="border border-indigo-200 bg-indigo-50/50 p-2 text-xs space-y-0.5">
+            <div className="border border-indigo-200 bg-indigo-50/50 p-2 text-sm space-y-0.5">
               <div className="flex justify-between font-semibold">
                 <span>Gross Profit Margin</span>
                 <span className="font-mono">{grossMarginPct}%</span>
@@ -206,7 +206,7 @@ export function ProfitLossPrintModal({
           </div>
 
           <div className="mb-6 overflow-hidden">
-            <table className="w-full border-collapse border border-gray-400 text-[10px]">
+            <table className="w-full border-collapse border border-gray-400 text-xs">
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-400 text-gray-800 font-bold text-center">
                   <th className="border border-gray-300 p-1.5 text-left w-64">
@@ -381,15 +381,15 @@ export function ProfitLossPrintModal({
                 </tr>
 
                 <tr className="bg-emerald-50 font-bold border-t-2 border-b-2 border-black text-black">
-                  <td className="border border-gray-300 p-2 text-left uppercase text-xs">
+                  <td className="border border-gray-300 p-2 text-left uppercase text-sm">
                     Net Profit / Loss
                   </td>
                   <td className="border border-gray-300 p-2 text-center text-gray-600">0</td>
                   <td className="border border-gray-300 p-2 text-center text-gray-600">0</td>
-                  <td className="border border-gray-300 p-2 text-right font-mono text-sm">
+                  <td className="border border-gray-300 p-2 text-right font-mono text-base">
                     {netProfit.toLocaleString()}
                   </td>
-                  <td className="border border-gray-300 p-2 text-center font-mono text-xs">
+                  <td className="border border-gray-300 p-2 text-center font-mono text-sm">
                     {returnOnSalesPct}%
                   </td>
                   <td className="border border-gray-300 p-2 text-center text-gray-500">-</td>
@@ -399,11 +399,11 @@ export function ProfitLossPrintModal({
             </table>
           </div>
 
-          <div className="pt-6 grid grid-cols-2 gap-8 text-center text-xs">
-            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+          <div className="pt-6 grid grid-cols-2 gap-8 text-center text-sm">
+            <div className="border-t border-black pt-1 font-bold text-xs uppercase">
               Prepared by: Accounts Department
             </div>
-            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+            <div className="border-t border-black pt-1 font-bold text-xs uppercase">
               Approved by: Management
             </div>
           </div>
@@ -411,13 +411,13 @@ export function ProfitLossPrintModal({
       </div>
 
       <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
           Close Preview
         </Button>
         <Button
           size="sm"
           onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
         >
           <PrinterIcon className="size-3.5" />
           <span>Print A4 Statement</span>

@@ -29,16 +29,16 @@ export function LatestChange() {
                 "relative flex size-full flex-col gap-1 overflow-hidden px-4 pt-3 pb-1 *:text-nowrap",
                 "transition-opacity group-data-[collapsible=icon]:hidden"
             )}>
-            <span className="font-light font-mono text-[10px] text-muted-foreground">
+            <span className="font-light font-mono text-xs text-muted-foreground">
 				{latestChange.badge}
 			</span>
-            <p className="font-medium text-xs">{latestChange.title}</p>
-            <span className="text-[10px] text-muted-foreground">
+            <p className="font-medium text-sm">{latestChange.title}</p>
+            <span className="text-xs text-muted-foreground">
 				{latestChange.description}
 			</span>
             <Button
                 asChild
-                className="w-max px-0 font-light text-xs"
+                className="w-max px-0 font-light text-sm"
                 size="sm"
                 variant="link">
 				<a href={latestChange.readMore.href}>{latestChange.readMore.label}</a>

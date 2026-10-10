@@ -120,7 +120,7 @@ export const ValidatedInput = React.forwardRef(
     const showValidState = touched && isValid && !isEmpty && showSuccess;
 
     return (
-      <div className={cn("space-y-1 w-full text-xs", containerClassName)}>
+      <div className={cn("space-y-1 w-full text-sm", containerClassName)}>
         {label && (
           <div className="flex items-center justify-between font-medium text-foreground">
             <span>
@@ -130,7 +130,7 @@ export const ValidatedInput = React.forwardRef(
             {touched && (
               <span
                 className={cn(
-                  "text-[10px] font-semibold transition-colors duration-150 flex items-center gap-1",
+                  "text-xs font-semibold transition-colors duration-150 flex items-center gap-1",
                   showErrorState ? "text-destructive" : "text-emerald-500"
                 )}
               >
@@ -151,7 +151,7 @@ export const ValidatedInput = React.forwardRef(
             onChange={handleChange}
             onBlur={handleBlur}
             className={cn(
-              "pe-8 text-xs transition-all duration-200",
+              "pe-8 text-sm transition-all duration-200",
               showErrorState &&
                 "border-destructive bg-destructive/5 ring-1 ring-destructive/30 focus-visible:ring-destructive focus-visible:border-destructive",
               showValidState &&

@@ -136,11 +136,11 @@ export function NotificationManager({ user }) {
               <BellIcon className="size-5 text-primary" />
               <span>Notification Center</span>
             </h2>
-            <Badge variant="outline" className="text-[9px] bg-primary/10 border-primary/30 font-medium py-0">
+            <Badge variant="outline" className="text-xs bg-primary/10 border-primary/30 font-medium py-0">
               Auto-prunes after 30 Days
             </Badge>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Real-time audit alerts, inventory stock warnings, and authentication session logs.
           </p>
         </div>
@@ -151,7 +151,7 @@ export function NotificationManager({ user }) {
             size="sm"
             onClick={handleManualRefresh}
             disabled={refreshing}
-            className="cursor-pointer gap-1.5 text-xs h-7.5 px-2.5"
+            className="cursor-pointer gap-1.5 text-sm h-7.5 px-2.5"
           >
             <RefreshCwIcon className={`size-3 text-muted-foreground ${refreshing ? "animate-spin" : ""}`} />
             <span>Refresh</span>
@@ -163,7 +163,7 @@ export function NotificationManager({ user }) {
               size="sm"
               onClick={handleMarkAllRead}
               disabled={loadingAction}
-              className="cursor-pointer gap-1 text-xs h-7.5 px-2.5 font-medium"
+              className="cursor-pointer gap-1 text-sm h-7.5 px-2.5 font-medium"
             >
               <CheckCheckIcon className="size-3 text-primary" />
               <span>Mark All Read</span>
@@ -176,7 +176,7 @@ export function NotificationManager({ user }) {
               size="sm"
               onClick={() => setShowClearModal(true)}
               disabled={loadingAction}
-              className="cursor-pointer gap-1 text-xs h-7.5 px-2.5 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+              className="cursor-pointer gap-1 text-sm h-7.5 px-2.5 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
             >
               <Trash2Icon className="size-3" />
               <span>Clear History</span>
@@ -205,8 +205,8 @@ export function NotificationManager({ user }) {
               <div className="p-2.5 rounded-full bg-muted/60 mb-2 text-muted-foreground">
                 <InboxIcon className="size-5" />
               </div>
-              <h3 className="text-xs font-semibold text-foreground">No notifications found</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+              <h3 className="text-sm font-semibold text-foreground">No notifications found</h3>
+              <p className="text-sm text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
                 There are no notifications matching your active filter.
               </p>
             </div>

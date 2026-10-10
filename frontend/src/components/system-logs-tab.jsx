@@ -171,14 +171,14 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
         <CardHeader className="p-3 sm:p-3.5 border-b border-border/40 space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+              <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-1.5">
                 <Terminal className="size-4 text-primary" />
                 <span>System Diagnostics & Error Logs</span>
-                <Badge variant="outline" className="text-[9px] bg-primary/10 border-primary/30 font-medium py-0">
+                <Badge variant="outline" className="text-xs bg-primary/10 border-primary/30 font-medium py-0">
                   Auto-prunes after 7 Days
                 </Badge>
               </CardTitle>
-              <CardDescription className="text-[10px] mt-0.5">
+              <CardDescription className="text-xs mt-0.5">
                 Real-time console errors, warnings, and system exception logs.
               </CardDescription>
             </div>
@@ -188,7 +188,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                 variant="outline"
                 size="sm"
                 onClick={loadLogs}
-                className="cursor-pointer h-7 text-xs gap-1 px-2.5"
+                className="cursor-pointer h-7 text-sm gap-1 px-2.5"
               >
                 <RefreshCw className={`size-3 ${loadingLogs ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
@@ -200,17 +200,17 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                     variant="outline"
                     size="sm"
                     disabled={filteredLogs.length === 0}
-                    className="cursor-pointer h-7 text-xs gap-1 px-2.5"
+                    className="cursor-pointer h-7 text-sm gap-1 px-2.5"
                   >
                     <Download className="size-3 text-primary" />
                     <span>Export & Tools</span>
                     <ChevronDown className="size-3 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 text-xs">
+                <DropdownMenuContent align="end" className="w-48 text-sm">
                   <DropdownMenuItem
                     onClick={handleCopyAllLogs}
-                    className="cursor-pointer gap-2 py-1.5 text-xs font-medium"
+                    className="cursor-pointer gap-2 py-1.5 text-sm font-medium"
                   >
                     {copiedAll ? (
                       <CopyCheck className="size-3.5 text-emerald-500" />
@@ -222,14 +222,14 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => handleDownloadLogArchive("json")}
-                    className="cursor-pointer gap-2 py-1.5 text-xs"
+                    className="cursor-pointer gap-2 py-1.5 text-sm"
                   >
                     <FileCode className="size-3.5 text-primary" />
                     <span>Download JSON (.json)</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleDownloadLogArchive("txt")}
-                    className="cursor-pointer gap-2 py-1.5 text-xs"
+                    className="cursor-pointer gap-2 py-1.5 text-sm"
                   >
                     <FileText className="size-3.5 text-muted-foreground" />
                     <span>Download Text (.txt)</span>
@@ -242,7 +242,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                   variant="destructive"
                   size="sm"
                   onClick={() => setShowClearLogsModal(true)}
-                  className="cursor-pointer h-7 text-xs gap-1 px-2.5"
+                  className="cursor-pointer h-7 text-sm gap-1 px-2.5"
                 >
                   <Trash2 className="size-3" />
                   <span>Clear All</span>
@@ -257,7 +257,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                 variant={logLevelFilter === "all" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setLogLevelFilter("all")}
-                className="text-[11px] h-6 px-2 rounded cursor-pointer font-medium"
+                className="text-sm h-6 px-2 rounded cursor-pointer font-medium"
               >
                 All ({logs.length})
               </Button>
@@ -265,7 +265,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                 variant={logLevelFilter === "error" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setLogLevelFilter("error")}
-                className="text-[11px] h-6 px-2 rounded cursor-pointer text-rose-500 font-medium"
+                className="text-sm h-6 px-2 rounded cursor-pointer text-rose-500 font-medium"
               >
                 Errors ({logs.filter((l) => l.level === "error").length})
               </Button>
@@ -273,7 +273,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                 variant={logLevelFilter === "warning" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setLogLevelFilter("warning")}
-                className="text-[11px] h-6 px-2 rounded cursor-pointer text-amber-500 font-medium"
+                className="text-sm h-6 px-2 rounded cursor-pointer text-amber-500 font-medium"
               >
                 Warnings ({logs.filter((l) => l.level === "warning").length})
               </Button>
@@ -285,7 +285,7 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                 placeholder="Search logs..."
                 value={searchLog}
                 onChange={(e) => setSearchLog(e.target.value)}
-                className="pl-7.5 text-xs h-7 bg-muted/30"
+                className="pl-7.5 text-sm h-7 bg-muted/30"
               />
             </div>
           </div>
@@ -295,13 +295,13 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
           {loadingLogs ? (
             <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
               <CloudLoader size="sm" />
-              <p className="text-[11px]">Loading diagnostics logs...</p>
+              <p className="text-sm">Loading diagnostics logs...</p>
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="py-8 flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
               <Terminal className="size-6 opacity-30 text-emerald-500" />
-              <p className="text-xs font-semibold text-foreground">System Health Normal</p>
-              <p className="text-[11px]">No errors or system warnings found in the active log registry.</p>
+              <p className="text-sm font-semibold text-foreground">System Health Normal</p>
+              <p className="text-sm">No errors or system warnings found in the active log registry.</p>
             </div>
           ) : (
             <div>
@@ -323,16 +323,16 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <Badge
                               variant={isError ? "destructive" : "warning"}
-                              className="text-[9px] uppercase font-bold px-1.5 py-0"
+                              className="text-xs uppercase font-bold px-1.5 py-0"
                             >
                               {log.level || "error"}
                             </Badge>
-                            <span className="font-semibold text-xs text-foreground">{log.title}</span>
-                            <span className="text-[9px] text-muted-foreground font-mono bg-muted/60 px-1 py-0.2 rounded">
+                            <span className="font-semibold text-sm text-foreground">{log.title}</span>
+                            <span className="text-xs text-muted-foreground font-mono bg-muted/60 px-1 py-0.2 rounded">
                               {log.source || "frontend"}
                             </span>
                           </div>
-                          <p className="text-[11px] text-foreground/90 font-mono break-all leading-tight">{log.message}</p>
+                          <p className="text-sm text-foreground/90 font-mono break-all leading-tight">{log.message}</p>
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0">
@@ -365,12 +365,12 @@ export function SystemLogsTab({ logs = [], loadingLogs, loadLogs, isAdmin, setSu
                       </div>
 
                       {log.stack && (
-                        <div className="p-2 rounded-md bg-black/80 text-zinc-300 font-mono text-[9px] leading-relaxed overflow-x-auto max-h-20 border border-border/40">
+                        <div className="p-2 rounded-md bg-black/80 text-zinc-300 font-mono text-xs leading-relaxed overflow-x-auto max-h-20 border border-border/40">
                           <pre className="whitespace-pre-wrap break-words">{log.stack}</pre>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-[9.5px] text-muted-foreground pt-0.5 border-t border-border/40">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5 border-t border-border/40">
                         <div className="flex items-center gap-1">
                           <Clock className="size-2.5" />
                           <span>{new Date(log.createdAt).toLocaleString()}</span>

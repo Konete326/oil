@@ -80,14 +80,14 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
             <h2 className="text-lg font-bold text-foreground">
               {editingEmployee ? "Edit Employee Profile" : "Add New Employee Profile"}
             </h2>
-            <p className="text-xs text-muted-foreground">Staff member details & monthly base salary configuration.</p>
+            <p className="text-sm text-muted-foreground">Staff member details & monthly base salary configuration.</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
             <XIcon className="size-4" />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <ValidatedInput
             label="Full Name"
             rule="name"
@@ -138,7 +138,7 @@ export function EmployeeModal({ isOpen, onClose, editingEmployee = null, onSucce
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>

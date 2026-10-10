@@ -126,7 +126,7 @@ export function ExpensePrintStatementModal({
 
       <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-base">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
             <span>Operational Expenses Statement Preview (A4 Standard)</span>
           </div>
@@ -134,7 +134,7 @@ export function ExpensePrintStatementModal({
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -143,7 +143,7 @@ export function ExpensePrintStatementModal({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1.5 text-sm cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -151,7 +151,7 @@ export function ExpensePrintStatementModal({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Statement</span>
@@ -164,7 +164,7 @@ export function ExpensePrintStatementModal({
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
-            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
+            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-sm print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
             dir="ltr"
             lang="en"
           >
@@ -175,13 +175,13 @@ export function ExpensePrintStatementModal({
                   <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                     AL KHALEEJ LUBRICANTS
                   </h1>
-                  <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
+                  <p className="font-bold text-sm text-black uppercase tracking-wider pt-0.5">
                     EXPENSES STATEMENT
                   </p>
-                  <p className="text-[11px] text-gray-700 font-medium">
+                  <p className="text-sm text-gray-700 font-medium">
                     Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
                   </p>
-                  <p className="text-[10px] text-gray-600">
+                  <p className="text-xs text-gray-600">
                     Tel: (021) 35091244 | Korangi Industrial Area, Karachi
                   </p>
                 </div>
@@ -189,22 +189,22 @@ export function ExpensePrintStatementModal({
 
               <div className="text-right space-y-1">
                 <div className="border border-black p-2 bg-gray-50 text-right">
-                  <span className="text-[10px] font-bold text-gray-600 uppercase block">Total Expenses:</span>
-                  <span className="text-sm font-bold font-mono text-black">
+                  <span className="text-xs font-bold text-gray-600 uppercase block">Total Expenses:</span>
+                  <span className="text-base font-bold font-mono text-black">
                     Rs. {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
-                <p className="text-[10px] text-gray-700 font-semibold pt-0.5">
+                <p className="text-xs text-gray-700 font-semibold pt-0.5">
                   {periodLabel}
                 </p>
               </div>
             </div>
 
             <div className="mb-4">
-              <div className="text-[10px] font-bold uppercase text-gray-800 pb-1">
+              <div className="text-xs font-bold uppercase text-gray-800 pb-1">
                 Category Breakdown
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 {categoryList.map(([cat, amt]) => (
                   <div key={cat} className="border border-black p-1.5 bg-gray-50/50 flex justify-between items-center">
                     <span className="font-semibold text-gray-800">{cat}:</span>
@@ -215,7 +215,7 @@ export function ExpensePrintStatementModal({
             </div>
 
             <div className="mb-6 overflow-hidden">
-              <table className="w-full border-collapse border border-black text-[10px]">
+              <table className="w-full border-collapse border border-black text-xs">
                 <thead>
                   <tr className="bg-gray-100 border-b border-black font-bold uppercase tracking-tight text-center">
                     <th className="border border-black p-1.5 w-16">
@@ -257,10 +257,10 @@ export function ExpensePrintStatementModal({
                         <td className="border border-gray-300 p-1 font-semibold text-black leading-tight">
                           {e.title}
                         </td>
-                        <td className="border border-gray-300 p-1 text-center text-[9px] uppercase font-medium text-gray-700">
+                        <td className="border border-gray-300 p-1 text-center text-xs uppercase font-medium text-gray-700">
                           {e.category}
                         </td>
-                        <td className="border border-gray-300 p-1 text-center text-[9px] font-mono text-gray-700">
+                        <td className="border border-gray-300 p-1 text-center text-xs font-mono text-gray-700">
                           {e.paymentMode || "Cash"}
                         </td>
                         <td className="border border-gray-300 p-1 text-right font-mono font-bold text-gray-900">
@@ -270,7 +270,7 @@ export function ExpensePrintStatementModal({
                     ))
                   )}
 
-                  <tr className="border-t-2 border-black font-bold bg-gray-100 text-xs">
+                  <tr className="border-t-2 border-black font-bold bg-gray-100 text-sm">
                     <td colSpan={5} className="border border-black p-2 text-left uppercase">
                       Total Expenses:
                     </td>
@@ -282,7 +282,7 @@ export function ExpensePrintStatementModal({
               </table>
             </div>
 
-            <div className="pt-8 grid grid-cols-2 gap-8 text-center text-[10px]">
+            <div className="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
               <div className="space-y-6">
                 <div className="pt-3 border-t border-black">
                   <p className="font-bold uppercase">{activeOperator}</p>
@@ -301,13 +301,13 @@ export function ExpensePrintStatementModal({
         </div>
 
         <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
             Close Preview
           </Button>
           <Button
             size="sm"
             onClick={handlePrint}
-            className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+            className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
           >
             <PrinterIcon className="size-3.5" />
             <span>Print A4 Statement</span>

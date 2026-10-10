@@ -54,15 +54,15 @@ export function LoginPage({ onLoginSuccess }) {
             <LogoIcon className="size-7" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome to Al Khaleej Lubricants</h1>
-          <p className="text-xs text-muted-foreground">Enter your credentials to access the Oil Management Portal.</p>
+          <p className="text-sm text-muted-foreground">Enter your credentials to access the Oil Management Portal.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <div className="space-y-1">
             <label className="font-medium text-foreground flex items-center justify-between">
               <span>Email Address</span>
               {emailTouched && (
-                <span className={`text-[10px] ${isEmailValid ? "text-emerald-500" : "text-destructive"}`}>
+                <span className={`text-xs ${isEmailValid ? "text-emerald-500" : "text-destructive"}`}>
                   {isEmailValid ? "Valid Email" : "Invalid Email Format"}
                 </span>
               )}
@@ -78,7 +78,7 @@ export function LoginPage({ onLoginSuccess }) {
                   if (!emailTouched) setEmailTouched(true);
                 }}
                 onBlur={() => setEmailTouched(true)}
-                className={`ps-9 pe-9 text-xs transition-colors ${
+                className={`ps-9 pe-9 text-sm transition-colors ${
                   emailTouched ? (isEmailValid ? "border-emerald-500/60 focus-visible:ring-emerald-500" : "border-destructive focus-visible:ring-destructive") : ""
                 }`}
                 required
@@ -99,7 +99,7 @@ export function LoginPage({ onLoginSuccess }) {
             <label className="font-medium text-foreground flex items-center justify-between">
               <span>Password</span>
               {passwordTouched && (
-                <span className={`text-[10px] ${isPasswordValid ? "text-emerald-500" : "text-destructive"}`}>
+                <span className={`text-xs ${isPasswordValid ? "text-emerald-500" : "text-destructive"}`}>
                   {isPasswordValid ? "Min 6 Characters" : "At least 6 characters"}
                 </span>
               )}
@@ -115,7 +115,7 @@ export function LoginPage({ onLoginSuccess }) {
                   if (!passwordTouched) setPasswordTouched(true);
                 }}
                 onBlur={() => setPasswordTouched(true)}
-                className={`ps-9 pe-9 text-xs transition-colors ${
+                className={`ps-9 pe-9 text-sm transition-colors ${
                   passwordTouched ? (isPasswordValid ? "border-emerald-500/60 focus-visible:ring-emerald-500" : "border-destructive focus-visible:ring-destructive") : ""
                 }`}
                 required
@@ -133,7 +133,7 @@ export function LoginPage({ onLoginSuccess }) {
 
           <Button
             type="submit"
-            className="w-full h-10 gap-2 text-xs font-semibold cursor-pointer shadow-xs"
+            className="w-full h-10 gap-2 text-sm font-semibold cursor-pointer shadow-xs"
             disabled={loading || (emailTouched && passwordTouched && !isFormValid)}
           >
             {loading ? (

@@ -35,14 +35,14 @@ export function DashboardStats({ stats, loading }) {
             {items.map((s) => (
 				<DashboardCard key={s.label}>
 					<CardHeader className="flex flex-row items-center justify-between">
-						<CardTitle className="font-normal text-xs tracking-wide">
+						<CardTitle className="font-normal text-sm tracking-wide">
 							{s.label}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="flex flex-row items-center gap-2">
 						<p className="font-semibold text-2xl tabular-nums">{s.value}</p>
 					</CardContent>
-					<CardFooter className="gap-1 rounded-none bg-background text-xs">
+					<CardFooter className="gap-1 rounded-none bg-background text-sm">
 						<Delta value={s.delta}>
 							<DeltaIcon />
 							<DeltaValue />

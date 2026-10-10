@@ -472,7 +472,7 @@ export function CustomerUdharDiaryModal({
                 </h2>
                 <Badge
                   className={cn(
-                    "text-[10.5px] font-semibold",
+                    "text-xs font-semibold",
                     currentBalance > 0
                       ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                       : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -484,7 +484,7 @@ export function CustomerUdharDiaryModal({
                 </Badge>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap font-mono">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap font-mono">
                 {customerProfile?.phone && (
                   <span className="flex items-center gap-1">
                     <PhoneIcon className="size-3 text-emerald-600" />
@@ -503,7 +503,7 @@ export function CustomerUdharDiaryModal({
               variant="outline"
               size="sm"
               onClick={handleWhatsAppShare}
-              className="h-8 gap-1.5 text-xs px-2.5 border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+              className="h-8 gap-1.5 text-sm px-2.5 border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
               title="Share ledger statement on WhatsApp"
             >
               <Share2Icon className="size-3.5 text-emerald-600" />
@@ -514,7 +514,7 @@ export function CustomerUdharDiaryModal({
               variant="default"
               size="sm"
               onClick={handlePrint}
-              className="h-8 gap-1.5 text-xs px-3 cursor-pointer shadow-xs"
+              className="h-8 gap-1.5 text-sm px-3 cursor-pointer shadow-xs"
               title="Print A4 ledger statement"
             >
               <PrinterIcon className="size-3.5" />
@@ -535,7 +535,7 @@ export function CustomerUdharDiaryModal({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="rounded-xl border border-border/80 bg-blue-500/5 p-3.5 shadow-2xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 block">
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 block">
                 Total Purchases (Debit)
               </span>
               <p className="text-xl font-bold font-mono text-foreground mt-0.5">
@@ -549,7 +549,7 @@ export function CustomerUdharDiaryModal({
 
           <div className="rounded-xl border border-border/80 bg-emerald-500/5 p-3.5 shadow-2xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 block">
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 block">
                 Total Payments (Credit)
               </span>
               <p className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
@@ -563,7 +563,7 @@ export function CustomerUdharDiaryModal({
 
           <div className="rounded-xl border border-border/80 bg-amber-500/5 p-3.5 shadow-2xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 block">
+              <span className="text-sm font-semibold text-amber-600 dark:text-amber-400 block">
                 Net Balance Due
               </span>
               <p className="text-xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-0.5">
@@ -584,7 +584,7 @@ export function CustomerUdharDiaryModal({
                 setVasooliAmount(currentBalance > 0 ? String(currentBalance) : "");
                 setActiveForm(activeForm === "vasooli" ? null : "vasooli");
               }}
-              className="h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer shadow-2xs"
+              className="h-8 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer shadow-2xs"
             >
               <HandCoinsIcon className="size-3.5" />
               <span>+ Record Payment</span>
@@ -594,7 +594,7 @@ export function CustomerUdharDiaryModal({
               size="sm"
               variant="outline"
               onClick={() => setActiveForm(activeForm === "udhar" ? null : "udhar")}
-              className="h-8 text-xs font-semibold border-border hover:bg-muted text-foreground gap-1.5 cursor-pointer"
+              className="h-8 text-sm font-semibold border-border hover:bg-muted text-foreground gap-1.5 cursor-pointer"
             >
               <PlusIcon className="size-3.5 text-primary" />
               <span>+ Add Credit Bill</span>
@@ -607,7 +607,7 @@ export function CustomerUdharDiaryModal({
               placeholder="Search by date or bill #..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              className="h-8 pl-8 text-xs bg-muted/30 focus:bg-background"
+              className="h-8 pl-8 text-sm bg-muted/30 focus:bg-background"
             />
           </div>
         </div>
@@ -618,20 +618,20 @@ export function CustomerUdharDiaryModal({
             className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 space-y-3 animate-in fade-in no-print"
           >
             <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
-              <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+              <h4 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                 <HandCoinsIcon className="size-3.5 text-emerald-600" />
                 <span>Record Payment Received from {customerName}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setActiveForm(null)}
-                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-sm">
               <div>
                 <label className="block font-medium mb-1 text-muted-foreground">Amount (PKR) *</label>
                 <Input
@@ -640,7 +640,7 @@ export function CustomerUdharDiaryModal({
                   required
                   value={vasooliAmount}
                   onChange={(e) => setVasooliAmount(e.target.value)}
-                  className="h-8 text-xs font-mono font-bold"
+                  className="h-8 text-sm font-mono font-bold"
                   placeholder="e.g. 5000"
                 />
               </div>
@@ -650,7 +650,7 @@ export function CustomerUdharDiaryModal({
                 <select
                   value={vasooliMode}
                   onChange={(e) => setVasooliMode(e.target.value)}
-                  className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-medium cursor-pointer"
+                  className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm font-medium cursor-pointer"
                 >
                   <option value="Cash">Cash</option>
                   <option value="Bank Transfer">Bank Transfer</option>
@@ -665,7 +665,7 @@ export function CustomerUdharDiaryModal({
                   required
                   value={vasooliDate}
                   onChange={(e) => setVasooliDate(e.target.value)}
-                  className="h-8 text-xs font-mono"
+                  className="h-8 text-sm font-mono"
                 />
               </div>
 
@@ -675,7 +675,7 @@ export function CustomerUdharDiaryModal({
                   type="text"
                   value={vasooliNotes}
                   onChange={(e) => setVasooliNotes(e.target.value)}
-                  className="h-8 text-xs"
+                  className="h-8 text-sm"
                   placeholder="Optional note..."
                 />
               </div>
@@ -687,7 +687,7 @@ export function CustomerUdharDiaryModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveForm(null)}
-                className="h-7 text-xs cursor-pointer"
+                className="h-7 text-sm cursor-pointer"
               >
                 Cancel
               </Button>
@@ -695,7 +695,7 @@ export function CustomerUdharDiaryModal({
                 type="submit"
                 size="sm"
                 disabled={submitting}
-                className="h-7 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                className="h-7 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
               >
                 {submitting ? "Saving..." : "Save Payment"}
               </Button>
@@ -709,27 +709,27 @@ export function CustomerUdharDiaryModal({
             className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 space-y-3 animate-in fade-in no-print"
           >
             <div className="flex items-center justify-between border-b border-primary/20 pb-2">
-              <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+              <h4 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                 <PlusIcon className="size-3.5 text-primary" />
                 <span>Add New Credit Bill for {customerName}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setActiveForm(null)}
-                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-sm">
               <div className="sm:col-span-2">
                 <label className="block font-medium mb-1 text-muted-foreground">Product / Item Name</label>
                 <Input
                   type="text"
                   value={udharItemName}
                   onChange={(e) => setUdharItemName(e.target.value)}
-                  className="h-8 text-xs"
+                  className="h-8 text-sm"
                   placeholder="e.g. Engine Oil 20W50"
                 />
               </div>
@@ -742,7 +742,7 @@ export function CustomerUdharDiaryModal({
                   step="0.5"
                   value={udharQty}
                   onChange={(e) => setUdharQty(e.target.value)}
-                  className="h-8 text-xs font-mono"
+                  className="h-8 text-sm font-mono"
                   placeholder="1"
                 />
               </div>
@@ -755,13 +755,13 @@ export function CustomerUdharDiaryModal({
                   required
                   value={udharPrice}
                   onChange={(e) => setUdharPrice(e.target.value)}
-                  className="h-8 text-xs font-mono font-bold"
+                  className="h-8 text-sm font-mono font-bold"
                   placeholder="e.g. 4500"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm pt-1">
               <div>
                 <label className="block font-medium mb-1 text-muted-foreground">Date *</label>
                 <Input
@@ -769,7 +769,7 @@ export function CustomerUdharDiaryModal({
                   required
                   value={udharDate}
                   onChange={(e) => setUdharDate(e.target.value)}
-                  className="h-8 text-xs font-mono"
+                  className="h-8 text-sm font-mono"
                 />
               </div>
 
@@ -779,7 +779,7 @@ export function CustomerUdharDiaryModal({
                   type="text"
                   value={udharNotes}
                   onChange={(e) => setUdharNotes(e.target.value)}
-                  className="h-8 text-xs"
+                  className="h-8 text-sm"
                   placeholder="Vehicle number or remarks..."
                 />
               </div>
@@ -791,7 +791,7 @@ export function CustomerUdharDiaryModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveForm(null)}
-                className="h-7 text-xs cursor-pointer"
+                className="h-7 text-sm cursor-pointer"
               >
                 Cancel
               </Button>
@@ -799,7 +799,7 @@ export function CustomerUdharDiaryModal({
                 type="submit"
                 size="sm"
                 disabled={submitting}
-                className="h-7 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
+                className="h-7 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
               >
                 {submitting ? "Saving..." : "Add Credit Bill"}
               </Button>
@@ -809,30 +809,30 @@ export function CustomerUdharDiaryModal({
 
         <div className="rounded-xl border border-border/80 overflow-hidden shadow-2xs">
           <Table className="print-table">
-            <TableHeader className="bg-muted/70 text-xs">
+            <TableHeader className="bg-muted/70 text-sm">
               <TableRow className="border-b border-border/80">
-                <TableHead className="w-[105px] text-xs h-9 font-semibold text-foreground">
+                <TableHead className="w-[105px] text-sm h-9 font-semibold text-foreground">
                   Date
                 </TableHead>
-                <TableHead className="w-[110px] text-xs h-9 font-semibold text-foreground">
+                <TableHead className="w-[110px] text-sm h-9 font-semibold text-foreground">
                   Bill / Ref #
                 </TableHead>
-                <TableHead className="text-xs h-9 font-semibold text-foreground">
+                <TableHead className="text-sm h-9 font-semibold text-foreground">
                   Particulars / Items
                 </TableHead>
-                <TableHead className="w-[100px] text-xs h-9 font-semibold text-foreground">
+                <TableHead className="w-[100px] text-sm h-9 font-semibold text-foreground">
                   Mode
                 </TableHead>
-                <TableHead className="w-[115px] text-xs h-9 text-right font-semibold text-foreground">
+                <TableHead className="w-[115px] text-sm h-9 text-right font-semibold text-foreground">
                   Debit (Billed)
                 </TableHead>
-                <TableHead className="w-[115px] text-xs h-9 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                <TableHead className="w-[115px] text-sm h-9 text-right font-semibold text-emerald-600 dark:text-emerald-400">
                   Credit (Paid)
                 </TableHead>
-                <TableHead className="w-[125px] text-xs h-9 text-right font-bold text-foreground">
+                <TableHead className="w-[125px] text-sm h-9 text-right font-bold text-foreground">
                   Balance (PKR)
                 </TableHead>
-                <TableHead className="w-[70px] text-xs h-9 text-right pe-3 font-semibold text-muted-foreground no-print">
+                <TableHead className="w-[70px] text-sm h-9 text-right pe-3 font-semibold text-muted-foreground no-print">
                   Action
                 </TableHead>
               </TableRow>
@@ -840,13 +840,13 @@ export function CustomerUdharDiaryModal({
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-xs text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-sm text-muted-foreground">
                     Loading customer ledger...
                   </TableCell>
                 </TableRow>
               ) : filteredEntries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-xs text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-sm text-muted-foreground">
                     No ledger records found for this customer.
                   </TableCell>
                 </TableRow>
@@ -854,33 +854,33 @@ export function CustomerUdharDiaryModal({
                 filteredEntries.map((row) => (
                   <TableRow
                     key={row.id}
-                    className="hover:bg-muted/20 text-xs border-b border-border/40 transition-colors"
+                    className="hover:bg-muted/20 text-sm border-b border-border/40 transition-colors"
                   >
-                    <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
+                    <TableCell className="font-mono text-muted-foreground text-sm py-2.5">
                       {new Date(row.date).toLocaleDateString()}
                     </TableCell>
 
-                    <TableCell className="font-mono font-bold text-primary py-2.5 text-[11px]">
+                    <TableCell className="font-mono font-bold text-primary py-2.5 text-sm">
                       {row.reference}
                     </TableCell>
 
                     <TableCell className="py-2.5">
-                      <span className="font-medium text-foreground text-xs block">{row.description}</span>
+                      <span className="font-medium text-foreground text-sm block">{row.description}</span>
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground text-[11px] py-2.5">
+                    <TableCell className="text-muted-foreground text-sm py-2.5">
                       {row.mode || "Cash"}
                     </TableCell>
 
-                    <TableCell className="text-right font-mono font-medium text-foreground py-2.5 text-xs">
+                    <TableCell className="text-right font-mono font-medium text-foreground py-2.5 text-sm">
                       {row.debit > 0 ? `Rs ${row.debit.toLocaleString()}` : "—"}
                     </TableCell>
 
-                    <TableCell className="text-right font-mono font-medium text-emerald-600 dark:text-emerald-400 py-2.5 text-xs">
+                    <TableCell className="text-right font-mono font-medium text-emerald-600 dark:text-emerald-400 py-2.5 text-sm">
                       {row.credit > 0 ? `Rs ${row.credit.toLocaleString()}` : "—"}
                     </TableCell>
 
-                    <TableCell className="text-right font-mono font-bold text-foreground py-2.5 text-xs">
+                    <TableCell className="text-right font-mono font-bold text-foreground py-2.5 text-sm">
                       Rs {row.balance.toLocaleString()}
                     </TableCell>
 
@@ -905,7 +905,7 @@ export function CustomerUdharDiaryModal({
                 ))
               )}
 
-              <TableRow className="bg-muted/40 font-bold border-t-2 border-border text-xs">
+              <TableRow className="bg-muted/40 font-bold border-t-2 border-border text-sm">
                 <TableCell colSpan={4} className="py-2.5 uppercase tracking-wider text-foreground">
                   Ledger Totals
                 </TableCell>
@@ -924,17 +924,17 @@ export function CustomerUdharDiaryModal({
           </Table>
         </div>
 
-        <div className="hidden print:grid print-signatures pt-8 text-center text-xs">
-          <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+        <div className="hidden print:grid print-signatures pt-8 text-center text-sm">
+          <div className="border-t border-black pt-1 font-bold text-xs uppercase">
             Customer Signature
           </div>
-          <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+          <div className="border-t border-black pt-1 font-bold text-xs uppercase">
             Authorized Signature (Al Khaleej)
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border/80 pt-3 no-print">
-          <p className="text-[11px]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground border-t border-border/80 pt-3 no-print">
+          <p className="text-sm">
             Showing {filteredEntries.length} ledger entries.
           </p>
 
@@ -942,7 +942,7 @@ export function CustomerUdharDiaryModal({
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="h-7.5 text-xs px-4 cursor-pointer self-end sm:self-auto"
+            className="h-7.5 text-sm px-4 cursor-pointer self-end sm:self-auto"
           >
             Close
           </Button>

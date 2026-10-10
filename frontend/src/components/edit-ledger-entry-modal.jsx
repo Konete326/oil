@@ -71,21 +71,21 @@ export function EditLedgerEntryModal({ isOpen, onClose, entry, onSuccess }) {
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
-            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2">
               <AlertCircleIcon className="size-4" />
               {error}
             </div>
           )}
 
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-base">
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1">
                 Transaction Type
               </label>
               <select
                 value={transactionType}
                 onChange={(e) => setTransactionType(e.target.value)}
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-base"
               >
                 <option value="Credit (Payment Received)">Credit (Payment Received)</option>
                 <option value="Debit (Invoice/Challan)">Debit (Invoice/Challan)</option>
@@ -93,7 +93,7 @@ export function EditLedgerEntryModal({ isOpen, onClose, entry, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1">
                 Amount (Rs)
               </label>
               <Input
@@ -108,7 +108,7 @@ export function EditLedgerEntryModal({ isOpen, onClose, entry, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1">
                 Date & Time
               </label>
               <div className="relative">
@@ -117,20 +117,20 @@ export function EditLedgerEntryModal({ isOpen, onClose, entry, onSuccess }) {
                   type="datetime-local"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="pl-9 font-mono text-xs"
+                  className="pl-9 font-mono text-sm"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1">
                 Payment Mode
               </label>
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-base"
               >
                 <option value="Cash">Cash</option>
                 <option value="Cheque">Cheque</option>
@@ -141,7 +141,7 @@ export function EditLedgerEntryModal({ isOpen, onClose, entry, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1">
                 Description / Particulars
               </label>
               <Input

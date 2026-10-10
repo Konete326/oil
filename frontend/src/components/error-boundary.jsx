@@ -32,14 +32,14 @@ export class ErrorBoundary extends React.Component {
     if (this.state.hasError && this.state.recoveryAttempts >= 2) {
       return (
         <div className="p-6 text-center space-y-3 bg-card border border-border/80 rounded-2xl m-4 shadow-sm">
-          <p className="text-sm font-semibold text-foreground">Something went wrong in this section.</p>
-          <p className="text-xs text-muted-foreground">{this.state.error?.message || "Render exception occurred."}</p>
+          <p className="text-base font-semibold text-foreground">Something went wrong in this section.</p>
+          <p className="text-sm text-muted-foreground">{this.state.error?.message || "Render exception occurred."}</p>
           <button
             onClick={() => {
               this.setState({ hasError: false, error: null, recoveryAttempts: 0 });
               window.location.reload();
             }}
-            className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl cursor-pointer hover:bg-primary/90 transition-colors"
+            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-xl cursor-pointer hover:bg-primary/90 transition-colors"
           >
             Reload Section
           </button>

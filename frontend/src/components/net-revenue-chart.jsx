@@ -59,7 +59,7 @@ export function NetRevenueChart({ revenue = [], loading }) {
         {loading ? (
           <Skeleton className="h-60 w-full md:h-80" />
         ) : chartRows.length === 0 ? (
-          <div className="h-60 md:h-80 flex items-center justify-center text-xs text-muted-foreground">
+          <div className="h-60 md:h-80 flex items-center justify-center text-sm text-muted-foreground">
             No sales revenue data available yet.
           </div>
         ) : (

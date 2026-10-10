@@ -90,13 +90,13 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                 <TruckIcon className="size-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-base sm:text-base text-foreground flex items-center gap-2 flex-wrap">
                   {currentSup.name}
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 font-mono font-medium">
+                  <span className="text-sm px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 font-mono font-medium">
                     Vendor / Refinery
                   </span>
                 </h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                <p className="text-sm sm:text-sm text-muted-foreground">
                   {currentSup.phone ? `Phone: ${currentSup.phone}` : "No phone registered"} | {currentSup.address || "Address not provided"}
                 </p>
               </div>
@@ -107,7 +107,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                 onClick={() => setIsTrialSheetOpen(true)}
                 size="sm"
                 variant="outline"
-                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+                className="gap-1.5 cursor-pointer text-sm font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
                 title="Supplier Individual Trial Balance Sheet"
               >
                 <ScaleIcon className="size-3.5 text-amber-600" />
@@ -118,7 +118,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                 variant="outline"
                 size="sm"
                 onClick={handleExportExcel}
-                className="gap-1.5 cursor-pointer text-xs"
+                className="gap-1.5 cursor-pointer text-sm"
               >
                 <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
                 <span>Export Excel</span>
@@ -127,7 +127,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
               <Button
                 onClick={() => setIsPrintOpen(true)}
                 size="sm"
-                className="gap-1.5 cursor-pointer text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="gap-1.5 cursor-pointer text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <PrinterIcon className="size-3.5" />
                 <span>Print A4 Statement</span>
@@ -144,10 +144,10 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
               <CloudLoader label="Loading vendor transactions & ledger history..." />
             </div>
           ) : (
-            <div className="p-4 sm:p-6 space-y-5 text-xs overflow-y-auto flex-1">
+            <div className="p-4 sm:p-6 space-y-5 text-sm overflow-y-auto flex-1">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <ArrowUpRightIcon className="size-3.5 text-amber-500" /> Total Purchases
                   </span>
                   <div className="text-base font-bold font-mono text-foreground">
@@ -156,7 +156,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <ArrowDownLeftIcon className="size-3.5 text-emerald-500" /> Total Payments Paid
                   </span>
                   <div className="text-base font-bold font-mono text-foreground">
@@ -165,7 +165,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                 </div>
 
                 <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3.5 space-y-1">
-                  <span className="text-[11px] text-rose-500 font-semibold flex items-center gap-1">
+                  <span className="text-sm text-rose-500 font-semibold flex items-center gap-1">
                     <WalletIcon className="size-3.5 text-rose-500" /> Net Balance Owed
                   </span>
                   <div className="text-base font-bold font-mono text-rose-500">
@@ -174,7 +174,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <ClockIcon className="size-3.5 text-primary" /> Total Entries
                   </span>
                   <div className="text-base font-bold font-mono text-foreground">
@@ -185,17 +185,17 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold text-xs text-foreground uppercase tracking-wider">
+                  <h4 className="font-semibold text-sm text-foreground uppercase tracking-wider">
                     Supplier Khata Ledger Transactions
                   </h4>
-                  <span className="text-[11px] text-muted-foreground font-mono">
+                  <span className="text-sm text-muted-foreground font-mono">
                     Showing all chronological records
                   </span>
                 </div>
 
                 <div className="rounded-xl border border-border overflow-hidden">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-muted/40 text-muted-foreground uppercase text-xs tracking-wider">
                       <tr>
                         <th className="p-3 ps-4">Date</th>
                         <th className="p-3">Type</th>
@@ -209,12 +209,12 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                       {ledgerEntries.length > 0 ? (
                         ledgerEntries.map((entry, idx) => (
                           <tr key={entry._id || idx} className="hover:bg-muted/10">
-                            <td className="p-3 ps-4 text-muted-foreground text-[11px]">
+                            <td className="p-3 ps-4 text-muted-foreground text-sm">
                               {new Date(entry.createdAt || entry.date).toLocaleDateString()}
                             </td>
                             <td className="p-3 font-semibold text-foreground">
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${
                                   entry.transactionType?.includes("Purchase")
                                     ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                                     : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
@@ -230,7 +230,7 @@ export function SupplierDetailModal({ isOpen, onClose, supplier }) {
                               Rs. {(entry.runningBalance || 0).toLocaleString()}
                             </td>
                             <td className="p-3 text-muted-foreground">{entry.paymentMode || "Cash"}</td>
-                            <td className="p-3 pe-4 text-muted-foreground text-[11px]">
+                            <td className="p-3 pe-4 text-muted-foreground text-sm">
                               {entry.referenceNumber || entry.reference || entry.notes || "-"}
                             </td>
                           </tr>

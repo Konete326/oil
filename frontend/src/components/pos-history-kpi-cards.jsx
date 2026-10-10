@@ -33,11 +33,11 @@ export function PosHistoryKpiCards({
           <ArrowUpRightIcon className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] text-muted-foreground font-medium truncate">Total Revenue</p>
+          <p className="text-sm text-muted-foreground font-medium truncate">Total Revenue</p>
           <p className="text-lg font-bold text-foreground font-mono">
             Rs {totalRevenue.toLocaleString()}
           </p>
-          <div className="flex items-center gap-2 text-[10px] font-mono mt-0.5">
+          <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
             <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Cash: Rs {totalCashRevenue.toLocaleString()}</span>
           </div>
         </div>
@@ -48,11 +48,11 @@ export function PosHistoryKpiCards({
           <CreditCardIcon className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] text-muted-foreground font-medium truncate">Udhar / Receivables</p>
+          <p className="text-sm text-muted-foreground font-medium truncate">Udhar / Receivables</p>
           <p className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono">
             Rs {totalCreditRevenue.toLocaleString()}
           </p>
-          <p className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">
+          <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
             {creditSalesCount} credit bills pending
           </p>
         </div>
@@ -63,11 +63,11 @@ export function PosHistoryKpiCards({
           <ArrowDownRightIcon className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] text-muted-foreground font-medium truncate">Expenses & Staff</p>
+          <p className="text-sm text-muted-foreground font-medium truncate">Expenses & Staff</p>
           <p className="text-lg font-bold text-rose-600 dark:text-rose-400 font-mono">
             Rs {totalExpenses.toLocaleString()}
           </p>
-          <p className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">
+          <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
             Staff Advances: Rs {totalStaffExpenses.toLocaleString()}
           </p>
         </div>
@@ -93,12 +93,12 @@ export function PosHistoryKpiCards({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-1">
-            <p className="text-[11px] font-bold uppercase tracking-wider">
+            <p className="text-sm font-bold uppercase tracking-wider">
               {isLoss ? "Net Loss" : "Net Profit"}
             </p>
             <span
               className={cn(
-                "text-[9.5px] px-1.5 py-0.2 rounded font-mono font-bold",
+                "text-xs px-1.5 py-0.2 rounded font-mono font-bold",
                 isLoss ? "bg-rose-500/20 text-rose-700 dark:text-rose-300" : "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
               )}
             >
@@ -113,7 +113,7 @@ export function PosHistoryKpiCards({
           >
             {isLoss ? "-" : "+"} Rs {absNet.toLocaleString()}
           </p>
-          <p className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">
+          <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
             Drawer Cash: Rs {netCashInHand.toLocaleString()}
           </p>
         </div>

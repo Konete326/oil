@@ -73,13 +73,13 @@ export function InventoryKpiSummary({ products = [] }) {
             className="rounded-xl border border-border/70 bg-card p-2.5 px-3.5 shadow-2xs hover:border-border transition-all flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5 min-w-0">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block truncate">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block truncate">
                 {item.title}
               </span>
               <div className="text-base sm:text-lg font-bold font-mono tracking-tight text-foreground truncate">
                 {item.value}
               </div>
-              <p className="text-[10px] text-muted-foreground truncate">{item.subtitle}</p>
+              <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
             </div>
             <div className={`p-2 rounded-lg border shrink-0 ${item.accent}`}>
               <Icon className="size-4" />

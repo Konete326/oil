@@ -93,10 +93,10 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
               <LandmarkIcon className="size-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-foreground">
+              <h3 className="font-bold text-base text-foreground">
                 {editingAccount ? "Edit Bank Account Details" : "Add New Bank / Cash Account"}
               </h3>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Bank title, account number & branch information
               </p>
             </div>
@@ -104,19 +104,19 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
           <button
             type="button"
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground text-sm font-bold cursor-pointer"
+            className="text-muted-foreground hover:text-foreground text-base font-bold cursor-pointer"
           >
             <XIcon className="size-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3 text-sm">
           <div className="space-y-1">
             <label className="font-semibold text-foreground">Select Bank *</label>
             <select
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
-              className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
             >
               {POPULAR_BANKS.map((bank) => (
                 <option key={bank} value={bank}>
@@ -134,7 +134,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
                 placeholder="e.g. Soneri Bank, First Women Bank"
                 value={customBankName}
                 onChange={(e) => setCustomBankName(e.target.value)}
-                className="h-8 text-xs"
+                className="h-8 text-sm"
               />
             </div>
           )}
@@ -147,7 +147,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
               placeholder="e.g. Al Khaleej Lubricants (Main Current)"
               value={accountTitle}
               onChange={(e) => setAccountTitle(e.target.value)}
-              className="h-8 text-xs"
+              className="h-8 text-sm"
             />
           </div>
 
@@ -159,7 +159,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
                 placeholder="e.g. 0123-4567890-01"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-                className="h-8 text-xs font-mono"
+                className="h-8 text-sm font-mono"
               />
             </div>
 
@@ -168,7 +168,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
               <select
                 value={accountType}
                 onChange={(e) => setAccountType(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="Current">Current Account</option>
                 <option value="Savings">Savings / Profit</option>
@@ -185,7 +185,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
                 placeholder="e.g. Circular Road #0421"
                 value={branchName}
                 onChange={(e) => setBranchName(e.target.value)}
-                className="h-8 text-xs"
+                className="h-8 text-sm"
               />
             </div>
 
@@ -196,7 +196,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
                 placeholder="0.00"
                 value={openingBalance}
                 onChange={(e) => setOpeningBalance(e.target.value)}
-                className="h-8 text-xs font-mono font-bold"
+                className="h-8 text-sm font-mono font-bold"
               />
             </div>
           </div>
@@ -207,7 +207,7 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
               placeholder="e.g. Primary account for Shell & Caltex lubricant purchases"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="h-8 text-xs"
+              className="h-8 text-sm"
             />
           </div>
 
@@ -217,14 +217,14 @@ export function BankAccountModal({ isOpen, onClose, onSaveAccount, editingAccoun
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="h-7.5 text-xs cursor-pointer"
+              className="h-7.5 text-sm cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               size="sm"
-              className="h-7.5 text-xs font-semibold gap-1.5 cursor-pointer"
+              className="h-7.5 text-sm font-semibold gap-1.5 cursor-pointer"
             >
               {editingAccount ? <Edit3Icon className="size-3.5" /> : <PlusIcon className="size-3.5" />}
               <span>{editingAccount ? "Update Account" : "Save Account"}</span>

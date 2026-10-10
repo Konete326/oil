@@ -187,19 +187,19 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                 </h2>
                 <Badge
                   variant={isClosed ? "secondary" : isShiftActive ? "default" : "outline"}
-                  className="text-[10px] uppercase font-mono px-2 py-0.5"
+                  className="text-xs uppercase font-mono px-2 py-0.5"
                 >
                   {isClosed ? "Closed" : isShiftActive ? "Open (10 AM - 6 PM)" : "Shift Off"}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Rozana hisab-kitab, sales, baqaya mojooda stock, aur cash drawer ka mukammal summary.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
-            <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-xs">
+            <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-sm">
               <button
                 type="button"
                 onClick={() => setViewMode("overview")}
@@ -223,7 +223,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
             <Button
               size="sm"
               onClick={handleWhatsAppShare}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white h-8"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white h-8"
               title="Share Closing on WhatsApp"
             >
               <SendIcon className="size-3.5" />
@@ -233,7 +233,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-semibold h-8"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-semibold h-8"
               title="Print Complete Day Z-Report"
             >
               <PrinterIcon className="size-3.5" />
@@ -252,7 +252,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
         {loading ? (
           <div className="py-12 text-center space-y-2">
             <div className="size-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-muted-foreground font-mono">Loading shift & stock metrics...</p>
+            <p className="text-sm text-muted-foreground font-mono">Loading shift & stock metrics...</p>
           </div>
         ) : (
           <>
@@ -261,110 +261,110 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
                   <div className="flex items-center justify-between text-muted-foreground mb-1">
-                    <span className="text-[11px] font-medium">Kul Farokht (Gross)</span>
+                    <span className="text-sm font-medium">Kul Farokht (Gross)</span>
                     <ShoppingBagIcon className="size-3.5 text-blue-500" />
                   </div>
                   <div className="text-base sm:text-lg font-bold text-foreground font-mono">
                     Rs. {(m.totalSales || 0).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Orders: {m.ordersCount || 0} Slips
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
                   <div className="flex items-center justify-between text-muted-foreground mb-1">
-                    <span className="text-[11px] font-medium">Naqd Farokht (Cash)</span>
+                    <span className="text-sm font-medium">Naqd Farokht (Cash)</span>
                     <WalletIcon className="size-3.5 text-emerald-500" />
                   </div>
                   <div className="text-base sm:text-lg font-bold text-foreground font-mono">
                     Rs. {(m.cashSales || 0).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Immediate In-Hand Cash
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
                   <div className="flex items-center justify-between text-muted-foreground mb-1">
-                    <span className="text-[11px] font-medium">Khata / Udhar (Credit)</span>
+                    <span className="text-sm font-medium">Khata / Udhar (Credit)</span>
                     <CreditCardIcon className="size-3.5 text-purple-500" />
                   </div>
                   <div className="text-base sm:text-lg font-bold text-purple-400 font-mono">
                     Rs. {(m.creditSales || 0).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Client Ledger Balance
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
                   <div className="flex items-center justify-between text-muted-foreground mb-1">
-                    <span className="text-[11px] font-medium">Farokht Shuda Liters</span>
+                    <span className="text-sm font-medium">Farokht Shuda Liters</span>
                     <DropletsIcon className="size-3.5 text-cyan-500" />
                   </div>
                   <div className="text-base sm:text-lg font-bold text-foreground font-mono">
                     {(m.totalLitersSold || 0).toLocaleString()} Liters
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Volume Sold Today
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
                   <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 mb-1 font-bold">
-                    <span className="text-[11px]">Baqaya Mojooda Maal</span>
+                    <span className="text-sm">Baqaya Mojooda Maal</span>
                     <BoxesIcon className="size-4" />
                   </div>
                   <div className="text-base sm:text-lg font-black text-cyan-700 dark:text-cyan-300 font-mono">
                     {(m.totalStockRemainingLiters || 0).toLocaleString()} Liters
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Shop & Godown Me Mojood
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
                   <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 mb-1 font-bold">
-                    <span className="text-[11px]">Mojooda Maal Ki Maliyat</span>
+                    <span className="text-sm">Mojooda Maal Ki Maliyat</span>
                     <PackageIcon className="size-4" />
                   </div>
                   <div className="text-base sm:text-lg font-black text-amber-700 dark:text-amber-300 font-mono">
                     Rs. {(m.totalStockValuation || 0).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Total Inventory Asset Value
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
                   <div className="flex items-center justify-between text-muted-foreground mb-1">
-                    <span className="text-[11px] font-medium">Kul Munafa (Gross)</span>
+                    <span className="text-sm font-medium">Kul Munafa (Gross)</span>
                     <TrendingUpIcon className="size-3.5 text-emerald-500" />
                   </div>
                   <div className="text-base sm:text-lg font-bold text-emerald-500 font-mono">
                     Rs. {(m.totalProfit || 0).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Margin: {m.totalSales ? Math.round((m.totalProfit / m.totalSales) * 100) : 0}%
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
                   <div className="flex items-center justify-between text-primary mb-1">
-                    <span className="text-[11px] font-medium">Net Day Margin</span>
+                    <span className="text-sm font-medium">Net Day Margin</span>
                     <ShieldCheckIcon className="size-3.5" />
                   </div>
                   <div className="text-base sm:text-lg font-bold text-primary font-mono">
                     Rs. {(m.netDayMargin || 0).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Profit - Expenses ({m.totalExpenses ? `Rs ${m.totalExpenses.toLocaleString()}` : "Rs 0"})
                   </div>
                 </div>
               </div>
 
-              <div className="mt-3 p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="mt-3 p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
                 <div className="flex items-center gap-2">
                   <DropletsIcon className="size-4 text-cyan-600 shrink-0" />
                   <span className="text-slate-800 dark:text-slate-200">
@@ -386,25 +386,25 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                     placeholder="Closing Remarks / Handover Notes (Optional)..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="text-xs h-9 bg-muted/30"
+                    className="text-sm h-9 bg-muted/30"
                   />
                 </div>
               )}
 
               {confirmStep && (
-                <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs space-y-1 animate-in fade-in mt-3">
+                <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm space-y-1 animate-in fade-in mt-3">
                   <div className="flex items-center gap-2 text-destructive font-semibold">
                     <AlertTriangleIcon className="size-4 shrink-0" />
                     <span>Khatmi Tasdeeq: Kya aap waqai shop close karna chahte hain?</span>
                   </div>
-                  <p className="text-muted-foreground text-[11px] pl-6">
+                  <p className="text-muted-foreground text-sm pl-6">
                     Dukaan close hote hi aaj ka active sales counter 0 ho jayega. Iske baad jo bhi sale hogi wo agle din (Next Day Shift) par count hogi aur stock barabar cut hoga.
                   </p>
                 </div>
               )}
 
               {isClosed && shiftData?.closedShift && (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between mt-3">
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-sm flex items-center justify-between mt-3">
                   <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2Icon className="size-4" />
                     <span>
@@ -412,7 +412,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                       {new Date(shiftData.closedShift.closedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })})
                     </span>
                   </div>
-                  <span className="font-mono text-[11px] text-muted-foreground">
+                  <span className="font-mono text-sm text-muted-foreground">
                     By: {shiftData.closedShift.closedBy}
                   </span>
                 </div>
@@ -431,34 +431,34 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                       <h1 className="text-xl font-black text-slate-950 font-mono tracking-tight uppercase">
                         AL KHALEEJ LUBRICANTS
                       </h1>
-                      <p className="text-xs font-bold text-slate-800">
+                      <p className="text-sm font-bold text-slate-800">
                         DAILY SHOP SHIFT CLOSING & Z-REPORT
                       </p>
-                      <p className="text-[10px] text-slate-600">
+                      <p className="text-xs text-slate-600">
                         Shop No. 23, Near Fatima Jinnah Girls College, Nishter Road, Karachi | Ph: 0300-2205541
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-right text-xs font-mono">
-                    <span className="px-2.5 py-0.5 rounded text-[11px] font-bold border border-slate-900 uppercase">
+                  <div className="text-right text-sm font-mono">
+                    <span className="px-2.5 py-0.5 rounded text-sm font-bold border border-slate-900 uppercase">
                       {isClosed ? "CLOSED SHIFT" : "ACTIVE SHIFT"}
                     </span>
-                    <p className="font-bold pt-1.5 text-sm">
+                    <p className="font-bold pt-1.5 text-base">
                       Tareekh: {shiftData?.todayStr || new Date().toLocaleDateString("en-GB")}
                     </p>
-                    <p className="text-[10px] text-slate-600">
+                    <p className="text-xs text-slate-600">
                       Timings: 10:00 AM — 06:00 PM
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-4 text-xs">
+                <div className="space-y-4 text-sm">
                   <div>
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
+                    <h3 className="font-bold text-sm uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
                       1. Sales & Revenue Summary
                     </h3>
-                    <table className="w-full text-xs mt-1.5 border border-slate-900 border-collapse">
+                    <table className="w-full text-sm mt-1.5 border border-slate-900 border-collapse">
                       <thead className="bg-slate-100 font-bold border-b border-slate-900">
                         <tr>
                           <th className="border-r border-slate-900 py-1.5 px-2 text-left">Description</th>
@@ -483,7 +483,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                         <tr className="bg-slate-50 font-black border-t-2 border-slate-900">
                           <td className="border-r border-slate-900 py-2 px-2 uppercase font-mono">Kul Farokht (Gross Total Sales)</td>
                           <td className="border-r border-slate-900 py-2 px-2 text-center font-mono">{m.ordersCount || 0} Slips</td>
-                          <td className="border-r border-slate-900 py-2 px-2 text-right font-mono text-sm">Rs. {(m.totalSales || 0).toLocaleString()}</td>
+                          <td className="border-r border-slate-900 py-2 px-2 text-right font-mono text-base">Rs. {(m.totalSales || 0).toLocaleString()}</td>
                           <td className="py-2 px-2 text-right font-mono">100% Synced</td>
                         </tr>
                       </tbody>
@@ -491,10 +491,10 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
+                    <h3 className="font-bold text-sm uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
                       2. Stock & Liters Reconciliation
                     </h3>
-                    <table className="w-full text-xs mt-1.5 border border-slate-900 border-collapse">
+                    <table className="w-full text-sm mt-1.5 border border-slate-900 border-collapse">
                       <thead className="bg-slate-100 font-bold border-b border-slate-900">
                         <tr>
                           <th className="border-r border-slate-900 py-1.5 px-2 text-left">Stock Item / Details</th>
@@ -510,7 +510,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                         </tr>
                         <tr className="bg-cyan-50 font-bold">
                           <td className="border-r border-slate-900 py-2 px-2">Baqaya Mojooda Maal (Abhi Dukan & Godown Me Mojood Maal)</td>
-                          <td className="border-r border-slate-900 py-2 px-2 text-center font-mono text-sm text-cyan-900">{(m.totalStockRemainingLiters || 0).toLocaleString()} L</td>
+                          <td className="border-r border-slate-900 py-2 px-2 text-center font-mono text-base text-cyan-900">{(m.totalStockRemainingLiters || 0).toLocaleString()} L</td>
                           <td className="py-2 px-2 text-right font-mono font-black text-cyan-900">Rs. {(m.totalStockValuation || 0).toLocaleString()}</td>
                         </tr>
                       </tbody>
@@ -518,31 +518,31 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
+                    <h3 className="font-bold text-sm uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
                       3. Financial Profit, Cost & Expenses
                     </h3>
                     <div className="grid grid-cols-4 gap-2 pt-1 font-mono text-center">
                       <div className="border border-slate-800 p-2 rounded">
-                        <span className="text-[10px] text-slate-600 block">Kharid Cost (Cost)</span>
-                        <span className="font-bold text-xs">Rs. {(m.totalCost || 0).toLocaleString()}</span>
+                        <span className="text-xs text-slate-600 block">Kharid Cost (Cost)</span>
+                        <span className="font-bold text-sm">Rs. {(m.totalCost || 0).toLocaleString()}</span>
                       </div>
                       <div className="border border-slate-800 p-2 rounded">
-                        <span className="text-[10px] text-slate-600 block">Kul Munafa (Gross)</span>
-                        <span className="font-bold text-xs text-emerald-800">Rs. {(m.totalProfit || 0).toLocaleString()}</span>
+                        <span className="text-xs text-slate-600 block">Kul Munafa (Gross)</span>
+                        <span className="font-bold text-sm text-emerald-800">Rs. {(m.totalProfit || 0).toLocaleString()}</span>
                       </div>
                       <div className="border border-slate-800 p-2 rounded">
-                        <span className="text-[10px] text-slate-600 block">Akhrajaat (Expenses)</span>
-                        <span className="font-bold text-xs text-red-800">Rs. {(m.totalExpenses || 0).toLocaleString()}</span>
+                        <span className="text-xs text-slate-600 block">Akhrajaat (Expenses)</span>
+                        <span className="font-bold text-sm text-red-800">Rs. {(m.totalExpenses || 0).toLocaleString()}</span>
                       </div>
                       <div className="border-2 border-slate-900 bg-slate-100 p-2 rounded">
-                        <span className="text-[10px] font-bold block">Net Day Margin</span>
-                        <span className="font-black text-sm text-slate-950">Rs. {(m.netDayMargin || 0).toLocaleString()}</span>
+                        <span className="text-xs font-bold block">Net Day Margin</span>
+                        <span className="font-black text-base text-slate-950">Rs. {(m.netDayMargin || 0).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
+                    <h3 className="font-bold text-sm uppercase tracking-wider text-slate-950 pb-1.5 border-b border-slate-400">
                       4. Cash Drawer Reconciliation
                     </h3>
                     <div className="flex items-center justify-between p-2.5 border border-slate-900 bg-slate-50 font-mono">
@@ -552,7 +552,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                <div className="pt-10 grid grid-cols-2 gap-8 text-xs text-slate-800">
+                <div className="pt-10 grid grid-cols-2 gap-8 text-sm text-slate-800">
                   <div>
                     <div className="w-52 border-b border-slate-800 pt-1 text-center font-bold">
                       Cashier / Munshi Signature
@@ -571,7 +571,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
         )}
 
         <div className="flex items-center justify-between border-t pt-3 print:hidden gap-2 flex-wrap">
-          <div className="text-xs text-muted-foreground font-mono">
+          <div className="text-sm text-muted-foreground font-mono">
             {isClosed ? "Shift is closed for today." : "Official closing time: 06:00 PM."}
           </div>
 
@@ -580,7 +580,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="text-xs h-9 px-4 cursor-pointer"
+              className="text-sm h-9 px-4 cursor-pointer"
             >
               {isClosed ? "Close" : "Cancel"}
             </Button>
@@ -591,7 +591,7 @@ export function ShopClosingModal({ isOpen, onClose, onSuccess }) {
                 size="sm"
                 disabled={loading || closing}
                 onClick={handleCloseShift}
-                className="text-xs h-9 px-4 font-semibold gap-1.5 shadow-sm cursor-pointer"
+                className="text-sm h-9 px-4 font-semibold gap-1.5 shadow-sm cursor-pointer"
               >
                 {closing ? (
                   <div className="size-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />

@@ -8,7 +8,7 @@ export function PaginationBar({ currentPage, totalPages, totalItems, pageSize = 
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border px-4 py-3 bg-card rounded-b-xl text-xs">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border px-4 py-3 bg-card rounded-b-xl text-sm">
       <div className="text-muted-foreground">
         Showing <span className="font-semibold text-foreground">{startItem}</span> to{" "}
         <span className="font-semibold text-foreground">{endItem}</span> of{" "}
@@ -19,7 +19,7 @@ export function PaginationBar({ currentPage, totalPages, totalItems, pageSize = 
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-1 px-2.5 text-xs cursor-pointer"
+          className="h-8 gap-1 px-2.5 text-sm cursor-pointer"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -33,7 +33,7 @@ export function PaginationBar({ currentPage, totalPages, totalItems, pageSize = 
               key={page}
               variant={page === currentPage ? "default" : "ghost"}
               size="sm"
-              className="size-8 text-xs font-medium cursor-pointer"
+              className="size-8 text-sm font-medium cursor-pointer"
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -44,7 +44,7 @@ export function PaginationBar({ currentPage, totalPages, totalItems, pageSize = 
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-1 px-2.5 text-xs cursor-pointer"
+          className="h-8 gap-1 px-2.5 text-sm cursor-pointer"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >

@@ -130,7 +130,7 @@ export function DocumentationView() {
               <h1 className="text-xl font-bold text-foreground tracking-tight">
                 Software Documentation &amp; User Manual
               </h1>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Official User Guide, Role Permissions, Operating Rules &amp; Enterprise License (2026 Edition).
               </p>
             </div>
@@ -141,7 +141,7 @@ export function DocumentationView() {
           variant="outline"
           size="sm"
           onClick={handleCopyCredit}
-          className="gap-2 text-xs cursor-pointer self-start sm:self-auto"
+          className="gap-2 text-sm cursor-pointer self-start sm:self-auto"
         >
           {copiedKey ? <CheckIcon className="size-3.5 text-emerald-500" /> : <CopyIcon className="size-3.5" />}
           <span>Copy System Specs</span>
@@ -151,14 +151,14 @@ export function DocumentationView() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-3">
           <div className="rounded-xl border border-border bg-card p-3 shadow-xs space-y-1">
-            <p className="text-[11px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">
+            <p className="text-sm font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">
               Navigation Index
             </p>
             {DOCUMENTATION_SECTIONS.map((sec) => (
               <button
                 key={sec.id}
                 onClick={() => setActiveSection(sec.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer text-left ${
                   activeSection === sec.id
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -170,15 +170,15 @@ export function DocumentationView() {
             ))}
           </div>
 
-          <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-2 text-xs">
+          <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-2 text-sm">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <InfoIcon className="size-4 text-primary" />
               <span>Portal Info</span>
             </div>
-            <p className="text-muted-foreground text-[11px]">
+            <p className="text-muted-foreground text-sm">
               Software engineered specifically for <strong className="text-foreground">Al Khaleej Lubricants LLC</strong> for managing industrial oil production, retail sales, textile mill deliveries, and financial ledgers.
             </p>
-            <div className="pt-2 border-t border-border/50 text-[10px] text-muted-foreground">
+            <div className="pt-2 border-t border-border/50 text-xs text-muted-foreground">
               Developed by <span className="font-bold text-primary">Elite Dev Agency</span> (2026).
             </div>
           </div>
@@ -194,51 +194,51 @@ export function DocumentationView() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-foreground">1. System Overview</h2>
-                    <p className="text-xs text-muted-foreground">Al Khaleej Lubricants ERP &amp; Oil Management Software</p>
+                    <p className="text-sm text-muted-foreground">Al Khaleej Lubricants ERP &amp; Oil Management Software</p>
                   </div>
                 </div>
 
-                <p className="text-xs leading-relaxed text-foreground/90">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   Welcome to the official operating system for <strong>Al Khaleej Lubricants LLC</strong>. This enterprise platform is engineered to streamline end-to-end lube blending operations, raw oil drum purchasing, retail counter POS sales, textile mill contract shipments via tanker trucks, customer credit khatas, and automated profit &amp; loss analytics.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                   <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-1">
-                    <p className="text-[10px] text-muted-foreground uppercase font-semibold">Client Name</p>
-                    <p className="text-xs font-bold text-foreground">Al Khaleej Lubricants LLC</p>
+                    <p className="text-xs text-muted-foreground uppercase font-semibold">Client Name</p>
+                    <p className="text-sm font-bold text-foreground">Al Khaleej Lubricants LLC</p>
                   </div>
                   <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-1">
-                    <p className="text-[10px] text-muted-foreground uppercase font-semibold">Engineering Agency</p>
-                    <p className="text-xs font-bold text-primary">Elite Dev Agency</p>
+                    <p className="text-xs text-muted-foreground uppercase font-semibold">Engineering Agency</p>
+                    <p className="text-sm font-bold text-primary">Elite Dev Agency</p>
                   </div>
                   <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-1">
-                    <p className="text-[10px] text-muted-foreground uppercase font-semibold">Version / Release</p>
-                    <p className="text-xs font-bold text-foreground">2026 Enterprise Edition v2.4</p>
+                    <p className="text-xs text-muted-foreground uppercase font-semibold">Version / Release</p>
+                    <p className="text-sm font-bold text-foreground">2026 Enterprise Edition v2.4</p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                   <LayersIcon className="size-4 text-primary" />
                   Key Business Capabilities
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="p-3 rounded-lg border bg-muted/20 space-y-1">
                     <p className="font-semibold text-foreground">Multi-Unit Inventory Control</p>
-                    <p className="text-[11px] text-muted-foreground">Manage Master Drums (208L), Cans (1L/4L), Buckets, and Bulk oil stock with real-time low-stock alerts.</p>
+                    <p className="text-sm text-muted-foreground">Manage Master Drums (208L), Cans (1L/4L), Buckets, and Bulk oil stock with real-time low-stock alerts.</p>
                   </div>
                   <div className="p-3 rounded-lg border bg-muted/20 space-y-1">
                     <p className="font-semibold text-foreground">Automated Financial Sync</p>
-                    <p className="text-[11px] text-muted-foreground">Synchronized Customer Khatas, Supplier Ledgers, POS sales receipts, and operational expenses.</p>
+                    <p className="text-sm text-muted-foreground">Synchronized Customer Khatas, Supplier Ledgers, POS sales receipts, and operational expenses.</p>
                   </div>
                   <div className="p-3 rounded-lg border bg-muted/20 space-y-1">
                     <p className="font-semibold text-foreground">Real-Time Form Validation</p>
-                    <p className="text-[11px] text-muted-foreground">Live regex checks, red border error highlighting, and submit protection across all forms.</p>
+                    <p className="text-sm text-muted-foreground">Live regex checks, red border error highlighting, and submit protection across all forms.</p>
                   </div>
                   <div className="p-3 rounded-lg border bg-muted/20 space-y-1">
                     <p className="font-semibold text-foreground">Audit Trail &amp; Security</p>
-                    <p className="text-[11px] text-muted-foreground">Immutable activity logs capturing user operations, timestamps, and network security details.</p>
+                    <p className="text-sm text-muted-foreground">Immutable activity logs capturing user operations, timestamps, and network security details.</p>
                   </div>
                 </div>
               </div>
@@ -251,7 +251,7 @@ export function DocumentationView() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                   <div>
                     <h2 className="text-lg font-bold text-foreground">2. Software User Guide</h2>
-                    <p className="text-xs text-muted-foreground">Detailed instructions for operating all management modules.</p>
+                    <p className="text-sm text-muted-foreground">Detailed instructions for operating all management modules.</p>
                   </div>
                   <div className="relative w-full sm:w-64">
                     <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
@@ -259,7 +259,7 @@ export function DocumentationView() {
                       placeholder="Search module guide..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="ps-9 text-xs"
+                      className="ps-9 text-sm"
                     />
                   </div>
                 </div>
@@ -268,15 +268,15 @@ export function DocumentationView() {
                   {filteredGuides.map((guide, idx) => (
                     <div
                       key={guide.name}
-                      className="p-4 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors space-y-1 text-xs"
+                      className="p-4 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors space-y-1 text-sm"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">
+                        <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">
                           Module {idx + 1}
                         </span>
-                        <h4 className="font-bold text-foreground text-xs">{guide.name}</h4>
+                        <h4 className="font-bold text-foreground text-sm">{guide.name}</h4>
                       </div>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">{guide.desc}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{guide.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -289,11 +289,11 @@ export function DocumentationView() {
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
                 <div>
                   <h2 className="text-lg font-bold text-foreground">3. Role-Based Access Control (RBAC) Matrix</h2>
-                  <p className="text-xs text-muted-foreground">Permission matrix defining user access privileges across roles.</p>
+                  <p className="text-sm text-muted-foreground">Permission matrix defining user access privileges across roles.</p>
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border border-border">
-                  <table className="w-full text-xs text-left">
+                  <table className="w-full text-sm text-left">
                     <thead className="bg-muted/60 text-muted-foreground font-semibold border-b border-border">
                       <tr>
                         <th className="p-3">Module / Feature</th>
@@ -376,24 +376,24 @@ export function DocumentationView() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-foreground">4. Operating Rules, Terms of Service &amp; Licensing</h2>
-                    <p className="text-xs text-muted-foreground">Legal usage terms, software ownership, and privacy policy.</p>
+                    <p className="text-sm text-muted-foreground">Legal usage terms, software ownership, and privacy policy.</p>
                   </div>
                 </div>
 
-                <div className="space-y-4 text-xs">
+                <div className="space-y-4 text-sm">
                   <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
                     <h4 className="font-bold text-foreground flex items-center gap-2">
                       <CheckCircle2Icon className="size-4 text-primary" />
                       Proprietary Software License Grant
                     </h4>
-                    <p className="text-muted-foreground leading-relaxed text-[11px]">
+                    <p className="text-muted-foreground leading-relaxed text-sm">
                       This software suite is a proprietary enterprise solution custom built for <strong className="text-foreground">Al Khaleej Lubricants LLC</strong>. All rights, title, and intellectual property concerning code architecture, UI components, and backend database schema were engineered by <strong className="text-primary">Elite Dev Agency</strong> (2026).
                     </p>
                   </div>
 
                   <div className="space-y-3 pt-2">
                     <h4 className="font-bold text-foreground">Prohibited Actions &amp; Terms of Use</h4>
-                    <ul className="space-y-2 text-muted-foreground list-disc ps-5 text-[11px]">
+                    <ul className="space-y-2 text-muted-foreground list-disc ps-5 text-sm">
                       <li>
                         <strong className="text-foreground">No Unauthorized Resale:</strong> This software is strictly non-transferable and may not be resold, sub-licensed, or rented to third-party entities under any circumstances.
                       </li>
@@ -410,8 +410,8 @@ export function DocumentationView() {
                   </div>
 
                   <div className="p-4 rounded-xl border border-border bg-muted/30 text-center space-y-1">
-                    <p className="font-bold text-foreground text-xs">Al Khaleej Lubricants LLC © 2026</p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="font-bold text-foreground text-sm">Al Khaleej Lubricants LLC © 2026</p>
+                    <p className="text-xs text-muted-foreground">
                       Designed, Engineered &amp; Maintained by <span className="font-semibold text-primary">Elite Dev Agency</span>. All Rights Reserved.
                     </p>
                   </div>

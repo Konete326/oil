@@ -113,16 +113,16 @@ export function UserManagementManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">User Management & Permissions</h1>
-          <p className="text-xs text-muted-foreground">Manage user roles, grant feature permissions, and control system access.</p>
+          <p className="text-sm text-muted-foreground">Manage user roles, grant feature permissions, and control system access.</p>
         </div>
 
-        <Button size="sm" onClick={handleOpenAddModal} className="gap-1.5 cursor-pointer text-xs">
+        <Button size="sm" onClick={handleOpenAddModal} className="gap-1.5 cursor-pointer text-sm">
           <PlusIcon className="size-3.5" />
           <span>Create New User</span>
         </Button>
       </div>
 
-      <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-500 flex items-center gap-3">
+      <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-sm text-amber-500 flex items-center gap-3">
         <LockIcon className="size-5 shrink-0" />
         <div>
           <strong className="font-semibold text-foreground">Admin Account Protection Active:</strong> Admin user accounts are visible only to logged-in Admins and cannot be deleted by anyone (including Admins).
@@ -137,19 +137,19 @@ export function UserManagementManager() {
             placeholder="Search user name, email, role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs"
+            className="ps-9 text-sm"
           />
         </div>
 
-        <div className="text-xs text-muted-foreground font-medium">
+        <div className="text-sm text-muted-foreground font-medium">
           Total Users: <strong className="text-foreground font-mono">{filteredUsers.length}</strong>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-3 ps-4">User Name</th>
                 <th className="p-3">Email Address</th>
@@ -181,13 +181,13 @@ export function UserManagementManager() {
                   return (
                     <tr key={user._id} className="hover:bg-muted/30 transition-colors">
                       <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
-                        <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <span>{user.name}</span>
                           {isSelf && (
-                            <span className="ms-1.5 px-1.5 py-0.2 text-[9px] font-bold rounded bg-primary/20 text-primary">
+                            <span className="ms-1.5 px-1.5 py-0.2 text-xs font-bold rounded bg-primary/20 text-primary">
                               (You)
                             </span>
                           )}
@@ -196,7 +196,7 @@ export function UserManagementManager() {
                       <td className="p-3 font-mono text-muted-foreground">{user.email}</td>
                       <td className="p-3">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
                             isAdminUser
                               ? "bg-primary/15 text-primary border border-primary/30"
                               : "bg-muted text-muted-foreground border border-border"
@@ -207,7 +207,7 @@ export function UserManagementManager() {
                       </td>
                       <td className="p-3">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                             user.status === "Active"
                               ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                               : "bg-destructive/10 text-destructive border-destructive/20"
@@ -218,7 +218,7 @@ export function UserManagementManager() {
                         </span>
                       </td>
                       <td className="p-3">
-                        <span className="text-muted-foreground text-[11px]">
+                        <span className="text-muted-foreground text-sm">
                           {user.permissions?.includes("all")
                             ? "Full Access (All Features)"
                             : `${user.permissions?.length || 0} Modules Granted`}

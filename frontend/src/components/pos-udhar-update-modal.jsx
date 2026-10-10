@@ -124,11 +124,11 @@ export function PosUdharUpdateModal({
                 <h3 className="font-bold text-base text-foreground">
                   Udhar Maal Update & Vasooli
                 </h3>
-                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
                   {sale.saleNumber}
                 </span>
               </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Update customer details, payment status, or record credit collection.
               </p>
             </div>
@@ -136,30 +136,30 @@ export function PosUdharUpdateModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground text-sm font-bold cursor-pointer"
+            className="text-muted-foreground hover:text-foreground text-base font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 space-y-1.5">
-          <div className="flex justify-between items-center text-xs">
+          <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Customer:</span>
             <span className="font-bold text-foreground">{sale.customerName || "Walk-in Customer"}</span>
           </div>
-          <div className="flex justify-between items-center text-xs">
+          <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Kul Bill Amount:</span>
             <span className="font-mono font-bold text-foreground">Rs {grandTotal.toLocaleString()}</span>
           </div>
           {alreadyReceived > 0 && (
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Pehle Ada Shuda (Paid):</span>
               <span className="font-mono font-semibold text-emerald-600">Rs {alreadyReceived.toLocaleString()}</span>
             </div>
           )}
-          <div className="flex justify-between items-center text-xs pt-1 border-t border-amber-500/20 font-bold">
+          <div className="flex justify-between items-center text-sm pt-1 border-t border-amber-500/20 font-bold">
             <span className="text-amber-700 dark:text-amber-400">Baqaya Udhar:</span>
-            <span className="font-mono text-sm text-amber-700 dark:text-amber-400">
+            <span className="font-mono text-base text-amber-700 dark:text-amber-400">
               Rs {remainingDue.toLocaleString()}
             </span>
           </div>
@@ -170,7 +170,7 @@ export function PosUdharUpdateModal({
             type="button"
             onClick={() => setActiveTab("vasooli")}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer",
+              "px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 cursor-pointer",
               activeTab === "vasooli"
                 ? "bg-emerald-600 text-white shadow-xs font-bold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -184,7 +184,7 @@ export function PosUdharUpdateModal({
             type="button"
             onClick={() => setActiveTab("details")}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer",
+              "px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 cursor-pointer",
               activeTab === "details"
                 ? "bg-primary text-primary-foreground shadow-xs font-bold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -196,14 +196,14 @@ export function PosUdharUpdateModal({
         </div>
 
         {activeTab === "vasooli" ? (
-          <form onSubmit={handleVasooliSubmit} className="space-y-3 text-xs">
+          <form onSubmit={handleVasooliSubmit} className="space-y-3 text-sm">
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="font-semibold text-foreground">Kitni Raqam Vasool Hui? (PKR) *</label>
                 <button
                   type="button"
                   onClick={() => setVasooliAmount(String(remainingDue))}
-                  className="text-[10px] text-primary hover:underline font-semibold cursor-pointer"
+                  className="text-xs text-primary hover:underline font-semibold cursor-pointer"
                 >
                   Poori Baqaya Raqam (Rs {remainingDue.toLocaleString()})
                 </button>
@@ -215,7 +215,7 @@ export function PosUdharUpdateModal({
                 required
                 value={vasooliAmount}
                 onChange={(e) => setVasooliAmount(e.target.value)}
-                className="h-8.5 text-xs font-mono font-bold"
+                className="h-8.5 text-sm font-mono font-bold"
                 placeholder="e.g. 5000"
               />
             </div>
@@ -229,7 +229,7 @@ export function PosUdharUpdateModal({
                     type="button"
                     onClick={() => setVasooliMode(mode)}
                     className={cn(
-                      "p-2 rounded-lg border text-center font-semibold text-[11px] transition-all cursor-pointer flex flex-col items-center gap-1",
+                      "p-2 rounded-lg border text-center font-semibold text-sm transition-all cursor-pointer flex flex-col items-center gap-1",
                       vasooliMode === mode
                         ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold"
                         : "border-border bg-card text-muted-foreground hover:text-foreground"
@@ -250,7 +250,7 @@ export function PosUdharUpdateModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="e.g. Dukan par aakar cash de gaya..."
-                className="h-8 text-xs"
+                className="h-8 text-sm"
               />
             </div>
 
@@ -260,7 +260,7 @@ export function PosUdharUpdateModal({
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="h-8 text-xs cursor-pointer"
+                className="h-8 text-sm cursor-pointer"
               >
                 Cancel
               </Button>
@@ -268,14 +268,14 @@ export function PosUdharUpdateModal({
                 type="submit"
                 size="sm"
                 disabled={saving}
-                className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                className="h-8 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
               >
                 {saving ? "Updating..." : "Wasooli Record & Khata Clear Karein"}
               </Button>
             </div>
           </form>
         ) : (
-          <form onSubmit={handleDetailsSubmit} className="space-y-3 text-xs">
+          <form onSubmit={handleDetailsSubmit} className="space-y-3 text-sm">
             <div>
               <label className="block font-semibold text-foreground mb-1">Customer / Party Name *</label>
               <Input
@@ -283,7 +283,7 @@ export function PosUdharUpdateModal({
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Customer ka naam..."
-                className="h-8.5 text-xs font-medium"
+                className="h-8.5 text-sm font-medium"
               />
             </div>
 
@@ -293,7 +293,7 @@ export function PosUdharUpdateModal({
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 placeholder="0300-1234567"
-                className="h-8.5 text-xs font-mono"
+                className="h-8.5 text-sm font-mono"
               />
             </div>
 
@@ -302,7 +302,7 @@ export function PosUdharUpdateModal({
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground cursor-pointer focus:outline-none"
+                className="w-full h-8.5 rounded-md border border-input bg-background px-2.5 text-sm text-foreground cursor-pointer focus:outline-none"
               >
                 <option value="Credit / Khata">Udhar / Credit Maal (Khata)</option>
                 <option value="Cash">Cash (Paid in Full)</option>
@@ -316,7 +316,7 @@ export function PosUdharUpdateModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Koi zaroori baat ya reference..."
-                className="h-8 text-xs"
+                className="h-8 text-sm"
               />
             </div>
 
@@ -326,7 +326,7 @@ export function PosUdharUpdateModal({
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="h-8 text-xs cursor-pointer"
+                className="h-8 text-sm cursor-pointer"
               >
                 Cancel
               </Button>
@@ -334,7 +334,7 @@ export function PosUdharUpdateModal({
                 type="submit"
                 size="sm"
                 disabled={saving}
-                className="h-8 text-xs font-bold cursor-pointer"
+                className="h-8 text-sm font-bold cursor-pointer"
               >
                 {saving ? "Updating..." : "Bill & Khata Update Karein"}
               </Button>

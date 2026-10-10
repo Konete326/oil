@@ -139,7 +139,7 @@ export function CashPrintStatementModal({
 
       <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-base">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
             <span>Subsidiary Ledger for Cash Transactions (A4 Standard)</span>
           </div>
@@ -147,7 +147,7 @@ export function CashPrintStatementModal({
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -156,7 +156,7 @@ export function CashPrintStatementModal({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1.5 text-sm cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -164,7 +164,7 @@ export function CashPrintStatementModal({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Document</span>
@@ -177,11 +177,11 @@ export function CashPrintStatementModal({
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
-            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
+            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-sm print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
           dir="ltr"
           lang="en"
         >
-          <div className="flex justify-end text-[11px] font-medium text-black pb-1">
+          <div className="flex justify-end text-sm font-medium text-black pb-1">
             Annex 10
           </div>
 
@@ -192,12 +192,12 @@ export function CashPrintStatementModal({
                 AL KHALEEJ LUBRICANTS
               </span>
             </div>
-            <h1 className="text-xs md:text-sm font-bold uppercase tracking-wider text-black">
+            <h1 className="text-sm md:text-base font-bold uppercase tracking-wider text-black">
               CASH BOOK STATEMENT
             </h1>
           </div>
 
-          <div className="border border-black mb-4 text-[11px] leading-relaxed">
+          <div className="border border-black mb-4 text-sm leading-relaxed">
             <div className="grid grid-cols-1 divide-y divide-black">
               <div className="px-3 py-1 flex">
                 <span className="w-48 font-semibold text-black">Branch / Location:</span>
@@ -225,7 +225,7 @@ export function CashPrintStatementModal({
           </div>
 
           <div className="mb-6">
-            <table className="w-full border-collapse border border-black text-[11px]">
+            <table className="w-full border-collapse border border-black text-sm">
               <thead>
                 <tr className="border-b border-black text-center font-bold">
                   <th rowSpan={2} className="border-r border-black p-2 w-20 text-center">
@@ -269,7 +269,7 @@ export function CashPrintStatementModal({
                       <td className="border-r border-black p-1.5 font-medium leading-tight">
                         {row.particulars}
                       </td>
-                      <td className="border-r border-black p-1.5 text-center font-mono text-[10px]">
+                      <td className="border-r border-black p-1.5 text-center font-mono text-xs">
                         {row.reference}
                       </td>
                       <td className="border-r border-black p-1.5 text-right font-mono">
@@ -307,20 +307,20 @@ export function CashPrintStatementModal({
             </table>
           </div>
 
-          <div className="pt-10 grid grid-cols-2 gap-12 text-xs">
+          <div className="pt-10 grid grid-cols-2 gap-12 text-sm">
             <div className="space-y-6">
-              <p className="font-semibold text-[11px]">Prepared by:</p>
+              <p className="font-semibold text-sm">Prepared by:</p>
               <div className="pt-4 border-t border-black w-4/5">
-                <p className="font-bold uppercase text-[11px]">{activeOperator}</p>
-                <p className="text-[10px] text-gray-700">Cashier Signature</p>
+                <p className="font-bold uppercase text-sm">{activeOperator}</p>
+                <p className="text-xs text-gray-700">Cashier Signature</p>
               </div>
             </div>
 
             <div className="space-y-6 text-right flex flex-col items-end">
-              <p className="font-semibold text-[11px]">Approved by:</p>
+              <p className="font-semibold text-sm">Approved by:</p>
               <div className="pt-4 border-t border-black w-4/5 text-right">
-                <p className="font-bold uppercase text-[11px]">AL KHALEEJ ACCOUNTS</p>
-                <p className="text-[10px] text-gray-700">Authorized Signature</p>
+                <p className="font-bold uppercase text-sm">AL KHALEEJ ACCOUNTS</p>
+                <p className="text-xs text-gray-700">Authorized Signature</p>
               </div>
             </div>
           </div>
@@ -328,13 +328,13 @@ export function CashPrintStatementModal({
       </div>
 
       <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
           Close Preview
         </Button>
         <Button
           size="sm"
           onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
         >
           <PrinterIcon className="size-3.5" />
           <span>Print A4 Document</span>

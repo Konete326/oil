@@ -44,12 +44,12 @@ export function ConfirmModal({
           </div>
           <div>
             <h3 className="font-semibold text-base text-foreground">{title}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{message}</p>
+            <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{message}</p>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-border/60 pt-4">
-          <Button variant="outline" size="sm" onClick={onClose} disabled={loading} className="cursor-pointer text-xs">
+          <Button variant="outline" size="sm" onClick={onClose} disabled={loading} className="cursor-pointer text-sm">
             {cancelText}
           </Button>
           <Button
@@ -57,7 +57,7 @@ export function ConfirmModal({
             size="sm"
             onClick={onConfirm}
             disabled={loading}
-            className="cursor-pointer font-medium text-xs"
+            className="cursor-pointer font-medium text-sm"
           >
             {loading ? "Processing..." : confirmText}
           </Button>

@@ -99,7 +99,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 my-auto">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 shrink-0">
-          <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+          <h3 className="font-bold text-base text-foreground flex items-center gap-2">
             <UserIcon className="size-4 text-primary" />
             {customer ? "Edit Customer Profile" : "Add New Customer"}
           </h3>
@@ -108,7 +108,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-3 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 space-y-3 text-sm">
           <ValidatedInput
             label="Customer Full Name *"
             rule="name"
@@ -129,11 +129,11 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
                 placeholder="0300-1234567"
               />
               <div className="space-y-1">
-                <label className="font-medium text-foreground text-[11px]">Customer Type</label>
+                <label className="font-medium text-foreground text-sm">Customer Type</label>
                 <select
                   value={customerType}
                   onChange={(e) => setCustomerType(e.target.value)}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full h-9 rounded-md border border-input bg-background px-2.5 text-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="Retail">Retail Customer</option>
                   <option value="Wholesale">Wholesale Party</option>
@@ -143,7 +143,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
             </div>
 
             {duplicateWarning && (
-              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] flex items-center gap-1.5 animate-in fade-in duration-150 font-medium">
+              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-sm flex items-center gap-1.5 animate-in fade-in duration-150 font-medium">
                 <AlertTriangleIcon className="size-3.5 shrink-0" />
                 <span>{duplicateWarning}</span>
               </div>
@@ -178,11 +178,11 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
 
           {customer && (
             <div className="space-y-1 pt-1">
-              <label className="font-medium text-foreground text-[11px]">Account Status</label>
+              <label className="font-medium text-foreground text-sm">Account Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-8 rounded-md border border-input bg-background px-2.5 text-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="Active">Active (Chalu)</option>
                 <option value="Inactive">Inactive (Band)</option>
@@ -191,10 +191,10 @@ export function CustomerModal({ isOpen, onClose, customer, onSuccess, existingCu
           )}
 
           <div className="pt-2.5 flex justify-end gap-2 border-t border-border">
-            <Button variant="outline" type="button" onClick={onClose} disabled={submitting} className="cursor-pointer text-xs h-8">
+            <Button variant="outline" type="button" onClick={onClose} disabled={submitting} className="cursor-pointer text-sm h-8">
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting || !nameValid} className="cursor-pointer text-xs font-semibold h-8 px-4 bg-primary text-primary-foreground">
+            <Button type="submit" disabled={submitting || !nameValid} className="cursor-pointer text-sm font-semibold h-8 px-4 bg-primary text-primary-foreground">
               {submitting ? (
                 <><Loader2Icon className="size-3.5 animate-spin" /><span>Saving...</span></>
               ) : (

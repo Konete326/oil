@@ -40,7 +40,7 @@ export function DashboardActivity({ activities = [], loading }) {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : items.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground">
+          <div className="p-8 text-center text-sm text-muted-foreground">
             No system audit logs recorded yet.
           </div>
         ) : (
@@ -54,10 +54,10 @@ export function DashboardActivity({ activities = [], loading }) {
                   {getIcon(item.iconType)}
                 </span>
                 <div className="min-w-0 flex-1 space-y-1">
-                  <p className="line-clamp-1 text-pretty text-foreground text-xs font-medium leading-snug">
+                  <p className="line-clamp-1 text-pretty text-foreground text-sm font-medium leading-snug">
                     {item.title}
                   </p>
-                  <p className="text-muted-foreground text-[10px]">{item.time}</p>
+                  <p className="text-muted-foreground text-xs">{item.time}</p>
                 </div>
               </li>
             ))}

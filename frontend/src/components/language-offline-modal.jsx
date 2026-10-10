@@ -35,18 +35,18 @@ export function LanguageOfflineModal({ isOpen, onClose }) {
             <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
               Internet Connection Required
             </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Language switching is only available when you are connected to the internet. Please check your network connection and try again.
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5 space-y-2 text-xs">
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5 space-y-2 text-sm">
           <div className="flex items-center gap-2 text-foreground font-medium">
             <Globe className="size-4 text-primary shrink-0" />
             <span>Why is internet required?</span>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-normal">
+          <p className="text-sm text-muted-foreground leading-normal">
             Your selected language preferences are verified and synced with cloud account settings across all authorized devices in real time.
           </p>
         </div>
@@ -56,7 +56,7 @@ export function LanguageOfflineModal({ isOpen, onClose }) {
             variant="default"
             size="sm"
             onClick={onClose}
-            className="cursor-pointer text-xs font-medium px-4"
+            className="cursor-pointer text-sm font-medium px-4"
           >
             Understood
           </Button>

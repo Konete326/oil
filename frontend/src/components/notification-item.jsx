@@ -16,26 +16,26 @@ export function NotificationItem({ notification, isAdmin, onMarkRead, onDeleteTa
     switch (type) {
       case "stock":
         return (
-          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 text-[10px] font-medium px-1.5 py-0">
+          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 text-xs font-medium px-1.5 py-0">
             <PackageX className="size-2.5" /> Low Stock
           </Badge>
         );
       case "login":
         return (
-          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 text-[10px] font-medium px-1.5 py-0">
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 text-xs font-medium px-1.5 py-0">
             <UserCheck className="size-2.5" /> Session
           </Badge>
         );
       case "warning":
       case "danger":
         return (
-          <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 gap-1 text-[10px] font-medium px-1.5 py-0">
+          <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 gap-1 text-xs font-medium px-1.5 py-0">
             <AlertTriangle className="size-2.5" /> Alert
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20 gap-1 text-[10px] font-medium px-1.5 py-0">
+          <Badge variant="outline" className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20 gap-1 text-xs font-medium px-1.5 py-0">
             <Info className="size-2.5" /> System
           </Badge>
         );
@@ -55,17 +55,17 @@ export function NotificationItem({ notification, isAdmin, onMarkRead, onDeleteTa
         <div className="mt-0.5 shrink-0">{getTypeBadge(notification.type)}</div>
         <div className="space-y-0.5 min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <h4 className={`text-xs tracking-tight truncate ${!notification.isRead ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
+            <h4 className={`text-sm tracking-tight truncate ${!notification.isRead ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
               {notification.title}
             </h4>
             {!notification.isRead && (
               <span className="size-1.5 rounded-full bg-primary shrink-0" />
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground leading-tight break-words">
+          <p className="text-sm text-muted-foreground leading-tight break-words">
             {notification.message}
           </p>
-          <div className="flex items-center gap-2.5 pt-0.5 text-[10px] text-muted-foreground/75">
+          <div className="flex items-center gap-2.5 pt-0.5 text-xs text-muted-foreground/75">
             <span className="flex items-center gap-1">
               <Clock className="size-2.5 text-muted-foreground/60" />
               {new Date(notification.createdAt).toLocaleString(undefined, {

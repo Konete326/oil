@@ -124,10 +124,10 @@ export function SyncManagerModal({ isOpen, onClose }) {
               {isOnline ? <CloudIcon className="size-4" /> : <CloudOffIcon className="size-4" />}
             </div>
             <div>
-              <h3 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+              <h3 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                 Offline & Cloud Sync Hub
               </h3>
-              <p className="text-[10px] text-muted-foreground">Encrypted Local Storage & Real-time Cloud Sync</p>
+              <p className="text-xs text-muted-foreground">Encrypted Local Storage & Real-time Cloud Sync</p>
             </div>
           </div>
           <button
@@ -138,10 +138,10 @@ export function SyncManagerModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div className="p-3.5 space-y-2.5 overflow-y-auto flex-1 text-xs">
+        <div className="p-3.5 space-y-2.5 overflow-y-auto flex-1 text-sm">
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2 rounded-xl border border-border/80 bg-muted/20 space-y-0.5">
-              <span className="text-muted-foreground flex items-center gap-1 font-medium text-[10.5px]">
+              <span className="text-muted-foreground flex items-center gap-1 font-medium text-xs">
                 {isOnline ? <WifiIcon className="size-3 text-emerald-500" /> : <WifiOffIcon className="size-3 text-destructive" />}
                 Network State
               </span>
@@ -151,18 +151,18 @@ export function SyncManagerModal({ isOpen, onClose }) {
                     isOnline ? "bg-emerald-500 animate-pulse" : "bg-destructive"
                   }`}
                 />
-                <span className="font-semibold text-xs text-foreground font-mono">
+                <span className="font-semibold text-sm text-foreground font-mono">
                   {isOnline ? (networkDetails?.label || `Online (${networkSpeed})`) : "Offline Mode"}
                 </span>
               </div>
             </div>
 
             <div className="p-2 rounded-xl border border-border/80 bg-muted/20 space-y-0.5">
-              <span className="text-muted-foreground flex items-center gap-1 font-medium text-[10.5px]">
+              <span className="text-muted-foreground flex items-center gap-1 font-medium text-xs">
                 <ClockIcon className="size-3 text-primary" />
                 Last Cloud Sync
               </span>
-              <div className="font-semibold text-xs text-foreground pt-0.5">{formattedLastSync}</div>
+              <div className="font-semibold text-sm text-foreground pt-0.5">{formattedLastSync}</div>
             </div>
           </div>
 
@@ -170,9 +170,9 @@ export function SyncManagerModal({ isOpen, onClose }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <HardDriveIcon className="size-3.5 text-primary" />
-                <span className="font-semibold text-xs text-foreground">Offline Storage & Cache Usage</span>
+                <span className="font-semibold text-sm text-foreground">Offline Storage & Cache Usage</span>
               </div>
-              <span className="text-[10px] font-mono font-bold text-foreground">
+              <span className="text-xs font-mono font-bold text-foreground">
                 {storageInfo.usedMB} MB / {storageInfo.quotaMB} MB
               </span>
             </div>
@@ -184,7 +184,7 @@ export function SyncManagerModal({ isOpen, onClose }) {
                   style={{ width: `${storageInfo.percent}%` }}
                 />
               </div>
-              <div className="flex items-center justify-between text-[9.5px] text-muted-foreground pt-0.5">
+              <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5">
                 <span className="flex items-center gap-1">
                   <ShieldCheckIcon className="size-3 text-emerald-500" />
                   <span>30-Day Auto-Cleanup Active</span>
@@ -194,13 +194,13 @@ export function SyncManagerModal({ isOpen, onClose }) {
             </div>
 
             <div className="flex items-center justify-between pt-1 border-t border-border/50">
-              <span className="text-[10px] text-muted-foreground">Prune synced cache &gt;30 days</span>
+              <span className="text-xs text-muted-foreground">Prune synced cache &gt;30 days</span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleCleanCache}
                 disabled={isCleaning}
-                className="h-6 gap-1 text-[10px] px-2 cursor-pointer border-dashed"
+                className="h-6 gap-1 text-xs px-2 cursor-pointer border-dashed"
               >
                 <SparklesIcon className={`size-2.5 text-primary ${isCleaning ? "animate-spin" : ""}`} />
                 <span>{isCleaning ? "Cleaning..." : "Auto-Clean Cache"}</span>
@@ -212,10 +212,10 @@ export function SyncManagerModal({ isOpen, onClose }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <DatabaseIcon className="size-3.5 text-primary" />
-                <span className="font-semibold text-xs text-foreground">Pending Offline Queue</span>
+                <span className="font-semibold text-sm text-foreground">Pending Offline Queue</span>
               </div>
               <span
-                className={`px-2 py-0.5 rounded-full font-semibold text-[9.5px] ${
+                className={`px-2 py-0.5 rounded-full font-semibold text-xs ${
                   pendingCount > 0
                     ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                     : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -228,23 +228,23 @@ export function SyncManagerModal({ isOpen, onClose }) {
             {pendingItems.length === 0 ? (
               <div className="py-2 text-center text-muted-foreground flex flex-col items-center justify-center gap-0.5">
                 <CheckCircle2Icon className="size-4 text-emerald-500" />
-                <span className="font-medium text-xs text-foreground">100% Synced with Cloud</span>
-                <span className="text-[10px]">All offline counter transactions are safely backed up.</span>
+                <span className="font-medium text-sm text-foreground">100% Synced with Cloud</span>
+                <span className="text-xs">All offline counter transactions are safely backed up.</span>
               </div>
             ) : (
               <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
                 {pendingItems.map((item) => (
                   <div
                     key={item.id}
-                    className="p-1.5 rounded-lg bg-card border border-border/60 flex items-center justify-between text-[10.5px]"
+                    className="p-1.5 rounded-lg bg-card border border-border/60 flex items-center justify-between text-xs"
                   >
                     <div className="flex items-center gap-1.5 truncate">
-                      <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-muted text-foreground uppercase">
+                      <span className="font-mono text-xs px-1 py-0.2 rounded bg-muted text-foreground uppercase">
                         {item.type}
                       </span>
-                      <span className="text-muted-foreground capitalize truncate text-[10.5px]">{item.action}</span>
+                      <span className="text-muted-foreground capitalize truncate text-xs">{item.action}</span>
                     </div>
-                    <span className="text-[9px] font-mono text-muted-foreground shrink-0">
+                    <span className="text-xs font-mono text-muted-foreground shrink-0">
                       {new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
@@ -254,9 +254,9 @@ export function SyncManagerModal({ isOpen, onClose }) {
           </div>
 
           {actionMessage && (
-            <div className="p-2 rounded-xl border border-primary/30 bg-primary/10 text-primary flex items-center gap-2 animate-in fade-in duration-150 text-xs">
+            <div className="p-2 rounded-xl border border-primary/30 bg-primary/10 text-primary flex items-center gap-2 animate-in fade-in duration-150 text-sm">
               <AlertCircleIcon className="size-3.5 shrink-0" />
-              <span className="font-medium text-[10.5px]">{actionMessage}</span>
+              <span className="font-medium text-xs">{actionMessage}</span>
             </div>
           )}
         </div>
@@ -267,21 +267,21 @@ export function SyncManagerModal({ isOpen, onClose }) {
             size="sm"
             onClick={handleFullHydration}
             disabled={!isOnline || isHydrating || isSyncing}
-            className="cursor-pointer text-xs gap-1 h-7.5 px-2.5"
+            className="cursor-pointer text-sm gap-1 h-7.5 px-2.5"
           >
             <HardDriveDownloadIcon className={`size-3 text-primary ${isHydrating ? "animate-spin" : ""}`} />
             <span>{isHydrating ? "Hydrating..." : "Pull Cloud Data"}</span>
           </Button>
 
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" onClick={onClose} className="cursor-pointer text-xs h-7.5 px-2.5">
+            <Button variant="ghost" size="sm" onClick={onClose} className="cursor-pointer text-sm h-7.5 px-2.5">
               Close
             </Button>
             <Button
               size="sm"
               onClick={handleManualSync}
               disabled={!isOnline || isSyncing || isHydrating}
-              className="cursor-pointer text-xs gap-1 bg-primary text-primary-foreground font-medium h-7.5 px-3"
+              className="cursor-pointer text-sm gap-1 bg-primary text-primary-foreground font-medium h-7.5 px-3"
             >
               <RefreshCwIcon className={`size-3 ${isSyncing ? "animate-spin" : ""}`} />
               <span>{isSyncing ? "Syncing..." : "Sync Now"}</span>

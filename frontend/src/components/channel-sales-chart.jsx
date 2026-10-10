@@ -71,7 +71,7 @@ export function ChannelSalesChart({ data = [], loading }) {
       </CardHeader>
       <CardContent>
         {chartRows.length === 0 ? (
-          <div className="h-60 md:h-80 flex items-center justify-center text-xs text-muted-foreground">
+          <div className="h-60 md:h-80 flex items-center justify-center text-sm text-muted-foreground">
             No sales data recorded yet for this period.
           </div>
         ) : (

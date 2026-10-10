@@ -147,10 +147,10 @@ export function PosCheckoutModal({
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-primary/5">
           <div className="flex items-center gap-2">
             <ReceiptIcon className="size-4 text-primary" />
-            <h3 className="font-bold text-sm text-foreground">Complete Checkout</h3>
+            <h3 className="font-bold text-base text-foreground">Complete Checkout</h3>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+            <span className="text-sm font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
               Rs {grandTotal.toLocaleString()}
             </span>
             <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer size-6.5" disabled={submitting}>
@@ -159,11 +159,11 @@ export function PosCheckoutModal({
           </div>
         </div>
 
-        <div className="p-4 space-y-2.5 text-xs">
+        <div className="p-4 space-y-2.5 text-sm">
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
+              <label className="font-medium text-sm text-foreground flex items-center gap-1">
                 <UserIcon className="size-3 text-muted-foreground" /> Customer
               </label>
               <CustomerVendorSelect
@@ -181,7 +181,7 @@ export function PosCheckoutModal({
                 }}
               />
               {selectedCustomerObj && (
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground px-0.5 pt-0.5 font-mono">
+                <div className="flex items-center justify-between text-xs text-muted-foreground px-0.5 pt-0.5 font-mono">
                   <span>Khata: <strong className="text-foreground">Rs {selectedCustomerObj.currentBalance?.toLocaleString() || 0}</strong></span>
                   {selectedCustomerObj.creditLimit > 0 && (
                     <span>Limit: <strong className="text-foreground">Rs {selectedCustomerObj.creditLimit?.toLocaleString()}</strong></span>
@@ -190,19 +190,19 @@ export function PosCheckoutModal({
               )}
             </div>
             <div className="space-y-1">
-              <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
+              <label className="font-medium text-sm text-foreground flex items-center gap-1">
                 <TagIcon className="size-3 text-muted-foreground" /> Sale Type
               </label>
-              <div className="w-full h-8 flex items-center rounded-md border border-input bg-muted/50 px-2 text-xs font-semibold">
+              <div className="w-full h-8 flex items-center rounded-md border border-input bg-muted/50 px-2 text-sm font-semibold">
                 {saleType}
               </div>
             </div>
           </div>
 
           {isCreditBreached && (
-            <div className="rounded-lg bg-amber-500/15 border border-amber-500/40 p-2 text-amber-500 text-xs flex items-start gap-1.5 animate-pulse">
+            <div className="rounded-lg bg-amber-500/15 border border-amber-500/40 p-2 text-amber-500 text-sm flex items-start gap-1.5 animate-pulse">
               <AlertTriangleIcon className="size-3.5 shrink-0 mt-0.5" />
-              <div className="space-y-0.5 text-[10.5px]">
+              <div className="space-y-0.5 text-xs">
                 <div className="font-bold flex items-center gap-1">
                   <span>⚠️ Credit Limit Exceeded</span>
                 </div>
@@ -214,9 +214,9 @@ export function PosCheckoutModal({
           )}
 
           {isLossSale && (
-            <div className="rounded-lg bg-destructive/15 border border-destructive/40 p-2 text-destructive text-xs flex items-start gap-1.5 animate-pulse">
+            <div className="rounded-lg bg-destructive/15 border border-destructive/40 p-2 text-destructive text-sm flex items-start gap-1.5 animate-pulse">
               <AlertTriangleIcon className="size-3.5 shrink-0 mt-0.5" />
-              <div className="space-y-0.5 text-[10.5px]">
+              <div className="space-y-0.5 text-xs">
                 <div className="font-bold">⚠️ Loss Detected (Checkout Blocked)</div>
                 <div className="leading-tight">
                   Grand Total (Rs {grandTotal.toLocaleString()}) kul kharid cost (Rs {cartCostTotal.toLocaleString()}) se kam hai. Sale allow nahi hai.
@@ -227,13 +227,13 @@ export function PosCheckoutModal({
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="font-medium text-[11px] text-foreground flex items-center gap-1">
+              <label className="font-medium text-sm text-foreground flex items-center gap-1">
                 <CreditCardIcon className="size-3 text-muted-foreground" /> Payment Mode
               </label>
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs cursor-pointer"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm cursor-pointer"
               >
                 <option value="Cash">Cash</option>
                 <option value="Bank Transfer">Bank Transfer (IBFT)</option>
@@ -244,7 +244,7 @@ export function PosCheckoutModal({
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="font-medium text-[11px] text-foreground">Discount (Rs)</label>
+                <label className="font-medium text-sm text-foreground">Discount (Rs)</label>
               </div>
               <ValidatedInput
                 rule="positiveNumber"
@@ -253,21 +253,21 @@ export function PosCheckoutModal({
                 onChange={(e) => setDiscount(e.target.value)}
                 onValidationChange={setDiscountValid}
                 placeholder="0"
-                className="h-8 text-xs"
+                className="h-8 text-sm"
               />
             </div>
           </div>
 
           {(paymentMode === "Bank Transfer" || paymentMode === "Card") && (
             <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 space-y-1.5 animate-in fade-in duration-150">
-              <label className="font-semibold text-[11px] text-foreground flex items-center gap-1.5">
+              <label className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                 <LandmarkIcon className="size-3.5 text-primary" />
                 Deposit to Bank Account *
               </label>
               <select
                 value={selectedBankAccountId}
                 onChange={(e) => setSelectedBankAccountId(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 {availableBankAccounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
@@ -291,7 +291,7 @@ export function PosCheckoutModal({
               />
               <div className="space-y-1">
                 <label className="font-medium text-muted-foreground">Change Due</label>
-                <div className="h-9 rounded-md border bg-muted/40 px-3 flex items-center font-mono font-bold text-emerald-500 text-xs">
+                <div className="h-9 rounded-md border bg-muted/40 px-3 flex items-center font-mono font-bold text-emerald-500 text-sm">
                   Rs {changeDue.toLocaleString()}
                 </div>
               </div>
@@ -300,11 +300,11 @@ export function PosCheckoutModal({
         </div>
 
         <div className="px-4 pb-4 flex gap-2">
-          <Button variant="outline" className="flex-1 cursor-pointer text-xs h-8" onClick={onClose} disabled={submitting}>
+          <Button variant="outline" className="flex-1 cursor-pointer text-sm h-8" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
           <Button
-            className="flex-1 gap-1.5 text-xs cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white h-8"
+            className="flex-1 gap-1.5 text-sm cursor-pointer font-semibold bg-emerald-600 hover:bg-emerald-700 text-white h-8"
             onClick={handleConfirm}
             disabled={submitting || !isFormValid}
           >

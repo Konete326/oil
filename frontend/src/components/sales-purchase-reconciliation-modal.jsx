@@ -146,7 +146,7 @@ export function SalesPurchaseReconciliationModal({
       <div className="w-full max-w-6xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-lg border border-border/40 text-xs">
+            <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-lg border border-border/40 text-sm">
               <button
                 onClick={() => setActiveType("purchases")}
                 className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
@@ -168,7 +168,7 @@ export function SalesPurchaseReconciliationModal({
                 Sales Reconciliation
               </button>
             </div>
-            <span className="text-muted-foreground text-xs font-mono">
+            <span className="text-muted-foreground text-sm font-mono">
               ({displayRows.length} Records)
             </span>
           </div>
@@ -177,7 +177,7 @@ export function SalesPurchaseReconciliationModal({
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -186,7 +186,7 @@ export function SalesPurchaseReconciliationModal({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1.5 text-sm cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -194,7 +194,7 @@ export function SalesPurchaseReconciliationModal({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Document</span>
@@ -207,31 +207,31 @@ export function SalesPurchaseReconciliationModal({
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
-            className="w-full max-w-[287mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-[10px] print:shadow-none print:border-none print:p-0 a4-landscape-sheet relative notranslate"
+            className="w-full max-w-[287mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-landscape-sheet relative notranslate"
             dir="ltr"
             lang="en"
           >
             <div className="pb-4 flex items-start justify-between border-b border-black mb-3">
               <div className="space-y-1">
-                <h1 className="font-extrabold text-xs uppercase tracking-tight text-black">
+                <h1 className="font-extrabold text-sm uppercase tracking-tight text-black">
                   {activeType.toUpperCase()} TRANSACTIONS
                 </h1>
-                <p className="font-bold text-[11px] uppercase underline text-black">
+                <p className="font-bold text-sm uppercase underline text-black">
                   MONTHLY RECONCILIATION REPORT
                 </p>
-                <p className="font-bold text-[10px] uppercase text-black pt-0.5">
+                <p className="font-bold text-xs uppercase text-black pt-0.5">
                   Month: <span className="underline">{currentMonthName}</span>
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <OilDropLogo className="size-8" />
-                <span className="font-black text-sm uppercase tracking-tight font-mono">
+                <span className="font-black text-base uppercase tracking-tight font-mono">
                   AL KHALEEJ LUBRICANTS
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pb-4 mb-1 text-[10px] leading-tight font-sans">
+            <div className="grid grid-cols-2 gap-4 pb-4 mb-1 text-xs leading-tight font-sans">
               <div className="space-y-0.5">
                 <div className="flex">
                   <span className="w-36 font-bold uppercase">Company Name:</span>
@@ -249,7 +249,7 @@ export function SalesPurchaseReconciliationModal({
             </div>
 
             <div className="mb-4">
-              <table className="w-full border-collapse border-2 border-black text-[9px]">
+              <table className="w-full border-collapse border-2 border-black text-xs">
                 <thead>
                   <tr className="border-b-2 border-black text-center font-bold uppercase tracking-tight">
                     <th className="border border-black p-1.5 w-16">
@@ -278,7 +278,7 @@ export function SalesPurchaseReconciliationModal({
                 <tbody className="divide-y divide-black">
                   {displayRows.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-8 text-center text-gray-500 border border-black text-[11px]">
+                      <td colSpan={7} className="p-8 text-center text-gray-500 border border-black text-sm">
                         No {activeType} reconciliation records found for this period.
                       </td>
                     </tr>
@@ -314,7 +314,7 @@ export function SalesPurchaseReconciliationModal({
                     <td colSpan={6} className="border border-black p-1.5 text-left uppercase">
                       Grand Total :
                     </td>
-                    <td className="border border-black p-1.5 text-right font-mono font-bold text-[10px]">
+                    <td className="border border-black p-1.5 text-right font-mono font-bold text-xs">
                       {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -322,20 +322,20 @@ export function SalesPurchaseReconciliationModal({
               </table>
             </div>
 
-            <div className="pt-2 text-[10px] font-bold uppercase text-black">
+            <div className="pt-2 text-xs font-bold uppercase text-black">
               END OF REPORT
             </div>
           </div>
         </div>
 
         <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+          <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
             Close Preview
           </Button>
           <Button
             size="sm"
             onClick={handlePrint}
-            className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+            className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
           >
             <PrinterIcon className="size-3.5" />
             <span>Print A4 Document</span>

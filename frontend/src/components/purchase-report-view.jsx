@@ -29,12 +29,12 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
             placeholder="Search vendor, product, purchase #..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs"
+            className="ps-9 text-sm"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-4 text-xs font-medium">
+          <div className="hidden md:flex items-center gap-4 text-sm font-medium">
             <div className="px-3 py-1.5 rounded-lg border border-border bg-muted/40 text-foreground">
               Total Purchases: <strong className="font-mono text-primary">Rs. {totalCost.toLocaleString()}</strong>
             </div>
@@ -43,7 +43,7 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
             </div>
           </div>
 
-          <Button size="sm" onClick={onOpenModal} className="gap-1.5 cursor-pointer text-xs">
+          <Button size="sm" onClick={onOpenModal} className="gap-1.5 cursor-pointer text-sm">
             <PlusIcon className="size-3.5" />
             <span>Record Stock Purchase</span>
           </Button>
@@ -52,8 +52,8 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-3 ps-4">Date</th>
                 <th className="p-3">Purchase #</th>
@@ -81,7 +81,7 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
               ) : (
                 filteredPurchases.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item) => (
                   <tr key={item._id} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-3 ps-4 text-muted-foreground text-[11px]">
+                    <td className="p-3 ps-4 text-muted-foreground text-sm">
                       {new Date(item.purchaseDate || item.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-3 font-mono font-medium">{item.purchaseNumber}</td>
@@ -100,7 +100,7 @@ export function PurchaseReportView({ purchases = [], totalCost = 0, loading = fa
                       Rs. {item.totalAmount.toLocaleString()}
                     </td>
                     <td className="p-3 pe-4 text-center">
-                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                      <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                         {item.paymentStatus}
                       </span>
                     </td>

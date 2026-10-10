@@ -5,8 +5,8 @@ export function PaginationControl({ page = 1, pages = 1, total = 0, onPageChange
   if (pages <= 1 && total === 0) return null;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-card border-t border-border text-xs">
-      <div className="text-muted-foreground font-medium text-[11px]">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-card border-t border-border text-sm">
+      <div className="text-muted-foreground font-medium text-sm">
         Showing Page <strong className="text-foreground font-mono">{page}</strong> of{" "}
         <strong className="text-foreground font-mono">{pages || 1}</strong> ({total} Total Records)
       </div>
@@ -17,13 +17,13 @@ export function PaginationControl({ page = 1, pages = 1, total = 0, onPageChange
           size="sm"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed"
+          className="h-8 px-2.5 text-sm gap-1 cursor-pointer disabled:cursor-not-allowed"
         >
           <ChevronLeftIcon className="size-3.5" />
           <span>Previous</span>
         </Button>
 
-        <span className="px-2 font-mono text-[11px] text-muted-foreground font-semibold">
+        <span className="px-2 font-mono text-sm text-muted-foreground font-semibold">
           {page} / {pages || 1}
         </span>
 
@@ -32,7 +32,7 @@ export function PaginationControl({ page = 1, pages = 1, total = 0, onPageChange
           size="sm"
           disabled={page >= pages}
           onClick={() => onPageChange(page + 1)}
-          className="h-8 px-2.5 text-xs gap-1 cursor-pointer disabled:cursor-not-allowed"
+          className="h-8 px-2.5 text-sm gap-1 cursor-pointer disabled:cursor-not-allowed"
         >
           <span>Next</span>
           <ChevronRightIcon className="size-3.5" />

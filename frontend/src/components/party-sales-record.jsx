@@ -21,11 +21,11 @@ export function PartySalesRecord({ partyRecords = [], loading = false }) {
             placeholder="Search party sales history..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 text-xs"
+            className="ps-9 text-sm"
           />
         </div>
 
-        <div className="flex items-center gap-3 text-xs font-medium">
+        <div className="flex items-center gap-3 text-sm font-medium">
           <div className="px-3 py-1.5 rounded-lg border border-border bg-primary/10 text-primary">
             Combined Party Sales: <strong>Rs. {grandTotalSales.toLocaleString()}</strong>
           </div>
@@ -34,8 +34,8 @@ export function PartySalesRecord({ partyRecords = [], loading = false }) {
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-3 ps-4">Party / Customer Name</th>
                 <th className="p-3">Party Type</th>
@@ -61,13 +61,13 @@ export function PartySalesRecord({ partyRecords = [], loading = false }) {
                 filteredParties.map((party) => (
                   <tr key={party.partyName} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 ps-4 font-semibold text-foreground flex items-center gap-2">
-                      <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                      <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
                         {party.partyName.charAt(0).toUpperCase()}
                       </div>
                       <span>{party.partyName}</span>
                     </td>
                     <td className="p-3">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground border border-border">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-muted text-muted-foreground border border-border">
                         {party.type === "Textile Mill" ? <FactoryIcon className="size-3 text-sky-500" /> : <ShoppingBagIcon className="size-3 text-emerald-500" />}
                         {party.type}
                       </span>
@@ -78,7 +78,7 @@ export function PartySalesRecord({ partyRecords = [], loading = false }) {
                     <td className="p-3 text-center font-mono font-medium">
                       {party.orderCount} Orders
                     </td>
-                    <td className="p-3 pe-4 text-right text-muted-foreground text-[11px]">
+                    <td className="p-3 pe-4 text-right text-muted-foreground text-sm">
                       {party.lastSaleDate ? new Date(party.lastSaleDate).toLocaleDateString() : "N/A"}
                     </td>
                   </tr>

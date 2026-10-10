@@ -80,10 +80,10 @@ export function BankEntryModal({
               {isDeposit ? <ArrowDownLeftIcon className="size-4" /> : <ArrowUpRightIcon className="size-4" />}
             </div>
             <div>
-              <h3 className="font-bold text-sm text-foreground">
+              <h3 className="font-bold text-base text-foreground">
                 {isDeposit ? "Record Deposit (Jama / Inflow)" : "Record Withdrawal (Naam / Outflow)"}
               </h3>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {activeAccount?.bankName} — {activeAccount?.accountTitle} ({activeAccount?.accountNumber})
               </p>
             </div>
@@ -91,24 +91,24 @@ export function BankEntryModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground text-sm font-bold cursor-pointer"
+            className="text-muted-foreground hover:text-foreground text-base font-bold cursor-pointer"
           >
             <XIcon className="size-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-          <div className="p-2 rounded-lg bg-muted/40 border border-border/80 flex items-center justify-between text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3 text-sm">
+          <div className="p-2 rounded-lg bg-muted/40 border border-border/80 flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <LandmarkIcon className="size-4 text-primary" />
               <div>
                 <span className="font-bold text-foreground block">{activeAccount?.bankName}</span>
-                <span className="text-[10.5px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Title: {activeAccount?.accountTitle} | A/C: {activeAccount?.accountNumber}
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold">
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold">
               {activeAccount?.accountType || "Current"}
             </span>
           </div>
@@ -123,7 +123,7 @@ export function BankEntryModal({
               placeholder={isDeposit ? "e.g. Malik Auto Workshop, Cash Deposit" : "e.g. Shell Lubricants Distributor, Caltex Oil"}
               value={party}
               onChange={(e) => setParty(e.target.value)}
-              className="h-8 text-xs"
+              className="h-8 text-sm"
             />
           </div>
 
@@ -137,7 +137,7 @@ export function BankEntryModal({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="h-8 text-xs font-mono font-bold"
+                className="h-8 text-sm font-mono font-bold"
               />
             </div>
 
@@ -147,7 +147,7 @@ export function BankEntryModal({
                 placeholder="e.g. CHQ-90182 or IBFT-1029"
                 value={ref}
                 onChange={(e) => setRef(e.target.value)}
-                className="h-8 text-xs font-mono"
+                className="h-8 text-sm font-mono"
               />
             </div>
           </div>
@@ -158,7 +158,7 @@ export function BankEntryModal({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 {TRANSACTION_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -175,7 +175,7 @@ export function BankEntryModal({
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="h-8 text-xs"
+                className="h-8 text-sm"
               />
             </div>
           </div>
@@ -186,7 +186,7 @@ export function BankEntryModal({
               placeholder="e.g. 200L Drum supply invoice #4829 payment..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="h-8 text-xs"
+              className="h-8 text-sm"
             />
           </div>
 
@@ -197,7 +197,7 @@ export function BankEntryModal({
               size="sm"
               onClick={onClose}
               disabled={loading}
-              className="h-7.5 text-xs cursor-pointer"
+              className="h-7.5 text-sm cursor-pointer"
             >
               Cancel
             </Button>
@@ -206,7 +206,7 @@ export function BankEntryModal({
               size="sm"
               disabled={loading}
               className={cn(
-                "h-7.5 text-xs font-semibold text-white cursor-pointer gap-1.5",
+                "h-7.5 text-sm font-semibold text-white cursor-pointer gap-1.5",
                 isDeposit ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
               )}
             >

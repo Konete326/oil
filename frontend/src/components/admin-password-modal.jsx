@@ -44,7 +44,7 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm, title, message,
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-bold text-foreground">{title || "Security Verification Required"}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {message || "This is a sensitive administrative action. Enter your account password to confirm."}
             </p>
           </div>
@@ -52,7 +52,7 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm, title, message,
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium flex items-center gap-1.5">
+            <label className="text-sm font-medium flex items-center gap-1.5">
               <LockIcon className="size-3.5 text-muted-foreground" />
               Administrator Password
             </label>
@@ -64,10 +64,10 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm, title, message,
                 setPassword(e.target.value);
                 if (error) setError("");
               }}
-              className="text-xs h-9 bg-background/80"
+              className="text-sm h-9 bg-background/80"
               autoFocus
             />
-            {error && <p className="text-[11px] text-destructive font-medium">{error}</p>}
+            {error && <p className="text-sm text-destructive font-medium">{error}</p>}
           </div>
 
           <div className="flex items-center justify-end gap-2 border-t border-border/60 pt-4">
@@ -77,7 +77,7 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm, title, message,
               size="sm"
               onClick={handleModalClose}
               disabled={loading}
-              className="text-xs cursor-pointer"
+              className="text-sm cursor-pointer"
             >
               Cancel
             </Button>
@@ -86,7 +86,7 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm, title, message,
               variant="destructive"
               size="sm"
               disabled={loading}
-              className="text-xs cursor-pointer gap-1.5"
+              className="text-sm cursor-pointer gap-1.5"
             >
               {loading && <Loader2Icon className="size-3.5 animate-spin" />}
               {actionLabel}

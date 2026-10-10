@@ -46,7 +46,7 @@ export function DashboardInvoices({ invoices = [], loading }) {
             <Skeleton className="h-6 w-full" />
           </div>
         ) : items.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground">
+          <div className="p-8 text-center text-sm text-muted-foreground">
             No sales invoices or challans recorded yet.
           </div>
         ) : (
@@ -70,7 +70,7 @@ export function DashboardInvoices({ invoices = [], loading }) {
                     <TableCell className="max-w-40 truncate ps-6 font-medium">
                       {inv.customer}
                     </TableCell>
-                    <TableCell className="text-muted-foreground font-mono text-xs">
+                    <TableCell className="text-muted-foreground font-mono text-sm">
                       {inv.invoiceId}
                     </TableCell>
                     <TableCell className="pe-6 text-right tabular-nums font-semibold text-foreground">

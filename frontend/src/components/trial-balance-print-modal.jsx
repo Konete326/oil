@@ -106,7 +106,7 @@ export function TrialBalancePrintModal({
 
       <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-base">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
             <span>Trial Balance Sheet Preview (A4 Standard)</span>
           </div>
@@ -114,7 +114,7 @@ export function TrialBalancePrintModal({
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -123,7 +123,7 @@ export function TrialBalancePrintModal({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1.5 text-sm cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -131,7 +131,7 @@ export function TrialBalancePrintModal({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Statement</span>
@@ -144,7 +144,7 @@ export function TrialBalancePrintModal({
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
           <div
-            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
+            className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-sm print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate"
           dir="ltr"
           lang="en"
         >
@@ -155,34 +155,34 @@ export function TrialBalancePrintModal({
                 <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                   AL KHALEEJ LUBRICANTS
                 </h1>
-                <p className="font-bold text-xs text-black uppercase tracking-wider pt-0.5">
+                <p className="font-bold text-sm text-black uppercase tracking-wider pt-0.5">
                   TRIAL BALANCE STATEMENT
                 </p>
-                <p className="text-[11px] text-gray-700 font-medium">
+                <p className="text-sm text-gray-700 font-medium">
                   Plot #44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
                 </p>
-                <p className="text-[10px] text-gray-600">
+                <p className="text-xs text-gray-600">
                   Tel: (021) 35091244 | Korangi Industrial Area, Karachi
                 </p>
               </div>
             </div>
 
             <div className="text-right space-y-1">
-              <span className={`inline-block px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${
+              <span className={`inline-block px-2 py-0.5 rounded border text-xs font-bold uppercase ${
                 isBalanced ? "border-emerald-600 text-emerald-700 bg-emerald-50" : "border-amber-600 text-amber-700 bg-amber-50"
               }`}>
                 {isBalanced ? "BALANCED" : "DIFFERENCE"}
               </span>
-              <p className="text-[11px] font-mono text-gray-800 font-semibold pt-1">
+              <p className="text-sm font-mono text-gray-800 font-semibold pt-1">
                 As of: {currentDate}
               </p>
             </div>
           </div>
 
           <div className="mb-6 overflow-hidden">
-            <table className="w-full border-collapse border border-black text-[11px]">
+            <table className="w-full border-collapse border border-black text-sm">
               <thead>
-                <tr className="bg-gray-100 border-b border-black font-bold uppercase text-[10px] tracking-tight">
+                <tr className="bg-gray-100 border-b border-black font-bold uppercase text-xs tracking-tight">
                   <th className="border border-black p-2 w-20 text-center">
                     Code
                   </th>
@@ -216,7 +216,7 @@ export function TrialBalancePrintModal({
                       <td className="border border-gray-300 p-1.5 font-semibold text-black">
                         {acc.accountName}
                       </td>
-                      <td className="border border-gray-300 p-1.5 text-center text-[10px] uppercase font-medium text-gray-700">
+                      <td className="border border-gray-300 p-1.5 text-center text-xs uppercase font-medium text-gray-700">
                         {acc.category}
                       </td>
                       <td className="border border-gray-300 p-1.5 text-right font-mono font-medium text-gray-900">
@@ -233,7 +233,7 @@ export function TrialBalancePrintModal({
                   ))
                 )}
 
-                <tr className="border-t-2 border-black font-bold bg-gray-100 text-xs">
+                <tr className="border-t-2 border-black font-bold bg-gray-100 text-sm">
                   <td colSpan={3} className="border border-black p-2 text-left uppercase">
                     Total Amount
                   </td>
@@ -247,10 +247,10 @@ export function TrialBalancePrintModal({
 
                 {!isBalanced && (
                   <tr className="bg-amber-50 font-bold text-amber-900">
-                    <td colSpan={3} className="border border-black p-1.5 text-left uppercase text-[10px]">
+                    <td colSpan={3} className="border border-black p-1.5 text-left uppercase text-xs">
                       Difference
                     </td>
-                    <td colSpan={2} className="border border-black p-1.5 text-right font-mono text-xs">
+                    <td colSpan={2} className="border border-black p-1.5 text-right font-mono text-sm">
                       Rs. {difference.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -259,20 +259,20 @@ export function TrialBalancePrintModal({
             </table>
           </div>
 
-          <div className="pt-10 grid grid-cols-2 gap-12 text-xs">
+          <div className="pt-10 grid grid-cols-2 gap-12 text-sm">
             <div className="space-y-6">
-              <p className="font-semibold text-[11px]">Prepared by:</p>
+              <p className="font-semibold text-sm">Prepared by:</p>
               <div className="pt-4 border-t border-black w-4/5">
-                <p className="font-bold uppercase text-[11px]">AL KHALEEJ FINANCE</p>
-                <p className="text-[10px] text-gray-700">Accountant Signature</p>
+                <p className="font-bold uppercase text-sm">AL KHALEEJ FINANCE</p>
+                <p className="text-xs text-gray-700">Accountant Signature</p>
               </div>
             </div>
 
             <div className="space-y-6 text-right flex flex-col items-end">
-              <p className="font-semibold text-[11px]">Approved by:</p>
+              <p className="font-semibold text-sm">Approved by:</p>
               <div className="pt-4 border-t border-black w-4/5 text-right">
-                <p className="font-bold uppercase text-[11px]">MANAGEMENT</p>
-                <p className="text-[10px] text-gray-700">Authorized Signature</p>
+                <p className="font-bold uppercase text-sm">MANAGEMENT</p>
+                <p className="text-xs text-gray-700">Authorized Signature</p>
               </div>
             </div>
           </div>
@@ -280,13 +280,13 @@ export function TrialBalancePrintModal({
       </div>
 
       <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
           Close Preview
         </Button>
         <Button
           size="sm"
           onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
         >
           <PrinterIcon className="size-3.5" />
           <span>Print A4 Statement</span>

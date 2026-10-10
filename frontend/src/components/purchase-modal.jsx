@@ -92,14 +92,14 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div>
             <h2 className="text-lg font-bold text-foreground">Record Stock Purchase (Khareedari)</h2>
-            <p className="text-xs text-muted-foreground">Add oil stock / raw inventory purchase from supplier.</p>
+            <p className="text-sm text-muted-foreground">Add oil stock / raw inventory purchase from supplier.</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
             <XIcon className="size-4" />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <ValidatedInput
             label="Supplier / Vendor Name"
             rule="name"
@@ -116,7 +116,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
               <select
                 value={productId}
                 onChange={handleProductSelect}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="">Custom / New Product</option>
                 {productsList.map((p) => (
@@ -172,9 +172,9 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
 
-          <div className="p-3 rounded-lg bg-muted/40 border border-border flex justify-between items-center text-xs">
+          <div className="p-3 rounded-lg bg-muted/40 border border-border flex justify-between items-center text-sm">
             <span className="font-medium text-muted-foreground">Calculated Net Total:</span>
-            <span className="font-mono font-bold text-sm text-primary">Rs. {calculatedTotal.toLocaleString()}</span>
+            <span className="font-mono font-bold text-base text-primary">Rs. {calculatedTotal.toLocaleString()}</span>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -183,7 +183,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
               <select
                 value={paymentStatus}
                 onChange={(e) => setPaymentStatus(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="Paid">Paid (Cash / Bank)</option>
                 <option value="Credit">Credit (Khata)</option>
@@ -208,7 +208,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }) {
                 required
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
           </div>

@@ -148,7 +148,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
             </div>
             <div>
               <h2 className="text-lg font-bold text-foreground">Record Staff Advance</h2>
-              <p className="text-xs text-muted-foreground">Issue advance cash or bank transfer to employee khata.</p>
+              <p className="text-sm text-muted-foreground">Issue advance cash or bank transfer to employee khata.</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
@@ -156,7 +156,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-sm">
           <div ref={employeeDropdownRef} className="relative space-y-1">
             <label className="font-medium text-foreground">Search & Select Employee *</label>
             <div className="relative">
@@ -170,14 +170,14 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
                   setIsEmployeeDropdownOpen(true);
                 }}
                 onFocus={() => setIsEmployeeDropdownOpen(true)}
-                className="ps-8.5 pe-3 h-9 text-xs rounded-xl bg-muted/30 focus:bg-background border-border/80 shadow-2xs font-medium"
+                className="ps-8.5 pe-3 h-9 text-sm rounded-xl bg-muted/30 focus:bg-background border-border/80 shadow-2xs font-medium"
               />
             </div>
 
             {isEmployeeDropdownOpen && (
               <div className="absolute left-0 right-0 top-15 z-50 max-h-48 overflow-y-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-xl p-1 divide-y divide-border/40 animate-in fade-in-50 duration-100">
                 {filteredEmployees.length === 0 ? (
-                  <div className="p-3 text-center text-xs text-muted-foreground">
+                  <div className="p-3 text-center text-sm text-muted-foreground">
                     No employees found matching "{employeeSearch}"
                   </div>
                 ) : (
@@ -191,16 +191,16 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
                         setIsEmployeeDropdownOpen(false);
                       }}
                       className={cn(
-                        "w-full text-left p-2 rounded-lg transition-colors flex items-center justify-between gap-2 cursor-pointer text-xs",
+                        "w-full text-left p-2 rounded-lg transition-colors flex items-center justify-between gap-2 cursor-pointer text-sm",
                         employeeId === emp._id ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted text-foreground"
                       )}
                     >
                       <div>
                         <p className="font-semibold">{emp.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{emp.designation} {emp.phone ? `• ${emp.phone}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{emp.designation} {emp.phone ? `• ${emp.phone}` : ""}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="text-[10px] font-mono text-amber-500 font-bold block">
+                        <span className="text-xs font-mono text-amber-500 font-bold block">
                           Adv: Rs {(emp.advanceBalance || 0).toLocaleString()}
                         </span>
                         {employeeId === emp._id && <CheckIcon className="size-3 text-primary ml-auto mt-0.5" />}
@@ -213,7 +213,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
           </div>
 
           {selectedEmployeeObj && (
-            <div className="p-3 bg-muted/40 rounded-xl border border-border/80 space-y-1.5 text-xs">
+            <div className="p-3 bg-muted/40 rounded-xl border border-border/80 space-y-1.5 text-sm">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Monthly Salary:</span>
                 <span className="font-mono font-bold text-foreground">Rs. {Number(selectedEmployeeObj.baseSalary || 0).toLocaleString()}</span>
@@ -234,7 +234,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             onValidationChange={setAmountValid}
-            className="font-mono font-bold text-sm text-purple-600 dark:text-purple-400"
+            className="font-mono font-bold text-base text-purple-600 dark:text-purple-400"
           />
 
           <div className="space-y-1">
@@ -242,7 +242,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
             <select
               value={paymentMode}
               onChange={(e) => setPaymentMode(e.target.value)}
-              className="w-full h-9 rounded-xl border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-2xs cursor-pointer"
+              className="w-full h-9 rounded-xl border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-2xs cursor-pointer"
             >
               {PAYMENT_MODES.map((mode) => (
                 <option key={mode} value={mode}>
@@ -255,14 +255,14 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
           {isBankPayment && (
             <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 space-y-2.5 animate-in fade-in duration-150">
               <div className="space-y-1">
-                <label className="font-semibold text-[11px] text-foreground flex items-center gap-1.5">
+                <label className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                   <LandmarkIcon className="size-3.5 text-primary" />
                   <span>Disburse From Bank Account *</span>
                 </label>
                 <select
                   value={selectedBankAccountId}
                   onChange={(e) => setSelectedBankAccountId(e.target.value)}
-                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2.5 text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
+                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2.5 text-sm font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
                 >
                   {availableBankAccounts.map((acc) => (
                     <option key={acc.id} value={acc.id}>
@@ -273,7 +273,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-[10.5px] text-muted-foreground">
+                <label className="font-medium text-xs text-muted-foreground">
                   Cheque / Tx / Reference # (Optional)
                 </label>
                 <input
@@ -281,7 +281,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
                   placeholder="e.g. CHQ-9102 or IBFT Ref #"
                   value={bankReferenceNo}
                   onChange={(e) => setBankReferenceNo(e.target.value)}
-                  className="w-full h-8 rounded-lg border border-input bg-background px-2.5 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
+                  className="w-full h-8 rounded-lg border border-input bg-background px-2.5 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
                 />
               </div>
             </div>
@@ -294,7 +294,7 @@ export function AdvanceModal({ isOpen, onClose, employees = [], onSuccess, defau
               placeholder="e.g. Medical emergency, urgent travel advance"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="h-9 text-xs rounded-xl"
+              className="h-9 text-sm rounded-xl"
             />
           </div>
 

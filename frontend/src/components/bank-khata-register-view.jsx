@@ -459,8 +459,8 @@ export function BankKhataRegisterView() {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <LandmarkIcon className="size-4 text-primary" />
-            <span className="text-xs font-bold text-foreground">Bank & Cash Accounts:</span>
-            <span className="text-[11px] text-muted-foreground">Select an account to view its ledger and live balance</span>
+            <span className="text-sm font-bold text-foreground">Bank & Cash Accounts:</span>
+            <span className="text-sm text-muted-foreground">Select an account to view its ledger and live balance</span>
           </div>
           <Button
             variant="outline"
@@ -469,7 +469,7 @@ export function BankKhataRegisterView() {
               setEditingAccount(null);
               setIsAccountModalOpen(true);
             }}
-            className="h-7 text-xs px-2.5 gap-1.5 text-primary cursor-pointer hover:bg-primary/10"
+            className="h-7 text-sm px-2.5 gap-1.5 text-primary cursor-pointer hover:bg-primary/10"
           >
             <PlusIcon className="size-3.5" />
             <span>Add Bank Account</span>
@@ -496,19 +496,19 @@ export function BankKhataRegisterView() {
               >
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-bold text-foreground truncate">{acc.accountTitle}</span>
-                    <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-muted font-semibold text-muted-foreground">
+                    <span className="text-sm font-bold text-foreground truncate">{acc.accountTitle}</span>
+                    <span className="text-xs px-1.5 py-0.2 rounded bg-muted font-semibold text-muted-foreground">
                       {acc.accountType}
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground font-mono truncate">
+                  <p className="text-sm text-muted-foreground font-mono truncate">
                     {acc.bankName} • {acc.accountNumber}
                   </p>
                   <div className="flex items-center gap-1 pt-0.5">
-                    <span className="text-[10px] text-muted-foreground">Balance:</span>
+                    <span className="text-xs text-muted-foreground">Balance:</span>
                     <span
                       className={cn(
-                        "text-xs font-mono font-bold",
+                        "text-sm font-mono font-bold",
                         bal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                       )}
                     >
@@ -556,13 +556,13 @@ export function BankKhataRegisterView() {
             <LandmarkIcon className="size-3.5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
               <span>{activeAccount.accountTitle}</span>
-              <span className="text-xs font-mono font-normal text-muted-foreground">
+              <span className="text-sm font-mono font-normal text-muted-foreground">
                 ({activeAccount.accountNumber})
               </span>
             </h2>
-            <p className="text-[10.5px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {activeAccount.bankName} {activeAccount.branchName ? `• ${activeAccount.branchName}` : ""}
             </p>
           </div>
@@ -575,7 +575,7 @@ export function BankKhataRegisterView() {
               setEntryModalType("Received");
               setIsEntryModalOpen(true);
             }}
-            className="h-7.5 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-2.5 text-xs cursor-pointer shadow-2xs"
+            className="h-7.5 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-2.5 text-sm cursor-pointer shadow-2xs"
           >
             <ArrowDownLeftIcon className="size-3.5" />
             <span>+ Deposit (Jama)</span>
@@ -587,7 +587,7 @@ export function BankKhataRegisterView() {
               setEntryModalType("Paid");
               setIsEntryModalOpen(true);
             }}
-            className="h-7.5 gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-medium px-2.5 text-xs cursor-pointer shadow-2xs"
+            className="h-7.5 gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-medium px-2.5 text-sm cursor-pointer shadow-2xs"
           >
             <ArrowUpRightIcon className="size-3.5" />
             <span>- Withdraw (Naam)</span>
@@ -597,7 +597,7 @@ export function BankKhataRegisterView() {
             variant="outline"
             size="sm"
             onClick={handleExportExcel}
-            className="h-7.5 gap-1 text-xs px-2.5 cursor-pointer"
+            className="h-7.5 gap-1 text-sm px-2.5 cursor-pointer"
           >
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
             <span>Excel</span>
@@ -607,7 +607,7 @@ export function BankKhataRegisterView() {
             variant="outline"
             size="sm"
             onClick={handlePrint}
-            className="h-7.5 gap-1 text-xs px-2.5 cursor-pointer"
+            className="h-7.5 gap-1 text-sm px-2.5 cursor-pointer"
           >
             <PrinterIcon className="size-3.5 text-primary" />
             <span>Print</span>
@@ -636,7 +636,7 @@ export function BankKhataRegisterView() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8 text-xs h-7.5 bg-background"
+              className="ps-8 text-sm h-7.5 bg-background"
             />
           </div>
 
@@ -648,7 +648,7 @@ export function BankKhataRegisterView() {
                 setStartDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="text-xs h-7.5 bg-background"
+              className="text-sm h-7.5 bg-background"
               title="Start Date"
             />
           </div>
@@ -661,7 +661,7 @@ export function BankKhataRegisterView() {
                 setEndDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="text-xs h-7.5 bg-background"
+              className="text-sm h-7.5 bg-background"
               title="End Date"
             />
           </div>
@@ -677,7 +677,7 @@ export function BankKhataRegisterView() {
                   setEndDate("");
                   setCurrentPage(1);
                 }}
-                className="h-7 text-[11px] px-2 text-rose-500 hover:bg-rose-500/10 cursor-pointer"
+                className="h-7 text-sm px-2 text-rose-500 hover:bg-rose-500/10 cursor-pointer"
               >
                 Clear
               </Button>

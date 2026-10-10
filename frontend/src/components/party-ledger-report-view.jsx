@@ -98,7 +98,7 @@ export function PartyLedgerReportView() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-xs">
+          <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-lg border border-border/40 text-sm">
             <button
               onClick={() => setPartyType("Customer")}
               className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
@@ -124,7 +124,7 @@ export function PartyLedgerReportView() {
           <select
             value={partyName}
             onChange={(e) => setPartyName(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             {partiesList.map((p) => (
               <option key={p} value={p}>
@@ -134,38 +134,38 @@ export function PartyLedgerReportView() {
           </select>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-background px-2.5 py-1 rounded-md border border-border">
+        <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground bg-background px-2.5 py-1 rounded-md border border-border">
             <CalendarIcon className="size-3.5" />
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-foreground outline-none text-xs"
+              className="bg-transparent text-foreground outline-none text-sm"
             />
             <span>to</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-foreground outline-none text-xs"
+              className="bg-transparent text-foreground outline-none text-sm"
             />
           </div>
 
           <Button
             size="sm"
             onClick={handleShareWhatsApp}
-            className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             Share on WhatsApp
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-xs cursor-pointer">
+          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-1.5 text-sm cursor-pointer">
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
             <span>Export Excel</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-xs cursor-pointer">
+          <Button variant="outline" size="sm" onClick={() => setIsPrintModalOpen(true)} className="gap-1.5 text-sm cursor-pointer">
             <PrinterIcon className="size-3.5" />
             <span>Print Statement</span>
           </Button>
@@ -174,39 +174,39 @@ export function PartyLedgerReportView() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Debits</span>
+          <span className="text-sm text-muted-foreground font-medium">Total Debits</span>
           <div className="text-xl font-bold font-mono text-emerald-500">
             Rs. {totalDebit.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Billed / Payments Paid</p>
+          <p className="text-sm text-muted-foreground">Billed / Payments Paid</p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Total Credits</span>
+          <span className="text-sm text-muted-foreground font-medium">Total Credits</span>
           <div className="text-xl font-bold font-mono text-amber-500">
             Rs. {totalCredit.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Payments Received / Purchases</p>
+          <p className="text-sm text-muted-foreground">Payments Received / Purchases</p>
         </div>
 
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-1">
-          <span className="text-xs text-muted-foreground font-medium">Closing Running Balance</span>
+          <span className="text-sm text-muted-foreground font-medium">Closing Running Balance</span>
           <div className="text-xl font-bold font-mono text-primary">
             Rs. {closingBalance.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-foreground">Current Net Balance Owed</p>
+          <p className="text-sm text-muted-foreground">Current Net Balance Owed</p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-border bg-muted/30 font-semibold text-xs text-foreground flex items-center justify-between">
+        <div className="p-4 border-b border-border bg-muted/30 font-semibold text-sm text-foreground flex items-center justify-between">
           <span>{partyName} — Detailed Khata Ledger Statement</span>
-          <span className="text-muted-foreground font-mono text-[11px]">{ledgerData.length} Total Ledger Entries</span>
+          <span className="text-muted-foreground font-mono text-sm">{ledgerData.length} Total Ledger Entries</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-3 ps-4">Date</th>
                 <th className="p-3">Particulars / Transaction Type</th>
@@ -233,7 +233,7 @@ export function PartyLedgerReportView() {
               ) : (
                 ledgerData.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((item, idx) => (
                   <tr key={item._id || idx} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-3 ps-4 text-muted-foreground text-[11px]">
+                    <td className="p-3 ps-4 text-muted-foreground text-sm">
                       {new Date(item.date).toLocaleDateString()}
                     </td>
                     <td className="p-3 font-semibold text-foreground">{item.type}</td>
@@ -247,7 +247,7 @@ export function PartyLedgerReportView() {
                       Rs. {item.runningBalance.toLocaleString()}
                     </td>
                     <td className="p-3 text-muted-foreground">{item.mode || "Cash"}</td>
-                    <td className="p-3 pe-4 text-muted-foreground text-[11px]">
+                    <td className="p-3 pe-4 text-muted-foreground text-sm">
                       {item.reference || item.notes || "-"}
                     </td>
                   </tr>

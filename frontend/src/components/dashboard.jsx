@@ -93,13 +93,13 @@ export function Dashboard() {
           <h1 className="text-lg font-semibold tracking-tight text-foreground leading-tight">
             Operational Dashboard
           </h1>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Rozana hisab · stock status · revenue
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center p-0.5 rounded-lg bg-muted/50 border border-border/60 text-xs">
+          <div className="flex items-center p-0.5 rounded-lg bg-muted/50 border border-border/60 text-sm">
             {PERIODS.map(({ key, label, icon: Icon, color }) => (
               <button
                 key={key}
@@ -121,7 +121,7 @@ export function Dashboard() {
             size="sm"
             onClick={() => loadDashboard(period, startDate, endDate)}
             disabled={loading}
-            className="h-7 px-2.5 text-xs gap-1 cursor-pointer shrink-0"
+            className="h-7 px-2.5 text-sm gap-1 cursor-pointer shrink-0"
           >
             <RotateCwIcon className={`size-3 ${loading ? "animate-spin text-primary" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
@@ -132,7 +132,7 @@ export function Dashboard() {
       {period === "custom" && (
         <form
           onSubmit={handleApplyCustomFilter}
-          className="px-3 py-2 rounded-lg border border-border/60 bg-muted/20 flex flex-wrap items-center gap-2 text-xs animate-in fade-in"
+          className="px-3 py-2 rounded-lg border border-border/60 bg-muted/20 flex flex-wrap items-center gap-2 text-sm animate-in fade-in"
         >
           <CalendarIcon className="size-3.5 text-primary" />
           <span className="font-medium text-foreground">Range:</span>
@@ -140,7 +140,7 @@ export function Dashboard() {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="text-xs h-7 bg-background w-32"
+            className="text-sm h-7 bg-background w-32"
             required
           />
           <span className="text-muted-foreground">→</span>
@@ -148,9 +148,9 @@ export function Dashboard() {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="text-xs h-7 bg-background w-32"
+            className="text-sm h-7 bg-background w-32"
           />
-          <Button type="submit" size="sm" className="h-7 text-xs px-3 cursor-pointer">
+          <Button type="submit" size="sm" className="h-7 text-sm px-3 cursor-pointer">
             Apply
           </Button>
         </form>
@@ -167,7 +167,7 @@ export function Dashboard() {
               className="rounded-xl border p-3.5 bg-card transition-all hover:border-border/70 hover:shadow-sm"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-tight">
                   {kpi.label}
                 </span>
                 <div className={`p-1.5 rounded-lg border ${card}`}>
@@ -177,7 +177,7 @@ export function Dashboard() {
               <p className={`text-xl font-extrabold tabular-nums tracking-tight ${fig}`}>
                 {kpi.value}
               </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{kpi.subtext}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{kpi.subtext}</p>
             </div>
           );
         })}

@@ -128,14 +128,14 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
             <h2 className="text-lg font-bold text-foreground">Record Expense Voucher</h2>
-            <p className="text-xs text-muted-foreground">Add operational business expense entry (Akhrajaat).</p>
+            <p className="text-sm text-muted-foreground">Add operational business expense entry (Akhrajaat).</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
             <XIcon className="size-4" />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-sm">
           <ValidatedInput
             label="Expense Title / Particulars"
             rule="name"
@@ -158,7 +158,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             onValidationChange={setAmountValid}
-            className="font-mono font-bold text-sm"
+            className="font-mono font-bold text-base"
           />
 
           <div className="space-y-1">
@@ -166,7 +166,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
             <select
               value={paymentMode}
               onChange={(e) => setPaymentMode(e.target.value)}
-              className="w-full h-9 rounded-xl border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-2xs cursor-pointer"
+              className="w-full h-9 rounded-xl border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary shadow-2xs cursor-pointer"
             >
               {PAYMENT_MODES.map((mode) => (
                 <option key={mode} value={mode}>
@@ -179,14 +179,14 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
           {isBankPayment && (
             <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 space-y-2.5 animate-in fade-in duration-150">
               <div className="space-y-1">
-                <label className="font-semibold text-[11px] text-foreground flex items-center gap-1.5">
+                <label className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                   <LandmarkIcon className="size-3.5 text-primary" />
                   <span>Paid From Bank Account *</span>
                 </label>
                 <select
                   value={selectedBankAccountId}
                   onChange={(e) => setSelectedBankAccountId(e.target.value)}
-                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2.5 text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
+                  className="w-full h-8.5 rounded-lg border border-input bg-background px-2.5 text-sm font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
                 >
                   {availableBankAccounts.map((acc) => (
                     <option key={acc.id} value={acc.id}>
@@ -197,7 +197,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-[10.5px] text-muted-foreground">
+                <label className="font-medium text-xs text-muted-foreground">
                   Cheque / Tx / Reference # (Optional)
                 </label>
                 <input
@@ -205,7 +205,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }) {
                   placeholder="e.g. CHQ-8021 or IBFT Ref #"
                   value={bankReferenceNo}
                   onChange={(e) => setBankReferenceNo(e.target.value)}
-                  className="w-full h-8 rounded-lg border border-input bg-background px-2.5 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
+                  className="w-full h-8 rounded-lg border border-input bg-background px-2.5 text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs"
                 />
               </div>
             </div>

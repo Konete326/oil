@@ -47,11 +47,11 @@ export function AuditTrailManager() {
               <ShieldCheckIcon className="size-5 text-primary" />
               <span>Activity Audit Trail</span>
             </h1>
-            <Badge variant="outline" className="text-[9px] bg-primary/10 border-primary/30 font-medium py-0">
+            <Badge variant="outline" className="text-xs bg-primary/10 border-primary/30 font-medium py-0">
               Auto-prunes after 30 Days
             </Badge>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Immutable audit logs tracking system logins, user permissions, transactions, and security actions.
           </p>
         </div>
@@ -60,7 +60,7 @@ export function AuditTrailManager() {
           variant="outline"
           size="sm"
           onClick={loadAuditLogs}
-          className="gap-1.5 cursor-pointer text-xs h-7.5 px-3 self-start sm:self-auto"
+          className="gap-1.5 cursor-pointer text-sm h-7.5 px-3 self-start sm:self-auto"
         >
           <RefreshCwIcon className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
           <span>Refresh Logs</span>
@@ -79,7 +79,7 @@ export function AuditTrailManager() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8 text-xs h-7.5 w-full bg-muted/30"
+              className="ps-8 text-sm h-7.5 w-full bg-muted/30"
             />
           </div>
 
@@ -90,7 +90,7 @@ export function AuditTrailManager() {
                 setSelectedModule(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full h-7.5 rounded-md border border-input bg-background px-2.5 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring font-medium"
+              className="w-full h-7.5 rounded-md border border-input bg-background px-2.5 text-sm text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring font-medium"
             >
               <option value="">All Modules</option>
               <option value="User Management">User Management</option>
@@ -106,8 +106,8 @@ export function AuditTrailManager() {
 
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-2.5 ps-3.5">Timestamp</th>
                 <th className="p-2.5">User & Role</th>
@@ -116,23 +116,23 @@ export function AuditTrailManager() {
                 <th className="p-2.5 pe-3.5">Activity Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60 text-xs">
+            <tbody className="divide-y divide-border/60 text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-muted-foreground text-xs">
+                  <td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">
                     Loading activity audit logs...
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-muted-foreground text-xs">
+                  <td colSpan={5} className="p-6 text-center text-muted-foreground text-sm">
                     No activity logs recorded in the past 30 days.
                   </td>
                 </tr>
               ) : (
                 logs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((log) => (
                   <tr key={log._id} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-2.5 ps-3.5 text-muted-foreground font-mono text-[10.5px]">
+                    <td className="p-2.5 ps-3.5 text-muted-foreground font-mono text-xs">
                       <div className="flex items-center gap-1">
                         <ClockIcon className="size-3 text-muted-foreground/70" />
                         <span>{new Date(log.timestamp || log.createdAt).toLocaleString()}</span>
@@ -142,16 +142,16 @@ export function AuditTrailManager() {
                       <div className="flex items-center gap-1.5">
                         <UserCheckIcon className="size-3 text-primary shrink-0" />
                         <span>{log.userName}</span>
-                        <span className="text-[9.5px] text-muted-foreground uppercase font-mono">({log.userRole})</span>
+                        <span className="text-xs text-muted-foreground uppercase font-mono">({log.userRole})</span>
                       </div>
                     </td>
-                    <td className="p-2.5 font-mono font-bold text-primary text-[11px]">{log.action}</td>
+                    <td className="p-2.5 font-mono font-bold text-primary text-sm">{log.action}</td>
                     <td className="p-2.5">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-muted text-muted-foreground border border-border">
+                      <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground border border-border">
                         {log.module}
                       </span>
                     </td>
-                    <td className="p-2.5 pe-3.5 text-muted-foreground font-mono text-[10.5px] max-w-xs truncate">
+                    <td className="p-2.5 pe-3.5 text-muted-foreground font-mono text-xs max-w-xs truncate">
                       {log.details || "-"}
                     </td>
                   </tr>

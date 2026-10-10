@@ -105,13 +105,13 @@ export function SettingsManager({ user }) {
             <Settings className="size-6 text-primary" />
             System Settings & Diagnostics
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Monitor real-time error logs, system diagnostics, offline sync engine, and administrative data maintenance.
           </p>
         </div>
 
         {successMsg && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-medium animate-in fade-in">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-sm font-medium animate-in fade-in">
             <CheckCircle2 className="size-4" />
             <span>{successMsg}</span>
           </div>
@@ -123,7 +123,7 @@ export function SettingsManager({ user }) {
           variant={activeTab === "language" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("language")}
-          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+          className="text-sm cursor-pointer h-8 gap-2 font-medium"
         >
           <Globe className="size-3.5" /> Language & Translation
         </Button>
@@ -131,7 +131,7 @@ export function SettingsManager({ user }) {
           variant={activeTab === "sync" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("sync")}
-          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+          className="text-sm cursor-pointer h-8 gap-2 font-medium"
         >
           <RefreshCw className="size-3.5" /> Offline Storage & Sync
         </Button>
@@ -139,7 +139,7 @@ export function SettingsManager({ user }) {
           variant={activeTab === "logs" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("logs")}
-          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+          className="text-sm cursor-pointer h-8 gap-2 font-medium"
         >
           <Terminal className="size-3.5" /> System Console Logs
         </Button>
@@ -147,7 +147,7 @@ export function SettingsManager({ user }) {
           variant={activeTab === "maintenance" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("maintenance")}
-          className="text-xs cursor-pointer h-8 gap-2 font-medium"
+          className="text-sm cursor-pointer h-8 gap-2 font-medium"
         >
           <Database className="size-3.5" /> Data Maintenance & Erase
         </Button>
@@ -166,7 +166,7 @@ export function SettingsManager({ user }) {
                   <HardDrive className="size-5 text-primary" />
                   IndexedDB Local Offline Engine & Sync Status
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Transactions created offline are automatically stored in browser storage and uploaded as soon as connection is re-established.
                 </p>
               </div>
@@ -175,7 +175,7 @@ export function SettingsManager({ user }) {
                 variant="default"
                 disabled={!isOnline || isSyncing}
                 onClick={() => setShowSyncConfirm(true)}
-                className="gap-2 text-xs cursor-pointer"
+                className="gap-2 text-sm cursor-pointer"
               >
                 <RefreshCw className={`size-3.5 ${isSyncing ? "animate-spin" : ""}`} />
                 <span>{isSyncing ? "Syncing..." : "Sync Cloud Data Now"}</span>
@@ -184,8 +184,8 @@ export function SettingsManager({ user }) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
               <div className="p-3 rounded-lg bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">Connection State</span>
-                <div className="flex items-center gap-2 font-bold text-sm">
+                <span className="text-sm text-muted-foreground font-medium">Connection State</span>
+                <div className="flex items-center gap-2 font-bold text-base">
                   {isOnline ? (
                     <span className="text-emerald-500 flex items-center gap-1.5">
                       <Wifi className="size-4" /> Online (Auto-Sync Ready)
@@ -199,13 +199,13 @@ export function SettingsManager({ user }) {
               </div>
 
               <div className="p-3 rounded-lg bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">Pending Unsynced Queue</span>
+                <span className="text-sm text-muted-foreground font-medium">Pending Unsynced Queue</span>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-foreground">
+                  <span className="font-bold text-base text-foreground">
                     {pendingCount} Item{pendingCount === 1 ? "" : "s"}
                   </span>
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold ${
+                    className={`text-xs px-2 py-0.5 rounded font-mono font-semibold ${
                       pendingCount > 0
                         ? "bg-amber-500/15 text-amber-600"
                         : "bg-emerald-500/15 text-emerald-600"
@@ -217,8 +217,8 @@ export function SettingsManager({ user }) {
               </div>
 
               <div className="p-3 rounded-lg bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">Last Sync Timestamp</span>
-                <div className="font-bold text-sm text-foreground">
+                <span className="text-sm text-muted-foreground font-medium">Last Sync Timestamp</span>
+                <div className="font-bold text-base text-foreground">
                   {lastSyncTime || "Continuous Auto-Sync"}
                 </div>
               </div>
@@ -226,7 +226,7 @@ export function SettingsManager({ user }) {
 
             {isSyncing && (
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold text-primary">
+                <div className="flex items-center justify-between text-sm font-semibold text-primary">
                   <span className="flex items-center gap-2">
                     <RefreshCw className="size-4 animate-spin" />
                     Synchronizing offline records to cloud database...

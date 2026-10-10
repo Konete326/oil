@@ -147,10 +147,10 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
               <LayersIcon className="size-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-foreground">
+              <h3 className="font-bold text-base text-foreground">
                 {initialData ? "Edit Oil Product" : "Add Lubricant / Oil Product"}
               </h3>
-              <p className="text-[10px] text-muted-foreground">Standardized Oil Inventory (All calculations in Liters)</p>
+              <p className="text-xs text-muted-foreground">Standardized Oil Inventory (All calculations in Liters)</p>
             </div>
           </div>
           <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer">
@@ -158,7 +158,7 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm overflow-y-auto flex-1">
 
           <div className="space-y-1">
             <ValidatedInput
@@ -172,12 +172,12 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
             />
           </div>
 
-          <div className="flex items-center justify-between px-3 py-1.5 rounded-lg border border-border/70 bg-muted/20 text-xs">
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-lg border border-border/70 bg-muted/20 text-sm">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
               <DropletIcon className="size-3.5 text-blue-500" />
               <span>Unit:</span>
             </div>
-            <span className="font-mono font-bold text-foreground text-[11px] bg-background px-2 py-0.5 rounded border border-border/60">
+            <span className="font-mono font-bold text-foreground text-sm bg-background px-2 py-0.5 rounded border border-border/60">
               Liters (L)
             </span>
           </div>
@@ -207,20 +207,20 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
             />
           </div>
 
-          <div className="flex items-center justify-between p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs">
+          <div className="flex items-center justify-between p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-sm">
             <div className="flex items-center gap-1.5">
               <BanknoteIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
               <span className="font-semibold text-emerald-700 dark:text-emerald-400">
                 Calculated Stock Value:
               </span>
             </div>
-            <span className="font-mono font-black text-sm text-emerald-700 dark:text-emerald-300">
+            <span className="font-mono font-black text-base text-emerald-700 dark:text-emerald-300">
               Rs {Math.round((Number(costPrice) || 0) * (Number(stockQuantity) || 0)).toLocaleString()}
             </span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card">
-            <div className="text-[11px] text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               Farokht rate (Selling Price) direct POS counter par sale ke waqt tay hogi.
             </div>
 
@@ -235,7 +235,7 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="h-7 text-[11px] gap-1 cursor-pointer"
+                    className="h-7 text-sm gap-1 cursor-pointer"
                   >
                     {uploading ? <Loader2Icon className="size-3 animate-spin" /> : <UploadCloudIcon className="size-3" />}
                     <span>Change</span>
@@ -250,7 +250,7 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
                       if (fileInputRef.current) fileInputRef.current.value = "";
                     }}
                     disabled={uploading}
-                    className="h-7 px-2 text-[11px] text-destructive hover:bg-destructive/10 cursor-pointer"
+                    className="h-7 px-2 text-sm text-destructive hover:bg-destructive/10 cursor-pointer"
                   >
                     Remove
                   </Button>
@@ -262,7 +262,7 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="h-7 text-[11px] gap-1 cursor-pointer border-dashed"
+                  className="h-7 text-sm gap-1 cursor-pointer border-dashed"
                 >
                   {uploading ? <Loader2Icon className="size-3 animate-spin" /> : <ImageIcon className="size-3 text-muted-foreground" />}
                   <span>Add Product Image (Optional)</span>
@@ -272,14 +272,14 @@ export function ProductModal({ isOpen, onClose, onSave, initialData, existingPro
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/80 shrink-0">
-            <Button type="button" variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
               Cancel
             </Button>
             <Button
               type="submit"
               size="sm"
               disabled={loading || uploading || !isFormValid}
-              className="cursor-pointer gap-2 font-medium bg-primary text-primary-foreground text-xs px-6"
+              className="cursor-pointer gap-2 font-medium bg-primary text-primary-foreground text-sm px-6"
             >
               {loading ? (
                 <>

@@ -93,7 +93,7 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
           {error && (
             <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive font-medium">
               {error}
@@ -125,7 +125,7 @@ export function MillModal({ isOpen, onClose, onSave, initialData }) {
               <select
                 value={zone}
                 onChange={(e) => setZone(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 {INDUSTRIAL_ZONES.map((z) => (
                   <option key={z} value={z}>{z}</option>

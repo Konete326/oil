@@ -37,10 +37,10 @@ export function AppSidebar() {
             <img src={softwareLogoImg} alt="Elite Dev Logo" className="size-full object-contain" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <span className="font-bold text-sm text-foreground tracking-tight block truncate">
+            <span className="font-bold text-base text-foreground tracking-tight block truncate">
               Al Khaleej Lubricants
             </span>
-            <span className="text-[10px] text-muted-foreground font-medium block truncate">
+            <span className="text-xs text-muted-foreground font-medium block truncate">
               by Elite Dev
             </span>
           </div>
@@ -74,10 +74,10 @@ export function AppSidebar() {
         </SidebarMenu>
 
         <div className="px-4 py-3 border-t border-border/40 transition-opacity group-data-[collapsible=icon]:hidden space-y-1">
-          <p className="text-[10px] font-bold text-foreground tracking-tight">
+          <p className="text-xs font-bold text-foreground tracking-tight">
             Al Khaleej Lubricants
           </p>
-          <p className="text-[9px] text-muted-foreground leading-tight">
+          <p className="text-xs text-muted-foreground leading-tight">
             © 2026 • Developed by <span className="font-semibold text-primary">Elite Dev</span>
           </p>
         </div>

@@ -147,12 +147,12 @@ export function ToastNotificationProvider({ children }) {
             <div className="mt-0.5">{getToastIcon(toast.type)}</div>
             <div className="flex-1 min-w-0 pr-1">
               <div className="flex items-center justify-between gap-1 mb-0.5">
-                <h4 className="font-semibold text-xs text-foreground truncate">
+                <h4 className="font-semibold text-sm text-foreground truncate">
                   {toast.title}
                 </h4>
-                <span className="text-[10px] text-muted-foreground shrink-0">Just now</span>
+                <span className="text-xs text-muted-foreground shrink-0">Just now</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2">{toast.message}</p>
+              <p className="text-sm text-muted-foreground leading-snug line-clamp-2">{toast.message}</p>
               <div className="flex items-center gap-3 mt-2">
                 <button
                   type="button"
@@ -160,7 +160,7 @@ export function ToastNotificationProvider({ children }) {
                     dismissToast(toast.id);
                     navigate("/notifications");
                   }}
-                  className="text-[11px] font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-sm font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Bell className="size-3" /> View details
                 </button>

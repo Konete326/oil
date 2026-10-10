@@ -117,7 +117,7 @@ export function NavUser({ user: currentUser, onLogout }) {
               </div>
               <div>
                 <span className="font-medium text-foreground">{savedUser.name}</span>
-                <div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
+                <div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-sm">
                   {savedUser.email}
                 </div>
               </div>
@@ -127,7 +127,7 @@ export function NavUser({ user: currentUser, onLogout }) {
           <DropdownMenuSeparator />
 
           <div className="px-3 py-2 bg-muted/40 rounded-lg mx-1 my-1 space-y-2 border border-border/40">
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-1.5 font-medium">
                 {isOnline ? (
                   <WifiIcon className="size-3.5 text-emerald-500" />
@@ -137,7 +137,7 @@ export function NavUser({ user: currentUser, onLogout }) {
                 <span>{isOnline ? "Online Mode" : "Offline Mode"}</span>
               </div>
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ${
+                className={`text-xs px-1.5 py-0.5 rounded font-mono font-semibold ${
                   pendingCount > 0
                     ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                     : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
@@ -147,7 +147,7 @@ export function NavUser({ user: currentUser, onLogout }) {
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-0.5 border-t border-border/30">
+            <div className="flex items-center justify-between text-sm text-muted-foreground pt-0.5 border-t border-border/30">
               <span className="flex items-center gap-1">
                 <GaugeIcon className="size-3 text-sky-500" />
                 {getSpeedLabel()}
@@ -156,7 +156,7 @@ export function NavUser({ user: currentUser, onLogout }) {
 
             {isSyncing && (
               <div className="space-y-1 pt-1">
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <RefreshCwIcon className="size-3 animate-spin text-primary" />
                     Throttled batch sync...
@@ -174,7 +174,7 @@ export function NavUser({ user: currentUser, onLogout }) {
 
             {!isSyncing && (
               <div className="flex items-center justify-between pt-0.5">
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   {lastSyncTime ? `Last: ${lastSyncTime}` : "Auto-sync active"}
                 </span>
                 <Button
@@ -182,7 +182,7 @@ export function NavUser({ user: currentUser, onLogout }) {
                   variant="outline"
                   disabled={!isOnline || isSyncing}
                   onClick={triggerManualSync}
-                  className="h-6 px-2 text-[10px] gap-1 cursor-pointer"
+                  className="h-6 px-2 text-xs gap-1 cursor-pointer"
                 >
                   <RefreshCwIcon className="size-2.5" />
                   <span>Sync Now</span>
@@ -212,7 +212,7 @@ export function NavUser({ user: currentUser, onLogout }) {
                 {isDark ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
                 <span>Theme</span>
               </div>
-              <span className="text-xs text-muted-foreground font-mono">
+              <span className="text-sm text-muted-foreground font-mono">
                 {isDark ? "Dark" : "Light"}
               </span>
             </DropdownMenuItem>

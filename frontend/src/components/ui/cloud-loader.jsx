@@ -139,7 +139,7 @@ export function CloudLoader({
       </div>
 
       {label && (
-        <span className="text-xs font-semibold text-muted-foreground tracking-wide animate-pulse">
+        <span className="text-sm font-semibold text-muted-foreground tracking-wide animate-pulse">
           {label}
         </span>
       )}

@@ -72,7 +72,7 @@ export function CustomerVendorSelect({
           onChange={handleInputChange}
           onFocus={handleFocus}
           placeholder={placeholder}
-          className="w-full h-9 rounded-md border border-input bg-background pl-9 pr-8 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+          className="w-full h-9 rounded-md border border-input bg-background pl-9 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {loading && (
           <div className="absolute right-2.5 top-2.5 size-3.5 border-2 border-primary border-t-transparent animate-spin rounded-full" />
@@ -80,7 +80,7 @@ export function CustomerVendorSelect({
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-border bg-card shadow-xl p-1 text-xs">
+        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-border bg-card shadow-xl p-1 text-sm">
           {options.length > 0 ? (
             options.map((item) => (
               <div
@@ -92,20 +92,20 @@ export function CustomerVendorSelect({
                   <div className="font-semibold text-foreground flex items-center gap-1.5">
                     <span>{item.name}</span>
                     {item.customerType && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/15 text-primary font-mono">
+                      <span className="text-xs px-1.5 py-0.2 rounded bg-primary/15 text-primary font-mono">
                         {item.customerType}
                       </span>
                     )}
                   </div>
                   {item.phone && (
-                    <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <div className="text-sm text-muted-foreground flex items-center gap-1">
                       <PhoneIcon className="size-3" />
                       <span>{item.phone}</span>
                     </div>
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] font-mono font-medium text-emerald-500">
+                  <div className="text-sm font-mono font-medium text-emerald-500">
                     Bal: Rs {(item.currentBalance || 0).toLocaleString()}
                   </div>
                 </div>

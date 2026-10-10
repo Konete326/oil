@@ -51,10 +51,10 @@ export function ProductDetailModal({
               <Package className="size-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base text-foreground">
+              <h3 className="font-bold text-base sm:text-base text-foreground">
                 Product & Stock Valuation
               </h3>
-              <p className="text-[10px] text-muted-foreground font-mono">
+              <p className="text-xs text-muted-foreground font-mono">
                 SKU: {product.sku || "N/A"}
               </p>
             </div>
@@ -64,7 +64,7 @@ export function ProductDetailModal({
           </Button>
         </div>
 
-        <div className="p-5 space-y-4 text-xs overflow-y-auto max-h-[80vh]">
+        <div className="p-5 space-y-4 text-sm overflow-y-auto max-h-[80vh]">
           <div className="flex items-center gap-3 p-3 rounded-xl border border-border/70 bg-muted/20">
             {product.imageUrl ? (
               <img
@@ -78,16 +78,16 @@ export function ProductDetailModal({
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h4 className="font-bold text-sm text-foreground leading-snug">
+              <h4 className="font-bold text-base text-foreground leading-snug">
                 {product.name}
               </h4>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className="text-[10px] font-mono bg-background px-2 py-0.5 rounded border border-border text-muted-foreground">
+                <span className="text-xs font-mono bg-background px-2 py-0.5 rounded border border-border text-muted-foreground">
                   Unit: Liters
                 </span>
                 <span
                   className={cn(
-                    "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono border",
+                    "px-2 py-0.5 rounded-full text-xs font-bold font-mono border",
                     isOutOfStock
                       ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30"
                       : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
@@ -101,68 +101,68 @@ export function ProductDetailModal({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide block">
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide block">
                 Stock Ki Kul Maliyat (Value)
               </span>
               <span className="text-lg sm:text-xl font-black font-mono text-emerald-700 dark:text-emerald-300 block mt-1">
                 Rs {productStockValue.toLocaleString()}
               </span>
-              <span className="text-[9.5px] text-muted-foreground block mt-0.5">
+              <span className="text-xs text-muted-foreground block mt-0.5">
                 {stockQty} L × Rs {costRate.toLocaleString()}
               </span>
             </div>
 
             <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-3">
-              <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide block">
+              <span className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide block">
                 Mojooda Stock (Volume)
               </span>
               <span className="text-lg sm:text-xl font-black font-mono text-blue-700 dark:text-blue-300 block mt-1">
                 {stockQty.toLocaleString()} L
               </span>
-              <span className="text-[9.5px] text-muted-foreground block mt-0.5">
+              <span className="text-xs text-muted-foreground block mt-0.5">
                 {formatStockVolume(stockQty)}
               </span>
             </div>
 
             <div className="rounded-xl border border-border/70 bg-card p-3">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide block">
                 Kharid Rate (Cost / L)
               </span>
               <span className="text-base sm:text-lg font-bold font-mono text-foreground block mt-1">
                 Rs {costRate.toLocaleString()}
               </span>
-              <span className="text-[9.5px] text-muted-foreground block mt-0.5">
+              <span className="text-xs text-muted-foreground block mt-0.5">
                 Per Liter purchase cost
               </span>
             </div>
 
             <div className="rounded-xl border border-border/70 bg-card p-3">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide block">
                 Godown Valuation Share
               </span>
               <span className="text-base sm:text-lg font-bold font-mono text-foreground block mt-1">
                 {valueShare}%
               </span>
-              <span className="text-[9.5px] text-muted-foreground block mt-0.5">
+              <span className="text-xs text-muted-foreground block mt-0.5">
                 Of total warehouse stock
               </span>
             </div>
           </div>
 
           <div className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-2">
-            <span className="text-[11px] font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+            <span className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
               <Banknote className="size-3.5 text-emerald-600" />
               <span>Full Godown Inventory Context</span>
             </span>
-            <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/60">
+            <div className="grid grid-cols-2 gap-2 text-sm pt-1 border-t border-border/60">
               <div>
-                <span className="text-[10px] text-muted-foreground block">Kul Godown Maliyat:</span>
+                <span className="text-xs text-muted-foreground block">Kul Godown Maliyat:</span>
                 <span className="font-mono font-bold text-foreground">
                   Rs {totalAllStockValue.toLocaleString()}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block">Kul Tail Volume:</span>
+                <span className="text-xs text-muted-foreground block">Kul Tail Volume:</span>
                 <span className="font-mono font-bold text-foreground">
                   {totalAllLiters.toLocaleString()} Liters
                 </span>
@@ -179,7 +179,7 @@ export function ProductDetailModal({
                   onClose();
                   onOpenRegister?.(product);
                 }}
-                className="h-8 gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                className="h-8 gap-1.5 text-sm text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
               >
                 <BookOpen className="size-3.5 text-emerald-600" />
                 <span>Stock Register</span>
@@ -191,7 +191,7 @@ export function ProductDetailModal({
                   onClose();
                   onOpenBarcode?.(product);
                 }}
-                className="h-8 gap-1.5 text-xs cursor-pointer"
+                className="h-8 gap-1.5 text-sm cursor-pointer"
               >
                 <ScanBarcode className="size-3.5 text-primary" />
                 <span>Barcode</span>
@@ -206,7 +206,7 @@ export function ProductDetailModal({
                   onClose();
                   onOpenEdit?.(product);
                 }}
-                className="h-8 gap-1.5 text-xs cursor-pointer"
+                className="h-8 gap-1.5 text-sm cursor-pointer"
               >
                 <Edit3 className="size-3.5 text-blue-500" />
                 <span>Edit</span>
@@ -214,7 +214,7 @@ export function ProductDetailModal({
               <Button
                 size="sm"
                 onClick={onClose}
-                className="h-8 text-xs cursor-pointer bg-primary text-primary-foreground"
+                className="h-8 text-sm cursor-pointer bg-primary text-primary-foreground"
               >
                 Done
               </Button>

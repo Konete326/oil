@@ -1,17 +1,14 @@
 import { useState } from "react";
-import { format } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { addLedgerEntryApi } from "@/lib/api";
+import { XIcon, PlusIcon, FileTextIcon, CreditCardIcon, HashIcon } from "lucide-react";
 
 export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, clientName, onSuccess }) {
   const [formData, setFormData] = useState({
-    date: format(new Date(), "yyyy-MM-dd"),
+    date: new Date().toISOString().split('T')[0],
     transactionType: "Debit",
     amount: "",
     paymentMode: "Cash",
@@ -39,7 +36,7 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
 
       await addLedgerEntryApi(payload);
       toast.success("Khata entry added successfully");
-      onSuccess?.();
+      if (onSuccess) onSuccess();
       onOpenChange(false);
     } catch (error) {
       toast.error(error.message || "Failed to add entry");
@@ -48,110 +45,131 @@ export function AddLedgerEntryModal({ open, onOpenChange, millId, customerId, cl
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add Khata Entry</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-0">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
+      <div className="relative bg-card border shadow-xl rounded-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center gap-2">
+            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <PlusIcon className="size-4" />
+            </div>
+            <h2 className="text-base font-bold text-foreground">Add Khata Entry</h2>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="size-8 rounded-full">
+            <XIcon className="size-4" />
+          </Button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+        <div className="p-4 sm:p-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <FileTextIcon className="size-3.5 text-muted-foreground" />
+                  Date
+                </label>
+                <Input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <FileTextIcon className="size-3.5 text-muted-foreground" />
+                  Type
+                </label>
+                <select
+                  value={formData.transactionType}
+                  onChange={(e) => setFormData({ ...formData, transactionType: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  required
+                >
+                  <option value="Debit">Debit</option>
+                  <option value="Credit">Credit</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <HashIcon className="size-3.5 text-muted-foreground" />
+                Amount (Rs)
+              </label>
               <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 required
+                placeholder="0.00"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="transactionType">Type</Label>
-              <Select
-                value={formData.transactionType}
-                onValueChange={(value) => setFormData({ ...formData, transactionType: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Debit">Debit</SelectItem>
-                  <SelectItem value="Credit">Credit</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">Amount (Rs)</Label>
-            <Input
-              id="amount"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              required
-              placeholder="0.00"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="paymentMode">Payment Mode</Label>
-              <Select
-                value={formData.paymentMode}
-                onValueChange={(value) => setFormData({ ...formData, paymentMode: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Bank">Bank</SelectItem>
-                  <SelectItem value="Cheque">Cheque</SelectItem>
-                  <SelectItem value="Online">Online</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <CreditCardIcon className="size-3.5 text-muted-foreground" />
+                  Payment Mode
+                </label>
+                <select
+                  value={formData.paymentMode}
+                  onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="Bank">Bank</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Online">Online</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <HashIcon className="size-3.5 text-muted-foreground" />
+                  Ref Number
+                </label>
+                <Input
+                  value={formData.referenceNumber}
+                  onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="referenceNumber">Ref Number</Label>
-              <Input
-                id="referenceNumber"
-                value={formData.referenceNumber}
-                onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
-                placeholder="Optional"
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <FileTextIcon className="size-3.5 text-muted-foreground" />
+                Notes / Details
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Enter details about this entry..."
+                rows={3}
+                className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes / Details</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Enter details about this entry..."
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding..." : "Add Entry"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Entry"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

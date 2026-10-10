@@ -459,11 +459,11 @@ export function CustomerTrialSheetModal({
                 <h2 className="text-base sm:text-lg font-bold text-foreground">
                   Customer Trial Balance Statement
                 </h2>
-                <Badge variant="outline" className="font-mono text-xs">
+                <Badge variant="outline" className="font-mono text-sm">
                   {custInfo.customerType || "Retail"}
                 </Badge>
                 <Badge
-                  className={`text-[10px] font-semibold ${
+                  className={`text-xs font-semibold ${
                     currentReceivable > 0
                       ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                       : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -474,7 +474,7 @@ export function CustomerTrialSheetModal({
                     : "Account Cleared (Nil)"}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Al-Khaleej Lubricants — Complete Customer Ledger &amp; Trial Balance Report
               </p>
             </div>
@@ -485,7 +485,7 @@ export function CustomerTrialSheetModal({
               variant="outline"
               size="sm"
               onClick={handleWhatsAppShare}
-              className="text-xs h-8 px-3 gap-1.5 border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+              className="text-sm h-8 px-3 gap-1.5 border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
               title="Share statement on WhatsApp"
             >
               <Share2Icon className="size-3.5 text-emerald-600" />
@@ -495,7 +495,7 @@ export function CustomerTrialSheetModal({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="text-xs h-8 px-3 gap-1.5 cursor-pointer"
+              className="text-sm h-8 px-3 gap-1.5 cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -504,7 +504,7 @@ export function CustomerTrialSheetModal({
               variant="default"
               size="sm"
               onClick={handlePrint}
-              className="text-xs h-8 px-3 gap-1.5 cursor-pointer"
+              className="text-sm h-8 px-3 gap-1.5 cursor-pointer"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4</span>
@@ -520,17 +520,17 @@ export function CustomerTrialSheetModal({
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-border/80 bg-muted/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="p-3.5 rounded-xl border border-border/80 bg-muted/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-foreground">{custInfo.name}</span>
+              <span className="font-bold text-base text-foreground">{custInfo.name}</span>
               {custInfo.folioNumber && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
                   Folio: {custInfo.folioNumber}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-3 text-muted-foreground flex-wrap font-mono text-[11px]">
+            <div className="flex items-center gap-3 text-muted-foreground flex-wrap font-mono text-sm">
               {custInfo.phone && (
                 <span className="flex items-center gap-1">
                   <PhoneIcon className="size-3 text-emerald-600" />
@@ -548,8 +548,8 @@ export function CustomerTrialSheetModal({
           </div>
 
           <div className="text-right sm:border-s sm:ps-4 border-border/80 shrink-0">
-            <span className="text-[10.5px] text-muted-foreground block">Statement Date</span>
-            <span className="font-mono text-xs font-semibold text-foreground">
+            <span className="text-xs text-muted-foreground block">Statement Date</span>
+            <span className="font-mono text-sm font-semibold text-foreground">
               {new Date().toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",
@@ -562,46 +562,46 @@ export function CustomerTrialSheetModal({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/25">
             <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 mb-1">
-              <span className="text-xs font-semibold">Total Purchases / Billed (Debit)</span>
+              <span className="text-sm font-semibold">Total Purchases / Billed (Debit)</span>
               <ArrowDownLeftIcon className="size-4" />
             </div>
             <div className="text-lg sm:text-xl font-bold font-mono text-foreground">
               Rs. {totalDebit.toLocaleString()}
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">
+            <div className="text-xs text-muted-foreground mt-0.5">
               All Invoices &amp; Dispatches
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
             <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-1">
-              <span className="text-xs font-semibold">Total Payments Received (Credit)</span>
+              <span className="text-sm font-semibold">Total Payments Received (Credit)</span>
               <ArrowUpRightIcon className="size-4" />
             </div>
             <div className="text-lg sm:text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
               Rs. {totalCredit.toLocaleString()}
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">
+            <div className="text-xs text-muted-foreground mt-0.5">
               Cash, Bank &amp; Cheque Collections
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
             <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 mb-1">
-              <span className="text-xs font-semibold">Net Balance Due (Payable)</span>
+              <span className="text-sm font-semibold">Net Balance Due (Payable)</span>
               <ScaleIcon className="size-4" />
             </div>
             <div className="text-lg sm:text-xl font-bold font-mono text-amber-500">
               Rs. {currentReceivable.toLocaleString()}
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">
+            <div className="text-xs text-muted-foreground mt-0.5">
               Current Outstanding Balance
             </div>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 no-print pt-1">
-          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/80 text-xs">
+          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/80 text-sm">
             <button
               onClick={() => setFilterType("all")}
               className={`px-3 py-1 rounded-md transition-colors cursor-pointer font-medium ${
@@ -641,15 +641,15 @@ export function CustomerTrialSheetModal({
               placeholder="Search reference, items, mode..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="text-xs h-8 pl-8 bg-muted/30"
+              className="text-sm h-8 pl-8 bg-muted/30"
             />
           </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
           <div className="overflow-x-auto max-h-[42vh] print:max-h-none">
-            <table className="w-full text-left text-xs print-table">
-              <thead className="bg-muted/60 sticky top-0 border-b border-border font-medium text-muted-foreground uppercase text-[10.5px] tracking-wider z-10">
+            <table className="w-full text-left text-sm print-table">
+              <thead className="bg-muted/60 sticky top-0 border-b border-border font-medium text-muted-foreground uppercase text-xs tracking-wider z-10">
                 <tr>
                   <th className="p-2.5 ps-3 w-10">#</th>
                   <th className="p-2.5">Date &amp; Time</th>
@@ -683,15 +683,15 @@ export function CustomerTrialSheetModal({
                 ) : (
                   filteredEntries.map((e, idx) => (
                     <tr key={e.id || idx} className="hover:bg-muted/20 transition-colors">
-                      <td className="p-2.5 ps-3 font-mono text-muted-foreground text-[11px]">
+                      <td className="p-2.5 ps-3 font-mono text-muted-foreground text-sm">
                         {idx + 1}
                       </td>
-                      <td className="p-2.5 font-mono text-muted-foreground text-[11px]">
+                      <td className="p-2.5 font-mono text-muted-foreground text-sm">
                         {new Date(e.date).toLocaleString()}
                       </td>
                       <td className="p-2.5 font-medium text-foreground">
                         <span
-                          className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                          className={`inline-block px-1.5 py-0.5 rounded text-xs font-semibold ${
                             e.type?.includes("Sale") || e.type?.includes("Challan") || e.type?.includes("Debit")
                               ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
                               : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
@@ -700,13 +700,13 @@ export function CustomerTrialSheetModal({
                           {e.type}
                         </span>
                       </td>
-                      <td className="p-2.5 font-mono font-bold text-foreground text-[11px]">
+                      <td className="p-2.5 font-mono font-bold text-foreground text-sm">
                         {e.reference}
                       </td>
-                      <td className="p-2.5 max-w-[220px] truncate text-[11px] text-muted-foreground">
+                      <td className="p-2.5 max-w-[220px] truncate text-sm text-muted-foreground">
                         {e.description}
                       </td>
-                      <td className="p-2.5 text-muted-foreground text-[11px]">{e.mode}</td>
+                      <td className="p-2.5 text-muted-foreground text-sm">{e.mode}</td>
                       <td className="p-2.5 text-right font-mono font-medium text-blue-600 dark:text-blue-400">
                         {e.debit > 0 ? `Rs. ${Number(e.debit).toLocaleString()}` : "—"}
                       </td>
@@ -720,7 +720,7 @@ export function CustomerTrialSheetModal({
                   ))
                 )}
 
-                <tr className="bg-muted/40 font-bold border-t-2 border-border text-xs">
+                <tr className="bg-muted/40 font-bold border-t-2 border-border text-sm">
                   <td colSpan={6} className="p-2.5 ps-3 uppercase tracking-wider text-foreground">
                     Trial Totals
                   </td>
@@ -739,7 +739,7 @@ export function CustomerTrialSheetModal({
           </div>
         </div>
 
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border/80">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground border-t border-border/80">
           <p>
             Showing {filteredEntries.length} transaction entries. All totals are calculated automatically.
           </p>
@@ -749,7 +749,7 @@ export function CustomerTrialSheetModal({
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="text-xs h-8 px-4 cursor-pointer"
+              className="text-sm h-8 px-4 cursor-pointer"
             >
               Close
             </Button>
@@ -757,7 +757,7 @@ export function CustomerTrialSheetModal({
               variant="default"
               size="sm"
               onClick={handlePrint}
-              className="text-xs h-8 px-4 gap-1.5 cursor-pointer"
+              className="text-sm h-8 px-4 gap-1.5 cursor-pointer"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print Trial Statement</span>

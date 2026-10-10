@@ -82,7 +82,7 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
               <TruckIcon className="size-5 text-primary" />
               Issue Delivery Challan & Gate Pass
             </h3>
-            <p className="text-xs text-muted-foreground">Record Tanker Dispatch & Mill Delivery Details</p>
+            <p className="text-sm text-muted-foreground">Record Tanker Dispatch & Mill Delivery Details</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
             <XIcon className="size-4" />
@@ -90,19 +90,19 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
         </div>
 
         {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-xs text-destructive">
+          <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="font-medium text-foreground">Target Textile Mill *</label>
               <select
                 value={millId}
                 onChange={(e) => setMillId(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs cursor-pointer"
                 required
               >
                 <option value="" disabled>Select Textile Mill</option>
@@ -119,7 +119,7 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
               <select
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs cursor-pointer"
                 required
               >
                 <option value="" disabled>Select Oil Product</option>
@@ -191,9 +191,9 @@ export function ChallanModal({ isOpen, onClose, onSave, mills, products }) {
             />
           </div>
 
-          <div className="p-3 bg-muted/40 rounded-lg border flex justify-between items-center text-xs">
+          <div className="p-3 bg-muted/40 rounded-lg border flex justify-between items-center text-sm">
             <span className="text-muted-foreground font-medium">Calculated Bill Amount:</span>
-            <span className="font-mono font-bold text-sm text-primary">Rs {Number(calculatedTotal).toLocaleString()}</span>
+            <span className="font-mono font-bold text-base text-primary">Rs {Number(calculatedTotal).toLocaleString()}</span>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t">

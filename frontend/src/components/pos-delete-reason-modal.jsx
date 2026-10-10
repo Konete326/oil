@@ -48,8 +48,8 @@ export function PosDeleteReasonModal({
               <AlertTriangleIcon className="size-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground">Delete Sale & Restore Stock</h3>
-              <p className="text-[11px] text-muted-foreground">Super Admin Audit Action</p>
+              <h3 className="text-base font-bold text-foreground">Delete Sale & Restore Stock</h3>
+              <p className="text-sm text-muted-foreground">Super Admin Audit Action</p>
             </div>
           </div>
           <button
@@ -63,28 +63,28 @@ export function PosDeleteReasonModal({
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
           <div className="rounded-xl border border-border/80 bg-background/60 p-3.5 space-y-2.5">
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground font-medium">Receipt #</span>
               <span className="font-mono font-bold text-primary">{sale.saleNumber}</span>
             </div>
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground font-medium">Customer</span>
               <span className="font-semibold text-foreground">{sale.customerName} {sale.customerPhone ? `(${sale.customerPhone})` : ""}</span>
             </div>
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground font-medium">Sale Value</span>
               <span className="font-mono font-bold text-destructive">Rs {grandTotal.toLocaleString()}</span>
             </div>
 
             {items.length > 0 && (
               <div className="pt-2 border-t border-border/60">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mb-1.5">
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-1.5">
                   <PackageCheckIcon className="size-3.5" />
                   <span>Items Automatically Restored to Inventory:</span>
                 </div>
                 <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
                   {items.map((itm, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-[11px] bg-muted/40 px-2 py-1 rounded">
+                    <div key={idx} className="flex items-center justify-between text-sm bg-muted/40 px-2 py-1 rounded">
                       <span className="truncate max-w-[240px] text-foreground font-medium">{itm.productName || "Product"}</span>
                       <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">+{itm.quantity} {itm.unitType || "Liters"}</span>
                     </div>
@@ -95,14 +95,14 @@ export function PosDeleteReasonModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <RotateCcwIcon className="size-3.5 text-primary" />
               <span>Reason for Cancellation / Deletion <span className="text-destructive">*</span></span>
             </label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+              className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
               required
             >
               <option value="Customer Returned Goods / Order Cancelled">Customer Returned Goods / Order Cancelled</option>
@@ -116,7 +116,7 @@ export function PosDeleteReasonModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <FileTextIcon className="size-3.5 text-muted-foreground" />
               <span>Audit Notes / Remarks (Optional)</span>
             </label>
@@ -125,7 +125,7 @@ export function PosDeleteReasonModal({
               placeholder="e.g. Return approved by manager, full cash refund issued."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
 
@@ -136,7 +136,7 @@ export function PosDeleteReasonModal({
               size="sm"
               onClick={onClose}
               disabled={loading}
-              className="cursor-pointer text-xs"
+              className="cursor-pointer text-sm"
             >
               Keep Sale
             </Button>
@@ -145,7 +145,7 @@ export function PosDeleteReasonModal({
               variant="destructive"
               size="sm"
               disabled={loading}
-              className="cursor-pointer text-xs font-semibold gap-1.5"
+              className="cursor-pointer text-sm font-semibold gap-1.5"
             >
               <RotateCcwIcon className="size-3.5" />
               <span>{loading ? "Restoring Stock & Deleting..." : "Confirm Delete & Restore Stock"}</span>

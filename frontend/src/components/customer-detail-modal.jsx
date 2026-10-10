@@ -159,15 +159,15 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 <UserIcon className="size-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-base sm:text-base text-foreground flex items-center gap-2 flex-wrap">
                   {customer ? customer.name : "Customer Analytics & Details"}
                   {customer?.customerType && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-mono">
+                    <span className="text-sm px-2 py-0.5 rounded-full bg-primary/15 text-primary font-mono">
                       {customer.customerType}
                     </span>
                   )}
                 </h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                <p className="text-sm sm:text-sm text-muted-foreground">
                   {customer?.phone ? `Phone: ${customer.phone}` : "No phone registered"} | City: {customer?.city || "N/A"}
                 </p>
               </div>
@@ -178,7 +178,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 onClick={() => setIsTrialSheetOpen(true)}
                 size="sm"
                 variant="outline"
-                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 hidden sm:inline-flex"
+                className="gap-1.5 cursor-pointer text-sm font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 hidden sm:inline-flex"
                 title="Customer Individual Trial Balance Sheet"
               >
                 <ScaleIcon className="size-3.5 text-amber-600" />
@@ -188,7 +188,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
               <Button
                 onClick={() => setIsAddingEntry(true)}
                 size="sm"
-                className="gap-1.5 cursor-pointer text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="gap-1.5 cursor-pointer text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
                 title="Add Purana Khata / New Entry"
               >
                 <PlusIcon className="size-3.5" />
@@ -199,7 +199,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 onClick={() => setIsDiaryOpen(true)}
                 size="sm"
                 variant="outline"
-                className="gap-1.5 cursor-pointer text-xs font-bold border-border hover:bg-muted"
+                className="gap-1.5 cursor-pointer text-sm font-bold border-border hover:bg-muted"
                 title="Customer Ledger Diary"
               >
                 <BookOpenIcon className="size-3.5 text-primary" />
@@ -209,7 +209,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
               <Button
                 onClick={() => setIsPrintOpen(true)}
                 size="sm"
-                className="gap-1.5 cursor-pointer text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="gap-1.5 cursor-pointer text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <PrinterIcon className="size-3.5" />
                 <span>Print A4 Statement</span>
@@ -225,12 +225,12 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
               <CloudLoader label="Loading customer analytics & historical records..." />
             </div>
           ) : error ? (
-            <div className="p-8 text-center text-destructive text-xs">{error}</div>
+            <div className="p-8 text-center text-destructive text-sm">{error}</div>
           ) : (
-            <div className="p-4 sm:p-6 space-y-5 text-xs overflow-y-auto flex-1">
+            <div className="p-4 sm:p-6 space-y-5 text-sm overflow-y-auto flex-1">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <ShoppingBagIcon className="size-3.5 text-primary" /> Total Purchases
                   </span>
                   <div className="text-base font-bold font-mono text-foreground">
@@ -239,7 +239,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <TrendingUpIcon className="size-3.5 text-blue-500" /> Total Orders
                   </span>
                   <div className="text-base font-bold font-mono text-foreground">
@@ -248,7 +248,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <CreditCardIcon className="size-3.5 text-emerald-500" /> Current Khata Balance
                   </span>
                   <div className="text-base font-bold font-mono text-emerald-500">
@@ -257,7 +257,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 </div>
 
                 <div className="rounded-xl border border-border bg-muted/20 p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <CheckCircle2Icon className="size-3.5 text-purple-500" /> Credit Limit
                   </span>
                   <div className="text-base font-bold font-mono text-foreground">
@@ -268,7 +268,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
 
               <div className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-xs text-foreground flex items-center gap-2">
+                  <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
                     <TrendingUpIcon className="size-4 text-primary" /> Sales Purchase Trend Chart
                   </h4>
                 </div>
@@ -288,7 +288,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-32 flex items-center justify-center text-muted-foreground text-xs">
+                  <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">
                     No graph data available yet for this customer.
                   </div>
                 )}
@@ -298,7 +298,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 <div className="flex border-b border-border gap-4">
                   <button
                     onClick={() => setActiveTab("sales")}
-                    className={`pb-2 text-xs font-semibold cursor-pointer border-b-2 transition-colors ${
+                    className={`pb-2 text-sm font-semibold cursor-pointer border-b-2 transition-colors ${
                       activeTab === "sales" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
                     }`}
                   >
@@ -306,7 +306,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                   </button>
                   <button
                     onClick={() => setActiveTab("ledger")}
-                    className={`pb-2 text-xs font-semibold cursor-pointer border-b-2 transition-colors ${
+                    className={`pb-2 text-sm font-semibold cursor-pointer border-b-2 transition-colors ${
                       activeTab === "ledger" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
                     }`}
                   >
@@ -316,7 +316,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
 
                 {activeTab === "sales" ? (
                   <div className="rounded-xl border border-border overflow-hidden">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full text-left text-sm">
                       <thead className="bg-muted/40 text-muted-foreground">
                         <tr>
                           <th className="p-3">Date</th>
@@ -340,7 +340,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                                 {sale.items?.map((i) => `${i.productName} (${i.quantity})`).join(", ")}
                               </td>
                               <td className="p-3">
-                                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">
+                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
                                   {sale.paymentMode}
                                 </span>
                               </td>
@@ -361,7 +361,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                   </div>
                 ) : (
                   <div className="rounded-xl border border-border overflow-hidden">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full text-left text-sm">
                       <thead className="bg-muted/40 text-muted-foreground">
                         <tr>
                           <th className="p-3">Date</th>
@@ -381,7 +381,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                               </td>
                               <td className="p-3 font-medium text-foreground">
                                 {entry.description}
-                                <div className="text-[10px] text-muted-foreground font-normal mt-0.5">{entry.type}</div>
+                                <div className="text-xs text-muted-foreground font-normal mt-0.5">{entry.type}</div>
                               </td>
                               <td className="p-3 text-right font-mono text-rose-500">
                                 {entry.debit > 0 ? `Rs ${entry.debit.toLocaleString()}` : "-"}

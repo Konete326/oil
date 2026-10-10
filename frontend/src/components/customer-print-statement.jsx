@@ -171,7 +171,7 @@ export function CustomerPrintStatement({
 
       <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-border bg-background shadow-2xl flex flex-col my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none print:my-0 print:p-0 print:block print:bg-white">
         <div className="w-full flex items-center justify-between border-b border-border p-3.5 print:hidden bg-card rounded-t-2xl shrink-0">
-          <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+          <div className="flex items-center gap-2 text-foreground font-semibold text-base">
             <CheckCircle2Icon className="size-4 text-emerald-500" />
             <span>Customer Khata & Ledger Statement (A4 Standard)</span>
           </div>
@@ -179,7 +179,7 @@ export function CustomerPrintStatement({
             <Button
               size="sm"
               onClick={handleShareWhatsApp}
-              className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 text-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <SendIcon className="size-3.5" />
               <span>Share WhatsApp</span>
@@ -188,7 +188,7 @@ export function CustomerPrintStatement({
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              className="gap-1.5 text-xs cursor-pointer"
+              className="gap-1.5 text-sm cursor-pointer"
             >
               <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
               <span>Export Excel</span>
@@ -196,7 +196,7 @@ export function CustomerPrintStatement({
             <Button
               size="sm"
               onClick={handlePrint}
-              className="gap-1.5 text-xs cursor-pointer bg-primary text-primary-foreground font-medium"
+              className="gap-1.5 text-sm cursor-pointer bg-primary text-primary-foreground font-medium"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print A4 Statement</span>
@@ -208,7 +208,7 @@ export function CustomerPrintStatement({
         </div>
 
         <div className="w-full flex-1 overflow-y-auto p-4 md:p-6 flex flex-col items-center print:overflow-visible print:p-0">
-          <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-xs print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate" dir="ltr" lang="en">
+          <div className="w-full max-w-[210mm] bg-white text-black p-6 md:p-8 rounded-xl shadow-lg border border-border/80 font-sans text-sm print:shadow-none print:border-none print:p-0 a4-sheet relative notranslate" dir="ltr" lang="en">
           <div className="flex justify-between items-start border-b border-black pb-4 mb-4">
             <div className="flex items-center gap-3">
               <OilDropLogo className="size-10" />
@@ -216,45 +216,45 @@ export function CustomerPrintStatement({
                 <h1 className="font-extrabold text-base tracking-tight text-black uppercase">
                   AL KHALEEJ LUBRICANTS
                 </h1>
-                <p className="text-[11px] text-gray-700 font-medium">
+                <p className="text-sm text-gray-700 font-medium">
                   Plot 44/B, Sector 15, Korangi Industrial Area, Karachi, Pakistan.
                 </p>
-                <p className="text-[10px] text-gray-600">
+                <p className="text-xs text-gray-600">
                   Tel: (021) 35091244
                 </p>
               </div>
             </div>
 
             <div className="text-right font-mono">
-              <span className="font-bold text-xs uppercase underline">
+              <span className="font-bold text-sm uppercase underline">
                 ACCOUNT STATEMENT
               </span>
-              <p className="text-[10px] text-gray-700 pt-1">
+              <p className="text-xs text-gray-700 pt-1">
                 Date: {new Date().toLocaleDateString("en-GB")}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pb-4 mb-2 text-xs">
+          <div className="grid grid-cols-2 gap-4 pb-4 mb-2 text-sm">
             <div className="space-y-0.5">
-              <p className="text-[10px] uppercase font-bold text-gray-700">Customer Details:</p>
-              <p className="font-bold text-sm text-black uppercase">{currentCustomer.name}</p>
-              <p className="text-[11px] text-gray-700">{currentCustomer.address || "Main Industrial Depot"}, {currentCustomer.city || "Karachi"}</p>
-              {currentCustomer.phone && <p className="text-[11px] text-gray-700">Phone: {currentCustomer.phone}</p>}
+              <p className="text-xs uppercase font-bold text-gray-700">Customer Details:</p>
+              <p className="font-bold text-base text-black uppercase">{currentCustomer.name}</p>
+              <p className="text-sm text-gray-700">{currentCustomer.address || "Main Industrial Depot"}, {currentCustomer.city || "Karachi"}</p>
+              {currentCustomer.phone && <p className="text-sm text-gray-700">Phone: {currentCustomer.phone}</p>}
             </div>
 
             <div className="space-y-0.5 text-right font-mono">
-              <p className="text-[10px] font-sans uppercase font-bold text-gray-700">Summary:</p>
-              <p className="text-[11px] text-gray-800">Opening Balance: <strong>Rs {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-              <p className="text-[11px] text-gray-800">Total Billed: <strong>Rs {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
-              <p className="text-[11px] text-gray-800">Total Paid: <strong>Rs {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-xs font-sans uppercase font-bold text-gray-700">Summary:</p>
+              <p className="text-sm text-gray-800">Opening Balance: <strong>Rs {openingBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-sm text-gray-800">Total Billed: <strong>Rs {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+              <p className="text-sm text-gray-800">Total Paid: <strong>Rs {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
             </div>
           </div>
 
           <div className="mb-6 overflow-hidden">
-            <table className="w-full text-left border-collapse text-[11px]">
+            <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-black font-bold uppercase text-[11px]">
+                <tr className="border-b border-black font-bold uppercase text-sm">
                   <th className="py-2 px-2 w-20 text-left">Date</th>
                   <th className="py-2 px-2 w-16 text-left">Invoice No</th>
                   <th className="py-2 px-2 w-24 text-left">Location</th>
@@ -285,7 +285,7 @@ export function CustomerPrintStatement({
                       {row.date.toLocaleDateString("en-GB")}
                     </td>
                     <td className="py-1.5 px-2 font-mono text-gray-800">{row.ref}</td>
-                    <td className="py-1.5 px-2 text-gray-800 uppercase font-semibold text-[10px]">{row.branch}</td>
+                    <td className="py-1.5 px-2 text-gray-800 uppercase font-semibold text-xs">{row.branch}</td>
                     <td className="py-1.5 px-2 text-black leading-tight">{row.narration}</td>
                     <td className="py-1.5 px-2 text-right font-mono text-gray-900">
                       {row.debit > 0
@@ -317,11 +317,11 @@ export function CustomerPrintStatement({
                 </tr>
 
                 <tr className="border-t border-black font-bold bg-gray-50">
-                  <td colSpan={4} className="py-2.5 px-2 text-left uppercase text-xs">
+                  <td colSpan={4} className="py-2.5 px-2 text-left uppercase text-sm">
                     Current Net Balance
                   </td>
                   <td colSpan={2}></td>
-                  <td className="py-2.5 px-2 text-right font-mono text-sm text-black">
+                  <td className="py-2.5 px-2 text-right font-mono text-base text-black">
                     {finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                 </tr>
@@ -329,11 +329,11 @@ export function CustomerPrintStatement({
             </table>
           </div>
 
-          <div className="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
-            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+          <div className="pt-8 grid grid-cols-2 gap-8 text-center text-sm">
+            <div className="border-t border-black pt-1 font-bold text-xs uppercase">
               Customer Signature
             </div>
-            <div className="border-t border-black pt-1 font-bold text-[10px] uppercase">
+            <div className="border-t border-black pt-1 font-bold text-xs uppercase">
               Authorized Signature
             </div>
           </div>
@@ -341,13 +341,13 @@ export function CustomerPrintStatement({
       </div>
 
       <div className="w-full flex items-center justify-end gap-2 p-3.5 border-t border-border bg-card rounded-b-2xl print:hidden shrink-0">
-        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+        <Button variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
           Close Preview
         </Button>
         <Button
           size="sm"
           onClick={handlePrint}
-          className="cursor-pointer text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+          className="cursor-pointer text-sm gap-1.5 bg-primary text-primary-foreground font-medium"
         >
           <PrinterIcon className="size-3.5" />
           <span>Print A4 Statement</span>

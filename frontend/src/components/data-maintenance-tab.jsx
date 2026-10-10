@@ -75,13 +75,13 @@ export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerErase
             <ShieldAlert className="size-4.5" />
           </div>
           <div>
-            <h3 className="text-xs sm:text-sm font-bold text-rose-500 flex items-center gap-1.5">
+            <h3 className="text-sm sm:text-base font-bold text-rose-500 flex items-center gap-1.5">
               <span>Full System Data Erasure</span>
-              <Badge variant="outline" className="text-[9px] text-rose-400 border-rose-500/30 py-0 font-normal">
+              <Badge variant="outline" className="text-xs text-rose-400 border-rose-500/30 py-0 font-normal">
                 Dangerous
               </Badge>
             </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               Permanently wipes all product inventory, sales, ledgers, and transactions. Admin user login is preserved.
             </p>
           </div>
@@ -92,23 +92,23 @@ export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerErase
             variant="destructive"
             size="sm"
             onClick={triggerEraseAllModal}
-            className="cursor-pointer gap-1.5 font-semibold text-xs h-7.5 px-3 shrink-0"
+            className="cursor-pointer gap-1.5 font-semibold text-sm h-7.5 px-3 shrink-0"
           >
             <Trash2 className="size-3.5" />
             <span>Erase All Data</span>
           </Button>
         ) : (
-          <Badge variant="outline" className="text-[10px] text-muted-foreground">Admin Only</Badge>
+          <Badge variant="outline" className="text-xs text-muted-foreground">Admin Only</Badge>
         )}
       </div>
 
       <Card className="border-border shadow-xs bg-card">
         <CardHeader className="p-3 sm:p-3.5 border-b border-border/40 space-y-0.5">
-          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+          <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-1.5">
             <Database className="size-4 text-primary" />
             <span>Selective Module Data Erasure</span>
           </CardTitle>
-          <CardDescription className="text-[10px]">
+          <CardDescription className="text-xs">
             Selectively purge specific module records from database with Super Admin password authentication.
           </CardDescription>
         </CardHeader>
@@ -125,8 +125,8 @@ export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerErase
                     {mod.icon}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-xs font-semibold text-foreground truncate">{mod.name}</h4>
-                    <p className="text-[10px] text-muted-foreground truncate">{mod.desc}</p>
+                    <h4 className="text-sm font-semibold text-foreground truncate">{mod.name}</h4>
+                    <p className="text-xs text-muted-foreground truncate">{mod.desc}</p>
                   </div>
                 </div>
 
@@ -135,7 +135,7 @@ export function DataMaintenanceTab({ isAdmin, triggerEraseAllModal, triggerErase
                     variant="outline"
                     size="sm"
                     onClick={() => triggerEraseModuleModal(mod.key, mod.name)}
-                    className="w-full h-6.5 text-[11px] cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive transition-colors gap-1"
+                    className="w-full h-6.5 text-sm cursor-pointer text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive transition-colors gap-1"
                   >
                     <Trash2 className="size-3" />
                     <span>{mod.btnLabel}</span>

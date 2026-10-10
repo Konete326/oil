@@ -20,7 +20,7 @@ export function NotFoundPage() {
 
         <div className="space-y-2">
           <h1 className="text-lg font-bold text-foreground">Page Not Found</h1>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             The URL path you entered does not match any valid route in the portal. Please check the address or return to the main dashboard.
           </p>
         </div>
@@ -30,7 +30,7 @@ export function NotFoundPage() {
             variant="outline"
             size="sm"
             onClick={() => navigate(-1)}
-            className="gap-1.5 text-xs cursor-pointer"
+            className="gap-1.5 text-sm cursor-pointer"
           >
             <ArrowLeftIcon className="size-3.5" />
             <span>Go Back</span>
@@ -38,7 +38,7 @@ export function NotFoundPage() {
           <Button
             size="sm"
             onClick={() => navigate("/")}
-            className="gap-1.5 text-xs cursor-pointer"
+            className="gap-1.5 text-sm cursor-pointer"
           >
             <HomeIcon className="size-3.5" />
             <span>Return to Dashboard</span>

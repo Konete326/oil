@@ -28,16 +28,16 @@ export function BankKhataTable({
 
   if (entries.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground text-xs space-y-2 shadow-xs">
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground text-sm space-y-2 shadow-xs">
         <LandmarkIcon className="size-8 mx-auto text-muted-foreground/40 mb-1" />
-        <p className="font-semibold text-foreground text-sm">No Entries Found</p>
-        <p className="text-[11px] text-muted-foreground">
+        <p className="font-semibold text-foreground text-base">No Entries Found</p>
+        <p className="text-sm text-muted-foreground">
           No transactions found for {selectedBank} or current filters.
         </p>
         <Button
           size="sm"
           onClick={onOpenDeposit}
-          className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white mt-1 cursor-pointer"
+          className="h-7 text-sm bg-emerald-600 hover:bg-emerald-700 text-white mt-1 cursor-pointer"
         >
           + Record First Deposit
         </Button>
@@ -48,8 +48,8 @@ export function BankKhataTable({
   return (
     <div className="rounded-xl border border-border bg-card shadow-xs overflow-hidden flex flex-col">
       <div className="overflow-x-auto max-h-[calc(100vh-320px)] min-h-[280px]">
-        <table className="w-full text-left text-xs">
-          <thead className="sticky top-0 bg-muted/90 backdrop-blur-xs z-10 border-b border-border text-[10.5px] font-semibold text-muted-foreground uppercase tracking-wider">
+        <table className="w-full text-left text-sm">
+          <thead className="sticky top-0 bg-muted/90 backdrop-blur-xs z-10 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             <tr>
               <th className="p-2.5 ps-3.5 w-[90px]">Date</th>
               <th className="p-2.5">Description & Particulars</th>
@@ -71,30 +71,30 @@ export function BankKhataTable({
                   row.naam > 0 && "bg-rose-500/[0.02]"
                 )}
               >
-                <td className="p-2.5 ps-3.5 font-mono text-muted-foreground text-[11px] whitespace-nowrap">
+                <td className="p-2.5 ps-3.5 font-mono text-muted-foreground text-sm whitespace-nowrap">
                   {new Date(row.date).toLocaleDateString()}
                 </td>
 
                 <td className="p-2.5">
                   <div>
-                    <span className="font-semibold text-foreground text-xs">{row.tafseel}</span>
-                    <p className="text-[10px] text-muted-foreground line-clamp-1">{row.reason}</p>
+                    <span className="font-semibold text-foreground text-sm">{row.tafseel}</span>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{row.reason}</p>
                     {row.notes && (
-                      <p className="text-[9.5px] text-muted-foreground/80 italic line-clamp-1">
+                      <p className="text-xs text-muted-foreground/80 italic line-clamp-1">
                         {row.notes}
                       </p>
                     )}
                   </div>
                 </td>
 
-                <td className="p-2.5 font-mono font-medium text-muted-foreground text-[11px]">
+                <td className="p-2.5 font-mono font-medium text-muted-foreground text-sm">
                   {row.folio}
                 </td>
 
                 <td className="p-2.5 text-center">
                   <span
                     className={cn(
-                      "inline-block rounded px-1.5 py-0.5 text-[9px] font-semibold border",
+                      "inline-block rounded px-1.5 py-0.5 text-xs font-semibold border",
                       row.sourceType === "POS Sale"
                         ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
                         : row.sourceType === "Stock Purchase"
@@ -108,15 +108,15 @@ export function BankKhataTable({
                   </span>
                 </td>
 
-                <td className="p-2.5 text-right font-mono font-bold text-rose-600 dark:text-rose-400 text-xs">
+                <td className="p-2.5 text-right font-mono font-bold text-rose-600 dark:text-rose-400 text-sm">
                   {row.naam > 0 ? `Rs ${row.naam.toLocaleString()}` : "-"}
                 </td>
 
-                <td className="p-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                <td className="p-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                   {row.jama > 0 ? `Rs ${row.jama.toLocaleString()}` : "-"}
                 </td>
 
-                <td className="p-2.5 text-right font-mono font-bold text-foreground text-xs">
+                <td className="p-2.5 text-right font-mono font-bold text-foreground text-sm">
                   Rs {row.balance.toLocaleString()}
                 </td>
 
@@ -132,7 +132,7 @@ export function BankKhataTable({
                       <Trash2Icon className="size-3" />
                     </Button>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground/40">-</span>
+                    <span className="text-xs text-muted-foreground/40">-</span>
                   )}
                 </td>
               </tr>

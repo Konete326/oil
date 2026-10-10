@@ -104,7 +104,7 @@ export function LedgerManager() {
             <BookOpenIcon className="size-6 text-primary" />
             Client Ledger & Khata (Accounts Receivable)
           </h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Debit/Credit ledger statements, payment receipts, and aging reports per customer account.
           </p>
         </div>
@@ -113,7 +113,7 @@ export function LedgerManager() {
           <Button
             variant="outline"
             onClick={() => setIsPrintModalOpen(true)}
-            className="gap-2 shadow-xs cursor-pointer text-xs"
+            className="gap-2 shadow-xs cursor-pointer text-sm"
           >
             <PrinterIcon className="size-4 text-primary" />
             Print A4 Statement
@@ -121,7 +121,7 @@ export function LedgerManager() {
 
           <Button
             onClick={() => setIsPaymentModalOpen(true)}
-            className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
+            className="gap-2 shadow-xs cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
           >
             <PlusIcon className="size-4" />
             Record Payment Receipt
@@ -135,7 +135,7 @@ export function LedgerManager() {
             <WalletIcon className="size-5" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Total Outstanding Receivable</p>
+            <p className="text-sm text-muted-foreground font-medium">Total Outstanding Receivable</p>
             <p className="text-xl font-bold text-foreground">Rs {totalOutstanding.toLocaleString()}</p>
           </div>
         </div>
@@ -145,7 +145,7 @@ export function LedgerManager() {
             <AlertTriangleIcon className="size-5" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">90+ Days Overdue Balance</p>
+            <p className="text-sm text-muted-foreground font-medium">90+ Days Overdue Balance</p>
             <p className="text-xl font-bold text-destructive">Rs {totalOverdue.toLocaleString()}</p>
           </div>
         </div>
@@ -155,7 +155,7 @@ export function LedgerManager() {
             <ClockIcon className="size-5" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">Total Payment Entries</p>
+            <p className="text-sm text-muted-foreground font-medium">Total Payment Entries</p>
             <p className="text-xl font-bold text-foreground">{entries.length}</p>
           </div>
         </div>
@@ -165,13 +165,13 @@ export function LedgerManager() {
         <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg w-fit">
           <button
             onClick={() => { setActiveTab("ledger"); setCurrentPage(1); }}
-            className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer ${activeTab === "ledger" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer ${activeTab === "ledger" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
           >
             Ledger Entries ({entries.length})
           </button>
           <button
             onClick={() => { setActiveTab("aging"); setCurrentPage(1); }}
-            className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer ${activeTab === "aging" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer ${activeTab === "aging" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
           >
             Aging Report ({agingData.length} Clients)
           </button>
@@ -186,7 +186,7 @@ export function LedgerManager() {
                   placeholder="Search client name, reference no, or transaction type..."
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                  className="ps-8 text-xs h-9 w-full"
+                  className="ps-8 text-sm h-9 w-full"
                 />
               </div>
 
@@ -194,7 +194,7 @@ export function LedgerManager() {
                 <select
                   value={selectedMill}
                   onChange={(e) => { setSelectedMill(e.target.value); setCurrentPage(1); }}
-                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring"
                 >
                   <option value="">All Customer Accounts</option>
                   {mills.map((m) => (
@@ -220,8 +220,8 @@ export function LedgerManager() {
           filteredEntries.length === 0 ? (
             <div className="p-8 text-center space-y-2">
               <BookOpenIcon className="size-8 mx-auto text-muted-foreground/60" />
-              <p className="text-sm font-medium text-foreground">No Ledger Entries Found</p>
-              <p className="text-xs text-muted-foreground">Click "Record Payment Receipt" to add the first transaction.</p>
+              <p className="text-base font-medium text-foreground">No Ledger Entries Found</p>
+              <p className="text-sm text-muted-foreground">Click "Record Payment Receipt" to add the first transaction.</p>
             </div>
           ) : (
             <>
@@ -241,8 +241,8 @@ export function LedgerManager() {
                   {paginatedEntries.map((entry) => {
                     const isCredit = entry.transactionType.includes("Credit");
                     return (
-                      <TableRow key={entry._id} className="hover:bg-muted/20 text-xs">
-                        <TableCell className="font-mono text-muted-foreground text-[11px]">
+                      <TableRow key={entry._id} className="hover:bg-muted/20 text-sm">
+                        <TableCell className="font-mono text-muted-foreground text-sm">
                           {new Date(entry.createdAt).toLocaleString()}
                         </TableCell>
                         <TableCell className="font-semibold text-foreground">
@@ -263,7 +263,7 @@ export function LedgerManager() {
                         <TableCell className="text-muted-foreground">
                           {entry.paymentMode}
                         </TableCell>
-                        <TableCell className="font-mono text-[11px] text-muted-foreground">
+                        <TableCell className="font-mono text-sm text-muted-foreground">
                           {entry.referenceNumber || "—"}
                         </TableCell>
                         <TableCell className={`text-right font-mono font-bold ${isCredit ? "text-emerald-500" : "text-amber-500"}`}>
@@ -290,8 +290,8 @@ export function LedgerManager() {
         ) : agingData.length === 0 ? (
           <div className="p-8 text-center space-y-2">
             <ClockIcon className="size-8 mx-auto text-muted-foreground/60" />
-            <p className="text-sm font-medium text-foreground">No Clients in Aging Report</p>
-            <p className="text-xs text-muted-foreground">Register customer accounts to view aging analysis.</p>
+            <p className="text-base font-medium text-foreground">No Clients in Aging Report</p>
+            <p className="text-sm text-muted-foreground">Register customer accounts to view aging analysis.</p>
           </div>
         ) : (
           <Table>
@@ -308,21 +308,21 @@ export function LedgerManager() {
             </TableHeader>
             <TableBody>
               {agingData.map((a) => (
-                <TableRow key={a._id} className="hover:bg-muted/20 text-xs">
+                <TableRow key={a._id} className="hover:bg-muted/20 text-sm">
                   <TableCell className="font-mono font-bold text-primary">
                     {a.code}
                   </TableCell>
                   <TableCell className="font-semibold text-foreground">
                     {a.name}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-[11px]">
+                  <TableCell className="text-muted-foreground text-sm">
                     {a.zone}
                   </TableCell>
                   <TableCell className="text-center font-mono">
                     {a.daysOverdue} Days
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold border ${AGING_COLORS[a.category] || "bg-muted text-muted-foreground"}`}>
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold border ${AGING_COLORS[a.category] || "bg-muted text-muted-foreground"}`}>
                       {a.category}
                     </span>
                   </TableCell>

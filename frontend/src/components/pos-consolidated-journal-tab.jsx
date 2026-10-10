@@ -30,14 +30,14 @@ export function PosConsolidatedJournalTab({
     <Table>
       <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
         <TableRow className="border-b border-border/80">
-          <TableHead className="w-[110px] text-xs h-9">Date & Time</TableHead>
-          <TableHead className="text-xs h-9">Ref / Voucher</TableHead>
-          <TableHead className="text-xs h-9">Particulars / Party</TableHead>
-          <TableHead className="text-center text-xs h-9">Category / Type</TableHead>
-          <TableHead className="text-xs h-9">Payment Mode</TableHead>
-          <TableHead className="text-right text-xs h-9">Inflow (+)</TableHead>
-          <TableHead className="text-right text-xs h-9">Outflow (-)</TableHead>
-          <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
+          <TableHead className="w-[110px] text-sm h-9">Date & Time</TableHead>
+          <TableHead className="text-sm h-9">Ref / Voucher</TableHead>
+          <TableHead className="text-sm h-9">Particulars / Party</TableHead>
+          <TableHead className="text-center text-sm h-9">Category / Type</TableHead>
+          <TableHead className="text-sm h-9">Payment Mode</TableHead>
+          <TableHead className="text-right text-sm h-9">Inflow (+)</TableHead>
+          <TableHead className="text-right text-sm h-9">Outflow (-)</TableHead>
+          <TableHead className="text-right text-sm h-9 pe-4">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -51,13 +51,13 @@ export function PosConsolidatedJournalTab({
             <TableRow
               key={`${item.type}-${item.id}`}
               className={cn(
-                "hover:bg-muted/20 text-xs border-b border-border/40 transition-colors",
+                "hover:bg-muted/20 text-sm border-b border-border/40 transition-colors",
                 isUdhar && "bg-amber-500/5 dark:bg-amber-500/10",
                 isExpense && "bg-rose-500/5 dark:bg-rose-500/10",
                 isStaffAdvance && "bg-purple-500/5 dark:bg-purple-500/10"
               )}
             >
-              <TableCell className="font-mono text-muted-foreground text-[11px] py-2.5">
+              <TableCell className="font-mono text-muted-foreground text-sm py-2.5">
                 {new Date(item.date).toLocaleString()}
               </TableCell>
 
@@ -81,7 +81,7 @@ export function PosConsolidatedJournalTab({
                 <div>
                   <p className="truncate max-w-[220px]">{item.description}</p>
                   {item.notes && (
-                    <p className="text-[10px] text-muted-foreground font-normal italic truncate max-w-[220px]">
+                    <p className="text-xs text-muted-foreground font-normal italic truncate max-w-[220px]">
                       {item.notes}
                     </p>
                   )}
@@ -91,7 +91,7 @@ export function PosConsolidatedJournalTab({
               <TableCell className="text-center py-2.5">
                 <span
                   className={cn(
-                    "inline-block rounded px-2 py-0.5 text-[10px] font-semibold border",
+                    "inline-block rounded px-2 py-0.5 text-xs font-semibold border",
                     isSale && "bg-emerald-500/15 border-emerald-500/35 text-emerald-600 dark:text-emerald-400",
                     isUdhar && "bg-amber-500/15 border-amber-500/35 text-amber-600 dark:text-amber-400",
                     isExpense && "bg-rose-500/15 border-rose-500/35 text-rose-600 dark:text-rose-400",
@@ -102,11 +102,11 @@ export function PosConsolidatedJournalTab({
                 </span>
               </TableCell>
 
-              <TableCell className="text-muted-foreground py-2.5 text-[11px]">
+              <TableCell className="text-muted-foreground py-2.5 text-sm">
                 {item.paymentMode || "Cash"}
               </TableCell>
 
-              <TableCell className="text-right font-mono font-bold py-2.5 text-xs">
+              <TableCell className="text-right font-mono font-bold py-2.5 text-sm">
                 {isSale || isUdhar ? (
                   <span
                     className={cn(
@@ -120,7 +120,7 @@ export function PosConsolidatedJournalTab({
                 )}
               </TableCell>
 
-              <TableCell className="text-right font-mono font-bold py-2.5 text-xs">
+              <TableCell className="text-right font-mono font-bold py-2.5 text-sm">
                 {isExpense || isStaffAdvance ? (
                   <span
                     className={cn(
@@ -140,7 +140,7 @@ export function PosConsolidatedJournalTab({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 gap-1 text-[11px] px-2.5 cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                      className="h-7 gap-1 text-sm px-2.5 cursor-pointer hover:border-primary hover:text-primary transition-colors"
                       onClick={() => onViewReceipt?.(item.raw)}
                     >
                       <ReceiptIcon className="size-3 text-primary" />
@@ -152,7 +152,7 @@ export function PosConsolidatedJournalTab({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 gap-1 text-[11px] px-2.5 cursor-pointer border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
+                      className="h-7 gap-1 text-sm px-2.5 cursor-pointer border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
                       onClick={() => onUpdateSale(item.raw)}
                       title="Udhar Wasool Karein / Update Karein"
                     >
@@ -165,7 +165,7 @@ export function PosConsolidatedJournalTab({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 gap-1 text-[11px] px-2.5 cursor-pointer border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                      className="h-7 gap-1 text-sm px-2.5 cursor-pointer border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
                       onClick={() => onViewDiary ? onViewDiary(item.raw.customerName) : onViewKhata?.(item.raw.customerName)}
                       title={`${item.raw.customerName} Ledger Details`}
                     >

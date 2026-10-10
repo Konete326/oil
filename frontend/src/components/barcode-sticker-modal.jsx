@@ -93,14 +93,14 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
       <div className="w-full border-b border-neutral-200 pb-1">
         <div className="flex items-center justify-center gap-1 mb-0.5">
           <OilDropLogo className="size-3" />
-          <p className="text-[9px] font-black tracking-wider uppercase text-neutral-800">
+          <p className="text-xs font-black tracking-wider uppercase text-neutral-800">
             AL KHALEEJ LUBRICANTS
           </p>
         </div>
-        <h4 className="text-[11px] font-bold leading-tight truncate text-black">
+        <h4 className="text-sm font-bold leading-tight truncate text-black">
           {product.name}
         </h4>
-        <p className="text-[9px] font-medium text-neutral-600 truncate">
+        <p className="text-xs font-medium text-neutral-600 truncate">
           {product.packagingType || "Standard"}
         </p>
       </div>
@@ -124,14 +124,14 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
             ) : null
           )}
         </svg>
-        <span className="font-mono font-bold text-[10px] tracking-widest text-black mt-0.5">
+        <span className="font-mono font-bold text-xs tracking-widest text-black mt-0.5">
           *{skuCode}*
         </span>
       </div>
 
-      <div className="w-full border-t border-neutral-200 pt-1 flex items-center justify-between text-[10px]">
+      <div className="w-full border-t border-neutral-200 pt-1 flex items-center justify-between text-xs">
         <span className="font-semibold text-neutral-600">RETAIL PRICE:</span>
-        <span className="font-mono font-black text-xs text-black">
+        <span className="font-mono font-black text-sm text-black">
           Rs {product.sellingPrice?.toLocaleString()}
         </span>
       </div>
@@ -147,10 +147,10 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
               <ScanBarcodeIcon className="size-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-foreground">
+              <h3 className="font-bold text-base text-foreground">
                 Product SKU Barcode Sticker
               </h3>
-              <p className="text-[10px] text-muted-foreground">Printable physical label for cans, bottles & drums</p>
+              <p className="text-xs text-muted-foreground">Printable physical label for cans, bottles & drums</p>
             </div>
           </div>
           <Button variant="ghost" size="icon-sm" onClick={onClose} className="cursor-pointer">
@@ -158,7 +158,7 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
           </Button>
         </div>
 
-        <div className="p-4 sm:p-5 space-y-3.5 text-xs overflow-hidden flex flex-col flex-1">
+        <div className="p-4 sm:p-5 space-y-3.5 text-sm overflow-hidden flex flex-col flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border border-border bg-muted/20 shrink-0 print:hidden">
             <div className="space-y-1">
               <label className="font-semibold text-foreground">Number of Stickers</label>
@@ -168,7 +168,7 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
                 max="500"
                 value={copies}
                 onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs font-mono font-bold shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm font-mono font-bold shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
 
@@ -177,7 +177,7 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
               <select
                 value={paperLayout}
                 onChange={(e) => setPaperLayout(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="single">Single Label (50mm × 30mm Thermal)</option>
                 <option value="a4sheet">A4 Sticker Sheet (Multi-Grid)</option>
@@ -192,14 +192,14 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
                   <LayersIcon className="size-3.5 text-primary" />
                   Live Sticker Preview
                 </span>
-                <span className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full bg-muted border border-border font-mono">
+                <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-muted border border-border font-mono">
                   {copies} label{copies > 1 ? "s" : ""} to print
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleCopySku}
-                className="text-[11px] text-primary hover:underline flex items-center gap-1 cursor-pointer font-mono"
+                className="text-sm text-primary hover:underline flex items-center gap-1 cursor-pointer font-mono"
               >
                 {copied ? <CheckIcon className="size-3 text-emerald-500" /> : <CopyIcon className="size-3" />}
                 <span>{skuCode}</span>
@@ -251,14 +251,14 @@ export function BarcodeStickerModal({ isOpen, onClose, product }) {
           `}</style>
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border shrink-0 print:hidden">
-            <Button type="button" variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-xs">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} className="cursor-pointer text-sm">
               Close
             </Button>
             <Button
               type="button"
               size="sm"
               onClick={handlePrint}
-              className="cursor-pointer gap-2 font-medium bg-primary text-primary-foreground text-xs px-5 shadow-xs"
+              className="cursor-pointer gap-2 font-medium bg-primary text-primary-foreground text-sm px-5 shadow-xs"
             >
               <PrinterIcon className="size-3.5" />
               <span>Print {copies} Sticker{copies > 1 ? "s" : ""}</span>

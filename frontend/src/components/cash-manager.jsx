@@ -339,7 +339,7 @@ export function CashManager() {
             <Building2Icon className="size-5 text-primary" />
             <span>Bank &amp; Cash Register</span>
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Real-time unified register for shop drawer cash and bank transactions.
           </p>
         </div>
@@ -351,7 +351,7 @@ export function CashManager() {
               setModalInitialType("Paid");
               setIsModalOpen(true);
             }}
-            className="h-8 bg-rose-600 hover:bg-rose-700 text-white gap-1.5 cursor-pointer text-xs font-semibold px-3 shadow-2xs"
+            className="h-8 bg-rose-600 hover:bg-rose-700 text-white gap-1.5 cursor-pointer text-sm font-semibold px-3 shadow-2xs"
           >
             <ArrowUpRightIcon className="size-3.5" />
             <span>Cash Out (Paid)</span>
@@ -363,7 +363,7 @@ export function CashManager() {
               setModalInitialType("Received");
               setIsModalOpen(true);
             }}
-            className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer text-xs font-semibold px-3 shadow-2xs"
+            className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 cursor-pointer text-sm font-semibold px-3 shadow-2xs"
           >
             <ArrowDownLeftIcon className="size-3.5" />
             <span>Cash In (Received)</span>
@@ -376,7 +376,7 @@ export function CashManager() {
               setEditingAccount(null);
               setIsAccountModalOpen(true);
             }}
-            className="h-8 text-xs px-2.5 gap-1.5 cursor-pointer"
+            className="h-8 text-sm px-2.5 gap-1.5 cursor-pointer"
           >
             <PlusIcon className="size-3.5 text-primary" />
             <span>Add Bank</span>
@@ -386,7 +386,7 @@ export function CashManager() {
             variant="outline"
             size="sm"
             onClick={handleExportExcel}
-            className="h-8 text-xs px-2.5 gap-1.5 cursor-pointer"
+            className="h-8 text-sm px-2.5 gap-1.5 cursor-pointer"
           >
             <FileSpreadsheetIcon className="size-3.5 text-emerald-500" />
             <span className="hidden sm:inline">Excel</span>
@@ -396,7 +396,7 @@ export function CashManager() {
             variant="outline"
             size="sm"
             onClick={() => setIsPrintModalOpen(true)}
-            className="h-8 text-xs px-2.5 gap-1.5 cursor-pointer"
+            className="h-8 text-sm px-2.5 gap-1.5 cursor-pointer"
           >
             <PrinterIcon className="size-3.5 text-primary" />
             <span>Print</span>
@@ -409,7 +409,7 @@ export function CashManager() {
           <button
             onClick={() => setSearchParams({})}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5",
+              "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5",
               activeMainTab === "register"
                 ? "bg-primary text-primary-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -421,7 +421,7 @@ export function CashManager() {
           <button
             onClick={() => setSearchParams({ tab: "party" })}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5",
+              "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5",
               activeMainTab === "party"
                 ? "bg-primary text-primary-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -440,7 +440,7 @@ export function CashManager() {
                 setCurrentPage(1);
               }}
               className={cn(
-                "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap",
+                "px-2.5 py-1 rounded-md text-sm font-semibold transition-all cursor-pointer whitespace-nowrap",
                 selectedAccountId === "all"
                   ? "bg-muted text-foreground font-bold border border-border"
                   : "text-muted-foreground hover:text-foreground"
@@ -456,7 +456,7 @@ export function CashManager() {
                   setCurrentPage(1);
                 }}
                 className={cn(
-                  "px-2.5 py-1 rounded-md text-[11px] transition-all cursor-pointer whitespace-nowrap",
+                  "px-2.5 py-1 rounded-md text-sm transition-all cursor-pointer whitespace-nowrap",
                   selectedAccountId === acc.id
                     ? "bg-muted text-foreground font-bold border border-border"
                     : "text-muted-foreground hover:text-foreground"
@@ -476,11 +476,11 @@ export function CashManager() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3 flex items-center justify-between shadow-2xs">
               <div>
-                <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Total Cash In (Received)</p>
+                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Total Cash In (Received)</p>
                 <p className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
                   Rs. {totalReceived.toLocaleString()}
                 </p>
-                <p className="text-[10px] text-muted-foreground">All Inflows &amp; Collections</p>
+                <p className="text-xs text-muted-foreground">All Inflows &amp; Collections</p>
               </div>
               <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                 <ArrowDownLeftIcon className="size-4" />
@@ -489,11 +489,11 @@ export function CashManager() {
 
             <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 p-3 flex items-center justify-between shadow-2xs">
               <div>
-                <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">Total Cash Out (Paid)</p>
+                <p className="text-sm font-medium text-rose-600 dark:text-rose-400">Total Cash Out (Paid)</p>
                 <p className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400">
                   Rs. {totalPaid.toLocaleString()}
                 </p>
-                <p className="text-[10px] text-muted-foreground">All Payments &amp; Expenses</p>
+                <p className="text-xs text-muted-foreground">All Payments &amp; Expenses</p>
               </div>
               <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                 <ArrowUpRightIcon className="size-4" />
@@ -502,11 +502,11 @@ export function CashManager() {
 
             <div className="rounded-xl border border-border bg-card p-3 flex items-center justify-between shadow-2xs">
               <div>
-                <p className="text-[11px] font-medium text-muted-foreground">Net Available Balance</p>
+                <p className="text-sm font-medium text-muted-foreground">Net Available Balance</p>
                 <p className={cn("text-xl font-bold font-mono", netBalance >= 0 ? "text-primary" : "text-destructive")}>
                   Rs. {netBalance.toLocaleString()}
                 </p>
-                <p className="text-[10px] text-muted-foreground">Inflow minus Outflow</p>
+                <p className="text-xs text-muted-foreground">Inflow minus Outflow</p>
               </div>
               <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
                 <WalletIcon className="size-4" />
@@ -515,7 +515,7 @@ export function CashManager() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-0.5">
-            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/80 text-xs">
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/80 text-sm">
               <button
                 onClick={() => setEntryTypeFilter("all")}
                 className={cn(
@@ -553,24 +553,24 @@ export function CashManager() {
                   placeholder="Search party, ref, account, notes..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="ps-8 text-xs h-8 bg-muted/30"
+                  className="ps-8 text-sm h-8 bg-muted/30"
                 />
               </div>
 
-              <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 px-2 h-8 rounded-lg border border-border">
+              <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground bg-muted/30 px-2 h-8 rounded-lg border border-border">
                 <CalendarIcon className="size-3.5 shrink-0" />
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent text-foreground outline-none text-xs w-28"
+                  className="bg-transparent text-foreground outline-none text-sm w-28"
                 />
                 <span>-</span>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent text-foreground outline-none text-xs w-28"
+                  className="bg-transparent text-foreground outline-none text-sm w-28"
                 />
               </div>
             </div>
@@ -578,8 +578,8 @@ export function CashManager() {
 
           <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border font-semibold text-muted-foreground uppercase text-[10.5px] tracking-wider">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted/50 border-b border-border font-semibold text-muted-foreground uppercase text-xs tracking-wider">
                   <tr>
                     <th className="p-2.5 ps-3.5 w-10">#</th>
                     <th className="p-2.5">Date &amp; Time</th>
@@ -612,21 +612,21 @@ export function CashManager() {
                       .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
                       .map((tx, idx) => (
                         <tr key={tx.id || idx} className="hover:bg-muted/20 transition-colors">
-                          <td className="p-2.5 ps-3.5 text-muted-foreground text-[11px] font-mono">
+                          <td className="p-2.5 ps-3.5 text-muted-foreground text-sm font-mono">
                             {(currentPage - 1) * PAGE_SIZE + idx + 1}
                           </td>
-                          <td className="p-2.5 text-muted-foreground text-[11px] font-mono whitespace-nowrap">
+                          <td className="p-2.5 text-muted-foreground text-sm font-mono whitespace-nowrap">
                             {new Date(tx.date).toLocaleDateString()}
                           </td>
                           <td className="p-2.5 font-medium text-foreground">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-muted/70 text-foreground border border-border">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-muted/70 text-foreground border border-border">
                               {tx.account}
                             </span>
                           </td>
                           <td className="p-2.5">
                             <span
                               className={cn(
-                                "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border",
+                                "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border",
                                 tx.type === "Paid"
                                   ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
                                   : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
@@ -642,9 +642,9 @@ export function CashManager() {
                           </td>
                           <td className="p-2.5 font-semibold text-foreground max-w-[220px] truncate">
                             <div>{tx.party}</div>
-                            {tx.notes && <div className="text-[10px] font-normal text-muted-foreground truncate">{tx.notes}</div>}
+                            {tx.notes && <div className="text-xs font-normal text-muted-foreground truncate">{tx.notes}</div>}
                           </td>
-                          <td className="p-2.5 text-muted-foreground font-mono text-[11px]">
+                          <td className="p-2.5 text-muted-foreground font-mono text-sm">
                             {tx.reference || "-"}
                           </td>
                           <td className="p-2.5 text-right font-mono font-medium text-rose-600 dark:text-rose-400">

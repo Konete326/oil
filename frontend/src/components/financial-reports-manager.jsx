@@ -42,7 +42,7 @@ export function FinancialReportsManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Financial & Platform Reports</h1>
-          <p className="text-xs text-muted-foreground">Consolidated Master Platform Report, Trial Balance Sheet, Profit & Loss, and Party Khatas.</p>
+          <p className="text-sm text-muted-foreground">Consolidated Master Platform Report, Trial Balance Sheet, Profit & Loss, and Party Khatas.</p>
         </div>
       </div>
 
@@ -57,7 +57,7 @@ export function FinancialReportsManager() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              className={`py-2.5 px-4 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"

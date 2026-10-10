@@ -19,7 +19,7 @@ export function NotificationFilter({
           variant={activeTab === "all" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("all")}
-          className="text-[11px] cursor-pointer h-7 px-2.5 rounded-md font-medium"
+          className="text-sm cursor-pointer h-7 px-2.5 rounded-md font-medium"
         >
           All ({totalCount})
         </Button>
@@ -27,7 +27,7 @@ export function NotificationFilter({
           variant={activeTab === "stock" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("stock")}
-          className="text-[11px] cursor-pointer h-7 px-2.5 gap-1.5 rounded-md font-medium"
+          className="text-sm cursor-pointer h-7 px-2.5 gap-1.5 rounded-md font-medium"
         >
           <PackageX className="size-3 text-amber-500" />
           <span>Stock ({stockCount})</span>
@@ -36,7 +36,7 @@ export function NotificationFilter({
           variant={activeTab === "login" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("login")}
-          className="text-[11px] cursor-pointer h-7 px-2.5 gap-1.5 rounded-md font-medium"
+          className="text-sm cursor-pointer h-7 px-2.5 gap-1.5 rounded-md font-medium"
         >
           <UserCheck className="size-3 text-emerald-500" />
           <span>Logins ({loginCount})</span>
@@ -45,7 +45,7 @@ export function NotificationFilter({
           variant={activeTab === "unread" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("unread")}
-          className="text-[11px] cursor-pointer h-7 px-2.5 gap-1.5 rounded-md font-medium"
+          className="text-sm cursor-pointer h-7 px-2.5 gap-1.5 rounded-md font-medium"
         >
           <Bell className="size-3 text-primary" />
           <span>Unread ({unreadCount})</span>
@@ -59,7 +59,7 @@ export function NotificationFilter({
           placeholder="Search notifications..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-7.5 text-xs h-7 bg-background/80 border-border/50 focus-visible:ring-1"
+          className="pl-7.5 text-sm h-7 bg-background/80 border-border/50 focus-visible:ring-1"
         />
       </div>
     </div>

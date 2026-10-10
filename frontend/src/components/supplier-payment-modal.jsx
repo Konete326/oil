@@ -60,20 +60,20 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div>
             <h2 className="text-lg font-bold text-foreground">Record Supplier Payment</h2>
-            <p className="text-xs text-muted-foreground">Record payment paid to vendor / refinery (Khareedari Khata).</p>
+            <p className="text-sm text-muted-foreground">Record payment paid to vendor / refinery (Khareedari Khata).</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="cursor-pointer">
             <XIcon className="size-4" />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <div className="space-y-1">
             <label className="font-medium text-foreground">Select Supplier / Refinery (Optional)</label>
             <select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
-              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="">-- Choose Supplier (Default: First Available) --</option>
               {suppliers.map((sup) => (
@@ -85,7 +85,7 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
           </div>
 
           {selectedSupplierObj && (
-            <div className="p-3 bg-muted/40 rounded-lg border border-border space-y-1 text-xs">
+            <div className="p-3 bg-muted/40 rounded-lg border border-border space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Current Balance Owed:</span>
                 <span className="font-mono font-bold text-amber-500">Rs. {selectedSupplierObj.currentBalance?.toLocaleString() || 0}</span>
@@ -110,7 +110,7 @@ export function SupplierPaymentModal({ isOpen, onClose, suppliers = [], onSucces
             <select
               value={paymentMode}
               onChange={(e) => setPaymentMode(e.target.value)}
-              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               {PAYMENT_MODES.map((mode) => (
                 <option key={mode} value={mode}>

@@ -75,18 +75,18 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
         </div>
 
         {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-xs text-destructive">
+          <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <div className="space-y-1">
             <label className="font-medium text-foreground">Select Customer Account (Optional)</label>
             <select
               value={millId}
               onChange={(e) => setMillId(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs cursor-pointer"
             >
               <option value="">Walk-in Khata / General Customer...</option>
               {mills.map((m) => (
@@ -127,7 +127,7 @@ export function PaymentModal({ isOpen, onClose, onSave, mills }) {
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs cursor-pointer"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs cursor-pointer"
               >
                 <option value="Bank Transfer">Bank Transfer / Pay Order</option>
                 <option value="Cheque">Cheque</option>

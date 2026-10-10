@@ -121,7 +121,7 @@ export function TextileManager() {
             <FactoryIcon className="size-5 text-primary" />
             <span>Textile Mills B2B Sales & Gate Pass</span>
           </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Manage Textile Mill contracts, Tanker Dip dispatch, Gate Passes, and Delivery Challans.
           </p>
         </div>
@@ -129,7 +129,7 @@ export function TextileManager() {
         <div className="flex flex-wrap items-center gap-1.5">
           <Button
             onClick={() => setIsChallanModalOpen(true)}
-            className="gap-1 shadow-xs cursor-pointer text-xs h-7.5 px-3"
+            className="gap-1 shadow-xs cursor-pointer text-sm h-7.5 px-3"
           >
             <TruckIcon className="size-3.5" />
             <span>Issue Challan</span>
@@ -140,7 +140,7 @@ export function TextileManager() {
               setEditingMill(null);
               setIsMillModalOpen(true);
             }}
-            className="gap-1 shadow-xs cursor-pointer text-xs h-7.5 px-3"
+            className="gap-1 shadow-xs cursor-pointer text-sm h-7.5 px-3"
           >
             <PlusIcon className="size-3.5" />
             <span>Add Mill</span>
@@ -154,7 +154,7 @@ export function TextileManager() {
             <FactoryIcon className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] text-muted-foreground font-medium truncate">Registered Textile Mills</p>
+            <p className="text-xs text-muted-foreground font-medium truncate">Registered Textile Mills</p>
             <p className="text-base sm:text-lg font-bold text-foreground">{mills.length}</p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export function TextileManager() {
             <TruckIcon className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] text-muted-foreground font-medium truncate">Dispatched Volume</p>
+            <p className="text-xs text-muted-foreground font-medium truncate">Dispatched Volume</p>
             <p className="text-base sm:text-lg font-bold text-foreground font-mono">{totalDispatchedLiters.toLocaleString()} L</p>
           </div>
         </div>
@@ -174,7 +174,7 @@ export function TextileManager() {
             <WalletIcon className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] text-muted-foreground font-medium truncate">Mills Outstanding Balance</p>
+            <p className="text-xs text-muted-foreground font-medium truncate">Mills Outstanding Balance</p>
             <p className="text-base sm:text-lg font-bold text-foreground font-mono">Rs {totalMillOutstanding.toLocaleString()}</p>
           </div>
         </div>
@@ -187,7 +187,7 @@ export function TextileManager() {
               setActiveTab("challans");
               setCurrentPage(1);
             }}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "challans" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -198,7 +198,7 @@ export function TextileManager() {
               setActiveTab("mills");
               setCurrentPage(1);
             }}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors cursor-pointer ${
               activeTab === "mills" ? "bg-background text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -215,7 +215,7 @@ export function TextileManager() {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            className="ps-8 text-xs h-7.5 bg-muted/30 focus:bg-background"
+            className="ps-8 text-sm h-7.5 bg-muted/30 focus:bg-background"
           />
         </div>
       </div>
@@ -231,8 +231,8 @@ export function TextileManager() {
           filteredChallans.length === 0 ? (
             <div className="p-8 text-center space-y-2">
               <TruckIcon className="size-7 mx-auto text-muted-foreground/60" />
-              <p className="text-xs font-semibold text-foreground">No Delivery Challans Found</p>
-              <p className="text-[11px] text-muted-foreground">Click "Issue Challan" to dispatch your first tanker load.</p>
+              <p className="text-sm font-semibold text-foreground">No Delivery Challans Found</p>
+              <p className="text-sm text-muted-foreground">Click "Issue Challan" to dispatch your first tanker load.</p>
             </div>
           ) : (
             <>
@@ -240,18 +240,18 @@ export function TextileManager() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                     <TableRow className="border-b border-border/80">
-                      <TableHead className="w-[110px] text-xs h-9">Challan No.</TableHead>
-                      <TableHead className="text-xs h-9">Textile Mill Consignee</TableHead>
-                      <TableHead className="text-xs h-9">Product / Grade</TableHead>
-                      <TableHead className="text-xs h-9">Tanker & Driver</TableHead>
-                      <TableHead className="text-center text-xs h-9">Dip & Volume</TableHead>
-                      <TableHead className="text-right text-xs h-9">Total Amount</TableHead>
-                      <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
+                      <TableHead className="w-[110px] text-sm h-9">Challan No.</TableHead>
+                      <TableHead className="text-sm h-9">Textile Mill Consignee</TableHead>
+                      <TableHead className="text-sm h-9">Product / Grade</TableHead>
+                      <TableHead className="text-sm h-9">Tanker & Driver</TableHead>
+                      <TableHead className="text-center text-sm h-9">Dip & Volume</TableHead>
+                      <TableHead className="text-right text-sm h-9">Total Amount</TableHead>
+                      <TableHead className="text-right text-sm h-9 pe-4">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedChallans.map((c) => (
-                      <TableRow key={c._id} className="hover:bg-muted/20 text-xs border-b border-border/40">
+                      <TableRow key={c._id} className="hover:bg-muted/20 text-sm border-b border-border/40">
                         <TableCell className="font-mono font-bold text-primary py-2">
                           {c.challanNumber}
                         </TableCell>
@@ -263,24 +263,24 @@ export function TextileManager() {
                         </TableCell>
                         <TableCell className="py-2">
                           <div className="space-y-0.5">
-                            <p className="font-mono font-medium text-foreground text-[11px]">{c.vehicleNumber}</p>
-                            <p className="text-[10px] text-muted-foreground">{c.driverName}</p>
+                            <p className="font-mono font-medium text-foreground text-sm">{c.vehicleNumber}</p>
+                            <p className="text-xs text-muted-foreground">{c.driverName}</p>
                           </div>
                         </TableCell>
                         <TableCell className="text-center py-2">
                           <div className="space-y-0.5 font-mono">
-                            <span className="font-bold text-foreground text-xs">{c.quantityLiters?.toLocaleString()} L</span>
-                            <p className="text-[9.5px] text-muted-foreground">Dip: {c.dipMeasurementInches}"</p>
+                            <span className="font-bold text-foreground text-sm">{c.quantityLiters?.toLocaleString()} L</span>
+                            <p className="text-xs text-muted-foreground">Dip: {c.dipMeasurementInches}"</p>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-foreground py-2 text-xs">
+                        <TableCell className="text-right font-mono font-bold text-foreground py-2 text-sm">
                           Rs {c.totalAmount?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-right py-2 pe-4">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-6.5 gap-1 text-[11px] px-2 cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                            className="h-6.5 gap-1 text-sm px-2 cursor-pointer hover:border-primary hover:text-primary transition-colors"
                             onClick={() => setPrintingChallan(c)}
                           >
                             <PrinterIcon className="size-3 text-primary" />
@@ -305,8 +305,8 @@ export function TextileManager() {
         ) : filteredMills.length === 0 ? (
           <div className="p-8 text-center space-y-2">
             <FactoryIcon className="size-7 mx-auto text-muted-foreground/60" />
-            <p className="text-xs font-semibold text-foreground">No Textile Mills Registered</p>
-            <p className="text-[11px] text-muted-foreground">Click "Add Mill" to add a new B2B client profile.</p>
+            <p className="text-sm font-semibold text-foreground">No Textile Mills Registered</p>
+            <p className="text-sm text-muted-foreground">Click "Add Mill" to add a new B2B client profile.</p>
           </div>
         ) : (
           <>
@@ -314,36 +314,36 @@ export function TextileManager() {
               <Table>
                 <TableHeader className="sticky top-0 bg-muted/90 backdrop-blur-sm z-10 shadow-xs">
                   <TableRow className="border-b border-border/80">
-                    <TableHead className="w-[100px] text-xs h-9">Code</TableHead>
-                    <TableHead className="text-xs h-9">Mill Name & Zone</TableHead>
-                    <TableHead className="text-xs h-9">Contact Representative</TableHead>
-                    <TableHead className="text-right text-xs h-9">Contract Rate</TableHead>
-                    <TableHead className="text-right text-xs h-9">Outstanding Balance</TableHead>
-                    <TableHead className="text-right text-xs h-9 pe-4">Actions</TableHead>
+                    <TableHead className="w-[100px] text-sm h-9">Code</TableHead>
+                    <TableHead className="text-sm h-9">Mill Name & Zone</TableHead>
+                    <TableHead className="text-sm h-9">Contact Representative</TableHead>
+                    <TableHead className="text-right text-sm h-9">Contract Rate</TableHead>
+                    <TableHead className="text-right text-sm h-9">Outstanding Balance</TableHead>
+                    <TableHead className="text-right text-sm h-9 pe-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedMills.map((m) => (
-                    <TableRow key={m._id} className="hover:bg-muted/20 text-xs border-b border-border/40">
+                    <TableRow key={m._id} className="hover:bg-muted/20 text-sm border-b border-border/40">
                       <TableCell className="font-mono font-bold text-primary py-2">
                         {m.code}
                       </TableCell>
                       <TableCell className="py-2">
                         <div className="space-y-0.5">
-                          <p className="font-semibold text-xs text-foreground">{m.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{m.zone}</p>
+                          <p className="font-semibold text-sm text-foreground">{m.name}</p>
+                          <p className="text-xs text-muted-foreground">{m.zone}</p>
                         </div>
                       </TableCell>
                       <TableCell className="py-2">
                         <div className="space-y-0.5">
-                          <p className="font-medium text-foreground text-[11px]">{m.contactPerson}</p>
-                          <p className="text-[10px] text-muted-foreground">{m.phone}</p>
+                          <p className="font-medium text-foreground text-sm">{m.contactPerson}</p>
+                          <p className="text-xs text-muted-foreground">{m.phone}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 py-2 text-xs">
+                      <TableCell className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 py-2 text-sm">
                         Rs {m.contractRatePerLiter} / L
                       </TableCell>
-                      <TableCell className="text-right font-mono font-bold text-amber-600 dark:text-amber-400 py-2 text-xs">
+                      <TableCell className="text-right font-mono font-bold text-amber-600 dark:text-amber-400 py-2 text-sm">
                         Rs {m.currentBalance?.toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right py-2 pe-4">
