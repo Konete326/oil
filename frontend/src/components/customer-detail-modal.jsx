@@ -6,7 +6,9 @@ import { CustomerPrintStatement } from "@/components/customer-print-statement";
 import { CustomerUdharDiaryModal } from "@/components/customer-udhar-diary-modal";
 import { CustomerTrialSheetModal } from "@/components/customer-trial-sheet-modal";
 import { EditLedgerEntryModal } from "@/components/edit-ledger-entry-modal";
-import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon, Edit3Icon } from "lucide-react";
+import { AddLedgerEntryModal } from "@/components/add-ledger-entry-modal";
+import { deleteLedgerEntryApi } from "@/lib/api";
+import { XIcon, UserIcon, PhoneIcon, MapPinIcon, CreditCardIcon, ShoppingBagIcon, PrinterIcon, TrendingUpIcon, Loader2Icon, CalendarIcon, CheckCircle2Icon, BookOpenIcon, ScaleIcon, Edit3Icon, PlusIcon, Trash2Icon } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export function CustomerDetailModal({ isOpen, onClose, customerId }) {
@@ -16,6 +18,7 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [isDiaryOpen, setIsDiaryOpen] = useState(false);
   const [isTrialSheetOpen, setIsTrialSheetOpen] = useState(false);
+  const [isAddingEntry, setIsAddingEntry] = useState(false);
   const [activeTab, setActiveTab] = useState("sales");
 
   useEffect(() => {
@@ -135,6 +138,17 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
     fetchCustomerDetail(customerId).then(res => setData(res)).catch(() => {});
   };
 
+  const handleDeleteEntry = async (entryId) => {
+    if (window.confirm("Are you sure you want to delete this ledger entry? This action cannot be undone.")) {
+      try {
+        await deleteLedgerEntryApi(entryId);
+        reloadData();
+      } catch (err) {
+        alert(err.message || "Failed to delete entry");
+      }
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto">
@@ -164,11 +178,21 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                 onClick={() => setIsTrialSheetOpen(true)}
                 size="sm"
                 variant="outline"
-                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20"
+                className="gap-1.5 cursor-pointer text-xs font-bold border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 hidden sm:inline-flex"
                 title="Customer Individual Trial Balance Sheet"
               >
                 <ScaleIcon className="size-3.5 text-amber-600" />
                 <span>Trial Sheet (PDF)</span>
+              </Button>
+
+              <Button
+                onClick={() => setIsAddingEntry(true)}
+                size="sm"
+                className="gap-1.5 cursor-pointer text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
+                title="Add Purana Khata / New Entry"
+              >
+                <PlusIcon className="size-3.5" />
+                <span>Add Entry</span>
               </Button>
 
               <Button
@@ -370,14 +394,26 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
                               </td>
                               <td className="p-3 text-center">
                                 {entry.isEditable && entry.original && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="h-7 text-[10px] px-2 gap-1"
-                                    onClick={() => setEditingEntry(entry.original)}
-                                  >
-                                    <Edit3Icon className="size-3" /> Edit
-                                  </Button>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="h-7 w-7 p-0"
+                                      title="Edit Entry"
+                                      onClick={() => setEditingEntry(entry.original)}
+                                    >
+                                      <Edit3Icon className="size-3" />
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="h-7 w-7 p-0 text-destructive border-destructive/30 hover:bg-destructive hover:text-white"
+                                      title="Delete Entry"
+                                      onClick={() => handleDeleteEntry(entry.original._id)}
+                                    >
+                                      <Trash2Icon className="size-3" />
+                                    </Button>
+                                  </div>
                                 )}
                               </td>
                             </tr>
@@ -439,6 +475,16 @@ export function CustomerDetailModal({ isOpen, onClose, customerId }) {
           isOpen={!!editingEntry}
           onClose={() => setEditingEntry(null)}
           entry={editingEntry}
+          onSuccess={reloadData}
+        />
+      )}
+
+      {isAddingEntry && (
+        <AddLedgerEntryModal
+          open={isAddingEntry}
+          onOpenChange={setIsAddingEntry}
+          customerId={customerId}
+          clientName={customer?.name}
           onSuccess={reloadData}
         />
       )}

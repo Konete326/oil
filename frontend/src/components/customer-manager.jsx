@@ -272,7 +272,11 @@ export function CustomerManager() {
                   </thead>
                   <tbody className="divide-y divide-border/40">
                     {customers.map((c) => (
-                      <tr key={c._id} className="hover:bg-muted/20 transition-colors">
+                      <tr 
+                        key={c._id} 
+                        className="hover:bg-muted/20 transition-colors cursor-pointer"
+                        onClick={() => handleOpenDetail(c._id)}
+                      >
                         <td className="p-2 ps-3.5 font-semibold text-foreground text-xs">
                           {c.name}
                         </td>
@@ -304,18 +308,8 @@ export function CustomerManager() {
                             {c.status || "Active"}
                           </span>
                         </td>
-                        <td className="p-2 pe-3.5 text-center">
+                        <td className="p-2 pe-3.5 text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-center gap-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenDetail(c._id); }}
-                              className="size-7 text-primary hover:bg-primary/10 cursor-pointer"
-                              title="View Analytics & Khata Details"
-                            >
-                              <EyeIcon className="size-3.5" />
-                            </Button>
                             <Button
                               type="button"
                               variant="ghost"

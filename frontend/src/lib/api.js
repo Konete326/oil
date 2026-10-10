@@ -942,6 +942,41 @@ export async function updateLedgerEntryApi(id, data) {
   }
 }
 
+export async function addLedgerEntryApi(data) {
+  try {
+    const res = await fetch(`${API_URL}/ledger`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to create ledger entry");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("addLedgerEntryApi error:", error);
+    throw error;
+  }
+}
+
+export async function deleteLedgerEntryApi(id) {
+  try {
+    const res = await fetch(`${API_URL}/ledger/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to delete ledger entry");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("deleteLedgerEntryApi error:", error);
+    throw error;
+  }
+}
+
 export async function fetchAgingReport() {
   if (typeof navigator !== "undefined" && !navigator.onLine) {
     const mills = (await getLocalSnapshot("mills")) || [];

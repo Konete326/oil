@@ -192,3 +192,146 @@ export const updateLedgerEntry = async (req, res, next) => {
   }
 };
 
+export const createLedgerEntry = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { millId, customerId, clientName, amount, transactionType, paymentMode, referenceNumber, notes, createdAt } = req.body;
+    
+    if (!millId && !customerId && !clientName) {
+      res.status(400);
+      throw new Error("Client (Mill or Customer) is required.");
+    }
+    
+    let targetModel = null;
+    let targetId = null;
+    let finalClientName = clientName;
+
+    if (customerId) {
+      targetModel = (await import("../models/customerModel.js")).Customer;
+      targetId = customerId;
+    } else if (millId) {
+      targetModel = (await import("../models/millModel.js")).Mill;
+      targetId = millId;
+    }
+
+    let targetDoc = null;
+    if (targetModel && targetId) {
+      targetDoc = await targetModel.findById(targetId).session(session);
+      if (targetDoc) finalClientName = targetDoc.name;
+    }
+
+    const entry = new Ledger({
+      clientType: millId ? "Textile Mill" : (customerId ? "General Customer" : "Other"),
+      mill: millId || undefined,
+      customer: customerId || undefined,
+      partyName: finalClientName,
+      clientName: finalClientName,
+      transactionType,
+      amount: Number(amount),
+      paymentMode: paymentMode || "Cash",
+      referenceNumber,
+      notes,
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+    });
+
+    await entry.save({ session });
+
+    if (targetDoc) {
+      const effect = entry.transactionType.includes("Debit") ? entry.amount : -entry.amount;
+      targetDoc.currentBalance = (targetDoc.currentBalance || 0) + effect;
+      await targetDoc.save({ session });
+      
+      const allEntries = await Ledger.find({ $or: [{ customer: targetId }, { mill: targetId }] })
+          .sort({ createdAt: 1 })
+          .session(session);
+          
+      let sumDebits = 0;
+      let sumCredits = 0;
+      for (const e of allEntries) {
+        if (e.transactionType.includes("Debit")) sumDebits += e.amount;
+        else if (e.transactionType.includes("Credit")) sumCredits += e.amount;
+      }
+      const initialBalance = targetDoc.currentBalance - (sumDebits - sumCredits);
+      let currentRunning = initialBalance;
+      for (const e of allEntries) {
+        if (e.transactionType.includes("Debit")) currentRunning += e.amount;
+        else if (e.transactionType.includes("Credit")) currentRunning -= e.amount;
+        e.runningBalance = currentRunning;
+        await e.save({ session });
+      }
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+    res.status(201).json({ success: true, data: entry });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+  }
+};
+
+export const deleteLedgerEntry = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { id } = req.params;
+    const entry = await Ledger.findById(id).session(session);
+    
+    if (!entry) {
+      res.status(404);
+      throw new Error("Ledger entry not found");
+    }
+
+    let targetModel = null;
+    let targetId = null;
+    
+    if (entry.customer) {
+      targetModel = (await import("../models/customerModel.js")).Customer;
+      targetId = entry.customer;
+    } else if (entry.mill) {
+      targetModel = (await import("../models/millModel.js")).Mill;
+      targetId = entry.mill;
+    }
+
+    const oldEffect = entry.transactionType.includes("Debit") ? entry.amount : -entry.amount;
+    
+    await Ledger.findByIdAndDelete(id).session(session);
+
+    if (targetModel && targetId) {
+      const targetDoc = await targetModel.findById(targetId).session(session);
+      if (targetDoc) {
+        targetDoc.currentBalance = (targetDoc.currentBalance || 0) - oldEffect;
+        await targetDoc.save({ session });
+        
+        const allEntries = await Ledger.find({ $or: [{ customer: targetId }, { mill: targetId }] })
+            .sort({ createdAt: 1 })
+            .session(session);
+            
+        let sumDebits = 0;
+        let sumCredits = 0;
+        for (const e of allEntries) {
+          if (e.transactionType.includes("Debit")) sumDebits += e.amount;
+          else if (e.transactionType.includes("Credit")) sumCredits += e.amount;
+        }
+        const initialBalance = targetDoc.currentBalance - (sumDebits - sumCredits);
+        let currentRunning = initialBalance;
+        for (const e of allEntries) {
+          if (e.transactionType.includes("Debit")) currentRunning += e.amount;
+          else if (e.transactionType.includes("Credit")) currentRunning -= e.amount;
+          e.runningBalance = currentRunning;
+          await e.save({ session });
+        }
+      }
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+    res.status(200).json({ success: true, message: "Ledger entry deleted" });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+  }
+};
